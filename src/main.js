@@ -8815,14 +8815,20 @@ function showHomeCardbackZoom(previewEl){
     const nextIdx=(idx+dir+BACK_OPTIONS.length)%BACK_OPTIONS.length;
     applyBackColor(BACK_OPTIONS[nextIdx]?.value||activeValue);
   };
-  controls.querySelector('.cardback-zoom-nav.prev')?.addEventListener('click',(ev)=>{
-    ev.stopPropagation();
-    stepBackColor(-1);
-  });
-  controls.querySelector('.cardback-zoom-nav.next')?.addEventListener('click',(ev)=>{
-    ev.stopPropagation();
-    stepBackColor(1);
-  });
+  const prevBtn=controls.querySelector('.cardback-zoom-nav.prev');
+  const nextBtn=controls.querySelector('.cardback-zoom-nav.next');
+  const bindNav=(btn,dir)=>{
+    if(!(btn instanceof HTMLElement))return;
+    const handleNav=(ev)=>{
+      ev.preventDefault();
+      ev.stopPropagation();
+      stepBackColor(dir);
+    };
+    btn.addEventListener('pointerdown',handleNav);
+    btn.addEventListener('click',handleNav);
+  };
+  bindNav(prevBtn,-1);
+  bindNav(nextBtn,1);
   requestAnimationFrame(()=>{
     ghost.classList.add('active');
     backdrop.classList.add('active');
@@ -8843,7 +8849,7 @@ function showHomeCardbackZoom(previewEl){
     homeCardbackZoomCleanup=null;
   };
   const handleDocPointer=(ev)=>{
-    if(ev.target instanceof Element&&ev.target.closest('.cardback-zoom-nav'))return;
+    if(ev.target instanceof Node&&controls.contains(ev.target))return;
     dismiss();
   };
   const handleEsc=(ev)=>{if(ev.key==='Escape')dismiss();};
