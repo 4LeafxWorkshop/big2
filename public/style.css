@@ -2346,11 +2346,14 @@ body[data-screen='home'] .home-wrap {
   border: 1px solid rgba(255,255,255,.35);
   background: rgba(8, 20, 30, .66);
   color: #f4f9fb;
-  font-size: 28px;
-  line-height: 1;
   display: grid;
   place-items: center;
   pointer-events: auto;
+}
+.cardback-zoom-nav-icon {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
 }
 .cardback-zoom-nav.prev { left: max(14px, env(safe-area-inset-left)); }
 .cardback-zoom-nav.next { right: max(14px, env(safe-area-inset-right)); }

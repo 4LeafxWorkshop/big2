@@ -8784,7 +8784,7 @@ function showHomeCardbackZoom(previewEl){
   backdrop.className='cardback-zoom-backdrop';
   const controls=document.createElement('div');
   controls.className='cardback-zoom-controls';
-  controls.innerHTML=`<button class="cardback-zoom-nav prev" type="button" aria-label="${state.language==='zh-HK'?'上一款':'Previous'}">‹</button><button class="cardback-zoom-nav next" type="button" aria-label="${state.language==='zh-HK'?'下一款':'Next'}">›</button>`;
+  controls.innerHTML=`<button class="cardback-zoom-nav prev" type="button" aria-label="${state.language==='zh-HK'?'上一款':'Previous'}"><svg class="cardback-zoom-nav-icon" viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M14.7 5.3a1 1 0 0 1 0 1.4L9.4 12l5.3 5.3a1 1 0 1 1-1.4 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.4 0Z"/></svg></button><button class="cardback-zoom-nav next" type="button" aria-label="${state.language==='zh-HK'?'下一款':'Next'}"><svg class="cardback-zoom-nav-icon" viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M9.3 18.7a1 1 0 0 1 0-1.4l5.3-5.3-5.3-5.3a1 1 0 1 1 1.4-1.4l6 6a1 1 0 0 1 0 1.4l-6 6a1 1 0 0 1-1.4 0Z"/></svg></button>`;
   const ratio=(rect.height&&rect.width)?(rect.height/rect.width):1.392857;
   const maxW=Math.min(window.innerWidth*0.72,340);
   const maxH=Math.min(window.innerHeight*0.82,Math.round(maxW*ratio));
@@ -8843,7 +8843,7 @@ function showHomeCardbackZoom(previewEl){
     homeCardbackZoomCleanup=null;
   };
   const handleDocPointer=(ev)=>{
-    if(ev.target instanceof HTMLElement&&ev.target.closest('.cardback-zoom-nav'))return;
+    if(ev.target instanceof Element&&ev.target.closest('.cardback-zoom-nav'))return;
     dismiss();
   };
   const handleEsc=(ev)=>{if(ev.key==='Escape')dismiss();};
