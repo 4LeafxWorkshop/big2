@@ -8816,16 +8816,21 @@ function showHomeCardbackZoom(previewEl){
     const nextIdx=(idx+dir+BACK_OPTIONS.length)%BACK_OPTIONS.length;
     applyBackColor(BACK_OPTIONS[nextIdx]?.value||activeValue);
   };
-  const handleNavActivate=(ev)=>{
-    if(!(ev.target instanceof Element))return;
-    const nav=ev.target.closest('.cardback-zoom-nav');
-    if(!(nav instanceof HTMLElement))return;
-    ev.preventDefault();
-    ev.stopPropagation();
-    stepBackColor(nav.classList.contains('prev')?-1:1);
+  const prevBtn=controls.querySelector('.cardback-zoom-nav.prev');
+  const nextBtn=controls.querySelector('.cardback-zoom-nav.next');
+  const bindNav=(btn,dir)=>{
+    if(!(btn instanceof HTMLElement))return;
+    const handleNav=(ev)=>{
+      ev.preventDefault();
+      ev.stopPropagation();
+      stepBackColor(dir);
+    };
+    btn.addEventListener('pointerup',handleNav);
+    btn.addEventListener('click',handleNav);
+    return ()=>{btn.removeEventListener('pointerup',handleNav);btn.removeEventListener('click',handleNav);};
   };
-  controls.addEventListener('pointerup',handleNavActivate);
-  controls.addEventListener('click',handleNavActivate);
+  const unbindPrev=bindNav(prevBtn,-1);
+  const unbindNext=bindNav(nextBtn,1);
   requestAnimationFrame(()=>{
     ghost.classList.add('active');
     backdrop.classList.add('active');
@@ -8833,8 +8838,8 @@ function showHomeCardbackZoom(previewEl){
   });
   const dismiss=()=>{
     document.removeEventListener('keydown',handleEsc,true);
-    controls.removeEventListener('pointerup',handleNavActivate);
-    controls.removeEventListener('click',handleNavActivate);
+    if(typeof unbindPrev==='function')unbindPrev();
+    if(typeof unbindNext==='function')unbindNext();
     ghost.classList.remove('active');
     backdrop.classList.remove('active');
     controls.classList.remove('active');
@@ -8847,7 +8852,11 @@ function showHomeCardbackZoom(previewEl){
     homeCardbackZoomCleanup=null;
   };
   const handleEsc=(ev)=>{if(ev.key==='Escape')dismiss();};
-  backdrop.addEventListener('pointerdown',dismiss,{passive:true});
+  const handleBackdropPointer=(ev)=>{
+    if(ev.target instanceof Element&&ev.target.closest('.cardback-zoom-nav'))return;
+    dismiss();
+  };
+  backdrop.addEventListener('pointerdown',handleBackdropPointer,{passive:true});
   ghost.addEventListener('pointerdown',dismiss,{passive:true});
   window.setTimeout(()=>{
     document.addEventListener('keydown',handleEsc,true);
@@ -9231,6 +9240,14 @@ function bindBackCarousel(comboId){
     markComboActive('config-back-combo',value);
     centerToButton(btn,true,value);
     if(state.screen==='home'){
+      if((ev.detail||0)>=2){
+        requestAnimationFrame(()=>{
+          const selectedBtn=viewport.querySelector(`.combo-btn.active[data-value="${value}"]`);
+          const selectedPreview=selectedBtn?.querySelector?.('.combo-back-preview');
+          showHomeCardbackZoom(selectedPreview instanceof HTMLElement?selectedPreview:preview);
+        });
+        return;
+      }
       const now=Date.now();
       const isDoubleTap=lastPreviewTapValue===value&&(now-lastPreviewTapAt)<320;
       lastPreviewTapAt=now;
