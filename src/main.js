@@ -8816,21 +8816,18 @@ function showHomeCardbackZoom(previewEl){
     const nextIdx=(idx+dir+BACK_OPTIONS.length)%BACK_OPTIONS.length;
     applyBackColor(BACK_OPTIONS[nextIdx]?.value||activeValue);
   };
-  const prevBtn=controls.querySelector('.cardback-zoom-nav.prev');
-  const nextBtn=controls.querySelector('.cardback-zoom-nav.next');
-  const bindNav=(btn,dir)=>{
-    if(!(btn instanceof HTMLElement))return;
-    const handleNav=(ev)=>{
+  const handleControlsPointer=(ev)=>{
+    if(!(ev.target instanceof Element))return;
+    const nav=ev.target.closest('.cardback-zoom-nav');
+    if(nav instanceof HTMLElement){
       ev.preventDefault();
       ev.stopPropagation();
-      stepBackColor(dir);
-    };
-    btn.addEventListener('pointerup',handleNav);
-    btn.addEventListener('click',handleNav);
-    return ()=>{btn.removeEventListener('pointerup',handleNav);btn.removeEventListener('click',handleNav);};
+      stepBackColor(nav.classList.contains('prev')?-1:1);
+      return;
+    }
+    dismiss();
   };
-  const unbindPrev=bindNav(prevBtn,-1);
-  const unbindNext=bindNav(nextBtn,1);
+  controls.addEventListener('pointerdown',handleControlsPointer);
   requestAnimationFrame(()=>{
     ghost.classList.add('active');
     backdrop.classList.add('active');
@@ -8838,8 +8835,7 @@ function showHomeCardbackZoom(previewEl){
   });
   const dismiss=()=>{
     document.removeEventListener('keydown',handleEsc,true);
-    if(typeof unbindPrev==='function')unbindPrev();
-    if(typeof unbindNext==='function')unbindNext();
+    controls.removeEventListener('pointerdown',handleControlsPointer);
     ghost.classList.remove('active');
     backdrop.classList.remove('active');
     controls.classList.remove('active');
@@ -8852,12 +8848,6 @@ function showHomeCardbackZoom(previewEl){
     homeCardbackZoomCleanup=null;
   };
   const handleEsc=(ev)=>{if(ev.key==='Escape')dismiss();};
-  const handleBackdropPointer=(ev)=>{
-    if(ev.target instanceof Element&&ev.target.closest('.cardback-zoom-nav'))return;
-    dismiss();
-  };
-  backdrop.addEventListener('pointerdown',handleBackdropPointer,{passive:true});
-  ghost.addEventListener('pointerdown',dismiss,{passive:true});
   window.setTimeout(()=>{
     document.addEventListener('keydown',handleEsc,true);
   },0);
