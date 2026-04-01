@@ -1428,10 +1428,27 @@ body[data-screen='home'] .home-wrap {
 }
 .room-create-wide {
   width: 100%;
+  min-height: 72px;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  gap: 10px;
+  justify-content: space-between;
+  gap: 12px;
+  position: relative;
+  padding: 0 18px;
+}
+.room-create-wide .room-create-icon {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.room-create-wide > span:last-child {
+  margin-left: auto;
+  white-space: nowrap;
+  writing-mode: horizontal-tb;
+  letter-spacing: .08em;
+  font-weight: 800;
 }
 .room-active-grid::-webkit-scrollbar {
   width: 6px;
@@ -1502,6 +1519,9 @@ body[data-screen='home'] .home-wrap {
 }
 .room-card-join-btn {
   min-width: 86px;
+}
+.room-code-row button {
+  white-space: nowrap;
 }
 .room-create-card {
   border-style: dashed;
