@@ -8816,20 +8816,16 @@ function showHomeCardbackZoom(previewEl){
     const nextIdx=(idx+dir+BACK_OPTIONS.length)%BACK_OPTIONS.length;
     applyBackColor(BACK_OPTIONS[nextIdx]?.value||activeValue);
   };
-  const prevBtn=controls.querySelector('.cardback-zoom-nav.prev');
-  const nextBtn=controls.querySelector('.cardback-zoom-nav.next');
-  const bindNav=(btn,dir)=>{
-    if(!(btn instanceof HTMLElement))return;
-    const handleNav=(ev)=>{
-      ev.preventDefault();
-      ev.stopPropagation();
-      stepBackColor(dir);
-    };
-    btn.addEventListener('pointerdown',handleNav);
-    btn.addEventListener('click',handleNav);
+  const handleNavActivate=(ev)=>{
+    if(!(ev.target instanceof Element))return;
+    const nav=ev.target.closest('.cardback-zoom-nav');
+    if(!(nav instanceof HTMLElement))return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    stepBackColor(nav.classList.contains('prev')?-1:1);
   };
-  bindNav(prevBtn,-1);
-  bindNav(nextBtn,1);
+  controls.addEventListener('pointerup',handleNavActivate);
+  controls.addEventListener('click',handleNavActivate);
   requestAnimationFrame(()=>{
     ghost.classList.add('active');
     backdrop.classList.add('active');
@@ -8837,6 +8833,8 @@ function showHomeCardbackZoom(previewEl){
   });
   const dismiss=()=>{
     document.removeEventListener('keydown',handleEsc,true);
+    controls.removeEventListener('pointerup',handleNavActivate);
+    controls.removeEventListener('click',handleNavActivate);
     ghost.classList.remove('active');
     backdrop.classList.remove('active');
     controls.classList.remove('active');
