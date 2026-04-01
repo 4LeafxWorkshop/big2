@@ -8774,6 +8774,7 @@ function showHomeCardbackZoom(previewEl){
   if(!rect.width||!rect.height)return;
   const src=previewEl.currentSrc||previewEl.getAttribute('src')||'';
   if(!src)return;
+  let activeValue=String(state.home.backColor||'red');
   const ghost=document.createElement('img');
   ghost.className='cardback-zoom-ghost';
   ghost.src=src;
@@ -8781,6 +8782,9 @@ function showHomeCardbackZoom(previewEl){
   ghost.decoding='async';
   const backdrop=document.createElement('div');
   backdrop.className='cardback-zoom-backdrop';
+  const controls=document.createElement('div');
+  controls.className='cardback-zoom-controls';
+  controls.innerHTML=`<button class="cardback-zoom-nav prev" type="button" aria-label="${state.language==='zh-HK'?'上一款':'Previous'}">‹</button><button class="cardback-zoom-nav next" type="button" aria-label="${state.language==='zh-HK'?'下一款':'Next'}">›</button>`;
   const ratio=(rect.height&&rect.width)?(rect.height/rect.width):1.392857;
   const maxW=Math.min(window.innerWidth*0.72,340);
   const maxH=Math.min(window.innerHeight*0.82,Math.round(maxW*ratio));
@@ -8795,23 +8799,53 @@ function showHomeCardbackZoom(previewEl){
   document.body.classList.add('cardback-zoom-open');
   document.body.appendChild(backdrop);
   document.body.appendChild(ghost);
+  document.body.appendChild(controls);
+  const applyBackColor=(value)=>{
+    if(!value)return;
+    activeValue=value;
+    state.home.backColor=value;
+    markComboActive('back-combo-left',value);
+    markComboActive('back-combo-right',value);
+    markComboActive('config-back-combo',value);
+    const file=backFileByValue(value);
+    ghost.src=withBase(`card-assets/${file}`);
+  };
+  const stepBackColor=(dir=1)=>{
+    const idx=Math.max(0,BACK_OPTIONS.findIndex((opt)=>opt.value===activeValue));
+    const nextIdx=(idx+dir+BACK_OPTIONS.length)%BACK_OPTIONS.length;
+    applyBackColor(BACK_OPTIONS[nextIdx]?.value||activeValue);
+  };
+  controls.querySelector('.cardback-zoom-nav.prev')?.addEventListener('click',(ev)=>{
+    ev.stopPropagation();
+    stepBackColor(-1);
+  });
+  controls.querySelector('.cardback-zoom-nav.next')?.addEventListener('click',(ev)=>{
+    ev.stopPropagation();
+    stepBackColor(1);
+  });
   requestAnimationFrame(()=>{
     ghost.classList.add('active');
     backdrop.classList.add('active');
+    controls.classList.add('active');
   });
   const dismiss=()=>{
     document.removeEventListener('pointerdown',handleDocPointer,true);
     document.removeEventListener('keydown',handleEsc,true);
     ghost.classList.remove('active');
     backdrop.classList.remove('active');
+    controls.classList.remove('active');
     window.setTimeout(()=>{
       ghost.remove();
       backdrop.remove();
+      controls.remove();
       document.body.classList.remove('cardback-zoom-open');
     },120);
     homeCardbackZoomCleanup=null;
   };
-  const handleDocPointer=()=>{dismiss();};
+  const handleDocPointer=(ev)=>{
+    if(ev.target instanceof HTMLElement&&ev.target.closest('.cardback-zoom-nav'))return;
+    dismiss();
+  };
   const handleEsc=(ev)=>{if(ev.key==='Escape')dismiss();};
   window.setTimeout(()=>{
     document.addEventListener('pointerdown',handleDocPointer,true);
@@ -9207,6 +9241,15 @@ function bindBackCarousel(comboId){
         showHomeCardbackZoom(selectedPreview instanceof HTMLElement?selectedPreview:preview);
       });
     }
+  });
+  viewport.addEventListener('dblclick',(ev)=>{
+    if(!(ev.target instanceof HTMLElement))return;
+    const preview=ev.target.closest?.('.combo-back-preview');
+    if(!(preview instanceof HTMLElement))return;
+    const btn=preview.closest?.('.combo-btn');
+    const value=String(btn?.getAttribute?.('data-value')||state.home.backColor||'red');
+    state.home.backColor=value;
+    showHomeCardbackZoom(preview);
   });
   viewport.addEventListener('dragstart',(ev)=>{
     ev.preventDefault();

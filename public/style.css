@@ -2325,6 +2325,35 @@ body[data-screen='home'] .home-wrap {
   height: var(--zoom-target-height);
   transform: translate(-50%,-50%);
 }
+.cardback-zoom-controls {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+.cardback-zoom-controls.active {
+  opacity: 1;
+}
+.cardback-zoom-nav {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.35);
+  background: rgba(8, 20, 30, .66);
+  color: #f4f9fb;
+  font-size: 28px;
+  line-height: 1;
+  display: grid;
+  place-items: center;
+  pointer-events: auto;
+}
+.cardback-zoom-nav.prev { left: max(14px, env(safe-area-inset-left)); }
+.cardback-zoom-nav.next { right: max(14px, env(safe-area-inset-right)); }
  .theme-dot {
   width: 10px;
   height: 10px;
