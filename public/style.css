@@ -1584,10 +1584,21 @@ body[data-screen='home'] .home-wrap {
   line-height: 1;
 }
 .room-create-svg {
-  width: 40px;
-  height: 40px;
+  width: 52px;
+  height: 52px;
   fill: #f0d08d;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,.35));
+}
+.room-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.room-inline-icon {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
 }
 .room-active-card:hover,
 .room-active-card.active {
