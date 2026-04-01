@@ -8808,7 +8808,7 @@ function showHomeCardbackZoom(previewEl){
     markComboActive('back-combo-left',value);
     markComboActive('back-combo-right',value);
     markComboActive('config-back-combo',value);
-    const file=backFileByValue(value);
+    const file=backAssetFile(value);
     ghost.src=withBase(`card-assets/${file}`);
   };
   const stepBackColor=(dir=1)=>{
