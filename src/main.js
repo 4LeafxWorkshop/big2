@@ -8816,18 +8816,44 @@ function showHomeCardbackZoom(previewEl){
     const nextIdx=(idx+dir+BACK_OPTIONS.length)%BACK_OPTIONS.length;
     applyBackColor(BACK_OPTIONS[nextIdx]?.value||activeValue);
   };
-  const handleControlsPointer=(ev)=>{
+  let swipeStartX=0;
+  let swipeStartY=0;
+  let swipeMoved=false;
+  const SWIPE_THRESHOLD=24;
+  const SWIPE_VERTICAL_LIMIT=20;
+  const handleControlsPointerDown=(ev)=>{
     if(!(ev.target instanceof Element))return;
     const nav=ev.target.closest('.cardback-zoom-nav');
     if(nav instanceof HTMLElement){
       ev.preventDefault();
       ev.stopPropagation();
       stepBackColor(nav.classList.contains('prev')?-1:1);
+      swipeMoved=true;
       return;
     }
+    swipeStartX=ev.clientX;
+    swipeStartY=ev.clientY;
+    swipeMoved=false;
+  };
+  const handleControlsPointerMove=(ev)=>{
+    if(swipeMoved)return;
+    const dx=ev.clientX-swipeStartX;
+    const dy=ev.clientY-swipeStartY;
+    if(Math.abs(dx)>=SWIPE_THRESHOLD&&Math.abs(dy)<=SWIPE_VERTICAL_LIMIT){
+      ev.preventDefault();
+      ev.stopPropagation();
+      stepBackColor(dx<0?1:-1);
+      swipeMoved=true;
+    }
+  };
+  const handleControlsPointerUp=(ev)=>{
+    if(swipeMoved)return;
+    if(ev.target instanceof Element&&ev.target.closest('.cardback-zoom-nav'))return;
     dismiss();
   };
-  controls.addEventListener('pointerdown',handleControlsPointer);
+  controls.addEventListener('pointerdown',handleControlsPointerDown);
+  controls.addEventListener('pointermove',handleControlsPointerMove);
+  controls.addEventListener('pointerup',handleControlsPointerUp);
   requestAnimationFrame(()=>{
     ghost.classList.add('active');
     backdrop.classList.add('active');
@@ -8835,7 +8861,9 @@ function showHomeCardbackZoom(previewEl){
   });
   const dismiss=()=>{
     document.removeEventListener('keydown',handleEsc,true);
-    controls.removeEventListener('pointerdown',handleControlsPointer);
+    controls.removeEventListener('pointerdown',handleControlsPointerDown);
+    controls.removeEventListener('pointermove',handleControlsPointerMove);
+    controls.removeEventListener('pointerup',handleControlsPointerUp);
     ghost.classList.remove('active');
     backdrop.classList.remove('active');
     controls.classList.remove('active');
