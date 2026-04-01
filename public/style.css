@@ -1376,8 +1376,12 @@ body[data-screen='home'] .home-wrap {
 }
 .room-active-block {
   display: grid;
-  gap: 6px;
-  margin-top: 4px;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.12);
+  background: rgba(7, 22, 34, .42);
 }
 .room-active-field .room-input {
   width: 100%;
@@ -1389,6 +1393,11 @@ body[data-screen='home'] .home-wrap {
   gap: 8px;
   font-size: .85rem;
   color: var(--muted);
+  padding-bottom: 2px;
+}
+.room-active-head > span:first-child {
+  font-weight: 700;
+  color: #f2dfae;
 }
 .room-active-hidden {
   margin-left: auto;
@@ -1398,10 +1407,22 @@ body[data-screen='home'] .home-wrap {
 .room-active-grid {
   display: grid;
   gap: 10px;
-  max-height: 240px;
+  max-height: 260px;
   overflow: auto;
   grid-template-columns: minmax(0, 1fr);
   align-items: stretch;
+  padding-right: 2px;
+}
+.room-active-grid::-webkit-scrollbar {
+  width: 6px;
+}
+.room-active-grid::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,.22);
+  border-radius: 999px;
+}
+.room-active-grid::-webkit-scrollbar-track {
+  background: rgba(255,255,255,.06);
+  border-radius: 999px;
 }
 .room-join-card .room-active-block {
   overflow: hidden;
@@ -1419,7 +1440,7 @@ body[data-screen='home'] .home-wrap {
   cursor: pointer;
   display: grid;
   gap: 8px;
-  transition: transform .2s ease, border-color .2s ease, background .2s ease;
+  transition: transform .2s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
   height: 100%;
   position: relative;
 }
@@ -1494,6 +1515,7 @@ body[data-screen='home'] .home-wrap {
   transform: translateY(-1px);
   border-color: rgba(246, 224, 165, .5);
   background: rgba(28, 46, 58, .7);
+  box-shadow: 0 8px 18px rgba(0,0,0,.26);
 }
 .room-active-card:disabled,
 .room-active-card-private {
