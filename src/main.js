@@ -8836,7 +8836,6 @@ function showHomeCardbackZoom(previewEl){
     controls.classList.add('active');
   });
   const dismiss=()=>{
-    document.removeEventListener('pointerdown',handleDocPointer,true);
     document.removeEventListener('keydown',handleEsc,true);
     ghost.classList.remove('active');
     backdrop.classList.remove('active');
@@ -8849,13 +8848,10 @@ function showHomeCardbackZoom(previewEl){
     },120);
     homeCardbackZoomCleanup=null;
   };
-  const handleDocPointer=(ev)=>{
-    if(ev.target instanceof Node&&controls.contains(ev.target))return;
-    dismiss();
-  };
   const handleEsc=(ev)=>{if(ev.key==='Escape')dismiss();};
+  backdrop.addEventListener('pointerdown',dismiss,{passive:true});
+  ghost.addEventListener('pointerdown',dismiss,{passive:true});
   window.setTimeout(()=>{
-    document.addEventListener('pointerdown',handleDocPointer,true);
     document.addEventListener('keydown',handleEsc,true);
   },0);
   homeCardbackZoomCleanup=dismiss;
