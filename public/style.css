@@ -4569,7 +4569,7 @@ body[data-screen='game'] .table-center-stack {
 .action-strip .control-row .recommend-anchor { order: 1; }
 .action-strip .control-row #play-btn { order: 2; }
 .action-strip .control-row #pass-btn { order: 3; }
-.action-strip .control-row #emote-toggle { order: 4; }
+.action-strip .control-row #emote-toggle { order: 7; }
 .action-strip .control-row .room-top-meta { order: 5; }
 .action-strip .control-row #auto-sort-btn { order: 6; }
 .action-strip .hand {
