@@ -1600,6 +1600,9 @@ body[data-screen='home'] .home-wrap {
   height: 20px;
   fill: currentColor;
 }
+.room-join-black {
+  color: #141414 !important;
+}
 .room-active-card:hover,
 .room-active-card.active {
   transform: translateY(-1px);
