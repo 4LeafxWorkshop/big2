@@ -1423,6 +1423,16 @@ body[data-screen='home'] .home-wrap {
   align-items: stretch;
   padding-right: 2px;
 }
+.room-create-section {
+  margin-bottom: 2px;
+}
+.room-create-wide {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
 .room-active-grid::-webkit-scrollbar {
   width: 6px;
 }
@@ -1453,6 +1463,45 @@ body[data-screen='home'] .home-wrap {
   transition: transform .2s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
   height: 100%;
   position: relative;
+}
+.room-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.room-seat-strip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.room-seat-mini {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,.22);
+  background: rgba(255,255,255,.08);
+  color: rgba(255,255,255,.8);
+  font-size: .82rem;
+}
+.room-seat-mini.filled img {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+}
+.room-seat-mini.vacant {
+  border-style: dashed;
+}
+.room-card-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+.room-card-join-btn {
+  min-width: 86px;
 }
 .room-create-card {
   border-style: dashed;
