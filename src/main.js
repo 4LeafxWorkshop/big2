@@ -354,8 +354,8 @@ const I18N={
     roomLobby:'大堂',
     roomTableTitle:'房間',
     roomSettings:'房間設定',
-    roomCreate:'服務台',
-    roomCreateHint:'點擊登記開房👆🏻',
+    roomCreate:'開房',
+    roomCreateHint:'',
     roomJoin:'加入房間',
     roomEnter:'進入大堂',
     roomCode:'房號',
@@ -9333,7 +9333,7 @@ function renderHome(){
   const roomLobbyHtml=(inRoom&&roomStatus!=='playing')?`<div class="room-overlay"><div class="room-card room-lobby-card room-card-icon"><div class="room-head"><span class="room-corner-icon" aria-hidden="true">🔢</span><h3>${roomTitle}</h3>${roomHostLine}</div><div class="room-id-center"><span class="room-code">${esc(state.room.code)}</span><button id="room-copy" class="secondary">${t('roomCopy')}</button></div>${roomPrivacyRow}<div class="lobby-table">${roomSeats}</div>${roomErrorHtml}<div class="room-actions">${roomStartControl}${roomPendingHint}<button id="room-leave" class="danger" ${roomStarting?'disabled':''}>${t('roomLeave')}</button></div></div></div>`:'';
   const activeRoomsState=state.home.activeRooms;
   const activeRooms=Array.isArray(activeRoomsState?.rows)?activeRoomsState.rows:[];
-  const createTableCard=`<button class="room-active-card room-create-card room-create-simple" id="room-create-card" type="button"><div class="room-active-code">${t('roomCreate')}</div><span class="room-create-hint">${t('roomCreateHint')}</span></button>`;
+  const createTableCard=`<button class="room-active-card room-create-card room-create-simple" id="room-create-card" type="button" aria-label="${t('roomCreate')}"><span class="room-create-icon" aria-hidden="true"><svg class="room-create-svg" viewBox="0 0 24 24" focusable="false"><path d="M12 3a1 1 0 0 1 1 1v7h7a1 1 0 1 1 0 2h-7v7a1 1 0 1 1-2 0v-7H4a1 1 0 1 1 0-2h7V4a1 1 0 0 1 1-1Z"/></svg></span><div class="room-active-code">${t('roomCreate')}</div></button>`;
   const maskRoomCode=(code)=>{
     const raw=String(code||'');
     if(!raw)return'';
