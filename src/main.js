@@ -2229,12 +2229,12 @@ const OPPONENT_PROFILE_BY_NAME={
   }
 };
 const BACK_OPTIONS=[
-  {value:'blue',file:'back-blue.png',label:{'zh-HK':'藍色',en:'Blue',fr:'Bleu',de:'Blau',es:'Azul',ja:'青'}},
-  {value:'red',file:'back-red.png',label:{'zh-HK':'紅色',en:'Red',fr:'Rouge',de:'Rot',es:'Rojo',ja:'赤'}},
-  {value:'green',file:'back-green.png',label:{'zh-HK':'綠色',en:'Green',fr:'Vert',de:'Grün',es:'Verde',ja:'緑'}},
-  {value:'gold',file:'back-gold.png',label:{'zh-HK':'金色',en:'Gold',fr:'Or',de:'Gold',es:'Oro',ja:'金'}},
-  {value:'silver',file:'back-silver.png',label:{'zh-HK':'銀色',en:'Silver',fr:'Argent',de:'Silber',es:'Plata',ja:'銀'}},
-  {value:'purple',file:'back-purple.png',label:{'zh-HK':'紫色',en:'Purple',fr:'Violet',de:'Lila',es:'Morado',ja:'紫'}}
+  {value:'blue',file:'back-blue.png',preview:'back-blue-sm.png',label:{'zh-HK':'藍色',en:'Blue',fr:'Bleu',de:'Blau',es:'Azul',ja:'青'}},
+  {value:'red',file:'back-red.png',preview:'back-red-sm.png',label:{'zh-HK':'紅色',en:'Red',fr:'Rouge',de:'Rot',es:'Rojo',ja:'赤'}},
+  {value:'green',file:'back-green.png',preview:'back-green-sm.png',label:{'zh-HK':'綠色',en:'Green',fr:'Vert',de:'Grün',es:'Verde',ja:'緑'}},
+  {value:'gold',file:'back-gold.png',preview:'back-gold-sm.png',label:{'zh-HK':'金色',en:'Gold',fr:'Or',de:'Gold',es:'Oro',ja:'金'}},
+  {value:'silver',file:'back-silver.png',preview:'back-silver-sm.png',label:{'zh-HK':'銀色',en:'Silver',fr:'Argent',de:'Silber',es:'Plata',ja:'銀'}},
+  {value:'purple',file:'back-purple.png',preview:'back-purple-sm.png',label:{'zh-HK':'紫色',en:'Purple',fr:'Violet',de:'Lila',es:'Morado',ja:'紫'}}
 ];
 const BASE_URL=(import.meta.env?.BASE_URL??'./').replace(/\/?$/,'/');
 const withBase=(p)=>`${BASE_URL}${String(p??'').replace(/^\/+/,'')}`;
@@ -8742,10 +8742,10 @@ function backAssetFile(value){
   return found?.file??'back-red.png';
 }
 function renderBackCombo(){
-  return BACK_OPTIONS.map((opt)=>`<button class="combo-btn ${state.home.backColor===opt.value?'active':''}" data-value="${opt.value}" aria-label="${opt.label[state.language]??opt.value}"><img class="combo-back-preview" src="${withBase(`card-assets/${opt.file}`)}" alt="${opt.label[state.language]??opt.value}"/></button>`).join('');
+  return BACK_OPTIONS.map((opt)=>`<button class="combo-btn ${state.home.backColor===opt.value?'active':''}" data-value="${opt.value}" aria-label="${opt.label[state.language]??opt.value}"><img class="combo-back-preview" src="${withBase(`card-assets/${opt.preview||opt.file}`)}" alt="${opt.label[state.language]??opt.value}"/></button>`).join('');
 }
 function renderBackCarouselItems(){
-  const items=BACK_OPTIONS.map((opt)=>`<button class="combo-btn ${state.home.backColor===opt.value?'active':''}" data-value="${opt.value}" aria-label="${opt.label[state.language]??opt.value}"><img class="combo-back-preview" src="${withBase(`card-assets/${opt.file}`)}" alt="${opt.label[state.language]??opt.value}" draggable="false"/></button>`).join('');
+  const items=BACK_OPTIONS.map((opt)=>`<button class="combo-btn ${state.home.backColor===opt.value?'active':''}" data-value="${opt.value}" aria-label="${opt.label[state.language]??opt.value}"><img class="combo-back-preview" src="${withBase(`card-assets/${opt.preview||opt.file}`)}" alt="${opt.label[state.language]??opt.value}" draggable="false"/></button>`).join('');
   return `${items}${items}${items}`;
 }
 function renderBackCarousel(comboId){
@@ -8772,9 +8772,10 @@ function showHomeCardbackZoom(previewEl){
   clearHomeCardbackZoom();
   const rect=previewEl.getBoundingClientRect();
   if(!rect.width||!rect.height)return;
-  const src=previewEl.currentSrc||previewEl.getAttribute('src')||'';
+  const initialValue=String(previewEl.closest?.('.combo-btn')?.getAttribute?.('data-value')||state.home.backColor||'red');
+  const src=withBase(`card-assets/${backAssetFile(initialValue)}`);
   if(!src)return;
-  let activeValue=String(state.home.backColor||'red');
+  let activeValue=initialValue;
   const ghost=document.createElement('img');
   ghost.className='cardback-zoom-ghost';
   ghost.src=src;
