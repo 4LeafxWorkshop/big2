@@ -1326,8 +1326,8 @@ body[data-screen='home'] .home-wrap {
   gap: 8px;
 }
 .room-player-avatar {
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   border-radius: 999px;
   border: 1px solid rgba(255,255,255,.4);
   object-fit: cover;
@@ -1513,12 +1513,14 @@ body[data-screen='home'] .home-wrap {
 .room-seat-mini.vacant {
   border-style: dashed;
 }
-.room-card-actions {
-  display: flex;
-  justify-content: flex-end;
-}
 .room-card-join-btn {
-  min-width: 86px;
+  min-width: 96px;
+}
+.room-card-join-inline {
+  margin-left: auto;
+}
+.room-join-top-btn {
+  min-width: 116px;
 }
 .room-code-row button {
   white-space: nowrap;
