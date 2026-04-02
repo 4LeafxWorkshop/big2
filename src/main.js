@@ -7554,7 +7554,12 @@ const faceRankClass=(card)=>(card.rank>=8&&card.rank<=10)?'face-jqk':'';
 function renderStaticCard(card,mini=false,extra='',inlineStyle=''){return`<div class="card face ${mini?'mini':''} ${faceRankClass(card)} ${extra}"${inlineStyle?` style="${inlineStyle}"`:''}><img class="card-art" src="${cardImagePath(card)}" alt="${RANKS[card.rank]} ${SUITS[card.suit].symbol}"/></div>`;}
 function renderHandCard(card,selected,extraClass='',index=0,total=1,zIndex=0){
   const draggable=isMobilePointer()?'false':'true';
-  return`<button class="card face hand-card ${faceRankClass(card)} ${selected?'selected':''} ${extraClass}" draggable="${draggable}" data-card-id="${cardId(card)}" style="--i:${index};--n:${Math.max(1,total)};z-index:${zIndex};"><img class="card-art" src="${cardImagePath(card)}" alt="${RANKS[card.rank]} ${SUITS[card.suit].symbol}"/></button>`;
+  const safeTotal=Math.max(1,total);
+  const center=(safeTotal-1)/2;
+  const delta=index-center;
+  const fanRot=(delta*2.2).toFixed(2);
+  const fanLift=(3+Math.abs(delta)*0.85).toFixed(2);
+  return`<button class="card face hand-card ${faceRankClass(card)} ${selected?'selected':''} ${extraClass}" draggable="${draggable}" data-card-id="${cardId(card)}" style="--i:${index};--n:${safeTotal};--fan-rot:${fanRot}deg;--fan-lift:${fanLift}px;z-index:${zIndex};"><img class="card-art" src="${cardImagePath(card)}" alt="${RANKS[card.rank]} ${SUITS[card.suit].symbol}"/></button>`;
 }
 function fanNoise(seed,i,salt=''){
   const s=`${seed}|${i}|${salt}`;
