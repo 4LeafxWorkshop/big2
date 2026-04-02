@@ -8768,7 +8768,7 @@ function clearHomeCardbackZoom(){
 }
 function showHomeCardbackZoom(previewEl){
   if(!(previewEl instanceof HTMLElement))return;
-  if(state.screen!=='home')return;
+  if(state.screen!=='home'&&state.screen!=='config')return;
   clearHomeCardbackZoom();
   const rect=previewEl.getBoundingClientRect();
   if(!rect.width||!rect.height)return;
