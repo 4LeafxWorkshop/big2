@@ -9436,10 +9436,6 @@ function renderHome(){
           const round=Number(r.roundCount||0)+1;
           const roundText=Number.isFinite(round)?round:'-';
           statusLabel=`<div class="room-active-status">⚔️ ${t('roomStatusPlaying')} · ${t('roomRound')} ${roundText}</div>`;
-        }else if(r.status==='finished'){
-          statusLabel=`<div class="room-active-status">${t('roomWaitingHost')}</div>`;
-        }else if(r.status==='lobby'||r.status==='starting'){
-          statusLabel=`<div class="room-active-status">${t('roomWaitingHost')}</div>`;
         }
         const displayPlayers=Number.isFinite(Number(r.displayPlayers))?Number(r.displayPlayers):Number(r.players||0);
         const totalSeats=Number.isFinite(Number(r.maxPlayers))?Number(r.maxPlayers):4;
