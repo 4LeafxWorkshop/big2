@@ -5091,6 +5091,7 @@ body[data-screen='game'] .table-center-stack {
   box-shadow: 0 0 0 2px rgba(255, 209, 102, .45), 0 6px 12px rgba(0,0,0,.28);
 }
 .action-strip .hand .hand-card {
+  --fan-rot: calc((var(--i, 0) - (var(--n, 1) - 1) / 2) * 3deg);
   width: calc(var(--card-w) * var(--hand-card-scale, 1.14)) !important;
   height: calc(var(--card-h) * var(--hand-card-scale, 1.14)) !important;
   aspect-ratio: 5 / 7;
