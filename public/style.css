@@ -1494,8 +1494,8 @@ body[data-screen='home'] .home-wrap {
   flex-wrap: wrap;
 }
 .room-seat-mini {
-  width: 28px;
-  height: 28px;
+  width: 40px;
+  height: 40px;
   border-radius: 999px;
   display: inline-grid;
   place-items: center;
