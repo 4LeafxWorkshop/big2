@@ -1428,7 +1428,7 @@ body[data-screen='home'] .home-wrap {
 }
 .room-create-wide {
   width: 100%;
-  min-height: 72px;
+  min-height: 60px;
   display: inline-flex;
   align-items: center;
   justify-content: space-between;
@@ -1586,8 +1586,8 @@ body[data-screen='home'] .home-wrap {
   line-height: 1;
 }
 .room-create-svg {
-  width: 52px;
-  height: 52px;
+  width: 44px;
+  height: 44px;
   fill: #f0d08d;
   filter: drop-shadow(0 2px 4px rgba(0,0,0,.35));
 }
@@ -1758,6 +1758,14 @@ body[data-screen='home'] .home-wrap {
   background: rgba(255,255,255,.06);
   color: #d6e6f5;
   font-size: .7rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.room-active-count-icon {
+  width: .85rem;
+  height: .85rem;
+  opacity: .92;
 }
 .room-active-status {
   justify-self: start;

@@ -9460,7 +9460,7 @@ function renderHome(){
         }).join('');
         const statusLine=statusText?`<div class="room-active-status-line">${esc(statusText)}</div>`:'';
         const joinInlineBtn=!isPrivate?`<button class="secondary room-card-join-btn room-card-join-inline" data-code="${esc(r.code)}" ${joinDisabled?'disabled':''}>${t('roomJoin')}</button>`:'';
-        return`<div class="room-active-card room-active-list-item${isPrivate?' room-active-card-private':''}" data-code="${esc(r.code)}" data-private="${isPrivate?'1':'0'}"${joinDisabled?' disabled':''}><div class="room-card-top"><div class="room-active-code"><span class="room-active-code-text">${esc(displayCode)}</span></div><div class="room-active-count">👤 ${displayPlayers}/${totalSeats}</div></div>${statusLine}<div class="room-seat-strip">${seatSlots}${joinInlineBtn}</div></div>`;
+        return`<div class="room-active-card room-active-list-item${isPrivate?' room-active-card-private':''}" data-code="${esc(r.code)}" data-private="${isPrivate?'1':'0'}"${joinDisabled?' disabled':''}><div class="room-card-top"><div class="room-active-code"><span class="room-active-code-text">${esc(displayCode)}</span></div><div class="room-active-count"><span class="room-active-count-icon title-icon title-icon-player" aria-hidden="true"></span><span>${displayPlayers}/${totalSeats}</span></div></div>${statusLine}<div class="room-seat-strip">${seatSlots}${joinInlineBtn}</div></div>`;
       }).join('')
       :'';
   const activeRoomsEmpty=activeRooms.length?'':`<div class="room-active-card room-active-empty" aria-disabled="true"><div class="room-active-code">${t('roomActiveEmpty')}</div><div class="room-active-info"><div class="room-active-count">0/4</div></div></div>`;
