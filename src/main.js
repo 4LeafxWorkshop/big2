@@ -379,7 +379,7 @@ const I18N={
     roomPrivacy:'房間私隱',
     roomPrivate:'私人',
     roomPublic:'公開',
-    roomNeedPlayers:'至少 1 位玩家加入才可開始',
+    roomNeedPlayers:'至少 1 位玩家才可開始遊戲',
     roomRoomId:'房號',
     roomRound:'回合',
     roomCountdown:'倒數',
@@ -624,7 +624,7 @@ const I18N={
     roomPrivacy:'Room Privacy',
     roomPrivate:'Private',
     roomPublic:'Public',
-    roomNeedPlayers:'Need at least 1 other human player to start.',
+    roomNeedPlayers:'Need at least 1 player to start game',
     roomRoomId:'Room ID',
     roomRound:'Round',
     roomCountdown:'Countdown',
@@ -868,7 +868,7 @@ const I18N={
     roomPrivacy:'Confidentialité',
     roomPrivate:'Privée',
     roomPublic:'Publique',
-    roomNeedPlayers:'Au moins 1 joueur doit rejoindre pour commencer.',
+    roomNeedPlayers:'Au moins 1 joueur est nécessaire pour commencer la partie.',
     roomRoomId:'ID de salle',
     roomRound:'Manche',
     roomCountdown:'Compte à rebours',
@@ -1112,7 +1112,7 @@ const I18N={
     roomPrivacy:'Privatsphäre',
     roomPrivate:'Privat',
     roomPublic:'Öffentlich',
-    roomNeedPlayers:'Mindestens 1 Spieler muss beitreten, um zu starten.',
+    roomNeedPlayers:'Mindestens 1 Spieler ist nötig, um das Spiel zu starten.',
     roomRoomId:'Raum‑ID',
     roomRound:'Runde',
     roomCountdown:'Countdown',
@@ -1356,7 +1356,7 @@ const I18N={
     roomPrivacy:'Privacidad',
     roomPrivate:'Privada',
     roomPublic:'Pública',
-    roomNeedPlayers:'Al menos 1 jugador debe unirse para empezar.',
+    roomNeedPlayers:'Se necesita al menos 1 jugador para empezar la partida.',
     roomRoomId:'ID de sala',
     roomRound:'Ronda',
     roomCountdown:'Cuenta atrás',
@@ -1601,7 +1601,7 @@ const I18N={
     roomPrivacy:'公開設定',
     roomPrivate:'非公開',
     roomPublic:'公開',
-    roomNeedPlayers:'開始には少なくとも他のプレイヤー1人が必要です。',
+    roomNeedPlayers:'ゲーム開始には少なくとも1人のプレイヤーが必要です。',
     roomRoomId:'ルームID',
     roomRound:'ラウンド',
     roomCountdown:'カウントダウン',
@@ -8606,7 +8606,7 @@ function resultScreenHtml(v,arr){
       <div class="result-list">${rows}</div>
       ${needsPlayers?`<div class="hint">${t('roomNeedPlayers')}</div>`:''}
       <div class="control-row">
-        <button id="result-home" class="secondary">${isRoom?t('roomLeave'):t('home')}</button>
+        <button id="result-home" class="${isRoom?'primary':'secondary'}">${isRoom?t('roomLeave'):t('home')}</button>
         ${(!isRoom||(!needsPlayers&&isHost))
     ?`<button id="result-again" class="primary">${t('again')}</button>`
     :(!isRoom?'':
@@ -9409,7 +9409,7 @@ function renderHome(){
     :`<span class="hint">${roomStarting?t('roomStarting'):t('roomWaitingHost')}</span>`;
   const roomPendingHint='';
   const roomTitle=t('roomTableTitle');
-  const roomLobbyHtml=(inRoom&&roomStatus!=='playing')?`<div class="room-overlay"><div class="room-card room-lobby-card room-card-icon"><div class="room-head"><span class="room-corner-icon room-corner-icon-reception" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M4 17.5a1 1 0 0 1-1-1V15a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v1.5a1 1 0 1 1-2 0V15a2 2 0 0 0-2-2h-1v3a1 1 0 0 1-2 0v-3h-4v3a1 1 0 0 1-2 0v-3H7a2 2 0 0 0-2 2v1.5a1 1 0 0 1-1 1Z"/><path d="M7 10a3 3 0 1 1 3-3 3 3 0 0 1-3 3Zm10 0a3 3 0 1 1 3-3 3 3 0 0 1-3 3Z"/><path d="M2 20a1 1 0 0 1 1-1h18a1 1 0 1 1 0 2H3a1 1 0 0 1-1-1Z"/></svg></span><h3>${roomTitle}</h3>${roomHostLine}</div><div class="room-id-center"><span class="room-code">${esc(state.room.code)}</span><button id="room-copy" class="secondary">${t('roomCopy')}</button></div>${roomPrivacyRow}<div class="lobby-table">${roomSeats}</div>${roomErrorHtml}<div class="room-actions">${roomStartControl}${roomPendingHint}<button id="room-leave" class="danger" ${roomStarting?'disabled':''}>${t('roomLeave')}</button></div></div></div>`:'';
+  const roomLobbyHtml=(inRoom&&roomStatus!=='playing')?`<div class="room-overlay"><div class="room-card room-lobby-card room-card-icon"><div class="room-head"><span class="room-corner-icon room-corner-icon-reception" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M4 17.5a1 1 0 0 1-1-1V15a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v1.5a1 1 0 1 1-2 0V15a2 2 0 0 0-2-2h-1v3a1 1 0 0 1-2 0v-3h-4v3a1 1 0 0 1-2 0v-3H7a2 2 0 0 0-2 2v1.5a1 1 0 0 1-1 1Z"/><path d="M7 10a3 3 0 1 1 3-3 3 3 0 0 1-3 3Zm10 0a3 3 0 1 1 3-3 3 3 0 0 1-3 3Z"/><path d="M2 20a1 1 0 0 1 1-1h18a1 1 0 1 1 0 2H3a1 1 0 0 1-1-1Z"/></svg></span><h3>${roomTitle}</h3>${roomHostLine}</div><div class="room-id-center"><span class="room-code">${esc(state.room.code)}</span><button id="room-copy" class="secondary">${t('roomCopy')}</button></div>${roomPrivacyRow}<div class="lobby-table">${roomSeats}</div>${roomErrorHtml}<div class="room-actions">${roomStartControl}${roomPendingHint}<button id="room-leave" class="primary" ${roomStarting?'disabled':''}>${t('roomLeave')}</button></div></div></div>`:'';
   const activeRoomsState=state.home.activeRooms;
   const activeRooms=Array.isArray(activeRoomsState?.rows)?activeRoomsState.rows:[];
   const createTableCard=`<button class="room-create-wide primary" id="room-create-card" type="button" aria-label="${t('roomCreate')}"><span class="room-create-icon" aria-hidden="true"><svg class="room-create-svg" viewBox="0 0 24 24" focusable="false"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H15a1 1 0 1 1 0 2H6v14h9a1 1 0 1 1 0 2H5.5A1.5 1.5 0 0 1 4 19.5v-15Z"/><path d="M15 8a1 1 0 0 1 1-1h3v-3a1 1 0 1 1 2 0v3h3a1 1 0 1 1 0 2h-3v3a1 1 0 1 1-2 0V9h-3a1 1 0 0 1-1-1Z"/><path d="M12 12.5a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0Z"/></svg></span><span>${t('roomCreate')}</span></button>`;
@@ -9474,7 +9474,7 @@ function renderHome(){
     ?`<span class="room-active-refresh-countdown">${state.room.joinOpenCountdown}s</span>`
     :'';
   const activeRoomsBlock=`<div class="room-active-block"><div class="room-create-section">${createTableCard}</div><div class="room-active-head"><span>${t('roomActiveList')}</span>${hiddenNote}<button id="room-active-refresh" class="secondary"><span class="room-active-refresh-label">${state.language==='zh-HK'?'更新':'Refresh'}</span>${refreshCountdownText}</button></div><div class="room-active-grid">${activeRoomsCards}${activeRoomsEmpty}</div></div>`;
-  const roomJoinModal=(!inRoom&&state.room.joinOpen)?`<div class="room-overlay"><div class="room-card room-join-card room-card-icon"><div class="room-head"><span class="room-corner-icon room-corner-icon-reception" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M4 17.5a1 1 0 0 1-1-1V15a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v1.5a1 1 0 1 1-2 0V15a2 2 0 0 0-2-2h-1v3a1 1 0 0 1-2 0v-3h-4v3a1 1 0 0 1-2 0v-3H7a2 2 0 0 0-2 2v1.5a1 1 0 0 1-1 1Z"/><path d="M7 10a3 3 0 1 1 3-3 3 3 0 0 1-3 3Zm10 0a3 3 0 1 1 3-3 3 3 0 0 1-3 3Z"/><path d="M2 20a1 1 0 0 1 1-1h18a1 1 0 1 1 0 2H3a1 1 0 0 1-1-1Z"/></svg></span><h3>${t('roomLobby')}</h3></div><label class="field"><span>${t('roomCode')}</span><div class="room-code-row"><input id="room-code-input" class="room-input" maxlength="8" placeholder="ABC123"/><button id="room-join-confirm" class="primary room-icon-btn room-join-black"><span>${t('roomJoin')}</span><svg class="room-inline-icon" viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M10 6a1 1 0 0 1 1 1v3h7.59l-2.3-2.3a1 1 0 1 1 1.42-1.4l4 4a1 1 0 0 1 0 1.4l-4 4a1 1 0 1 1-1.42-1.4l2.3-2.3H11v3a1 1 0 1 1-2 0V7a1 1 0 0 1 1-1Z"/><path d="M3 5a2 2 0 0 1 2-2h5a1 1 0 1 1 0 2H5v14h5a1 1 0 1 1 0 2H5a2 2 0 0 1-2-2V5Z"/></svg></button></div></label>${activeRoomsState?.loading?`<div class="hint">...</div>`:activeRoomsBlock}${roomErrorHtml}<div class="room-actions"><button id="room-join-cancel" class="secondary room-icon-btn"><svg class="room-inline-icon" viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M12 3.2 3 10v10a1 1 0 0 0 1 1h5.5a1 1 0 0 0 1-1v-5h3v5a1 1 0 0 0 1 1H20a1 1 0 0 0 1-1V10l-9-6.8Z"/></svg><span>${t('home')}</span></button></div></div></div>`:'';
+  const roomJoinModal=(!inRoom&&state.room.joinOpen)?`<div class="room-overlay"><div class="room-card room-join-card room-card-icon"><div class="room-head"><span class="room-corner-icon room-corner-icon-reception" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M4 17.5a1 1 0 0 1-1-1V15a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v1.5a1 1 0 1 1-2 0V15a2 2 0 0 0-2-2h-1v3a1 1 0 0 1-2 0v-3h-4v3a1 1 0 0 1-2 0v-3H7a2 2 0 0 0-2 2v1.5a1 1 0 0 1-1 1Z"/><path d="M7 10a3 3 0 1 1 3-3 3 3 0 0 1-3 3Zm10 0a3 3 0 1 1 3-3 3 3 0 0 1-3 3Z"/><path d="M2 20a1 1 0 0 1 1-1h18a1 1 0 1 1 0 2H3a1 1 0 0 1-1-1Z"/></svg></span><h3>${t('roomLobby')}</h3></div><label class="field"><span>${t('roomCode')}</span><div class="room-code-row"><input id="room-code-input" class="room-input" maxlength="8" placeholder="ABC123"/><button id="room-join-confirm" class="primary room-icon-btn"><span>${t('roomJoin')}</span><svg class="room-inline-icon" viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M10 6a1 1 0 0 1 1 1v3h7.59l-2.3-2.3a1 1 0 1 1 1.42-1.4l4 4a1 1 0 0 1 0 1.4l-4 4a1 1 0 1 1-1.42-1.4l2.3-2.3H11v3a1 1 0 1 1-2 0V7a1 1 0 0 1 1-1Z"/><path d="M3 5a2 2 0 0 1 2-2h5a1 1 0 1 1 0 2H5v14h5a1 1 0 1 1 0 2H5a2 2 0 0 1-2-2V5Z"/></svg></button></div></label>${activeRoomsState?.loading?`<div class="hint">...</div>`:activeRoomsBlock}${roomErrorHtml}<div class="room-actions"><button id="room-join-cancel" class="secondary room-icon-btn"><span>${t('home')}</span></button></div></div></div>`:'';
   const soloBtnCore=`<button id="solo-start" class="primary royal-start-btn" ${signedIn?'':'disabled'}>${t('solo')}</button>`;
   const soloBtnHtml=signedIn
     ?soloBtnCore
