@@ -1438,9 +1438,9 @@ body[data-screen='home'] .home-wrap {
 }
 .room-create-wide .room-create-icon {
   position: absolute;
-  left: 50%;
+  left: 16px;
   top: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateY(-50%);
   pointer-events: none;
 }
 .room-create-wide > span:last-child {
