@@ -5757,18 +5757,20 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
     grid-template-rows: minmax(74px, auto) minmax(0, 1fr);
     grid-template-areas:
       "west north east"
-      "center center center";
-    align-items: start;
+      "west center east";
+    align-items: center;
     gap: 5px;
   }
   .north, .east, .west {
     display: grid !important;
-    min-height: 74px;
+    min-height: 0;
     padding: 4px;
     border: 1px solid var(--player-color, rgba(126,177,215,.6));
     border-radius: 10px;
     background: linear-gradient(160deg, var(--seat-a), var(--seat-b));
   }
+  .north { min-height: 74px; align-self: start; }
+  .west, .east { align-self: stretch; }
   .east .seat-pack,
   .west .seat-pack,
   .north .seat-pack {
