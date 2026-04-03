@@ -8301,6 +8301,7 @@ function seatLastActionHtml(action){
 function centerLastMovesHtml(lastActions,selfSeat){
   const slots=['north','west','east','south'];
   return slots.map((cls)=>{
+    if(cls!=='south')return'';
     const seat=(selfSeat+seatCls.indexOf(cls))%4;
     const action=lastActions.get(seat);
     if(!action)return'';
@@ -10380,6 +10381,8 @@ function renderGame(){
       ?`<span class="avatar-status-badge warning ${active?'danger':''}" aria-label="${esc(t('lastCardCall'))}"></span>`
       :(active?`<span class="avatar-status-badge turn" aria-label="${esc(t('wait'))}"></span>`:'');
     const fan=v.gameOver&&v.revealedHands?(v.revealedHands[p.seat]??[]).map((c)=>renderStaticCard(c,true,'flip-in')).join(''):renderBackCards(p.count,`${p.rawName||p.name}-${p.seat}`);
+    const opponentLastAction=lastActions.get(p.seat);
+    const opponentOpenPlayHtml=opponentLastAction?`<div class="seat-open-play">${seatLastActionHtml(opponentLastAction)}</div>`:'';
     const avatarSrc=p.picture?authPictureUrlFrom(p.picture):avatarDataUri(p.name,pColor,p.gender,p.isBot);
     const botNameAttr=p.isBot?` data-bot-name="${esc(p.name)}"`:'';
     const opponentAttr=p.isBot?` data-opponent-name="${esc(p.rawName||p.name)}"`:'';
@@ -10404,7 +10407,7 @@ function renderGame(){
     const shellStyle=`--player-color:${pColor};${glass}`;
     const sectionStyle=innerNoOutline;
     const seatAttrs=emoteSeat===p.seat?' data-seat-emote-active="1"':'';
-    return`<div class="seat ${p.cls} ${active?'active':''}"${seatAttrs} style="${shellStyle}">${outerLabel}${calloutHtml}${emoteHtml}<div class="seat-pack seat-section" style="${sectionStyle}"><div class="opponent-fan ${opponentFanStyleByName(p.rawName||p.name)}">${fan}</div></div></div>`;
+    return`<div class="seat ${p.cls} ${active?'active':''}"${seatAttrs} style="${shellStyle}">${outerLabel}${calloutHtml}${emoteHtml}<div class="seat-pack seat-section" style="${sectionStyle}"><div class="opponent-fan ${opponentFanStyleByName(p.rawName||p.name)}">${fan}</div>${opponentOpenPlayHtml}</div></div>`;
   }).join('');
   const selfScore=self?selfScoreValue:0;
   const selfName=self?self.name:t('name');
