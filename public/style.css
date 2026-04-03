@@ -6923,29 +6923,29 @@ body[data-screen='game'] .north,
 body[data-screen='game'] .east,
 body[data-screen='game'] .west,
 body[data-screen='game'] .action-strip {
-  background:
-    linear-gradient(130deg, rgba(255,255,255,.09), rgba(255,255,255,.02)),
-    rgba(6, 18, 30, .48) !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 /* Game table shell: remove fill so enclosing panel is transparent. */
 body[data-screen='game'] .table {
-  background: transparent !important;
-  overflow: visible !important;
+  background:
+    radial-gradient(circle at 24% 20%, rgba(176, 238, 196, .14), transparent 42%),
+    radial-gradient(circle at 78% 74%, rgba(112, 182, 138, .14), transparent 44%),
+    linear-gradient(165deg, #1f6f44 0%, #185b39 58%, #134a2f 100%) !important;
+  overflow: hidden !important;
+  border: 1px solid rgba(214, 244, 224, .28) !important;
 }
 
 /* Actual play surface: green felt. */
 body[data-screen='game'] .table-center-stack {
   border-radius: 12px;
-  border: 1px solid rgba(255,255,255,.16);
-  background:
-    radial-gradient(circle at 26% 22%, rgba(168, 235, 188, .16), transparent 42%),
-    radial-gradient(circle at 76% 76%, rgba(90, 170, 120, .14), transparent 44%),
-    linear-gradient(165deg, #1e6a3f 0%, #175736 56%, #12472c 100%);
-  box-shadow: inset 0 0 0 1px rgba(8,25,42,.5);
-  width: calc(100% + 24px);
-  margin-left: -12px;
-  margin-right: -12px;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 /* Discard zone felt tone (snooker green). */
