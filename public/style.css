@@ -9105,3 +9105,20 @@ body[data-screen='game'][data-orientation='portrait'] .east .seat-pack,
 body[data-screen='game'][data-orientation='portrait'] .west .seat-pack {
   gap: 4px;
 }
+
+
+body[data-screen='game'] .north .seat-pack,
+body[data-screen='game'] .west .seat-pack,
+body[data-screen='game'] .east .seat-pack {
+  grid-template-areas:
+    "label"
+    "fan"
+    "last";
+}
+body[data-screen='game'] .north .seat-open-play,
+body[data-screen='game'] .west .seat-open-play,
+body[data-screen='game'] .east .seat-open-play {
+  grid-area: last;
+  margin-top: 0;
+  justify-self: center;
+}
