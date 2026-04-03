@@ -110,7 +110,7 @@ body[data-screen='game'] {
   overflow: hidden;
 }
 body[data-screen='game'][data-ios='1'] {
-  background-color: #0d2b2d;
+  background-color: #061420;
 }
 body[data-screen='game'] #app {
   height: 100dvh;
