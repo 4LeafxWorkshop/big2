@@ -4562,13 +4562,13 @@ body[data-screen='game'] .table-center-stack {
 }
 .opponent-fan { display: flex; gap: 0; margin-top: 0; transform: none; --stack-overlap: 30%; }
 .seat-open-play {
-  margin-top: 8px;
+  margin-top: 6px;
   display: flex;
   justify-content: center;
   width: 100%;
 }
 .seat-open-play .seat-played {
-  transform: scale(.9);
+  transform: scale(.78);
   transform-origin: center top;
 }
 .west .opponent-fan { margin-left: 1px; }
@@ -9089,4 +9089,19 @@ body[data-screen='game'] .center-last-south .seat-played .card.mini {
   body[data-screen='game'] .center-last-south .seat-played.seat-played-fan .card.mini + .card.mini {
     margin-left: calc(var(--card-w) * -1.8) !important;
   }
+}
+
+
+body[data-screen='game'][data-orientation='portrait'] .north,
+body[data-screen='game'][data-orientation='portrait'] .east,
+body[data-screen='game'][data-orientation='portrait'] .west {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+body[data-screen='game'][data-orientation='portrait'] .north .seat-pack,
+body[data-screen='game'][data-orientation='portrait'] .east .seat-pack,
+body[data-screen='game'][data-orientation='portrait'] .west .seat-pack {
+  gap: 4px;
 }

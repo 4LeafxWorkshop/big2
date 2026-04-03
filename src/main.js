@@ -10402,9 +10402,8 @@ function renderGame(){
     const outerLabel=`<div class="seat-name-fixed${peekActive?' motto-peek':''}"${opponentAttr}>${labelName}</div>`;
     const calloutHtml=seatCalloutHtml(p.seat,p.cls,pColor,false);
     const emoteHtml=seatEmoteHtml(p.seat,p.cls,pColor,false);
-    const glass='border:1px solid rgba(255,255,255,.17) !important;background:linear-gradient(130deg, rgba(255,255,255,.10), rgba(255,255,255,.03)),rgba(8, 24, 38, .36) !important;box-shadow:inset 0 0 0 1px rgba(255,255,255,.16),0 1px 4px rgba(0,0,0,.1) !important;border-radius:12px !important;';
+    const shellStyle=`--player-color:${pColor};border:0 !important;box-shadow:none !important;background:transparent !important;border-radius:0 !important;`;
     const innerNoOutline='border:0 !important;box-shadow:none !important;background:transparent !important;';
-    const shellStyle=`--player-color:${pColor};${glass}`;
     const sectionStyle=innerNoOutline;
     const seatAttrs=emoteSeat===p.seat?' data-seat-emote-active="1"':'';
     return`<div class="seat ${p.cls} ${active?'active':''}"${seatAttrs} style="${shellStyle}">${outerLabel}${calloutHtml}${emoteHtml}<div class="seat-pack seat-section" style="${sectionStyle}"><div class="opponent-fan ${opponentFanStyleByName(p.rawName||p.name)}">${fan}</div>${opponentOpenPlayHtml}</div></div>`;
