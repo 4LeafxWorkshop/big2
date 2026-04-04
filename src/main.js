@@ -8230,9 +8230,8 @@ function addRoomSystemLog(game,text){
   if(game.systemLog.length>200)game.systemLog=game.systemLog.slice(-200);
 }
 function centerMovesHtml(v){
-  const felt='border:1px solid rgba(220,245,226,.34) !important;background:radial-gradient(circle at 24% 20%, rgba(170,230,190,.18), transparent 38%),radial-gradient(circle at 78% 74%, rgba(98,165,126,.16), transparent 40%),linear-gradient(165deg, #1f6b43 0%, #185938 58%, #12492f 100%) !important;box-shadow:inset 0 0 0 1px rgba(8,25,42,.45) !important;border-radius:12px !important;';
-  const roomMeta='';
-  return`<div class="table-center-grid-wrap" style="${felt}">${roomMeta}</div>`;
+  void v;
+  return'';
 }
 function seatShortByViewClass(cls){
   const zh=state.language==='zh-HK';

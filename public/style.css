@@ -4052,7 +4052,7 @@ body[data-screen='game'] .table-center-stack {
   letter-spacing: .05em !important;
 }
 .center-last-north { left: 50%; top: 8px; transform: translate(-50%, 0); }
-.center-last-south { left: 50%; bottom: 8px; transform: translate(-50%, 0); }
+.center-last-south { left: 50%; bottom: 14px; transform: translate(-50%, 0); }
 .center-last-west { left: 8px; top: 50%; transform: translate(0, -50%); }
 .center-last-east { right: 8px; top: 50%; transform: translate(0, -50%); }
 .game-shell {
@@ -4838,12 +4838,13 @@ body[data-screen='game'] .table-center-stack {
 .table-emote {
   position: absolute;
   left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
+  top: auto;
+  bottom: 10px;
+  transform: translateX(-50%);
   width: clamp(110px, 22vw, 200px);
   height: auto;
   pointer-events: none;
-  animation: emoteWobble 1.2s ease-in-out infinite;
+  animation: emoteWobbleBottom 1.2s ease-in-out infinite;
   z-index: 35;
   filter: drop-shadow(0 10px 18px rgba(0,0,0,.35));
 }
@@ -4857,15 +4858,21 @@ body[data-screen='game'] .table-center-stack {
   50% { transform: translate(-50%, -52%) rotate(6deg) scale(1.02); }
   100% { transform: translate(-50%, -50%) rotate(-6deg) scale(0.98); }
 }
-.table-emote.emote-cool { animation: emoteWobble 1.2s ease-in-out infinite; }
+@keyframes emoteWobbleBottom {
+  0% { transform: translateX(-50%) rotate(-6deg) scale(0.98); }
+  50% { transform: translateX(-50%) translateY(-2px) rotate(6deg) scale(1.02); }
+  100% { transform: translateX(-50%) rotate(-6deg) scale(0.98); }
+}
+.table-emote.emote-cool { animation: emoteWobbleBottom 1.2s ease-in-out infinite; }
 .table-emote.emote-throw { animation: emoteThrow 1.3s ease-out forwards; width: clamp(150px, 30vw, 260px); }
 .table-emote.emote-rude {
   animation: emoteRudeJolt 0.6s steps(2, end) infinite;
   width: clamp(200px, 38vw, 320px);
   height: auto;
-  top: 50%;
+  top: auto;
+  bottom: 10px;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translateX(-50%);
 }
 .table-emote.emote-rude img { width: 78%; height: auto; }
 .table-emote.emote-rude .emote-rude-spark {
