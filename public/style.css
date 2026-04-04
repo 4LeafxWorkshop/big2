@@ -9199,3 +9199,28 @@ body[data-screen='game'][data-orientation='landscape'] .seat.east > .seat-name-f
   left: auto !important;
   transform: translateY(-50%) !important;
 }
+
+/* Keep side closed/open sets directly under side avatars. */
+body[data-screen='game'] .seat.west .opponent-fan,
+body[data-screen='game'] .seat.east .opponent-fan {
+  position: absolute !important;
+  top: calc(50% + 34px) !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+}
+body[data-screen='game'] .center-last-west,
+body[data-screen='game'] .center-last-east {
+  top: calc(50% + 118px) !important;
+  transform: translate(0, -50%) !important;
+}
+@media (max-width: 860px) and (orientation: portrait) {
+  body[data-screen='game'] .seat.west .opponent-fan,
+  body[data-screen='game'] .seat.east .opponent-fan {
+    top: calc(50% + 26px) !important;
+  }
+  body[data-screen='game'] .center-last-west,
+  body[data-screen='game'] .center-last-east {
+    top: calc(50% + 102px) !important;
+  }
+}
