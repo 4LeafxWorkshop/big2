@@ -10381,15 +10381,11 @@ function renderGame(){
       :(active?`<span class="avatar-status-badge turn" aria-label="${esc(t('wait'))}"></span>`:'');
     const fan=v.gameOver&&v.revealedHands?(v.revealedHands[p.seat]??[]).map((c)=>renderStaticCard(c,true,'flip-in')).join(''):renderBackCards(p.count,`${p.rawName||p.name}-${p.seat}`);
     const isSideSeat=p.cls==='west'||p.cls==='east';
-    const fanAnchorStyle=isSideSeat
-      ?'position:absolute !important;top:104px !important;left:50% !important;right:auto !important;transform:translateX(-50%) !important;'
-      :(p.cls==='north'
-        ?'justify-self:center !important;align-self:start !important;margin-left:0 !important;margin-right:0 !important;'
-        :'');
-    const opponentLastAction=lastActions.get(p.seat);
-    const openAnchorStyle=isSideSeat
-      ?'position:absolute !important;top:192px !important;left:50% !important;right:auto !important;width:max-content !important;transform:translateX(-50%) !important;'
+    const fanAnchorStyle=p.cls==='north'
+      ?'justify-self:center !important;align-self:start !important;margin-left:0 !important;margin-right:0 !important;'
       :'';
+    const opponentLastAction=lastActions.get(p.seat);
+    const openAnchorStyle=isSideSeat?'':'justify-self:center !important;';
     const opponentOpenPlayHtml=opponentLastAction?`<div class="seat-open-play" style="${openAnchorStyle}">${seatLastActionHtml(opponentLastAction)}</div>`:'';
     const avatarSrc=p.picture?authPictureUrlFrom(p.picture):avatarDataUri(p.name,pColor,p.gender,p.isBot);
     const botNameAttr=p.isBot?` data-bot-name="${esc(p.name)}"`:'';

@@ -9282,3 +9282,49 @@ body[data-screen='game'][data-orientation='landscape'] .seat.north > .seat-name-
   right: auto !important;
   transform: translateX(-50%) !important;
 }
+
+/* Single-source station float layout (web/mobile + portrait/landscape). */
+body[data-screen='game'] {
+  --opp-side-avatar-top: 28px;
+  --opp-side-fan-top: 112px;
+  --opp-side-open-top: 196px;
+}
+body[data-screen='game'] .seat.west,
+body[data-screen='game'] .seat.east,
+body[data-screen='game'] .seat.north {
+  position: relative !important;
+}
+body[data-screen='game'] .seat.west > .seat-name-fixed,
+body[data-screen='game'] .seat.east > .seat-name-fixed {
+  top: var(--opp-side-avatar-top) !important;
+  transform: none !important;
+}
+body[data-screen='game'] .seat.west .seat-pack,
+body[data-screen='game'] .seat.east .seat-pack {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+body[data-screen='game'] .seat.west .opponent-fan,
+body[data-screen='game'] .seat.east .opponent-fan {
+  position: absolute !important;
+  top: var(--opp-side-fan-top) !important;
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+}
+body[data-screen='game'] .seat.west .seat-open-play,
+body[data-screen='game'] .seat.east .seat-open-play {
+  position: absolute !important;
+  top: var(--opp-side-open-top) !important;
+  left: 50% !important;
+  width: max-content !important;
+  transform: translateX(-50%) !important;
+}
+@media (max-width: 860px) and (orientation: portrait) {
+  body[data-screen='game'] {
+    --opp-side-avatar-top: 22px;
+    --opp-side-fan-top: 96px;
+    --opp-side-open-top: 172px;
+  }
+}
