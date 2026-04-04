@@ -9174,3 +9174,28 @@ body[data-screen='game'][data-orientation='portrait'] .east > .seat-name-fixed {
   left: auto !important;
   transform: translateY(-50%) !important;
 }
+
+/* Station lock (all views): keep side stations centered on their own columns. */
+body[data-screen='game'] .seat.west,
+body[data-screen='game'] .seat.east {
+  align-self: stretch !important;
+}
+body[data-screen='game'] .seat.west .seat-pack,
+body[data-screen='game'] .seat.east .seat-pack {
+  align-content: start !important;
+  justify-items: center !important;
+}
+body[data-screen='game'][data-orientation='portrait'] .seat.west > .seat-name-fixed,
+body[data-screen='game'][data-orientation='landscape'] .seat.west > .seat-name-fixed {
+  top: 50% !important;
+  left: 6px !important;
+  right: auto !important;
+  transform: translateY(-50%) !important;
+}
+body[data-screen='game'][data-orientation='portrait'] .seat.east > .seat-name-fixed,
+body[data-screen='game'][data-orientation='landscape'] .seat.east > .seat-name-fixed {
+  top: 50% !important;
+  right: 6px !important;
+  left: auto !important;
+  transform: translateY(-50%) !important;
+}
