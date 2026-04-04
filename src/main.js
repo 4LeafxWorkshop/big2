@@ -8282,10 +8282,10 @@ function seatLastActionHtml(action){
   if(action.type==='pass')return`<div class="seat-played seat-played-pass"><span class="seat-pass-label"><span class="seat-pass-icon" aria-hidden="true"></span><span class="seat-pass-text">${t('pass')}</span></span></div>`;
   const ts=Number(action.ts)||0;
   const list=action.cards??[];
-  const isFive=list.length===5;
+  const isFan=list.length===3||list.length===5;
   const sizeStyle='width:var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) !important;height:var(--discard-card-h, calc(var(--card-h) * var(--hand-card-scale) * var(--card-scale))) !important;';
   const cards=list.map((c,i)=>{
-    if(isFive){
+    if(isFan){
       const mid=(list.length-1)/2;
       const offset=i-mid;
       const rot=offset*8;
@@ -8295,7 +8295,7 @@ function seatLastActionHtml(action){
     const rot=((fanNoise(`${action.seat}|${ts}|${cardId(c)}`,i,'played')*2)-1)*8.84;
     return renderStaticCard(c,true,'discard-card',`${sizeStyle}transform:rotate(${rot.toFixed(2)}deg);`);
   }).join('');
-  return`<div class="seat-played${isFive?' seat-played-fan':''}">${cards}</div>`;
+  return`<div class="seat-played${isFan?' seat-played-fan':''}">${cards}</div>`;
 }
 function centerLastMovesHtml(lastActions,selfSeat){
   const slots=['north','west','east','south'];
@@ -9179,6 +9179,18 @@ function bindBackCarousel(comboId){
     const nextIndex=(currentIndex+delta+optionCount)%optionCount;
     return BACK_OPTIONS[nextIndex]?.value;
   };
+  const applyBackSelection=(value,btn,animate=true)=>{
+    if(!value)return;
+    state.home.backColor=value;
+    markComboActive('back-combo-left',value);
+    markComboActive('back-combo-right',value);
+    markComboActive('config-back-combo',value);
+    if(btn instanceof HTMLElement){
+      centerToButton(btn,animate,value);
+      return;
+    }
+    centerToValue(value,animate);
+  };
   wrapper.querySelector('[data-carousel-dir="prev"]')?.addEventListener('click',()=>{
     if(dragActive)return;
     const nextValue=getNextValue('prev');
@@ -9195,6 +9207,7 @@ function bindBackCarousel(comboId){
     if(!(ev.target instanceof HTMLElement))return;
     const onCard=ev.target.closest?.('.combo-btn');
     if(!onCard)return;
+    if(ev.pointerType==='mouse'&&!isMobilePointer())return;
     viewport.setPointerCapture?.(ev.pointerId);
     stopMomentum();
     dragActive=true;
@@ -9252,12 +9265,9 @@ function bindBackCarousel(comboId){
     if(!(btn instanceof HTMLElement))return;
     const value=btn.getAttribute('data-value');
     if(!value)return;
-    state.home.backColor=value;
-    markComboActive('back-combo-left',value);
-    markComboActive('back-combo-right',value);
-    markComboActive('config-back-combo',value);
-    centerToButton(btn,true,value);
+    applyBackSelection(value,btn,true);
     if(state.screen==='home'){
+      if(!isMobilePointer())return;
       if((ev.detail||0)>=2){
         requestAnimationFrame(()=>{
           const selectedBtn=viewport.querySelector(`.combo-btn.active[data-value="${value}"]`);
@@ -9279,14 +9289,24 @@ function bindBackCarousel(comboId){
     }
   });
   viewport.addEventListener('dblclick',(ev)=>{
+    if(state.screen==='home'&&!isMobilePointer())return;
     if(!(ev.target instanceof HTMLElement))return;
     const preview=ev.target.closest?.('.combo-back-preview');
     if(!(preview instanceof HTMLElement))return;
     const btn=preview.closest?.('.combo-btn');
     const value=String(btn?.getAttribute?.('data-value')||state.home.backColor||'red');
-    state.home.backColor=value;
+    applyBackSelection(value,btn instanceof HTMLElement?btn:null,false);
     showHomeCardbackZoom(preview);
   });
+  if(!isMobilePointer()){
+    rail.querySelectorAll('.combo-btn').forEach((btn)=>{
+      if(!(btn instanceof HTMLElement))return;
+      btn.addEventListener('click',()=>{
+        const value=btn.getAttribute('data-value');
+        applyBackSelection(value,btn,true);
+      });
+    });
+  }
   viewport.addEventListener('dragstart',(ev)=>{
     ev.preventDefault();
   });
@@ -10355,7 +10375,9 @@ function renderGame(){
     return`<div class="emote-callout ${seatClass}" data-emote-seat="${seat}" style="--player-color:${color};${jitter}"><div class="callout-box"><div class="hk-inner"><span class="emote-icon">${emoteImageHtml}</span></div></div><div class="tail tail-${tailDir}"></div></div>`;
   };
   const emoteHtml=(emoteDisplayEnabled&&emoteSticker&&Number.isInteger(v.selfSeat)&&emoteSeat===v.selfSeat)
-    ?`<div class="table-emote emote-${emoteSticker.id}">${emoteImageHtml}</div>`
+    ?(emoteSticker.id==='rude'
+      ?`<div class="table-emote emote-rude"><span class="emote-rude-hit emote-rude-hit-1">${emoteImageHtml}</span><span class="emote-rude-hit emote-rude-hit-2">${emoteImageHtml}</span><span class="emote-rude-hit emote-rude-hit-3">${emoteImageHtml}</span></div>`
+      :`<div class="table-emote emote-${emoteSticker.id}">${emoteImageHtml}</div>`)
     :'';
   const lastActions=lastActionBySeat(v.history);
   const playKey=v.lastPlay?`${v.lastPlay.seat}-${v.lastPlay.cards.map(cardId).join(',')}`:'';
@@ -10373,6 +10395,7 @@ function renderGame(){
   const seatHtml=arr.filter((p)=>p.viewIndex!==0).map((p)=>{
     const active=v.currentSeat===p.seat&&!v.gameOver;
     const pColor=playerColorByViewClass(p.cls);
+    const useFlowOpponentStation=true;
     const dangerLast=Boolean(!v.gameOver&&p.count===1);
     const isHostSeat=hostSeat!==null&&hostSeat===p.seat;
     const hostBadgeHtml=isHostSeat?`<span class="lobby-seat-host-badge">🚩</span>`:'';
@@ -10387,6 +10410,7 @@ function renderGame(){
     const opponentLastAction=lastActions.get(p.seat);
     const openAnchorStyle=isSideSeat?'':'justify-self:center !important;';
     const opponentOpenPlayHtml=opponentLastAction?`<div class="seat-open-play" style="${openAnchorStyle}">${seatLastActionHtml(opponentLastAction)}</div>`:'';
+    const closedCountHtml=!v.gameOver&&p.count>0?`<span class="closed-count-pill">x${p.count}</span>`:'';
     const avatarSrc=p.picture?authPictureUrlFrom(p.picture):avatarDataUri(p.name,pColor,p.gender,p.isBot);
     const botNameAttr=p.isBot?` data-bot-name="${esc(p.name)}"`:'';
     const opponentAttr=p.isBot?` data-opponent-name="${esc(p.rawName||p.name)}"`:'';
@@ -10402,18 +10426,22 @@ function renderGame(){
     })();
     const namecardBtn=p.isBot?`<button type="button" class="seat-namecard" data-opponent-name="${esc(p.rawName||p.name)}" aria-label="${esc(t('profile'))}">🪪</button>`:'';
     const labelName=`<div class="name"><span class="player-avatar-wrap player-avatar-wrap-opponent avatar-rim" style="--avatar-rim:${pColor};"><img class="player-avatar player-avatar-opponent ${avatarGenderClass(p.gender)}" style="--avatar-outline:${pColor};" src="${avatarSrc}" alt="${esc(p.name)}"${botNameAttr}/>${hostBadgeHtml}${badgeHtml}</span><span class="seat-identity"><span class="seat-name-text">${esc(p.name)}</span><span class="seat-subline">${p.score??0}</span>${namecardBtn}${mottoText?`<span class="seat-motto-callout play-type-call" style="--player-color:${pColor};--motto-tilt:${mottoTilt};"><span class="hk-motto-box"><span class="${mottoClass}">${esc(mottoText)}</span>${hintText?`<span class="hk-chinese-sub">${esc(hintText)}</span>`:''}</span><span class="tail tail-north"></span></span>`:''}</span></div>`;
-    const peekActive=isMobilePointer()&&state.mottoPeekName===String(p.rawName||p.name);
-    const outerLabel=`<div class="seat-name-fixed${peekActive?' motto-peek':''}"${opponentAttr}>${labelName}</div>`;
     const calloutHtml=seatCalloutHtml(p.seat,p.cls,pColor,false);
     const emoteHtml=seatEmoteHtml(p.seat,p.cls,pColor,false);
+    const peekActive=isMobilePointer()&&state.mottoPeekName===String(p.rawName||p.name);
+    const outerLabel=`<div class="seat-name-fixed${peekActive?' motto-peek':''}"${opponentAttr}>${labelName}${calloutHtml}${emoteHtml}</div>`;
     const shellStyle=`--player-color:${pColor};border:0 !important;box-shadow:none !important;background:transparent !important;border-radius:0 !important;`;
     const innerNoOutline='border:0 !important;box-shadow:none !important;background:transparent !important;';
-    const seatPackAnchorStyle=isSideSeat
+    const seatPackAnchorStyle=useFlowOpponentStation
+      ?'position:relative !important;width:100% !important;height:100% !important;display:grid !important;align-content:start !important;justify-items:center !important;'
+      :isSideSeat
       ?'position:absolute !important;inset:0 !important;width:100% !important;height:100% !important;min-height:100% !important;display:grid !important;align-content:start !important;justify-items:center !important;'
       :(p.cls==='north'?'position:relative !important;width:100% !important;display:grid !important;align-content:start !important;justify-items:center !important;':'');
     const sectionStyle=`${innerNoOutline}${seatPackAnchorStyle}`;
     const seatAttrs=emoteSeat===p.seat?' data-seat-emote-active="1"':'';
-    return`<div class="seat ${p.cls} ${active?'active':''}"${seatAttrs} style="${shellStyle}">${outerLabel}${calloutHtml}${emoteHtml}<div class="seat-pack seat-section" style="${sectionStyle}"><div class="opponent-fan ${opponentFanStyleByName(p.rawName||p.name)}" style="${fanAnchorStyle}">${fan}</div>${opponentOpenPlayHtml}</div></div>`;
+    const outerLabelHtml=useFlowOpponentStation?'':outerLabel;
+    const innerLabelHtml=useFlowOpponentStation?outerLabel:'';
+    return`<div class="seat ${p.cls} ${active?'active':''}"${seatAttrs} style="${shellStyle}">${outerLabelHtml}<div class="seat-pack seat-section" style="${sectionStyle}">${innerLabelHtml}<div class="opponent-fan-wrap"><div class="opponent-fan ${opponentFanStyleByName(p.rawName||p.name)}" style="${fanAnchorStyle}">${fan}</div>${closedCountHtml}</div>${opponentOpenPlayHtml}</div></div>`;
   }).join('');
   const selfScore=self?selfScoreValue:0;
   const selfName=self?self.name:t('name');
@@ -10447,7 +10475,7 @@ function renderGame(){
   const isRecPlay=state.recommendation?.action==='play';
   const emotePanel=state.emote.open?`<div class="emote-panel">${EMOTE_STICKERS.map((s)=>`<button class="emote-btn" data-emote-id="${s.id}" type="button"><img src="${withBase(`emotes/${s.file}`)}" alt="${s.id}"/><span class="emote-btn-label">${esc(t(`emoteLabel${s.id[0].toUpperCase()}${s.id.slice(1)}`))}</span></button>`).join('')}</div>`:'';
   const sideZoneHtml=portraitMode?'':`<aside class="side-zone"><section class="side-card log-side-card"><h3 class="log-toggle-title title-with-icon" aria-label="${esc(logToggleStateText)}"><span class="title-icon title-icon-log" aria-hidden="true"></span><span>${t('log')}</span></h3><div class="history-list">${historyHtml(v.history,v.selfSeat,v.systemLog)}</div></section></aside>`;
-  app.innerHTML=`<section class="game-shell ${v.gameOver?'game-over':''} ${state.showLog?'log-open':''}"><div class="main-zone"><header class="topbar"><div class="game-title-wrap"><span class="game-logo-block"><img class="title-logo title-logo-game" src="${withBase('title-lockup-game.png')}" alt="鋤大D TRADITIONAL BIG TWO"/></span>${roomTopMeta}</div><div class="topbar-right"><div class="control-row">${renderLangMenu('game-lang-menu')}<button id="game-intro-toggle" class="secondary">${esc(intro.btnShow)}</button><button id="score-guide-toggle" class="secondary">${t('scoreGuide')}</button><button id="game-lb-toggle" class="secondary">${t('lb')}</button><button id="home-btn" class="secondary">${t('home')}</button><button id="restart-btn" class="primary">${t('restart')}</button></div></div></header><section class="table">${seatHtml}<div class="table-center-stack">${mobileNamesHtml}${mobileDiscardHtml}${centerMovesHtml(v)}${centerLastMovesHtml(lastActions,v.selfSeat)}${emoteHtml}</div>${(!v.gameOver&&youWin)?`<div class="win-celebrate"><div class="confetti-layer"></div><div class="win-banner">${t('congrats')}</div></div>`:''}</section><section class="action-zone"><div class="action-strip ${v.canControl&&!v.gameOver?'active':''}" style="--player-color:${playerColorByViewClass('south')};"><div class="seat-name-fixed player-tag"><div class="name">${selfAvatar}<span class="seat-identity"><span class="seat-name-text">${esc(selfName)}</span><span class="seat-subline">${selfScore}</span></span></div></div>${selfCalloutHtml}<div class="control-row"><button id="play-btn" class="primary game-cta-btn ${isRecPlay?'recommend-glow-play':''}" ${canPlay?'':'disabled'}><span aria-hidden="true">▶</span><span>${t('play')}</span></button><button id="pass-btn" class="danger game-cta-btn ${isRecPass?'recommend-glow':''}" ${v.canPass?'':'disabled'}><span aria-hidden="true">✖</span><span>${t('pass')}</span></button><span class="recommend-anchor"><button id="suggest-btn" class="secondary game-cta-btn" ${canSuggest?'':'disabled'}><span aria-hidden="true">💡</span><span>${t('suggest')}</span></button>${showRecommendHint?`<span class="recommend-layer"><span class="hint recommend-hint ${isRecEmpty?'rec-empty':''}"><span class="recommend-bulb" aria-hidden="true">💡</span><span>${esc(state.recommendHint)}</span></span></span>`:''}</span><button id="emote-toggle" class="secondary game-cta-btn emote-toggle" type="button"><span aria-hidden="true">😆</span><span>${t('emote')}</span></button><button id="auto-sort-btn" class="secondary game-cta-btn auto-sort-btn" ${canAutoSort?'':'disabled'}><svg class="sort-icon" aria-hidden="true" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827 1.24 4.874 2.418.49.552.865 1.102 1.126 1.532.26-.430.636-.980 1.126-1.532C9.173 4.24 10.798 3 13 3v1c-1.798 0-3.173 1.01-4.126 2.082A9.6 9.6 0 0 0 7.556 8a9.6 9.6 0 0 0 1.317 1.918C9.828 10.99 11.204 12 13 12v1c-2.202 0-3.827-1.24-4.874-2.418A10.6 10.6 0 0 1 7 9.05c-.26.43-.636.980-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173 1.01 4.126-2.082A9.6 9.6 0 0 0 6.444 8a9.6 9.6 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1-.5-.5"/><path d="M13 5.466V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192m0 9v-3.932a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.120.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192"/></svg></button></div>${emotePanel}<div class="hand">${v.hand.map((c,i)=>renderHandCard(c,state.selected.has(cardId(c)),(showMust3Highlight&&isLowestSingle(c))?'must3-highlight':'',i+1)).join('')}</div><div class="drag-popup" id="drag-popup">${t('drag')}</div></div></section>${v.gameOver?'':congratsOverlayHtml(v,youWin)}${revealHtml(v,arr)}</div>${sideZoneHtml}${v.gameOver?resultScreenHtml(v,arr):''}${state.opponentProfileName?opponentProfileModalHtml(state.opponentProfileName):''}${state.showScoreGuide?scoreGuideModalHtml():''}${state.home.showIntro?introPanelHtml():''}${state.home.showLeaderboard?leaderboardModalHtml():''}</section>`;
+  app.innerHTML=`<section class="game-shell ${v.gameOver?'game-over':''} ${state.showLog?'log-open':''}"><div class="main-zone"><header class="topbar"><div class="game-title-wrap"><span class="game-logo-block"><img class="title-logo title-logo-game" src="${withBase('title-lockup-game.png')}" alt="鋤大D TRADITIONAL BIG TWO"/></span>${roomTopMeta}</div><div class="topbar-right"><div class="control-row">${renderLangMenu('game-lang-menu')}<button id="game-intro-toggle" class="secondary">${esc(intro.btnShow)}</button><button id="score-guide-toggle" class="secondary">${t('scoreGuide')}</button><button id="game-lb-toggle" class="secondary">${t('lb')}</button><button id="home-btn" class="secondary">${t('home')}</button><button id="restart-btn" class="primary">${t('restart')}</button></div></div></header><section class="table">${seatHtml}<div class="table-center-stack">${mobileNamesHtml}${mobileDiscardHtml}${centerMovesHtml(v)}${centerLastMovesHtml(lastActions,v.selfSeat)}</div>${emoteHtml}${(!v.gameOver&&youWin)?`<div class="win-celebrate"><div class="confetti-layer"></div><div class="win-banner">${t('congrats')}</div></div>`:''}</section><section class="action-zone"><div class="action-strip ${v.canControl&&!v.gameOver?'active':''}" style="--player-color:${playerColorByViewClass('south')};"><div class="seat-name-fixed player-tag"><div class="name">${selfAvatar}<span class="seat-identity"><span class="seat-name-text">${esc(selfName)}</span><span class="seat-subline">${selfScore}</span></span></div></div>${selfCalloutHtml}<div class="control-row"><button id="play-btn" class="primary game-cta-btn ${isRecPlay?'recommend-glow-play':''}" ${canPlay?'':'disabled'}><span aria-hidden="true">▶</span><span>${t('play')}</span></button><button id="pass-btn" class="danger game-cta-btn ${isRecPass?'recommend-glow':''}" ${v.canPass?'':'disabled'}><span aria-hidden="true">✖</span><span>${t('pass')}</span></button><span class="recommend-anchor"><button id="suggest-btn" class="secondary game-cta-btn" ${canSuggest?'':'disabled'}><span aria-hidden="true">💡</span><span>${t('suggest')}</span></button>${showRecommendHint?`<span class="recommend-layer"><span class="hint recommend-hint ${isRecEmpty?'rec-empty':''}"><span class="recommend-bulb" aria-hidden="true">💡</span><span>${esc(state.recommendHint)}</span></span></span>`:''}</span><button id="emote-toggle" class="secondary game-cta-btn emote-toggle" type="button"><span aria-hidden="true">😆</span><span>${t('emote')}</span></button><button id="auto-sort-btn" class="secondary game-cta-btn auto-sort-btn" ${canAutoSort?'':'disabled'}><svg class="sort-icon" aria-hidden="true" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827 1.24 4.874 2.418.49.552.865 1.102 1.126 1.532.26-.430.636-.980 1.126-1.532C9.173 4.24 10.798 3 13 3v1c-1.798 0-3.173 1.01-4.126 2.082A9.6 9.6 0 0 0 7.556 8a9.6 9.6 0 0 0 1.317 1.918C9.828 10.99 11.204 12 13 12v1c-2.202 0-3.827-1.24-4.874-2.418A10.6 10.6 0 0 1 7 9.05c-.26.43-.636.980-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173 1.01 4.126-2.082A9.6 9.6 0 0 0 6.444 8a9.6 9.6 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1-.5-.5"/><path d="M13 5.466V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192m0 9v-3.932a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.120.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192"/></svg></button></div>${emotePanel}<div class="hand">${v.hand.map((c,i)=>renderHandCard(c,state.selected.has(cardId(c)),(showMust3Highlight&&isLowestSingle(c))?'must3-highlight':'',i+1)).join('')}</div><div class="drag-popup" id="drag-popup">${t('drag')}</div></div></section>${v.gameOver?'':congratsOverlayHtml(v,youWin)}${revealHtml(v,arr)}</div>${sideZoneHtml}${v.gameOver?resultScreenHtml(v,arr):''}${state.opponentProfileName?opponentProfileModalHtml(state.opponentProfileName):''}${state.showScoreGuide?scoreGuideModalHtml():''}${state.home.showIntro?introPanelHtml():''}${state.home.showLeaderboard?leaderboardModalHtml():''}</section>`;
   if(!v.gameOver&&youWin){
     app.innerHTML=app.innerHTML.replace('<div class="win-celebrate"><div class="confetti-layer"></div>','<div class="win-celebrate"><canvas class="confetti-canvas" data-confetti="win" aria-hidden="true"></canvas>');
   }
