@@ -9329,6 +9329,12 @@ body[data-screen='game'] .seat.north .seat-open-play {
   transform: translateX(-50%) !important;
   transform-origin: top center !important;
 }
+body[data-screen='game'] .seat.north .seat-open-play .seat-played,
+body[data-screen='game'] .seat.west .seat-open-play .seat-played,
+body[data-screen='game'] .seat.east .seat-open-play .seat-played {
+  transform: scale(1) !important;
+  transform-origin: center top !important;
+}
 body[data-screen='game'] .seat.west .opponent-fan,
 body[data-screen='game'] .seat.east .opponent-fan {
   position: absolute !important;
