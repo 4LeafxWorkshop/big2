@@ -9156,3 +9156,21 @@ body[data-screen='game'] .east > .seat-name-fixed {
   left: auto !important;
   transform: translateY(-50%) !important;
 }
+body[data-screen='game'][data-orientation='portrait'] .north > .seat-name-fixed {
+  top: 6px !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+}
+body[data-screen='game'][data-orientation='portrait'] .west > .seat-name-fixed {
+  top: 50% !important;
+  left: 6px !important;
+  right: auto !important;
+  transform: translateY(-50%) !important;
+}
+body[data-screen='game'][data-orientation='portrait'] .east > .seat-name-fixed {
+  top: 50% !important;
+  right: 6px !important;
+  left: auto !important;
+  transform: translateY(-50%) !important;
+}
