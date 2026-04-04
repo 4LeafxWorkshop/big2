@@ -9236,3 +9236,10 @@ body[data-screen='game'] .seat.east .seat-open-play {
     top: calc(50% + 80px) !important;
   }
 }
+
+/* Use in-seat open-play placement for opponents; hide center overlay duplicates. */
+body[data-screen='game'] .center-last-north,
+body[data-screen='game'] .center-last-west,
+body[data-screen='game'] .center-last-east {
+  display: none !important;
+}
