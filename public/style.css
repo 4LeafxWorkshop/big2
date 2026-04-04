@@ -9243,3 +9243,10 @@ body[data-screen='game'] .center-last-west,
 body[data-screen='game'] .center-last-east {
   display: none !important;
 }
+
+/* Final portrait/web alignment target: keep W/E opponent stations in the top band under avatars. */
+body[data-screen='game'] .seat.west > .seat-name-fixed,
+body[data-screen='game'] .seat.east > .seat-name-fixed {
+  top: 44px !important;
+  transform: none !important;
+}
