@@ -8766,7 +8766,7 @@ function clearHomeCardbackZoom(){
   }
   homeCardbackZoomCleanup=null;
 }
-function showHomeCardbackZoom(previewEl){
+function showHomeCardbackZoom(previewEl,options={}){
   if(!(previewEl instanceof HTMLElement))return;
   if(state.screen!=='home'&&state.screen!=='config')return;
   clearHomeCardbackZoom();
@@ -8787,10 +8787,16 @@ function showHomeCardbackZoom(previewEl){
   controls.className='cardback-zoom-controls';
   controls.innerHTML=`<button class="cardback-zoom-nav prev" type="button" aria-label="${state.language==='zh-HK'?'上一款':'Previous'}"><svg class="cardback-zoom-nav-icon" viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M14.7 5.3a1 1 0 0 1 0 1.4L9.4 12l5.3 5.3a1 1 0 1 1-1.4 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.4 0Z"/></svg></button><button class="cardback-zoom-nav next" type="button" aria-label="${state.language==='zh-HK'?'下一款':'Next'}"><svg class="cardback-zoom-nav-icon" viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M9.3 18.7a1 1 0 0 1 0-1.4l5.3-5.3-5.3-5.3a1 1 0 1 1 1.4-1.4l6 6a1 1 0 0 1 0 1.4l-6 6a1 1 0 0 1-1.4 0Z"/></svg></button>`;
   const ratio=(rect.height&&rect.width)?(rect.height/rect.width):1.392857;
-  const maxW=Math.min(window.innerWidth*0.72,340);
-  const maxH=Math.min(window.innerHeight*0.82,Math.round(maxW*ratio));
-  const targetW=Math.max(rect.width,Math.min(maxW,Math.round(maxH/ratio)));
-  const targetH=Math.max(rect.height,Math.round(targetW*ratio));
+  const zoomMultiplier=Math.max(1,Number(options.zoomMultiplier)||1);
+  const desiredW=Math.round(rect.width*zoomMultiplier);
+  const desiredH=Math.round(rect.height*zoomMultiplier);
+  const maxW=Math.round(window.innerWidth*0.9);
+  const maxH=Math.round(window.innerHeight*0.9);
+  const widthScale=Math.min(1,maxW/Math.max(1,desiredW));
+  const heightScale=Math.min(1,maxH/Math.max(1,desiredH));
+  const fitScale=Math.min(widthScale,heightScale);
+  const targetW=Math.max(rect.width,Math.round(desiredW*fitScale));
+  const targetH=Math.max(rect.height,Math.round(desiredH*fitScale));
   ghost.style.setProperty('--zoom-left',`${rect.left}px`);
   ghost.style.setProperty('--zoom-top',`${rect.top}px`);
   ghost.style.setProperty('--zoom-width',`${rect.width}px`);
@@ -9195,6 +9201,7 @@ function bindBackCarousel(comboId){
     if(!(ev.target instanceof HTMLElement))return;
     const onCard=ev.target.closest?.('.combo-btn');
     if(!onCard)return;
+    if(ev.pointerType==='mouse'&&!isMobilePointer())return;
     viewport.setPointerCapture?.(ev.pointerId);
     stopMomentum();
     dragActive=true;
@@ -9256,7 +9263,7 @@ function bindBackCarousel(comboId){
     markComboActive('back-combo-left',value);
     markComboActive('back-combo-right',value);
     markComboActive('config-back-combo',value);
-    centerToButton(btn,true,value);
+    centerToMiddleValue(value);
     if(state.screen==='home'){
       if(!isMobilePointer())return;
       if((ev.detail||0)>=2){
@@ -9280,14 +9287,21 @@ function bindBackCarousel(comboId){
     }
   });
   viewport.addEventListener('dblclick',(ev)=>{
-    if(state.screen==='home'&&!isMobilePointer())return;
     if(!(ev.target instanceof HTMLElement))return;
     const preview=ev.target.closest?.('.combo-back-preview');
     if(!(preview instanceof HTMLElement))return;
     const btn=preview.closest?.('.combo-btn');
     const value=String(btn?.getAttribute?.('data-value')||state.home.backColor||'red');
     state.home.backColor=value;
-    showHomeCardbackZoom(preview);
+    markComboActive('back-combo-left',value);
+    markComboActive('back-combo-right',value);
+    markComboActive('config-back-combo',value);
+    centerToMiddleValue(value);
+    window.setTimeout(()=>{
+      const selectedBtn=viewport.querySelector(`.combo-btn.active[data-value="${value}"]`);
+      const selectedPreview=selectedBtn?.querySelector?.('.combo-back-preview');
+      showHomeCardbackZoom(selectedPreview instanceof HTMLElement?selectedPreview:preview,{zoomMultiplier:6});
+    },120);
   });
   viewport.addEventListener('dragstart',(ev)=>{
     ev.preventDefault();
