@@ -6936,6 +6936,10 @@ body[data-screen='game'] .north .seat-section {
   background: linear-gradient(130deg, rgba(255,255,255,.09), rgba(255,255,255,.02)) !important;
   box-shadow: inset 0 0 0 1px rgba(8,25,42,.65) !important;
 }
+/* Hard-disable legacy center wrapper if present in stale clients. */
+body[data-screen='game'] .table-center-stack .table-center-grid-wrap {
+  display: none !important;
+}
 
 /* Slightly darker N/S/W/E panels with the same tint strength */
 body[data-screen='game'] .north,
