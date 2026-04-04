@@ -9290,6 +9290,9 @@ body[data-screen='game'] {
   --opp-open-gap: clamp(70px, 8.8vmin, 96px);
   --opp-side-fan-top: calc(var(--opp-side-avatar-top) + var(--opp-closed-gap));
   --opp-side-open-top: calc(var(--opp-side-fan-top) + var(--opp-open-gap));
+  --opp-north-fan-top: clamp(72px, 8.2vmin, 96px);
+  --opp-north-open-gap: clamp(62px, 7.4vmin, 84px);
+  --opp-north-open-top: calc(var(--opp-north-fan-top) + var(--opp-north-open-gap));
   --opp-side-closed-scale: .72;
   --opp-side-open-scale: 1;
 }
@@ -9304,18 +9307,34 @@ body[data-screen='game'] .seat.east > .seat-name-fixed {
   transform: none !important;
 }
 body[data-screen='game'] .seat.west .seat-pack,
-body[data-screen='game'] .seat.east .seat-pack {
+body[data-screen='game'] .seat.east .seat-pack,
+body[data-screen='game'] .seat.north .seat-pack {
   position: absolute !important;
   inset: 0 !important;
   width: 100% !important;
   height: 100% !important;
+}
+body[data-screen='game'] .seat.north .opponent-fan {
+  position: absolute !important;
+  top: var(--opp-north-fan-top) !important;
+  left: 50% !important;
+  transform: translateX(-50%) scale(var(--opp-side-closed-scale)) !important;
+  transform-origin: top center !important;
+}
+body[data-screen='game'] .seat.north .seat-open-play {
+  position: absolute !important;
+  top: var(--opp-north-open-top) !important;
+  left: 50% !important;
+  width: max-content !important;
+  transform: translateX(-50%) !important;
+  transform-origin: top center !important;
 }
 body[data-screen='game'] .seat.west .opponent-fan,
 body[data-screen='game'] .seat.east .opponent-fan {
   position: absolute !important;
   top: var(--opp-side-fan-top) !important;
   left: 50% !important;
-  transform: translateX(-50%) scale(var(--opp-side-closed-scale)) !important;
+  transform: translateX(-50%) scale(var(--opp-side-closed-scale)) rotate(var(--opp-side-fan-tilt, 0deg)) !important;
   transform-origin: top center !important;
 }
 body[data-screen='game'] .seat.west .seat-open-play,
@@ -9324,8 +9343,16 @@ body[data-screen='game'] .seat.east .seat-open-play {
   top: var(--opp-side-open-top) !important;
   left: 50% !important;
   width: max-content !important;
-  transform: translateX(-50%) scale(var(--opp-side-open-scale)) !important;
+  transform: translateX(-50%) scale(var(--opp-side-open-scale)) rotate(var(--opp-side-open-tilt, 0deg)) !important;
   transform-origin: top center !important;
+}
+body[data-screen='game'] .seat.west {
+  --opp-side-fan-tilt: -10deg;
+  --opp-side-open-tilt: -6deg;
+}
+body[data-screen='game'] .seat.east {
+  --opp-side-fan-tilt: 10deg;
+  --opp-side-open-tilt: 6deg;
 }
 @media (max-width: 860px) and (orientation: portrait) {
   body[data-screen='game'] .table {
@@ -9337,5 +9364,7 @@ body[data-screen='game'] .seat.east .seat-open-play {
     --opp-side-avatar-top: 22px;
     --opp-closed-gap: clamp(52px, 6.6vmin, 66px);
     --opp-open-gap: clamp(64px, 8.1vmin, 84px);
+    --opp-north-fan-top: clamp(64px, 7.4vmin, 84px);
+    --opp-north-open-gap: clamp(56px, 6.8vmin, 74px);
   }
 }
