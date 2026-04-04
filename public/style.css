@@ -9250,3 +9250,24 @@ body[data-screen='game'] .seat.east > .seat-name-fixed {
   top: 44px !important;
   transform: none !important;
 }
+body[data-screen='game'][data-orientation='portrait'] .seat.west > .seat-name-fixed,
+body[data-screen='game'][data-orientation='landscape'] .seat.west > .seat-name-fixed {
+  top: 44px !important;
+  left: 6px !important;
+  right: auto !important;
+  transform: none !important;
+}
+body[data-screen='game'][data-orientation='portrait'] .seat.east > .seat-name-fixed,
+body[data-screen='game'][data-orientation='landscape'] .seat.east > .seat-name-fixed {
+  top: 44px !important;
+  right: 6px !important;
+  left: auto !important;
+  transform: none !important;
+}
+body[data-screen='game'][data-orientation='portrait'] .seat.north > .seat-name-fixed,
+body[data-screen='game'][data-orientation='landscape'] .seat.north > .seat-name-fixed {
+  top: 6px !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+}
