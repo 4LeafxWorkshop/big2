@@ -9218,18 +9218,21 @@ body[data-screen='game'] .seat.north .opponent-fan {
   margin-left: 0 !important;
   margin-right: 0 !important;
 }
-body[data-screen='game'] .center-last-west,
-body[data-screen='game'] .center-last-east {
-  top: calc(50% + 118px) !important;
-  transform: translate(0, -50%) !important;
+body[data-screen='game'] .seat.west .seat-open-play,
+body[data-screen='game'] .seat.east .seat-open-play {
+  position: absolute !important;
+  top: calc(50% + 92px) !important;
+  left: 50% !important;
+  width: max-content !important;
+  transform: translateX(-50%) !important;
 }
 @media (max-width: 860px) and (orientation: portrait) {
   body[data-screen='game'] .seat.west .opponent-fan,
   body[data-screen='game'] .seat.east .opponent-fan {
     top: calc(50% + 26px) !important;
   }
-  body[data-screen='game'] .center-last-west,
-  body[data-screen='game'] .center-last-east {
-    top: calc(50% + 102px) !important;
+  body[data-screen='game'] .seat.west .seat-open-play,
+  body[data-screen='game'] .seat.east .seat-open-play {
+    top: calc(50% + 80px) !important;
   }
 }
