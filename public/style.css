@@ -9285,9 +9285,13 @@ body[data-screen='game'][data-orientation='landscape'] .seat.north > .seat-name-
 
 /* Single-source station float layout (web/mobile + portrait/landscape). */
 body[data-screen='game'] {
-  --opp-side-avatar-top: 28px;
-  --opp-side-fan-top: 112px;
-  --opp-side-open-top: 196px;
+  --opp-side-avatar-top: 26px;
+  --opp-closed-gap: clamp(56px, 7.2vmin, 74px);
+  --opp-open-gap: clamp(70px, 8.8vmin, 96px);
+  --opp-side-fan-top: calc(var(--opp-side-avatar-top) + var(--opp-closed-gap));
+  --opp-side-open-top: calc(var(--opp-side-fan-top) + var(--opp-open-gap));
+  --opp-side-closed-scale: .72;
+  --opp-side-open-scale: 1;
 }
 body[data-screen='game'] .seat.west,
 body[data-screen='game'] .seat.east,
@@ -9311,7 +9315,8 @@ body[data-screen='game'] .seat.east .opponent-fan {
   position: absolute !important;
   top: var(--opp-side-fan-top) !important;
   left: 50% !important;
-  transform: translateX(-50%) !important;
+  transform: translateX(-50%) scale(var(--opp-side-closed-scale)) !important;
+  transform-origin: top center !important;
 }
 body[data-screen='game'] .seat.west .seat-open-play,
 body[data-screen='game'] .seat.east .seat-open-play {
@@ -9319,12 +9324,18 @@ body[data-screen='game'] .seat.east .seat-open-play {
   top: var(--opp-side-open-top) !important;
   left: 50% !important;
   width: max-content !important;
-  transform: translateX(-50%) !important;
+  transform: translateX(-50%) scale(var(--opp-side-open-scale)) !important;
+  transform-origin: top center !important;
 }
 @media (max-width: 860px) and (orientation: portrait) {
+  body[data-screen='game'] .table {
+    aspect-ratio: 9 / 14;
+    height: auto !important;
+    max-height: 100%;
+  }
   body[data-screen='game'] {
     --opp-side-avatar-top: 22px;
-    --opp-side-fan-top: 96px;
-    --opp-side-open-top: 172px;
+    --opp-closed-gap: clamp(52px, 6.6vmin, 66px);
+    --opp-open-gap: clamp(64px, 8.1vmin, 84px);
   }
 }
