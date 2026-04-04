@@ -11397,7 +11397,7 @@ function render(){
     state.screen='opponents';
   }
   applyTheme();
-  document.title=EFFECTIVE_ENV==='PROD'?`${t('title')}`:`${t('title')} - ${EFFECTIVE_ENV}`;
+  document.title=t('title');
   document.body.setAttribute('data-screen',state.screen);
   document.body.setAttribute('data-game-mode',state.home.mode==='room'?'room':'solo');
   document.body.setAttribute('data-ios',isIOSDevice()?'1':'0');

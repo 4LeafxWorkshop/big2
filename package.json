@@ -29,6 +29,6 @@
     "@capacitor/ios": "^7.0.0",
     "cross-env": "^7.0.3",
     "prettier": "^3.3.1",
-    "vite": "^5.1.6"
+    "vite": "^5.4.21"
   }
 }
