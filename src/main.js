@@ -9179,18 +9179,6 @@ function bindBackCarousel(comboId){
     const nextIndex=(currentIndex+delta+optionCount)%optionCount;
     return BACK_OPTIONS[nextIndex]?.value;
   };
-  const applyBackSelection=(value,btn,animate=true)=>{
-    if(!value)return;
-    state.home.backColor=value;
-    markComboActive('back-combo-left',value);
-    markComboActive('back-combo-right',value);
-    markComboActive('config-back-combo',value);
-    if(btn instanceof HTMLElement){
-      centerToButton(btn,animate,value);
-      return;
-    }
-    centerToValue(value,animate);
-  };
   wrapper.querySelector('[data-carousel-dir="prev"]')?.addEventListener('click',()=>{
     if(dragActive)return;
     const nextValue=getNextValue('prev');
@@ -9207,7 +9195,6 @@ function bindBackCarousel(comboId){
     if(!(ev.target instanceof HTMLElement))return;
     const onCard=ev.target.closest?.('.combo-btn');
     if(!onCard)return;
-    if(ev.pointerType==='mouse'&&!isMobilePointer())return;
     viewport.setPointerCapture?.(ev.pointerId);
     stopMomentum();
     dragActive=true;
@@ -9265,7 +9252,11 @@ function bindBackCarousel(comboId){
     if(!(btn instanceof HTMLElement))return;
     const value=btn.getAttribute('data-value');
     if(!value)return;
-    applyBackSelection(value,btn,true);
+    state.home.backColor=value;
+    markComboActive('back-combo-left',value);
+    markComboActive('back-combo-right',value);
+    markComboActive('config-back-combo',value);
+    centerToButton(btn,true,value);
     if(state.screen==='home'){
       if(!isMobilePointer())return;
       if((ev.detail||0)>=2){
@@ -9295,18 +9286,9 @@ function bindBackCarousel(comboId){
     if(!(preview instanceof HTMLElement))return;
     const btn=preview.closest?.('.combo-btn');
     const value=String(btn?.getAttribute?.('data-value')||state.home.backColor||'red');
-    applyBackSelection(value,btn instanceof HTMLElement?btn:null,false);
+    state.home.backColor=value;
     showHomeCardbackZoom(preview);
   });
-  if(!isMobilePointer()){
-    rail.querySelectorAll('.combo-btn').forEach((btn)=>{
-      if(!(btn instanceof HTMLElement))return;
-      btn.addEventListener('click',()=>{
-        const value=btn.getAttribute('data-value');
-        applyBackSelection(value,btn,true);
-      });
-    });
-  }
   viewport.addEventListener('dragstart',(ev)=>{
     ev.preventDefault();
   });

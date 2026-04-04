@@ -2322,24 +2322,6 @@ body[data-screen='home'] .home-wrap {
   transform: scale(1.15);
   transform-origin: center;
 }
-@media (min-width: 861px) {
-  .cardback-carousel .cardback-combo {
-    overflow: visible;
-    padding: 8px 0 10px;
-  }
-  .cardback-combo .combo-btn {
-    opacity: .72;
-  }
-  .cardback-combo .combo-btn.active {
-    opacity: 1;
-    transform: translateY(-2px);
-  }
-  .cardback-combo .combo-btn.active .combo-back-preview {
-    box-shadow:
-      0 0 0 2px rgba(255, 209, 102, .78),
-      0 10px 18px rgba(0, 0, 0, .28);
-  }
-}
 .cardback-zoom-open {
   cursor: zoom-out;
   overflow: hidden;
