@@ -10413,7 +10413,10 @@ function renderGame(){
     const emoteHtml=seatEmoteHtml(p.seat,p.cls,pColor,false);
     const shellStyle=`--player-color:${pColor};border:0 !important;box-shadow:none !important;background:transparent !important;border-radius:0 !important;`;
     const innerNoOutline='border:0 !important;box-shadow:none !important;background:transparent !important;';
-    const sectionStyle=innerNoOutline;
+    const seatPackAnchorStyle=isSideSeat
+      ?'position:relative !important;height:100% !important;min-height:100% !important;'
+      :(p.cls==='north'?'position:relative !important;width:100% !important;':'');
+    const sectionStyle=`${innerNoOutline}${seatPackAnchorStyle}`;
     const seatAttrs=emoteSeat===p.seat?' data-seat-emote-active="1"':'';
     return`<div class="seat ${p.cls} ${active?'active':''}"${seatAttrs} style="${shellStyle}">${outerLabel}${calloutHtml}${emoteHtml}<div class="seat-pack seat-section" style="${sectionStyle}"><div class="opponent-fan ${opponentFanStyleByName(p.rawName||p.name)}" style="${fanAnchorStyle}">${fan}</div>${opponentOpenPlayHtml}</div></div>`;
   }).join('');
