@@ -9179,11 +9179,14 @@ body[data-screen='game'][data-orientation='portrait'] .east > .seat-name-fixed {
 body[data-screen='game'] .seat.west,
 body[data-screen='game'] .seat.east {
   align-self: stretch !important;
+  height: 100% !important;
 }
 body[data-screen='game'] .seat.west .seat-pack,
 body[data-screen='game'] .seat.east .seat-pack {
   align-content: start !important;
   justify-items: center !important;
+  height: 100% !important;
+  min-height: 100% !important;
 }
 body[data-screen='game'][data-orientation='portrait'] .seat.west > .seat-name-fixed,
 body[data-screen='game'][data-orientation='landscape'] .seat.west > .seat-name-fixed {
@@ -9208,6 +9211,12 @@ body[data-screen='game'] .seat.east .opponent-fan {
   left: 50% !important;
   right: auto !important;
   transform: translateX(-50%) !important;
+}
+body[data-screen='game'] .seat.north .opponent-fan {
+  justify-self: center !important;
+  align-self: start !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
 }
 body[data-screen='game'] .center-last-west,
 body[data-screen='game'] .center-last-east {
