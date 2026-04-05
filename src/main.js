@@ -10437,7 +10437,10 @@ function renderGame(){
     const seatAttrs=emoteSeat===p.seat?' data-seat-emote-active="1"':'';
     const outerLabelHtml=useFlowOpponentStation?'':outerLabel;
     const innerLabelHtml=useFlowOpponentStation?outerLabel:'';
-    return`<div class="seat ${p.cls} ${active?'active':''}"${seatAttrs} style="${shellStyle}">${outerLabelHtml}<div class="seat-pack seat-section" style="${sectionStyle}">${innerLabelHtml}<div class="opponent-fan-wrap"><div class="opponent-fan ${opponentFanStyleByName(p.rawName||p.name)}" style="${fanAnchorStyle}">${fan}</div>${closedCountHtml}</div>${opponentOpenPlayHtml}</div></div>`;
+    const sideStationFlowHtml=useFlowOpponentStation&&isSideSeat
+      ?`<div class="side-station-stack">${innerLabelHtml}<div class="opponent-fan-wrap"><div class="opponent-fan ${opponentFanStyleByName(p.rawName||p.name)}" style="${fanAnchorStyle}">${fan}</div>${closedCountHtml}</div>${opponentOpenPlayHtml}</div>`
+      :`${innerLabelHtml}<div class="opponent-fan-wrap"><div class="opponent-fan ${opponentFanStyleByName(p.rawName||p.name)}" style="${fanAnchorStyle}">${fan}</div>${closedCountHtml}</div>${opponentOpenPlayHtml}`;
+    return`<div class="seat ${p.cls} ${active?'active':''}"${seatAttrs} style="${shellStyle}">${outerLabelHtml}<div class="seat-pack seat-section" style="${sectionStyle}">${sideStationFlowHtml}</div></div>`;
   }).join('');
   const selfScore=self?selfScoreValue:0;
   const selfName=self?self.name:t('name');
