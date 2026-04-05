@@ -7876,7 +7876,7 @@ body[data-screen='game'] .center-last-north .seat-played.seat-played-fan .card.m
 body[data-screen='game'] .center-last-west .seat-played.seat-played-fan .card.mini + .card.mini,
 body[data-screen='game'] .center-last-east .seat-played.seat-played-fan .card.mini + .card.mini,
 body[data-screen='game'] .center-last-south .seat-played.seat-played-fan .card.mini + .card.mini {
-  margin-left: calc(var(--card-w) * -0.94) !important;
+  margin-left: calc(var(--card-w) * -1.04) !important;
 }
 @media (max-width: 860px) {
   body[data-screen='game'] .seat-played.seat-played-fan .card.mini + .card.mini,
@@ -7885,7 +7885,7 @@ body[data-screen='game'] .center-last-south .seat-played.seat-played-fan .card.m
   body[data-screen='game'] .center-last-west .seat-played.seat-played-fan .card.mini + .card.mini,
   body[data-screen='game'] .center-last-east .seat-played.seat-played-fan .card.mini + .card.mini,
   body[data-screen='game'] .center-last-south .seat-played.seat-played-fan .card.mini + .card.mini {
-    margin-left: calc(var(--card-w) * -1.24) !important;
+    margin-left: calc(var(--card-w) * -1.34) !important;
   }
 }
 
@@ -8115,14 +8115,14 @@ body[data-screen='game'] .side-zone.log-collapsed .log-side-card.collapsed {
     width: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * .6667) !important;
     height: calc(var(--discard-card-h, calc(var(--card-h) * var(--hand-card-scale) * var(--card-scale))) * .6667) !important;
   }
-  body[data-screen='game'] .center-last-south .seat-played .card.mini,
-  body[data-screen='game'] .center-last-south .seat-played .card.discard-card.mini {
-    width: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * .7) !important;
-    height: calc(var(--discard-card-h, calc(var(--card-h) * var(--hand-card-scale) * var(--card-scale))) * .7) !important;
+body[data-screen='game'] .center-last-south .seat-played .card.mini,
+body[data-screen='game'] .center-last-south .seat-played .card.discard-card.mini {
+    width: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * .9) !important;
+    height: calc(var(--discard-card-h, calc(var(--card-h) * var(--hand-card-scale) * var(--card-scale))) * .9) !important;
   }
 body[data-screen='game'] .center-last-south .seat-played {
   width: max-content !important;
-  transform: scale(.7) !important;
+  transform: scale(.9) !important;
   transform-origin: center bottom !important;
 }
 
@@ -8148,7 +8148,7 @@ body[data-screen='game'] .center-last-south .seat-played {
   body[data-screen='game'] .west .seat-open-play .opponent-open-scale,
   body[data-screen='game'] .east .seat-open-play .opponent-open-scale {
     width: max-content !important;
-    transform: scale(.7) !important;
+    transform: scale(.9) !important;
     transform-origin: center top !important;
     overflow: visible !important;
   }
@@ -9926,19 +9926,19 @@ body[data-screen='game'] .seat.east {
   body[data-screen='game'] .seat.north .seat-open-play .card.discard-card.mini,
   body[data-screen='game'] .seat.west .seat-open-play .card.discard-card.mini,
   body[data-screen='game'] .seat.east .seat-open-play .card.discard-card.mini {
-    width: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * .6667) !important;
-    height: calc(var(--discard-card-h, calc(var(--card-h) * var(--hand-card-scale) * var(--card-scale))) * .6667) !important;
+    width: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * .9) !important;
+    height: calc(var(--discard-card-h, calc(var(--card-h) * var(--hand-card-scale) * var(--card-scale))) * .9) !important;
   }
   body[data-screen='game'] .seat.north .seat-open-play .seat-played .card.mini + .card.mini,
   body[data-screen='game'] .seat.west .seat-open-play .seat-played .card.mini + .card.mini,
   body[data-screen='game'] .seat.east .seat-open-play .seat-played .card.mini + .card.mini,
   body[data-screen='game'] .seat-played.seat-played-fan .card.mini + .card.mini {
-    margin-left: calc(var(--card-w) * -0.7) !important;
+    margin-left: calc(var(--card-w) * -0.84) !important;
   }
   body[data-screen='game'] .seat.north .seat-open-play .seat-played.seat-played-fan .card.mini + .card.mini,
   body[data-screen='game'] .seat.west .seat-open-play .seat-played.seat-played-fan .card.mini + .card.mini,
   body[data-screen='game'] .seat.east .seat-open-play .seat-played.seat-played-fan .card.mini + .card.mini {
-    margin-left: calc(var(--card-w) * -1.8) !important;
+    margin-left: calc(var(--card-w) * -1.96) !important;
   }
   body[data-screen='game'] .seat.north .play-type-call-seat,
   body[data-screen='game'] .seat.north .last-card-call-seat,

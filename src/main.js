@@ -8277,6 +8277,8 @@ function lastActionBySeat(h){
   }
   return out;
 }
+const TABLE_PLAY_SCALE=.9;
+
 function seatLastActionHtml(action,sizeMultiplier=1){
   if(!action)return'';
   if(action.type==='pass')return`<div class="seat-played seat-played-pass"><span class="seat-pass-label"><span class="seat-pass-icon" aria-hidden="true"></span><span class="seat-pass-text">${t('pass')}</span></span></div>`;
@@ -8305,7 +8307,7 @@ function centerLastMovesHtml(lastActions,selfSeat){
     const seat=(selfSeat+seatCls.indexOf(cls))%4;
     const action=lastActions.get(seat);
     if(!action)return'';
-    return`<div class="center-last center-last-${cls}">${seatLastActionHtml(action,.7)}</div>`;
+    return`<div class="center-last center-last-${cls}">${seatLastActionHtml(action,TABLE_PLAY_SCALE)}</div>`;
   }).join('');
 }
 function seatGenderBySeat(v,seat){
@@ -10406,7 +10408,7 @@ function renderGame(){
       :'';
     const opponentLastAction=lastActions.get(p.seat);
     const openAnchorStyle=isSideSeat?'':'justify-self:center !important;';
-    const opponentOpenPlayHtml=opponentLastAction?`<div class="seat-open-play" style="${openAnchorStyle}"><div class="opponent-open-scale">${seatLastActionHtml(opponentLastAction,.7)}</div></div>`:'';
+    const opponentOpenPlayHtml=opponentLastAction?`<div class="seat-open-play" style="${openAnchorStyle}"><div class="opponent-open-scale">${seatLastActionHtml(opponentLastAction,TABLE_PLAY_SCALE)}</div></div>`:'';
     const closedCountHtml=!v.gameOver&&p.count>0?`<span class="closed-count-pill">x${p.count}</span>`:'';
     const avatarSrc=p.picture?authPictureUrlFrom(p.picture):avatarDataUri(p.name,pColor,p.gender,p.isBot);
     const botNameAttr=p.isBot?` data-bot-name="${esc(p.name)}"`:'';
