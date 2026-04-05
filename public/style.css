@@ -10592,3 +10592,14 @@ body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .emote
     margin-left: 0 !important;
   }
 }
+
+body[data-screen='game'] .center-last-south .seat-played .card.mini,
+body[data-screen='game'] .center-last-south .seat-played .card.discard-card.mini {
+  width: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * .7) !important;
+  height: calc(var(--discard-card-h, calc(var(--card-h) * var(--hand-card-scale) * var(--card-scale))) * .7) !important;
+}
+body[data-screen='game'] .center-last-south .seat-played {
+  width: max-content !important;
+  transform: scale(.7) !important;
+  transform-origin: center bottom !important;
+}
