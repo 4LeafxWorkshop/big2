@@ -10576,7 +10576,7 @@ body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .emote
     justify-self: center !important;
   }
   body[data-screen='game'][data-orientation='landscape'] .seat.north .opponent-fan {
-    margin-top: 0 !important;
+    margin-top: 7px !important;
   }
   body[data-screen='game'][data-orientation='landscape'] .seat.west .side-station-stack .opponent-fan,
   body[data-screen='game'][data-orientation='landscape'] .seat.east .side-station-stack .opponent-fan {
@@ -10662,6 +10662,9 @@ body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .emote
     overflow: visible !important;
   }
   body[data-screen='game'][data-orientation='landscape'] .seat.north .opponent-fan {
+    margin-top: 7px !important;
+  }
+  body[data-screen='game'][data-orientation='landscape'] .seat.north .opponent-fan {
     transform: scale(var(--opp-side-closed-scale)) !important;
     transform-origin: top center !important;
   }
@@ -10743,7 +10746,7 @@ body[data-screen='game'] .table-center-grid-wrap {
 
 @media (max-width: 860px) and (orientation: portrait) {
   body[data-screen='game'][data-orientation='portrait'] .seat.north .opponent-fan {
-    margin-top: 4px !important;
+    margin-top: -3px !important;
   }
   body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-pack > .seat-name-fixed,
   body[data-screen='game'][data-orientation='portrait'] .seat.west .seat-pack > .seat-name-fixed,
