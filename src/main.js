@@ -8277,7 +8277,7 @@ function lastActionBySeat(h){
   }
   return out;
 }
-const TABLE_PLAY_SCALE=.9;
+const TABLE_PLAY_SCALE=1;
 
 function seatLastActionHtml(action,sizeMultiplier=1){
   if(!action)return'';

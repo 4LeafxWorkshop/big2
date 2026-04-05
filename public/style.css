@@ -8117,12 +8117,12 @@ body[data-screen='game'] .side-zone.log-collapsed .log-side-card.collapsed {
   }
 body[data-screen='game'] .center-last-south .seat-played .card.mini,
 body[data-screen='game'] .center-last-south .seat-played .card.discard-card.mini {
-    width: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * .9) !important;
-    height: calc(var(--discard-card-h, calc(var(--card-h) * var(--hand-card-scale) * var(--card-scale))) * .9) !important;
+    width: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * 1) !important;
+    height: calc(var(--discard-card-h, calc(var(--card-h) * var(--hand-card-scale) * var(--card-scale))) * 1) !important;
   }
 body[data-screen='game'] .center-last-south .seat-played {
   width: max-content !important;
-  transform: scale(.9) !important;
+  transform: scale(1) !important;
   transform-origin: center bottom !important;
 }
 
@@ -8148,7 +8148,7 @@ body[data-screen='game'] .center-last-south .seat-played {
   body[data-screen='game'] .west .seat-open-play .opponent-open-scale,
   body[data-screen='game'] .east .seat-open-play .opponent-open-scale {
     width: max-content !important;
-    transform: scale(.9) !important;
+    transform: scale(1) !important;
     transform-origin: center top !important;
     overflow: visible !important;
   }
@@ -9926,8 +9926,8 @@ body[data-screen='game'] .seat.east {
   body[data-screen='game'] .seat.north .seat-open-play .card.discard-card.mini,
   body[data-screen='game'] .seat.west .seat-open-play .card.discard-card.mini,
   body[data-screen='game'] .seat.east .seat-open-play .card.discard-card.mini {
-    width: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * .9) !important;
-    height: calc(var(--discard-card-h, calc(var(--card-h) * var(--hand-card-scale) * var(--card-scale))) * .9) !important;
+    width: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * 1) !important;
+    height: calc(var(--discard-card-h, calc(var(--card-h) * var(--hand-card-scale) * var(--card-scale))) * 1) !important;
   }
   body[data-screen='game'] .seat.north .seat-open-play .seat-played .card.mini + .card.mini,
   body[data-screen='game'] .seat.west .seat-open-play .seat-played .card.mini + .card.mini,
