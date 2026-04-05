@@ -150,17 +150,17 @@ body[data-screen='game'][data-ios='1'] {
 body[data-screen='game'] #app {
   height: 100dvh;
   max-height: 100dvh;
-  padding-bottom: max(8px, env(safe-area-inset-bottom)) !important;
+  padding-bottom: 0 !important;
 }
 body[data-screen='game'][data-ios='1'] #app {
   padding-bottom: 0 !important;
 }
 body[data-screen='game'][data-ios='1'] .action-strip {
-  padding-bottom: max(8px, env(safe-area-inset-bottom)) !important;
+  padding-bottom: 0 !important;
 }
 /* Collapsed game log: lock layout to viewport height to avoid page overflow scrollbar. */
 body[data-screen='game'][data-log-open='0'] {
-  overflow: hidden !important;
+  overflow: visible !important;
 }
 body[data-screen='game'][data-log-open='0'] #app {
   box-sizing: border-box;
