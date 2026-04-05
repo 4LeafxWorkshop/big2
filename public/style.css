@@ -10691,3 +10691,32 @@ body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .emote
     margin-left: 0 !important;
   }
 }
+
+@media (max-width: 860px) {
+  body[data-screen='game'][data-ios='1'] #app {
+    height: auto !important;
+    max-height: none !important;
+    min-height: 100dvh !important;
+    min-height: -webkit-fill-available !important;
+    padding-bottom: 0 !important;
+  }
+  body[data-screen='game'][data-ios='1'] .game-shell,
+  body[data-screen='game'][data-ios='1'] .main-zone {
+    overflow: visible !important;
+  }
+  body[data-screen='game'][data-ios='1'] .action-zone,
+  body[data-screen='game'][data-ios='1'] .action-strip,
+  body[data-screen='game'][data-ios='1'] .action-strip .hand {
+    overflow: visible !important;
+    padding-bottom: 0 !important;
+  }
+  body[data-screen='game'][data-ios='1'] .action-strip .hand {
+    min-height: calc(var(--card-h) * 1.18 + 28px) !important;
+  }
+}
+
+body[data-screen='game'] .table,
+body[data-screen='game'] .table-center-stack,
+body[data-screen='game'] .table-center-grid-wrap {
+  overflow: visible !important;
+}
