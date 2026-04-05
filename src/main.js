@@ -11461,8 +11461,12 @@ function render(){
 function syncViewport(){
   const root=document.documentElement;
   const short=Math.min(window.innerWidth,window.innerHeight);
+  const viewportH=Math.max(0,Math.round(window.visualViewport?.height||window.innerHeight||0));
   const scale=Math.max(0.74,Math.min(1.1,short/520));
   root.style.setProperty('--card-scale',scale.toFixed(3));
+  if(viewportH){
+    root.style.setProperty('--app-vh',`${viewportH}px`);
+  }
   const orientation=isPortraitMode()?'portrait':'landscape';
   const orientationChanged=Boolean(lastOrientation)&&orientation!==lastOrientation;
   lastOrientation=orientation;
