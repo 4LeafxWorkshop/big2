@@ -8277,13 +8277,14 @@ function lastActionBySeat(h){
   }
   return out;
 }
-function seatLastActionHtml(action){
+function seatLastActionHtml(action,sizeMultiplier=1){
   if(!action)return'';
   if(action.type==='pass')return`<div class="seat-played seat-played-pass"><span class="seat-pass-label"><span class="seat-pass-icon" aria-hidden="true"></span><span class="seat-pass-text">${t('pass')}</span></span></div>`;
   const ts=Number(action.ts)||0;
   const list=action.cards??[];
   const isFan=list.length===3||list.length===5;
-  const sizeStyle='width:var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) !important;height:var(--discard-card-h, calc(var(--card-h) * var(--hand-card-scale) * var(--card-scale))) !important;';
+  const scale=Math.max(.1,Number(sizeMultiplier)||1);
+  const sizeStyle=`width:calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * ${scale}) !important;height:calc(var(--discard-card-h, calc(var(--card-h) * var(--hand-card-scale) * var(--card-scale))) * ${scale}) !important;`;
   const cards=list.map((c,i)=>{
     if(isFan){
       const mid=(list.length-1)/2;
@@ -10405,7 +10406,7 @@ function renderGame(){
       :'';
     const opponentLastAction=lastActions.get(p.seat);
     const openAnchorStyle=isSideSeat?'':'justify-self:center !important;';
-    const opponentOpenPlayHtml=opponentLastAction?`<div class="seat-open-play" style="${openAnchorStyle}">${seatLastActionHtml(opponentLastAction)}</div>`:'';
+    const opponentOpenPlayHtml=opponentLastAction?`<div class="seat-open-play" style="${openAnchorStyle}"><div class="opponent-open-scale">${seatLastActionHtml(opponentLastAction,.75)}</div></div>`:'';
     const closedCountHtml=!v.gameOver&&p.count>0?`<span class="closed-count-pill">x${p.count}</span>`:'';
     const avatarSrc=p.picture?authPictureUrlFrom(p.picture):avatarDataUri(p.name,pColor,p.gender,p.isBot);
     const botNameAttr=p.isBot?` data-bot-name="${esc(p.name)}"`:'';
