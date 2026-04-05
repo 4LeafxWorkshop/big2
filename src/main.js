@@ -8305,7 +8305,7 @@ function centerLastMovesHtml(lastActions,selfSeat){
     const seat=(selfSeat+seatCls.indexOf(cls))%4;
     const action=lastActions.get(seat);
     if(!action)return'';
-    return`<div class="center-last center-last-${cls}">${seatLastActionHtml(action)}</div>`;
+    return`<div class="center-last center-last-${cls}">${seatLastActionHtml(action,.7)}</div>`;
   }).join('');
 }
 function seatGenderBySeat(v,seat){
@@ -10406,7 +10406,7 @@ function renderGame(){
       :'';
     const opponentLastAction=lastActions.get(p.seat);
     const openAnchorStyle=isSideSeat?'':'justify-self:center !important;';
-    const opponentOpenPlayHtml=opponentLastAction?`<div class="seat-open-play" style="${openAnchorStyle}"><div class="opponent-open-scale">${seatLastActionHtml(opponentLastAction,.75)}</div></div>`:'';
+    const opponentOpenPlayHtml=opponentLastAction?`<div class="seat-open-play" style="${openAnchorStyle}"><div class="opponent-open-scale">${seatLastActionHtml(opponentLastAction,.7)}</div></div>`:'';
     const closedCountHtml=!v.gameOver&&p.count>0?`<span class="closed-count-pill">x${p.count}</span>`:'';
     const avatarSrc=p.picture?authPictureUrlFrom(p.picture):avatarDataUri(p.name,pColor,p.gender,p.isBot);
     const botNameAttr=p.isBot?` data-bot-name="${esc(p.name)}"`:'';

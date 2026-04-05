@@ -9362,7 +9362,7 @@ body[data-screen='game'] .north .seat-open-play .opponent-open-scale,
 body[data-screen='game'] .west .seat-open-play .opponent-open-scale,
 body[data-screen='game'] .east .seat-open-play .opponent-open-scale {
   width: max-content !important;
-  transform: scale(.75) !important;
+  transform: scale(.7) !important;
   transform-origin: center top !important;
   overflow: visible !important;
 }
