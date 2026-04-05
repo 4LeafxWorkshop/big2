@@ -10712,7 +10712,7 @@ body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .emote
     max-height: var(--app-vh, 100svh) !important;
     min-height: var(--app-vh, 100svh) !important;
     overflow: hidden !important;
-    padding-bottom: env(safe-area-inset-bottom) !important;
+    padding-bottom: 0 !important;
   }
   body[data-screen='game'][data-ios='1'] .game-shell,
   body[data-screen='game'][data-ios='1'] .main-zone {
@@ -10726,8 +10726,11 @@ body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .emote
     overflow: visible !important;
     padding-bottom: 0 !important;
   }
+  body[data-screen='game'][data-ios='1'] .action-strip {
+    padding-bottom: max(2px, env(safe-area-inset-bottom)) !important;
+  }
   body[data-screen='game'][data-ios='1'] .action-strip .hand {
-    min-height: calc(var(--card-h) * 1.14 + 24px) !important;
+    min-height: calc(var(--card-h) * 1.14 + 18px) !important;
     padding-bottom: 2px !important;
   }
 }
