@@ -10313,6 +10313,9 @@ body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .emote
   body[data-screen='game'][data-ios='1'] .action-strip {
     padding-bottom: 0 !important;
   }
+  body[data-screen='game'][data-ios='1'] #app {
+    padding: max(6px, env(safe-area-inset-top)) 5px 0 !important;
+  }
   body[data-screen='game'][data-ios='1'][data-log-open='0'] .action-zone,
   body[data-screen='game'][data-ios='1'][data-log-open='1'] .action-zone,
   body[data-screen='game'][data-ios='1'][data-log-open='0'] .action-strip,

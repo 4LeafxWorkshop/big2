@@ -9270,7 +9270,7 @@ function bindBackCarousel(comboId){
         requestAnimationFrame(()=>{
           const selectedBtn=viewport.querySelector(`.combo-btn.active[data-value="${value}"]`);
           const selectedPreview=selectedBtn?.querySelector?.('.combo-back-preview');
-          showHomeCardbackZoom(selectedPreview instanceof HTMLElement?selectedPreview:preview);
+          showHomeCardbackZoom(selectedPreview instanceof HTMLElement?selectedPreview:preview,{zoomMultiplier:6});
         });
         return;
       }
@@ -9282,7 +9282,7 @@ function bindBackCarousel(comboId){
       requestAnimationFrame(()=>{
         const selectedBtn=viewport.querySelector(`.combo-btn.active[data-value="${value}"]`);
         const selectedPreview=selectedBtn?.querySelector?.('.combo-back-preview');
-        showHomeCardbackZoom(selectedPreview instanceof HTMLElement?selectedPreview:preview);
+        showHomeCardbackZoom(selectedPreview instanceof HTMLElement?selectedPreview:preview,{zoomMultiplier:6});
       });
     }
   });
