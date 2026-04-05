@@ -9329,6 +9329,7 @@ body[data-screen='game'] .east .seat-open-play .opponent-open-scale {
   width: max-content !important;
   transform: scale(.75) !important;
   transform-origin: center top !important;
+  overflow: visible !important;
 }
 
 /* Final lock: opponent content top/center + badge anchors by seat station. */
@@ -10415,14 +10416,16 @@ body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .emote
   body[data-screen='game'][data-orientation='portrait'] .seat.west .seat-open-play,
   body[data-screen='game'][data-orientation='portrait'] .seat.east .seat-open-play {
     width: max-content !important;
-    max-width: 100% !important;
+    max-width: none !important;
     min-width: 0 !important;
+    overflow: visible !important;
   }
   body[data-screen='game'][data-orientation='portrait'] .seat.west .seat-open-play .seat-played,
   body[data-screen='game'][data-orientation='portrait'] .seat.east .seat-open-play .seat-played {
     width: max-content !important;
     justify-self: center !important;
     margin: 0 auto !important;
+    overflow: visible !important;
   }
 }
 
