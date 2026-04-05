@@ -7,6 +7,41 @@
     url('./backup/fonts/MaShanZheng-subset.woff2') format('woff2'),
     url('./backup/fonts/NaPecZTRCLxvwo41b4gvzkXaRMQ.ttf') format('truetype');
 }
+
+@media (orientation: portrait) {
+  body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-pack,
+  body[data-screen='game'][data-orientation='portrait'] .seat.west .side-station-stack,
+  body[data-screen='game'][data-orientation='portrait'] .seat.east .side-station-stack {
+    position: relative !important;
+    overflow: visible !important;
+  }
+  body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-open-play,
+  body[data-screen='game'][data-orientation='portrait'] .seat.west .seat-open-play,
+  body[data-screen='game'][data-orientation='portrait'] .seat.east .seat-open-play {
+    position: absolute !important;
+    left: 50% !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: 0 !important;
+    width: max-content !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+    transform: translateX(-50%) !important;
+    overflow: visible !important;
+    justify-self: auto !important;
+    align-self: auto !important;
+  }
+  body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-open-play .seat-played,
+  body[data-screen='game'][data-orientation='portrait'] .seat.west .seat-open-play .seat-played,
+  body[data-screen='game'][data-orientation='portrait'] .seat.east .seat-open-play .seat-played,
+  body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-open-play .opponent-open-scale,
+  body[data-screen='game'][data-orientation='portrait'] .seat.west .seat-open-play .opponent-open-scale,
+  body[data-screen='game'][data-orientation='portrait'] .seat.east .seat-open-play .opponent-open-scale {
+    width: max-content !important;
+    overflow: visible !important;
+  }
+}
 @font-face {
   font-family: 'Noto Serif TC';
   font-style: normal;
