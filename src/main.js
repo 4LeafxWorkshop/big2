@@ -10483,6 +10483,7 @@ function renderGame(){
   }
   const appEl=document.getElementById('app');
   if(appEl){
+    const logFabHost=portraitMode?(appEl.querySelector('.action-strip')||appEl):appEl;
     let logFab=appEl.querySelector('#game-log-fab');
     if(!logFab){
       const btn=document.createElement('button');
@@ -10492,8 +10493,10 @@ function renderGame(){
       btn.setAttribute('aria-label',t('log'));
       btn.innerHTML=`<span class="title-icon title-icon-log" aria-hidden="true"></span><span class="game-log-fab-text">${t('log')}</span>`;
       btn.setAttribute('data-ignore-click','0');
-      appEl.appendChild(btn);
+      logFabHost.appendChild(btn);
       logFab=btn;
+    }else if(logFab.parentElement!==logFabHost){
+      logFabHost.appendChild(logFab);
     }
     const existingSheet=appEl.querySelector('#log-sheet');
     if(existingSheet)existingSheet.remove();
@@ -10501,6 +10504,12 @@ function renderGame(){
       appEl.insertAdjacentHTML('beforeend',logSheetHtml);
     }
     if(logFab instanceof HTMLElement){
+      if(portraitMode){
+        logFab.style.removeProperty('left');
+        logFab.style.removeProperty('top');
+        logFab.style.removeProperty('right');
+        logFab.style.removeProperty('bottom');
+      }else{
       let x=state.logFab?.x;
       let y=state.logFab?.y;
       const pad=8;
@@ -10532,6 +10541,7 @@ function renderGame(){
         logFab.style.removeProperty('top');
         logFab.style.removeProperty('right');
         logFab.style.removeProperty('bottom');
+      }
       }
     }
   }

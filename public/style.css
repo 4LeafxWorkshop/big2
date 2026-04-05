@@ -5400,6 +5400,13 @@ body[data-screen='game'][data-orientation='portrait'] .side-zone { display: none
 .game-log-fab .title-icon { width: 18px; height: 18px; }
 body[data-screen='game'][data-orientation='landscape'] .game-log-fab { display: none; }
 body[data-screen='game'][data-orientation='portrait'] .game-log-fab { display: inline-flex; }
+body[data-screen='game'][data-orientation='portrait'] .action-strip .game-log-fab {
+  position: absolute;
+  right: 8px;
+  bottom: 6px;
+  z-index: 25;
+  touch-action: auto;
+}
 body[data-log-sheet='1'] .mobile-discard-panel { display: none !important; }
 body[data-log-sheet='1'] .side-zone { display: none !important; }
 body[data-log-sheet='1'] .side-zone .log-side-card { display: none !important; }
