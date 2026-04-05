@@ -10730,7 +10730,7 @@ body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .emote
     padding-bottom: 0 !important;
   }
   body[data-screen='game'][data-ios='1'] .action-strip {
-    padding-bottom: max(2px, env(safe-area-inset-bottom)) !important;
+    padding-bottom: 0 !important;
   }
   body[data-screen='game'][data-ios='1'] .action-strip .hand {
     min-height: calc(var(--card-h) * 1.14 + 18px) !important;
