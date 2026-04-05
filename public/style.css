@@ -10177,3 +10177,57 @@ body[data-screen='game'] .seat.north.active .seat-section {
     margin-right: 0 !important;
   }
 }
+
+@media (max-width: 860px) {
+  body[data-screen='game'][data-ios='1'] .center-last-south .seat-played-pass {
+    padding: 3px 5px !important;
+  }
+  body[data-screen='game'][data-ios='1'] .center-last-south .seat-pass-label {
+    padding: 4px 8px !important;
+    gap: 5px !important;
+    font-size: .8rem !important;
+    white-space: nowrap !important;
+    flex-wrap: nowrap !important;
+  }
+  body[data-screen='game'][data-ios='1'] .center-last-south .seat-pass-icon {
+    width: .86rem !important;
+    height: .86rem !important;
+  }
+  body[data-screen='game'][data-ios='1'] .action-zone {
+    padding-bottom: 0 !important;
+  }
+  body[data-screen='game'][data-ios='1'][data-log-open='0'] .action-zone,
+  body[data-screen='game'][data-ios='1'][data-log-open='1'] .action-zone {
+    padding-bottom: 0 !important;
+  }
+}
+
+@media (max-width: 860px) and (orientation: portrait) {
+  body[data-screen='game'][data-orientation='portrait'] .seat.west .side-station-stack > .seat-name-fixed,
+  body[data-screen='game'][data-orientation='portrait'] .seat.east .side-station-stack > .seat-name-fixed,
+  body[data-screen='game'][data-orientation='portrait'] .seat.west .side-station-stack > .seat-name-fixed .name,
+  body[data-screen='game'][data-orientation='portrait'] .seat.east .side-station-stack > .seat-name-fixed .name,
+  body[data-screen='game'][data-orientation='portrait'] .seat.west .side-station-stack > .seat-name-fixed .seat-identity,
+  body[data-screen='game'][data-orientation='portrait'] .seat.east .side-station-stack > .seat-name-fixed .seat-identity {
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+  body[data-screen='game'][data-orientation='portrait'] .seat.west .side-station-stack > .seat-name-fixed {
+    min-height: 0 !important;
+    padding: 0 !important;
+  }
+  body[data-screen='game'][data-orientation='portrait'] .seat.east .side-station-stack > .seat-name-fixed {
+    min-height: 0 !important;
+    padding: 0 !important;
+  }
+  body[data-screen='game'][data-orientation='portrait'] .seat.west .side-station-stack > .seat-name-fixed .player-avatar-wrap.player-avatar-wrap-opponent,
+  body[data-screen='game'][data-orientation='portrait'] .seat.east .side-station-stack > .seat-name-fixed .player-avatar-wrap.player-avatar-wrap-opponent {
+    background: transparent !important;
+  }
+  body[data-screen='game'][data-orientation='portrait'] .seat.west .side-station-stack > .seat-name-fixed .player-avatar-wrap.player-avatar-wrap-opponent.avatar-rim::after,
+  body[data-screen='game'][data-orientation='portrait'] .seat.east .side-station-stack > .seat-name-fixed .player-avatar-wrap.player-avatar-wrap-opponent.avatar-rim::after {
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+}
