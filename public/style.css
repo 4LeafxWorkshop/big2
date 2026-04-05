@@ -10706,7 +10706,7 @@ body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .emote
     min-height: 100svh !important;
     min-height: -webkit-fill-available !important;
     overflow: hidden !important;
-    padding-bottom: 0 !important;
+    padding-bottom: env(safe-area-inset-bottom) !important;
   }
   body[data-screen='game'][data-ios='1'] .game-shell,
   body[data-screen='game'][data-ios='1'] .main-zone {
