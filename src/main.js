@@ -11474,8 +11474,44 @@ function syncViewport(){
   requestAnimationFrame(syncHandStackMode);
 }
 
+let viewportRecoveryTimer=0;
+function scheduleViewportRecovery(delayMs=0){
+  if(viewportRecoveryTimer){
+    window.clearTimeout(viewportRecoveryTimer);
+    viewportRecoveryTimer=0;
+  }
+  const runRecovery=()=>{
+    viewportRecoveryTimer=0;
+    window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>{
+      syncViewport();
+      if(state.screen==='game'){
+        render();
+        window.requestAnimationFrame(syncDiscardSizeFromHand);
+        window.requestAnimationFrame(syncHandStackMode);
+        window.setTimeout(()=>{
+          syncViewport();
+          syncDiscardSizeFromHand();
+          syncHandStackMode();
+        },180);
+      }
+    }));
+  };
+  const delay=Math.max(0,Number(delayMs)||0);
+  if(!delay){
+    runRecovery();
+    return;
+  }
+  viewportRecoveryTimer=window.setTimeout(runRecovery,delay);
+}
+
 window.addEventListener('resize',syncViewport);
 window.addEventListener('orientationchange',syncViewport);
+window.addEventListener('focus',()=>{
+  if(state.screen==='game')scheduleViewportRecovery(30);
+});
+window.addEventListener('pageshow',()=>{
+  if(state.screen==='game')scheduleViewportRecovery(30);
+});
 const bootstrapAudioAndSpeech=()=>{if(!sound.enabled)return;unlockAudio();primeSpeech();};
 document.addEventListener('pointerdown',bootstrapAudioAndSpeech,{once:true});
 document.addEventListener('touchstart',bootstrapAudioAndSpeech,{once:true,passive:true});
@@ -11494,7 +11530,7 @@ document.addEventListener('visibilitychange',()=>{
       calloutResumePending=false;
       if(state.home.mode==='room')maybeRunRoomAi();
       else maybeRunSoloAi();
-      render();
+      scheduleViewportRecovery(30);
     }
   }
 });
