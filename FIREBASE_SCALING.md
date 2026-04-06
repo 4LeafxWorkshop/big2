@@ -6,11 +6,17 @@ This document lists the exact information needed when splitting Big Two across m
 
 - Primary Firebase project:
   - `seed-services`
-- Current responsibilities:
-  - leaderboard
-  - room documents
-  - room user pointers
-  - game logs
+- Current implemented responsibilities:
+  - `big2LeaderboardPlayers`
+  - `big2Users`
+  - `big2FirebaseInstances`
+  - `big2RoomDirectory`
+- Current room shard projects:
+  - `seed-services`
+  - `fourleafbig2`
+- Current live room collections on shards:
+  - `big2Rooms`
+  - `big2GameLogs`
 
 ## Planned scaling model
 
@@ -21,6 +27,11 @@ Example target:
   - user room pointers
 - one or more extra Firebase projects handle:
   - live room gameplay traffic only
+
+Current implementation:
+- this is already active
+- room creation rotates by the most recent `big2RoomDirectory.firebaseInstanceId`
+- clients resolve room code -> directory -> shard Firebase at join/reconnect time
 
 ## What to give for one new Firebase project
 
@@ -86,16 +97,27 @@ For this codebase, the cleanest split is:
 - Primary Firebase:
   - `big2LeaderboardPlayers`
   - `big2Users`
-  - lightweight `big2Rooms` directory only
+  - `big2FirebaseInstances`
+  - `big2RoomDirectory`
 - Room shard Firebase:
   - live `big2Rooms` game documents
   - `big2GameLogs`
 
-Minimum extra fields needed in the primary room directory:
+Current implemented directory fields:
 
-- `shardProjectId`
-- `shardEnvKey` or equivalent local routing key
-- `liveRoomId` if different from the public room id/code
+- `roomId`
+- `code`
+- `createdAt`
+- `hostId`
+- `hostName`
+- `firebaseInstanceId`
+
+Current implemented instance fields:
+
+- `projectId`
+- `projectNumber`
+- `appId`
+- `apiKey`
 
 ## Information needed again when adding even more Firebase projects later
 
@@ -133,3 +155,6 @@ For every additional Firebase project later, send this exact block:
 - If multiple Firebase projects are used from the browser, each one needs its own web app config.
 - If Google Auth is needed across all shards, the auth setup must be consistent across those projects.
 - If room discovery remains global, one project must act as the source of truth for room directory lookup.
+- In the current implementation, the source of truth is `seed-services`.
+- If a new shard row is added to `big2FirebaseInstances` with valid config and matching rules deployed, it joins new-room rotation automatically.
+- Existing rooms are not migrated automatically.

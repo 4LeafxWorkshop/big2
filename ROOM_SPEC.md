@@ -4,7 +4,39 @@ This document describes the room (lobby + multiplayer) implementation.
 
 ## Storage
 
-Rooms are stored in Firestore collection `big2Rooms`. Rules live in `firebase/firebase.rules`.
+Rules live in `firebase/firebase.rules`.
+
+Room storage is split across Firebase projects:
+
+- Primary project `seed-services` stores:
+  - `big2LeaderboardPlayers`
+  - `big2Users`
+  - `big2FirebaseInstances`
+  - `big2RoomDirectory`
+- Live room shards store:
+  - `big2Rooms`
+  - `big2GameLogs`
+
+`big2FirebaseInstances` schema:
+- doc id: Firebase project id
+- `projectId`: string
+- `projectNumber`: string
+- `appId`: string
+- `apiKey`: string
+
+`big2RoomDirectory` schema:
+- doc id: room id
+- `roomId`: string
+- `code`: string
+- `createdAt`: int (ms)
+- `hostId`: string
+- `hostName`: string
+- `firebaseInstanceId`: string
+
+Directory behavior:
+- routing fields are immutable after create
+- directory docs are deletable when the live room is pruned/deleted
+- clients use `firebaseInstanceId` to open the correct Firebase project for live room traffic
 
 Room document schema (current):
 - `hostId`: string (current room host id)
@@ -47,25 +79,31 @@ Settings snapshot (`settings`):
 - `avatarChoice`: `male` | `female` | `google`
 - `turnTimeout`: int (ms; default 20000; clamped 5000..60000)
 
-User pointer (signed-in only):
+User pointer (signed-in only, primary Firebase only):
 - Collection `big2Users/{uid}`:
   - `currentRoomId`: string
   - `updatedAt`: int (ms)
 
 Game logs:
-- Collection `big2GameLogs/{roomId_gameVersion}` stores round history, players, totals, settings, and summary.
+- Collection `big2GameLogs/{roomId_gameVersion}` in the selected room shard stores round history, players, totals, settings, and summary.
 
 ## Flow
 
 Create room:
-1. `createRoom()` generates a code and writes a new room doc with host in `players`.
+1. `createRoom()` generates a code.
+2. The client loads `big2FirebaseInstances` from primary Firebase.
+3. The client reads the most recent `big2RoomDirectory` record and rotates to the next usable Firebase instance.
+4. The live room doc is created in that shard's `big2Rooms`.
+5. An immutable `big2RoomDirectory/{roomId}` doc is created in `seed-services`.
 2. Host is `ready` by default.
 3. `expiresAt` is set to now + 2 hours.
 4. `totals` is initialized to `[5000,5000,5000,5000]` and `roundCount` to `0`.
 5. `settings` is a snapshot of `collectMainSettings()`.
 
 Join room (sign-in required):
-1. `joinRoomByCode()` validates status (`lobby` | `starting` | `finished`).
+1. `joinRoomByCode()` resolves `big2RoomDirectory` by room code.
+2. The client opens the live room from the shard given by `firebaseInstanceId`.
+3. Status is validated (`lobby` | `starting` | `finished`).
 2. Seat is assigned to the lowest available seat (0..3).
 3. New joiners are `ready` by default.
 4. Guest reconnection: if a guest with matching name/gender/picture is active, it reuses that entry.
@@ -79,7 +117,7 @@ Lobby (sign-in required):
   - All human players must be ready (host is allowed to start even if not ready).
 - Status flows: `lobby` -> `starting` -> `playing` (finalized after ~200ms).
 - Leave button is disabled while `status=starting`.
-- Signed-in users can only be in one room at a time (`big2Users.currentRoomId`).
+- Signed-in users can only be in one room at a time (`big2Users.currentRoomId` in primary Firebase).
 
 Game start:
 - `buildRoomGameState()` creates a full game state with 4 seats.
@@ -92,7 +130,7 @@ Game start:
 
 Gameplay:
 - `roomSubmitPlay()` and `roomSubmitPass()` are the only writers.
-- Each move is applied via Firestore transaction on the shared `game`.
+- Each move is applied via Firestore transaction on the live room shard's shared `game`.
 - Bots are driven by `maybeRunRoomAi()` on any client.
 - Turn timeout uses `settings.turnTimeout` + 2s grace.
   - If timed out while leading, the client attempts the weakest legal play.
@@ -103,7 +141,7 @@ Game end:
 - Room status is set to `finished`.
 - `expiresAt` becomes now + 10 minutes.
 - `totals` is updated and `roundCount` increments.
-- A game log snapshot is written to `big2GameLogs/{roomId_gameVersion}`.
+- A game log snapshot is written to the shard's `big2GameLogs/{roomId_gameVersion}`.
 
 ## Presence, Prune, and Host Migration
 
@@ -115,6 +153,7 @@ Prune:
 - Lobby/starting: players inactive for 5 minutes are pruned.
 - Playing: players inactive for 30s are pruned.
 - Stale room detection uses `updatedAt` (30s threshold) to display a stale warning.
+- When a live room is deleted, the matching `big2RoomDirectory` record should also be deleted.
 
 Host migration:
 - While not playing, host is reassigned if missing or stale (>45s).
@@ -132,7 +171,7 @@ Room UI is rendered in `renderHome()`:
 - Room buttons in "Room Settings"
 - Lobby overlay when `status=lobby` or `status=starting`
 - Join modal for code entry
-- Active room list (up to 4 entries) with status, round, seat avatars, and private lock
+- Active room list (up to 4 entries) is built by merging live `big2Rooms` from all usable Firebase instances
 - Private rooms are listed with a lock and are not joinable without code
 
 In-game:
@@ -144,3 +183,12 @@ Rematch:
 - In room mode, the result "Continue" button:
   - Host calls `restartRoomGame()` (starts a new round with the same players).
   - Joiners set ready and wait for host.
+
+## Scaling Notes
+
+- Adding a new Firebase shard only requires:
+  - adding a `big2FirebaseInstances` row in primary Firebase with valid config
+  - deploying the same Firestore rules to that project
+- New rooms pick up the extra shard automatically through rotation.
+- Existing rooms stay on their original Firebase instance.
+- Legacy rooms created before room-directory routing can still be opened from primary Firebase.

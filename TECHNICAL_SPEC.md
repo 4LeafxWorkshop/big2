@@ -36,6 +36,9 @@
   - Solo game runtime
   - Room state and snapshots
   - Emote UI state (picker open + active sticker timer)
+- Firebase architecture:
+  - primary Firebase (`seed-services`) for leaderboard, user pointers, Firebase instance registry, and room directory
+  - one or more room shard Firebase projects for live `big2Rooms` and `big2GameLogs`
 - Render pipeline:
   - `render()` dispatches to screen-specific renderers:
     - `renderHome()`
@@ -105,9 +108,31 @@
 ## 9. Data and Persistence
 - In-memory runtime store for leaderboard/profile cache behavior.
 - Cloud persistence via Firebase/Firestore:
-  - Leaderboard profiles
-  - Room documents and game logs
+  - Primary Firebase:
+    - leaderboard profiles
+    - user room pointers
+    - Firebase instance registry
+    - room directory
+  - Room shard Firebase:
+    - live room documents
+    - game logs
 - REST fallback is used for leaderboard writes if SDK auth is unavailable.
+
+### Multi-Firebase Room Routing
+
+- `big2FirebaseInstances` in primary Firebase is the shard registry.
+- `big2RoomDirectory` in primary Firebase maps room code / room id to `firebaseInstanceId`.
+- New room creation:
+  - loads the available Firebase instances
+  - reads the newest room directory entry
+  - rotates to the next usable Firebase instance
+  - creates the live room in that shard
+  - writes the directory record in primary Firebase
+- Join/reconnect:
+  - resolves the directory record first
+  - opens the correct shard Firebase app dynamically in the browser
+  - subscribes and writes only against that shard's live room
+- Existing legacy rooms without a directory record still fall back to primary Firebase room lookup.
 
 ## 10. Audio and Speech Subsystem
 - Sound engine via Web Audio API context.
