@@ -47,6 +47,18 @@ service cloud.firestore {
       allow update: if isValidGameLog(request.resource.data);
       allow delete: if false;
     }
+    match /big2FirebaseInstances/{instanceId} {
+      allow read: if true;
+      allow create: if isValidFirebaseInstanceDoc(request.resource.data);
+      allow update: if isValidFirebaseInstanceDoc(request.resource.data);
+      allow delete: if false;
+    }
+    match /big2RoomDirectory/{roomId} {
+      allow read: if true;
+      allow create: if isValidRoomDirectoryDoc(request.resource.data);
+      allow update: if false;
+      allow delete: if true;
+    }
   }
 
   function topLevelAllowedKeys() {
@@ -62,6 +74,64 @@ service cloud.firestore {
       'wins',
       'updatedAt'
     ];
+  }
+
+  function firebaseInstanceAllowedKeys() {
+    return [
+      'projectId',
+      'projectNumber',
+      'appId',
+      'apiKey'
+    ];
+  }
+
+  function isValidFirebaseInstanceDoc(d) {
+    return
+      d.keys().hasOnly(firebaseInstanceAllowedKeys()) &&
+      d.projectId is string &&
+      d.projectId.size() >= 1 &&
+      d.projectId.size() <= 80 &&
+      d.projectNumber is string &&
+      d.projectNumber.size() >= 1 &&
+      d.projectNumber.size() <= 40 &&
+      d.appId is string &&
+      d.appId.size() >= 1 &&
+      d.appId.size() <= 120 &&
+      d.apiKey is string &&
+      d.apiKey.size() >= 1 &&
+      d.apiKey.size() <= 80;
+  }
+
+  function roomDirectoryAllowedKeys() {
+    return [
+      'roomId',
+      'code',
+      'createdAt',
+      'hostId',
+      'hostName',
+      'firebaseInstanceId'
+    ];
+  }
+
+  function isValidRoomDirectoryDoc(d) {
+    return
+      d.keys().hasOnly(roomDirectoryAllowedKeys()) &&
+      d.roomId is string &&
+      d.roomId.size() >= 1 &&
+      d.roomId.size() <= 80 &&
+      d.code is string &&
+      d.code.size() >= 1 &&
+      d.code.size() <= 20 &&
+      d.createdAt is int &&
+      d.hostId is string &&
+      d.hostId.size() >= 1 &&
+      d.hostId.size() <= 120 &&
+      d.hostName is string &&
+      d.hostName.size() >= 1 &&
+      d.hostName.size() <= 32 &&
+      d.firebaseInstanceId is string &&
+      d.firebaseInstanceId.size() >= 1 &&
+      d.firebaseInstanceId.size() <= 80;
   }
 
   function settingsAllowedKeys() {
