@@ -10817,7 +10817,6 @@ body[data-screen='game'] .action-strip .control-row .room-top-meta {
 }
 body[data-screen='game'][data-ios='1'],
 body[data-screen='game'][data-ios='1'] #app,
-body[data-screen='game'][data-ios='1'] .game-shell,
 body[data-screen='game'][data-ios='1'] .main-zone,
 body[data-screen='game'][data-ios='1'] .action-zone,
 body[data-screen='game'][data-ios='1'] .action-strip {
