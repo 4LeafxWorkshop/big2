@@ -5248,13 +5248,10 @@ body[data-screen='game'] .table-center-stack {
 }
 .hand-card.must3-highlight .card-art {
   filter: drop-shadow(0 0 12px rgba(255, 209, 102, .7));
-  box-shadow:
-    0 0 0 2px rgba(255, 232, 160, .9),
-    0 0 12px rgba(255, 209, 102, .45);
+  box-shadow: 0 0 12px rgba(255, 209, 102, .45);
 }
 body[data-screen='game'] .hand.hand-stacked .hand-card.must3-highlight {
   box-shadow: none !important;
-  outline: 2px solid rgba(255, 232, 160, .9);
   animation: must3PulseStacked 1.4s ease-in-out infinite;
 }
 body[data-screen='game'] .hand.hand-stacked .hand-card.must3-highlight::before {
@@ -5264,8 +5261,8 @@ body[data-screen='game'] .hand.hand-stacked .hand-card.must3-highlight .card-art
   filter: none;
 }
 @keyframes must3PulseStacked {
-  0%, 100% { transform: translateY(0); outline-color: rgba(255, 232, 160, .75); }
-  50% { transform: translateY(-2px); outline-color: rgba(255, 232, 160, 1); }
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
 }
 @keyframes must3Pulse {
   0%, 100% { transform: translateY(0) scale(1.02); box-shadow: 0 0 0 3px rgba(255, 232, 160, .85), 0 0 18px rgba(255, 209, 102, .6), 0 0 28px rgba(255, 209, 102, .4); }
@@ -10779,5 +10776,79 @@ body[data-screen='game'] .table-center-grid-wrap {
   body[data-screen='game'][data-orientation='portrait'] .seat.west .seat-open-play *,
   body[data-screen='game'][data-orientation='portrait'] .seat.east .seat-open-play * {
     z-index: 1 !important;
+  }
+}
+
+body[data-screen='game'] .table {
+  position: relative !important;
+}
+body[data-screen='game'] .room-top-meta.room-top-meta-table {
+  position: absolute !important;
+  top: 10px !important;
+  left: 10px !important;
+  right: auto !important;
+  transform: none !important;
+  z-index: 20 !important;
+  pointer-events: none !important;
+}
+body[data-screen='game'] .room-top-meta.room-top-meta-table .room-top-meta.room-top-meta-inline {
+  transform: none !important;
+}
+body[data-screen='game'] .game-title-wrap .room-top-meta,
+body[data-screen='game'] .action-strip .control-row .room-top-meta {
+  display: none !important;
+}
+body[data-screen='game'][data-ios='1'],
+body[data-screen='game'][data-ios='1'] #app,
+body[data-screen='game'][data-ios='1'] .game-shell,
+body[data-screen='game'][data-ios='1'] .main-zone,
+body[data-screen='game'][data-ios='1'] .action-zone,
+body[data-screen='game'][data-ios='1'] .action-strip {
+  background: transparent !important;
+}
+body[data-screen='game'][data-orientation='portrait'] .seat.west .side-station-stack,
+body[data-screen='game'][data-orientation='portrait'] .seat.east .side-station-stack,
+body[data-screen='game'][data-orientation='landscape'] .seat.west .side-station-stack,
+body[data-screen='game'][data-orientation='landscape'] .seat.east .side-station-stack {
+  justify-items: center !important;
+  align-content: start !important;
+}
+body[data-screen='game'][data-orientation='portrait'] .seat.west .side-station-stack > .seat-name-fixed,
+body[data-screen='game'][data-orientation='portrait'] .seat.east .side-station-stack > .seat-name-fixed,
+body[data-screen='game'][data-orientation='landscape'] .seat.west .side-station-stack > .seat-name-fixed,
+body[data-screen='game'][data-orientation='landscape'] .seat.east .side-station-stack > .seat-name-fixed,
+body[data-screen='game'][data-orientation='portrait'] .seat.west .opponent-fan-wrap,
+body[data-screen='game'][data-orientation='portrait'] .seat.east .opponent-fan-wrap,
+body[data-screen='game'][data-orientation='landscape'] .seat.west .opponent-fan-wrap,
+body[data-screen='game'][data-orientation='landscape'] .seat.east .opponent-fan-wrap,
+body[data-screen='game'][data-orientation='portrait'] .seat.west .seat-open-play,
+body[data-screen='game'][data-orientation='portrait'] .seat.east .seat-open-play,
+body[data-screen='game'][data-orientation='landscape'] .seat.west .seat-open-play,
+body[data-screen='game'][data-orientation='landscape'] .seat.east .seat-open-play {
+  justify-self: center !important;
+  align-self: start !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+body[data-screen='game'][data-orientation='portrait'] .seat.west .opponent-fan,
+body[data-screen='game'][data-orientation='portrait'] .seat.east .opponent-fan,
+body[data-screen='game'][data-orientation='landscape'] .seat.west .opponent-fan,
+body[data-screen='game'][data-orientation='landscape'] .seat.east .opponent-fan {
+  margin-top: 0 !important;
+}
+body[data-screen='game'][data-orientation='portrait'] .seat.west .seat-open-play .seat-played,
+body[data-screen='game'][data-orientation='portrait'] .seat.east .seat-open-play .seat-played,
+body[data-screen='game'][data-orientation='landscape'] .seat.west .seat-open-play .seat-played,
+body[data-screen='game'][data-orientation='landscape'] .seat.east .seat-open-play .seat-played {
+  margin: 0 auto !important;
+  justify-self: center !important;
+}
+
+@media (max-width: 860px) and (orientation: portrait) {
+  body[data-screen='game'][data-orientation='portrait'] .seat.west .seat-open-play .seat-played.seat-played-five {
+    transform: translateX(10px) !important;
+  }
+  body[data-screen='game'][data-orientation='portrait'] .seat.east .seat-open-play .seat-played.seat-played-five {
+    transform: translateX(-10px) !important;
   }
 }
