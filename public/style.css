@@ -210,6 +210,23 @@ body[data-screen='game'][data-log-open='0'] .side-zone.log-collapsed .log-side-c
 body[data-screen='game'] .game-shell {
   margin-bottom: 0 !important;
   padding-bottom: 0 !important;
+  background:
+    linear-gradient(rgba(13, 43, 45, 0.38), rgba(13, 43, 45, 0.38)),
+    url('./backup/images/home-bg-desktop.jpg') center / cover no-repeat !important;
+}
+@media (max-width: 1080px) {
+  body[data-screen='game'] .game-shell {
+    background:
+      linear-gradient(rgba(13, 43, 45, 0.38), rgba(13, 43, 45, 0.38)),
+      url('./backup/images/home-bg-tablet.jpg') center / cover no-repeat !important;
+  }
+}
+@media (max-width: 700px) {
+  body[data-screen='game'] .game-shell {
+    background:
+      linear-gradient(rgba(13, 43, 45, 0.38), rgba(13, 43, 45, 0.38)),
+      url('./backup/images/home-bg-mobile.jpg') center / cover no-repeat !important;
+  }
 }
 h1, h2, h3, p { margin: 0; }
 .game-title {
