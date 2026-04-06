@@ -211,20 +211,20 @@ body[data-screen='game'] .game-shell {
   margin-bottom: 0 !important;
   padding-bottom: 0 !important;
   background:
-    linear-gradient(rgba(13, 43, 45, 0.38), rgba(13, 43, 45, 0.38)),
+    linear-gradient(rgba(13, 43, 45, 0.8), rgba(13, 43, 45, 0.8)),
     url('./backup/images/home-bg-desktop.jpg') center / cover no-repeat !important;
 }
 @media (max-width: 1080px) {
   body[data-screen='game'] .game-shell {
     background:
-      linear-gradient(rgba(13, 43, 45, 0.38), rgba(13, 43, 45, 0.38)),
+      linear-gradient(rgba(13, 43, 45, 0.8), rgba(13, 43, 45, 0.8)),
       url('./backup/images/home-bg-tablet.jpg') center / cover no-repeat !important;
   }
 }
 @media (max-width: 700px) {
   body[data-screen='game'] .game-shell {
     background:
-      linear-gradient(rgba(13, 43, 45, 0.38), rgba(13, 43, 45, 0.38)),
+      linear-gradient(rgba(13, 43, 45, 0.8), rgba(13, 43, 45, 0.8)),
       url('./backup/images/home-bg-mobile.jpg') center / cover no-repeat !important;
   }
 }
