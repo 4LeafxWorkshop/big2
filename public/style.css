@@ -10868,3 +10868,24 @@ body[data-screen='game'][data-orientation='landscape'] .seat.east .seat-open-pla
     transform: translateX(-10px) !important;
   }
 }
+
+body[data-screen='game'] .seat-name-fixed[data-opponent-name],
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .play-type-call-seat,
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-seat,
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat,
+body[data-screen='game'] .action-strip .play-type-call-self,
+body[data-screen='game'] .action-strip .last-card-call-self,
+body[data-screen='game'] .action-strip .emote-callout {
+  z-index: 14000 !important;
+}
+body[data-screen='game'] .seat.north .opponent-fan-wrap,
+body[data-screen='game'] .seat.west .opponent-fan-wrap,
+body[data-screen='game'] .seat.east .opponent-fan-wrap,
+body[data-screen='game'] .seat.north .opponent-fan,
+body[data-screen='game'] .seat.west .opponent-fan,
+body[data-screen='game'] .seat.east .opponent-fan,
+body[data-screen='game'] .seat.north .seat-open-play,
+body[data-screen='game'] .seat.west .seat-open-play,
+body[data-screen='game'] .seat.east .seat-open-play {
+  z-index: 1 !important;
+}
