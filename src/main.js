@@ -4999,6 +4999,7 @@ async function leaveRoom(toLobby=false){
   const roomId=String(state.room.id||'').trim();
   const uid=currentRoomPlayerId();
   const roomDb=currentRoomDb();
+  let refreshLobbyAfterLeave=false;
   if(roomId){
     resetRoomState();
     state.screen='home';
@@ -5009,7 +5010,7 @@ async function leaveRoom(toLobby=false){
     if(toLobby){
       state.room.joinOpen=true;
       state.room.error='';
-      void loadActiveRooms();
+      refreshLobbyAfterLeave=true;
     }
     render();
   }
@@ -5063,6 +5064,8 @@ async function leaveRoom(toLobby=false){
     if(shouldDeleteDirectory)await deleteRoomDirectory(roomId);
   }catch(err){
     console.error('leave room failed',err);
+  }finally{
+    if(refreshLobbyAfterLeave)void loadActiveRooms();
   }
 }
 async function setRoomPrivacy(isPrivate){
