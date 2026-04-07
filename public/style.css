@@ -8183,6 +8183,13 @@ body[data-screen='game'] .center-last-south .seat-played .card.discard-card.mini
     width: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * 1) !important;
     height: calc(var(--discard-card-h, calc(var(--card-h) * var(--hand-card-scale) * var(--card-scale))) * 1) !important;
   }
+@media (min-width: 861px) and (orientation: landscape) {
+  body[data-screen='game'][data-orientation='landscape'] .center-last-south .seat-played .card.mini,
+  body[data-screen='game'][data-orientation='landscape'] .center-last-south .seat-played .card.discard-card.mini {
+      width: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * 1.2) !important;
+      height: calc(var(--discard-card-h, calc(var(--card-h) * var(--hand-card-scale) * var(--card-scale))) * 1.2) !important;
+    }
+}
 body[data-screen='game'] .center-last-south .seat-played {
   width: max-content !important;
   transform: scale(1) !important;
@@ -8215,6 +8222,13 @@ body[data-screen='game'] .center-last-south .seat-played {
     transform-origin: center top !important;
     overflow: visible !important;
   }
+@media (min-width: 861px) and (orientation: landscape) {
+  body[data-screen='game'][data-orientation='landscape'] .north .seat-open-play .opponent-open-scale,
+  body[data-screen='game'][data-orientation='landscape'] .west .seat-open-play .opponent-open-scale,
+  body[data-screen='game'][data-orientation='landscape'] .east .seat-open-play .opponent-open-scale {
+    transform: scale(1.2) !important;
+  }
+}
   body[data-screen='game'] .north .seat-played .card.mini,
   body[data-screen='game'] .west .seat-played .card.mini,
   body[data-screen='game'] .east .seat-played .card.mini,
