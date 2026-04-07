@@ -1577,6 +1577,10 @@ body[data-screen='home'] .home-wrap {
 }
 .room-card-join-btn {
   min-width: 96px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 .room-card-join-inline {
   margin-left: auto;
@@ -1828,6 +1832,8 @@ body[data-screen='home'] .home-wrap {
   width: .85rem;
   height: .85rem;
   opacity: .92;
+  fill: currentColor;
+  flex: 0 0 auto;
 }
 .room-active-status {
   justify-self: start;

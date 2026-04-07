@@ -379,7 +379,7 @@ const I18N={
     roomPrivacy:'房間私隱',
     roomPrivate:'私人',
     roomPublic:'公開',
-    roomNeedPlayers:'至少 1 位玩家才可開始遊戲',
+    roomNeedPlayers:'至少 2 位玩家才可開始遊戲',
     roomRoomId:'房號',
     roomRound:'回合',
     roomCountdown:'倒數',
@@ -624,7 +624,7 @@ const I18N={
     roomPrivacy:'Room Privacy',
     roomPrivate:'Private',
     roomPublic:'Public',
-    roomNeedPlayers:'Need at least 1 player to start game',
+    roomNeedPlayers:'Need at least 2 players to start the game',
     roomRoomId:'Room ID',
     roomRound:'Round',
     roomCountdown:'Countdown',
@@ -868,7 +868,7 @@ const I18N={
     roomPrivacy:'Confidentialité',
     roomPrivate:'Privée',
     roomPublic:'Publique',
-    roomNeedPlayers:'Au moins 1 joueur est nécessaire pour commencer la partie.',
+    roomNeedPlayers:'Au moins 2 joueurs sont nécessaires pour commencer la partie.',
     roomRoomId:'ID de salle',
     roomRound:'Manche',
     roomCountdown:'Compte à rebours',
@@ -1112,7 +1112,7 @@ const I18N={
     roomPrivacy:'Privatsphäre',
     roomPrivate:'Privat',
     roomPublic:'Öffentlich',
-    roomNeedPlayers:'Mindestens 1 Spieler ist nötig, um das Spiel zu starten.',
+    roomNeedPlayers:'Mindestens 2 Spieler werden benötigt, um das Spiel zu starten.',
     roomRoomId:'Raum‑ID',
     roomRound:'Runde',
     roomCountdown:'Countdown',
@@ -1356,7 +1356,7 @@ const I18N={
     roomPrivacy:'Privacidad',
     roomPrivate:'Privada',
     roomPublic:'Pública',
-    roomNeedPlayers:'Se necesita al menos 1 jugador para empezar la partida.',
+    roomNeedPlayers:'Se necesitan al menos 2 jugadores para empezar la partida.',
     roomRoomId:'ID de sala',
     roomRound:'Ronda',
     roomCountdown:'Cuenta atrás',
@@ -1601,7 +1601,7 @@ const I18N={
     roomPrivacy:'公開設定',
     roomPrivate:'非公開',
     roomPublic:'公開',
-    roomNeedPlayers:'ゲーム開始には少なくとも1人のプレイヤーが必要です。',
+    roomNeedPlayers:'ゲーム開始には少なくとも2人のプレイヤーが必要です。',
     roomRoomId:'ルームID',
     roomRound:'ラウンド',
     roomCountdown:'カウントダウン',
@@ -9711,7 +9711,7 @@ function renderHome(){
     :`<span class="hint">${roomStarting?t('roomStarting'):t('roomWaitingHost')}</span>`;
   const roomPendingHint='';
   const roomTitle=t('roomTableTitle');
-  const roomLobbyHtml=(inRoom&&roomStatus!=='playing')?`<div class="room-overlay"><div class="room-card room-lobby-card room-card-icon"><div class="room-head"><span class="room-corner-icon room-corner-icon-reception" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M4 17.5a1 1 0 0 1-1-1V15a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v1.5a1 1 0 1 1-2 0V15a2 2 0 0 0-2-2h-1v3a1 1 0 0 1-2 0v-3h-4v3a1 1 0 0 1-2 0v-3H7a2 2 0 0 0-2 2v1.5a1 1 0 0 1-1 1Z"/><path d="M7 10a3 3 0 1 1 3-3 3 3 0 0 1-3 3Zm10 0a3 3 0 1 1 3-3 3 3 0 0 1-3 3Z"/><path d="M2 20a1 1 0 0 1 1-1h18a1 1 0 1 1 0 2H3a1 1 0 0 1-1-1Z"/></svg></span><h3>${roomTitle}</h3>${roomHostLine}</div><div class="room-id-center"><span class="room-code">${esc(state.room.code)}</span><button id="room-copy" class="secondary">${t('roomCopy')}</button></div>${roomPrivacyRow}<div class="lobby-table">${roomSeats}</div>${roomErrorHtml}<div class="room-actions">${roomStartControl}${roomPendingHint}<button id="room-leave" class="primary" ${roomStarting?'disabled':''}>${t('roomLeave')}</button></div></div></div>`:'';
+  const roomLobbyHtml=(inRoom&&roomStatus!=='playing')?`<div class="room-overlay"><div class="room-card room-lobby-card room-card-icon"><div class="room-head"><span class="room-corner-icon room-corner-icon-reception" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M4 17.5a1 1 0 0 1-1-1V15a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v1.5a1 1 0 1 1-2 0V15a2 2 0 0 0-2-2h-1v3a1 1 0 0 1-2 0v-3h-4v3a1 1 0 0 1-2 0v-3H7a2 2 0 0 0-2 2v1.5a1 1 0 0 1-1 1Z"/><path d="M7 10a3 3 0 1 1 3-3 3 3 0 0 1-3 3Zm10 0a3 3 0 1 1 3-3 3 3 0 0 1-3 3Z"/><path d="M2 20a1 1 0 0 1 1-1h18a1 1 0 1 1 0 2H3a1 1 0 0 1-1-1Z"/></svg></span><h3>${roomTitle}</h3>${roomHostLine}</div><div class="room-id-center"><span class="room-code">${esc(state.room.code)}</span><button id="room-copy" class="secondary">${t('roomCopy')}</button></div>${roomPrivacyRow}<div class="lobby-table">${roomSeats}</div>${roomErrorHtml}<div class="room-actions">${roomStartControl}${roomPendingHint}<button id="room-leave" class="secondary" ${roomStarting?'disabled':''}>${t('roomLeave')}</button></div></div></div>`:'';
   const activeRoomsState=state.home.activeRooms;
   const activeRooms=Array.isArray(activeRoomsState?.rows)?activeRoomsState.rows:[];
   const createTableCard=`<button class="room-create-wide primary" id="room-create-card" type="button" aria-label="${t('roomCreate')}"><span class="room-create-icon" aria-hidden="true"><svg class="room-create-svg" viewBox="0 0 24 24" focusable="false"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H15a1 1 0 1 1 0 2H6v14h9a1 1 0 1 1 0 2H5.5A1.5 1.5 0 0 1 4 19.5v-15Z"/><path d="M15 8a1 1 0 0 1 1-1h3v-3a1 1 0 1 1 2 0v3h3a1 1 0 1 1 0 2h-3v3a1 1 0 1 1-2 0V9h-3a1 1 0 0 1-1-1Z"/><path d="M12 12.5a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0Z"/></svg></span><span>${t('roomCreate')}</span></button>`;
@@ -9761,8 +9761,8 @@ function renderHome(){
           return`<span class="room-seat-mini filled" title="${esc(name)}"><img src="${src}" alt="${esc(name)}"/></span>`;
         }).join('');
         const statusLine=statusText?`<div class="room-active-status-line">${esc(statusText)}</div>`:'';
-        const joinInlineBtn=!isPrivate?`<button class="secondary room-card-join-btn room-card-join-inline" data-code="${esc(r.code)}" ${joinDisabled?'disabled':''}>${t('roomJoin')}</button>`:'';
-        return`<div class="room-active-card room-active-list-item${isPrivate?' room-active-card-private':''}" data-code="${esc(r.code)}" data-private="${isPrivate?'1':'0'}"${joinDisabled?' disabled':''}><div class="room-card-top"><div class="room-active-code"><span class="room-active-code-text">${esc(displayCode)}</span></div><div class="room-active-count"><span class="room-active-count-icon title-icon title-icon-player" aria-hidden="true"></span><span>${displayPlayers}/${totalSeats}</span></div></div>${statusLine}<div class="room-seat-strip">${seatSlots}${joinInlineBtn}</div></div>`;
+        const joinInlineBtn=!isPrivate?`<button class="secondary room-card-join-btn room-card-join-inline room-icon-btn" data-code="${esc(r.code)}" ${joinDisabled?'disabled':''}><svg class="room-inline-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M10 6a4 4 0 1 1 0 8 4 4 0 0 1 0-8m0 10c4.418 0 8 1.79 8 4v1H2v-1c0-2.21 3.582-4 8-4m10-8h-2V6h-2v2h-2v2h2v2h2v-2h2z"/></svg><span>${t('roomJoin')}</span></button>`:'';
+        return`<div class="room-active-card room-active-list-item${isPrivate?' room-active-card-private':''}" data-code="${esc(r.code)}" data-private="${isPrivate?'1':'0'}"${joinDisabled?' disabled':''}><div class="room-card-top"><div class="room-active-code"><span class="room-active-code-text">${esc(displayCode)}</span></div><div class="room-active-count"><svg class="room-active-count-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M8 11a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7m8 1a3 3 0 1 1 0-6 3 3 0 0 1 0 6M2 20c0-2.761 3.134-5 7-5s7 2.239 7 5v1H2zm15.5-6c2.66.178 4.5 1.79 4.5 3.95V21h-4v-1c0-1.985-.95-3.72-2.5-4.92"/></svg><span>${displayPlayers}/${totalSeats}</span></div></div>${statusLine}<div class="room-seat-strip">${seatSlots}${joinInlineBtn}</div></div>`;
       }).join('')
       :'';
   const activeRoomsEmpty=activeRooms.length?'':`<div class="room-active-card room-active-empty" aria-disabled="true"><div class="room-active-code">${t('roomActiveEmpty')}</div><div class="room-active-info"><div class="room-active-count">0/4</div></div></div>`;
@@ -9772,7 +9772,7 @@ function renderHome(){
     ?`<span class="room-active-refresh-countdown">${state.room.joinOpenCountdown}s</span>`
     :'';
   const activeRoomsBlock=`<div class="room-active-block"><div class="room-create-section">${createTableCard}</div><div class="room-active-head"><span>${t('roomActiveList')}</span>${hiddenNote}<button id="room-active-refresh" class="secondary"><span class="room-active-refresh-label">${state.language==='zh-HK'?'更新':'Refresh'}</span>${refreshCountdownText}</button></div><div class="room-active-grid">${activeRoomsCards}${activeRoomsEmpty}</div></div>`;
-  const roomJoinModal=(!inRoom&&state.room.joinOpen)?`<div class="room-overlay"><div class="room-card room-join-card room-card-icon"><div class="room-head"><span class="room-corner-icon room-corner-icon-reception" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M4 17.5a1 1 0 0 1-1-1V15a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v1.5a1 1 0 1 1-2 0V15a2 2 0 0 0-2-2h-1v3a1 1 0 0 1-2 0v-3h-4v3a1 1 0 0 1-2 0v-3H7a2 2 0 0 0-2 2v1.5a1 1 0 0 1-1 1Z"/><path d="M7 10a3 3 0 1 1 3-3 3 3 0 0 1-3 3Zm10 0a3 3 0 1 1 3-3 3 3 0 0 1-3 3Z"/><path d="M2 20a1 1 0 0 1 1-1h18a1 1 0 1 1 0 2H3a1 1 0 0 1-1-1Z"/></svg></span><h3>${t('roomLobby')}</h3></div><label class="field"><span>${t('roomCode')}</span><div class="room-code-row"><input id="room-code-input" class="room-input" maxlength="8" placeholder="ABC123"/><button id="room-join-confirm" class="secondary room-icon-btn room-join-top-btn"><span>${t('roomJoin')}</span></button></div></label>${activeRoomsState?.loading?`<div class="hint">...</div>`:activeRoomsBlock}${roomErrorHtml}<div class="room-actions"><button id="room-join-cancel" class="secondary room-icon-btn"><span>${t('home')}</span></button></div></div></div>`:'';
+  const roomJoinModal=(!inRoom&&state.room.joinOpen)?`<div class="room-overlay"><div class="room-card room-join-card room-card-icon"><div class="room-head"><span class="room-corner-icon room-corner-icon-reception" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M4 17.5a1 1 0 0 1-1-1V15a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v1.5a1 1 0 1 1-2 0V15a2 2 0 0 0-2-2h-1v3a1 1 0 0 1-2 0v-3h-4v3a1 1 0 0 1-2 0v-3H7a2 2 0 0 0-2 2v1.5a1 1 0 0 1-1 1Z"/><path d="M7 10a3 3 0 1 1 3-3 3 3 0 0 1-3 3Zm10 0a3 3 0 1 1 3-3 3 3 0 0 1-3 3Z"/><path d="M2 20a1 1 0 0 1 1-1h18a1 1 0 1 1 0 2H3a1 1 0 0 1-1-1Z"/></svg></span><h3>${t('roomLobby')}</h3></div><label class="field"><span>${t('roomCode')}</span><div class="room-code-row"><input id="room-code-input" class="room-input" maxlength="8" placeholder="ABC123"/><button id="room-join-confirm" class="secondary room-icon-btn room-join-top-btn"><svg class="room-inline-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M10 6a4 4 0 1 1 0 8 4 4 0 0 1 0-8m0 10c4.418 0 8 1.79 8 4v1H2v-1c0-2.21 3.582-4 8-4m10-8h-2V6h-2v2h-2v2h2v2h2v-2h2z"/></svg><span>${t('roomJoin')}</span></button></div></label>${activeRoomsState?.loading?`<div class="hint">...</div>`:activeRoomsBlock}${roomErrorHtml}<div class="room-actions"><button id="room-join-cancel" class="secondary room-icon-btn"><span>${t('home')}</span></button></div></div></div>`:'';
   const soloBtnCore=`<button id="solo-start" class="primary royal-start-btn" ${signedIn?'':'disabled'}>${t('solo')}</button>`;
   const soloBtnHtml=signedIn
     ?soloBtnCore
