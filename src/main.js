@@ -4887,7 +4887,6 @@ function subscribeRoom(roomId,code,firebaseInstanceId='',roomDbOverride=null){
       :null;
     startRoomPresencePing();
     syncRoomSelfProfile();
-    void updateActiveRoomPointer(roomId);
     const roomStatus=String(data.status);
     if(state.room.pendingStart&&(roomStatus==='starting'||roomStatus==='playing')){
       clearRoomStartPending();
