@@ -10603,6 +10603,9 @@ body[data-screen='game'] .seat.north.active .seat-section {
 }
 
 @media (max-width: 860px) and (orientation: portrait) {
+  body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-pack > .seat-name-fixed,
+  body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-pack > .seat-name-fixed .name,
+  body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-pack > .seat-name-fixed .seat-identity,
   body[data-screen='game'][data-orientation='portrait'] .seat.west .side-station-stack > .seat-name-fixed,
   body[data-screen='game'][data-orientation='portrait'] .seat.east .side-station-stack > .seat-name-fixed,
   body[data-screen='game'][data-orientation='portrait'] .seat.west .side-station-stack > .seat-name-fixed .name,
@@ -10618,6 +10621,10 @@ body[data-screen='game'] .seat.north.active .seat-section {
     padding: 0 !important;
   }
   body[data-screen='game'][data-orientation='portrait'] .seat.east .side-station-stack > .seat-name-fixed {
+    min-height: 0 !important;
+    padding: 0 !important;
+  }
+  body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-pack > .seat-name-fixed {
     min-height: 0 !important;
     padding: 0 !important;
   }
@@ -10842,16 +10849,20 @@ body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .emote
     align-content: start !important;
     gap: 2px !important;
   }
+  body[data-screen='game'][data-orientation='landscape'] .seat.north .seat-pack > .seat-name-fixed,
   body[data-screen='game'][data-orientation='landscape'] .seat.west .side-station-stack > .seat-name-fixed,
   body[data-screen='game'][data-orientation='landscape'] .seat.east .side-station-stack > .seat-name-fixed,
+  body[data-screen='game'][data-orientation='landscape'] .seat.north .seat-pack > .seat-name-fixed .name,
   body[data-screen='game'][data-orientation='landscape'] .seat.west .side-station-stack > .seat-name-fixed .name,
   body[data-screen='game'][data-orientation='landscape'] .seat.east .side-station-stack > .seat-name-fixed .name,
+  body[data-screen='game'][data-orientation='landscape'] .seat.north .seat-pack > .seat-name-fixed .seat-identity,
   body[data-screen='game'][data-orientation='landscape'] .seat.west .side-station-stack > .seat-name-fixed .seat-identity,
   body[data-screen='game'][data-orientation='landscape'] .seat.east .side-station-stack > .seat-name-fixed .seat-identity {
     background: transparent !important;
     border: 0 !important;
     box-shadow: none !important;
   }
+  body[data-screen='game'][data-orientation='landscape'] .seat.north .seat-pack > .seat-name-fixed,
   body[data-screen='game'][data-orientation='landscape'] .seat.west .side-station-stack > .seat-name-fixed,
   body[data-screen='game'][data-orientation='landscape'] .seat.east .side-station-stack > .seat-name-fixed {
     min-height: 0 !important;
