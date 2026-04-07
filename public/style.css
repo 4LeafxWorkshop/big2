@@ -7483,17 +7483,11 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .name {
     0 2px 7px rgba(0,0,0,.22) !important;
 }
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-round-wins {
-  min-height: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
-  color: #f6d991;
+  color: var(--game-round-wins-text);
   font-size: .64rem;
-  gap: 2px;
 }
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-round-wins-icon {
-  color: #f6d991;
+  color: var(--game-round-wins-icon);
   font-size: .66rem;
 }
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .play-type-call-seat,
