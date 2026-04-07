@@ -4210,8 +4210,10 @@ function roomPlayerIds(players){
 }
 function isRoomPresenceOnlyUpdate(prev,next){
   if(!prev||!next)return false;
-  if(String(prev.status||'')!=='playing')return false;
-  if(String(next.status||'')!=='playing')return false;
+  const prevStatus=String(prev.status||'');
+  const nextStatus=String(next.status||'');
+  if(prevStatus!==nextStatus)return false;
+  if(prevStatus!=='playing'&&prevStatus!=='finished')return false;
   if(Number(prev.gameVersion||0)!==Number(next.gameVersion||0))return false;
   if(String(prev.code||'')!==String(next.code||''))return false;
   if(String(prev.hostId||'')!==String(next.hostId||''))return false;
@@ -5300,9 +5302,10 @@ async function touchRoomPresence(force=false){
 }
 function startRoomPresencePing(){
   if(roomPresenceTimer||!state.room.id||!currentRoomDb())return;
-  void touchRoomPresence(true);
+  if(String(state.room.data?.status||'')!=='finished')void touchRoomPresence(true);
   roomPresenceTimer=window.setInterval(async()=>{
     if(!state.room.id||!currentRoomDb()){clearInterval(roomPresenceTimer);roomPresenceTimer=null;return;}
+    if(String(state.room.data?.status||'')==='finished')return;
     await touchRoomPresence(false);
     await pruneRoomIfNeeded();
   },ROOM_PRESENCE_PING_MS);
