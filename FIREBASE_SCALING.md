@@ -152,6 +152,12 @@ For every additional Firebase project later, send this exact block:
 
 ## Notes
 
+- Any time a new field is added to Firestore read/write payloads, `firebase/firebase.rules` must be updated in the same change.
+- After any Firestore schema field change, deploy the updated rules before considering the feature done.
+- For this project, deploy Firestore rules to both active projects:
+  - `seed-services`
+  - `fourleafbig2`
+- Do not assume a client-only code change is enough when a room/user/log document shape changes.
 - If multiple Firebase projects are used from the browser, each one needs its own web app config.
 - If Google Auth is needed across all shards, the auth setup must be consistent across those projects.
 - If room discovery remains global, one project must act as the source of truth for room directory lookup.

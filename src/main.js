@@ -11,6 +11,9 @@ const ROOM_PRUNE_LOBBY_MS=300000;
 const ROOM_PRUNE_PLAYING_MS=30000;
 const ROOM_STALE_MS=ROOM_PRUNE_PLAYING_MS;
 const ROOM_TIMEOUT_GRACE_MS=2000;
+const ROOM_RESULT_IDLE_MS=60000;
+const ROOM_IDLE_KILL_MS=60000;
+const ROOM_TIMEOUT_STRIKES_MAX=2;
 const ROOM_HOST_TAKEOVER_MS=45000;
 const ROOM_HOST_ACTIVE_MS=20000;
 const EMOTE_DURATION_MS=2400;
@@ -412,6 +415,8 @@ const I18N={
     roomStarted:'遊戲進行中',
     roomWelcomeJoin:'歡迎加入',
     roomWaitingHost:'等待房主開局',
+    roomHostSneakAway:'房主好像想偷偷溜走了。',
+    roomKickedTimeout:'你連續兩次超時，已被請離房間並由機器人頂替。',
     roomReconnecting:'連線中斷，正在重新連線...',
     roomStale:'房間太久未更新，請返回大堂重試。',
     roomJoinLog:'{{name}} 加入了房間。',
@@ -657,6 +662,8 @@ const I18N={
     roomStarted:'Game in progress',
     roomWelcomeJoin:'Welcome to join',
     roomWaitingHost:'Waiting for host to start...',
+    roomHostSneakAway:'Host looks to sneak away already.',
+    roomKickedTimeout:'You timed out twice and were replaced by a bot.',
     roomReconnecting:'Connection lost. Reconnecting...',
     roomStale:'Room is stale. Return to lobby and try again.',
     roomJoinLog:'{{name}} joined the room.',
@@ -901,6 +908,8 @@ const I18N={
     roomStarted:'Partie en cours',
     roomWelcomeJoin:'Bienvenue',
     roomWaitingHost:'En attente de l’hôte...',
+    roomHostSneakAway:'On dirait que l’hôte veut déjà filer en douce.',
+    roomKickedTimeout:'Vous avez dépassé le délai deux fois et avez été remplacé par un bot.',
     roomReconnecting:'Connexion perdue. Reconnexion...',
     roomStale:'Salle obsolète. Revenez au hall.',
     roomJoinLog:'{{name}} a rejoint la salle.',
@@ -1145,6 +1154,8 @@ const I18N={
     roomStarted:'Spiel läuft',
     roomWelcomeJoin:'Willkommen',
     roomWaitingHost:'Warte auf Host...',
+    roomHostSneakAway:'Der Host scheint sich schon davonschleichen zu wollen.',
+    roomKickedTimeout:'Du hast zweimal das Zeitlimit verpasst und wurdest durch einen Bot ersetzt.',
     roomReconnecting:'Verbindung verloren. Verbinde neu...',
     roomStale:'Raum veraltet. Zur Lobby zurückkehren.',
     roomJoinLog:'{{name}} ist dem Raum beigetreten.',
@@ -1389,6 +1400,8 @@ const I18N={
     roomStarted:'Partida en curso',
     roomWelcomeJoin:'Bienvenido',
     roomWaitingHost:'Esperando al anfitrión...',
+    roomHostSneakAway:'Parece que el anfitrión ya quiere escabullirse.',
+    roomKickedTimeout:'Has agotado el tiempo dos veces y un bot te ha sustituido.',
     roomReconnecting:'Conexión perdida. Reconectando...',
     roomStale:'Sala desactualizada. Vuelve al lobby.',
     roomJoinLog:'{{name}} se unió a la sala.',
@@ -1634,6 +1647,8 @@ const I18N={
     roomStarted:'ゲーム中',
     roomWelcomeJoin:'参加歓迎',
     roomWaitingHost:'ホストの開始待ち...',
+    roomHostSneakAway:'ホストはもうこっそり抜けたがっているようです。',
+    roomKickedTimeout:'2回連続で時間切れになったため、Bot に置き換えられました。',
     roomReconnecting:'接続が切れました。再接続中...',
     roomStale:'ルーム情報が古くなりました。ロビーに戻ってください。',
     roomJoinLog:'{{name}} が参加しました。',
@@ -1955,6 +1970,7 @@ let emoteTimer=null;
 const BOT_EMOTE_COOLDOWN_MS=5000;
 const botEmoteCooldownBySeat=new Map();
 let roomCountdownTimer=null;
+let roomResultExpiryReached=false;
 let roomStartPendingTimer=null;
 let playTypeCallTimer=null;
 const playTypeCallState={key:'',seat:0,text:'',until:0,startedAt:0,nonce:'',historyLen:0};
@@ -4177,11 +4193,28 @@ function isValidDifficulty(value){
 function resetRoomState(){
   if(state.room.unsub){try{state.room.unsub();}catch{}}
   if(roomPresenceTimer){clearInterval(roomPresenceTimer);roomPresenceTimer=null;}
+  roomResultExpiryReached=false;
   void updateActiveRoomPointer('');
   clearRoomStartPending();
   state.room={id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:false,error:'',started:false,unsub:null,selfSeat:-1,recordedGameKey:'',pendingStart:false};
   state.room.playerId='';
   if(state.home.mode==='room')state.home.mode='solo';
+}
+function abandonRoomLocally(msg='',openLobby=true){
+  if(state.room.unsub){try{state.room.unsub();}catch{}}
+  if(roomPresenceTimer){clearInterval(roomPresenceTimer);roomPresenceTimer=null;}
+  roomResultExpiryReached=false;
+  void updateActiveRoomPointer('');
+  clearRoomStartPending();
+  state.screen='home';
+  state.selected.clear();
+  state.recommendation=null;
+  setRecommendHint('');
+  state.opponentProfileName='';
+  state.home.mode='solo';
+  state.room={id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:Boolean(openLobby),error:String(msg||''),started:false,unsub:null,selfSeat:-1,recordedGameKey:'',pendingStart:false};
+  state.room.playerId='';
+  render();
 }
 function setRoomError(msg){
   state.room.error=msg||'';
@@ -4207,6 +4240,23 @@ function roomPlayerIds(players){
     if(v)seen.add(v);
   });
   return Array.from(seen);
+}
+function sanitizeRoomPlayerEntry(entry){
+  const seatRaw=Number(entry?.seat);
+  const lastSeenRaw=Number(entry?.lastSeen);
+  const timeoutStrikesRaw=Number(entry?.timeoutStrikes);
+  const next={
+    uid:String(entry?.uid||'').trim(),
+    name:String(entry?.name||'').slice(0,32),
+    gender:String(entry?.gender||'male')==='female'?'female':'male',
+    picture:String(entry?.picture||'').trim(),
+    seat:Number.isFinite(seatRaw)?seatRaw:0,
+    lastSeen:Number.isFinite(lastSeenRaw)&&lastSeenRaw>0?lastSeenRaw:0
+  };
+  if(Boolean(entry?.isHost))next.isHost=true;
+  if(Number.isFinite(timeoutStrikesRaw)&&timeoutStrikesRaw>0)next.timeoutStrikes=Math.max(0,Math.trunc(timeoutStrikesRaw));
+  if(entry?.isHuman===false)next.isHuman=false;
+  return next;
 }
 function isRoomPresenceOnlyUpdate(prev,next){
   if(!prev||!next)return false;
@@ -4647,7 +4697,7 @@ async function createRoom(){
       status:'lobby',
       createdAt:now,
       updatedAt:now,
-      expiresAt:now+(2*60*60*1000),
+      expiresAt:nextRoomIdleExpiry(now),
         maxPlayers:4,
         isPrivate:false,
         players:[{uid,name,gender:state.home.gender==='female'?'female':'male',picture:authPictureUrl(),isHost:true,seat:0,lastSeen:now}],
@@ -4794,7 +4844,12 @@ async function joinRoomByCode(codeRaw){
         players.push({uid,name,gender,picture,isHost:false,seat,lastSeen:now});
       }
       const updates={players,playerIds:roomPlayerIds(players),updatedAt:now,hostId,hostName};
+      if(String(data.status)==='lobby'||String(data.status)==='starting'){
+        updates.expiresAt=nextRoomIdleExpiry(now);
+      }
       if(String(data.status)==='finished'){
+        updates.expiresAt=nextRoomIdleExpiry(now);
+        updates.resultExpiresAt=now+ROOM_RESULT_IDLE_MS;
         updates.gameVersion=Number(data.gameVersion||0)+1;
       }
       if(data.game&&String(data.status)==='playing'&&players.length>prevCount){
@@ -4881,10 +4936,23 @@ function subscribeRoom(roomId,code,firebaseInstanceId='',roomDbOverride=null){
       resolvedId=guestMatch||baseRoomPlayerId();
     }
     state.room.playerId=resolvedId;
+    state.home.mode='room';
     state.room={...state.room,id:roomId,code:code||String(data.code??''),firebaseInstanceId:resolvedInstanceId,data,unsub,joinOpen:false,selfSeat:roomSelfSeat(data)};
     const selfEntry=Array.isArray(data.players)
       ?data.players.find((p)=>String(p?.uid||'')===String(resolvedId))
       :null;
+    roomResultExpiryReached=roomResultExpired(data);
+    if(roomLifecycleExpired(data,now)){
+      void roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(roomId).delete().catch(()=>{});
+      void deleteRoomDirectory(roomId);
+      resetRoomState();
+      render();
+      return;
+    }
+    if(prevRoomData&&!selfEntry){
+      abandonRoomLocally(t('roomKickedTimeout'),true);
+      return;
+    }
     startRoomPresencePing();
     syncRoomSelfProfile();
     const roomStatus=String(data.status);
@@ -5118,7 +5186,7 @@ async function startRoom(){
         const hostUpdate=(hostId&&String(data.hostId??'').trim()!==hostId)?{hostId,hostName}:{};
         const bumped=bumpRoomPlayerLastSeen(players,uid,now);
         const nextPlayers=bumped.changed?bumped.players:players;
-        tx.update(ref,{status:'starting',updatedAt:now,playerIds:roomPlayerIds(nextPlayers),players:nextPlayers,...hostUpdate});
+        tx.update(ref,{status:'starting',updatedAt:now,expiresAt:nextRoomIdleExpiry(now),playerIds:roomPlayerIds(nextPlayers),players:nextPlayers,...hostUpdate});
       });
     window.setTimeout(async()=>{
       try{
@@ -5157,7 +5225,7 @@ async function roomReset(){
       if(String(data.hostId)!==uid)throw new Error('not host');
       const now=Date.now();
       const players=Array.isArray(data.players)?data.players:[];
-      tx.update(ref,{status:'lobby',game:null,updatedAt:now,expiresAt:now+(2*60*60*1000),players});
+      tx.update(ref,{status:'lobby',game:null,updatedAt:now,expiresAt:nextRoomIdleExpiry(now),players});
     });
   }catch(err){
     console.error('room reset failed',err);
@@ -5174,6 +5242,7 @@ async function restartRoomGame(){
       if(!snap.exists)return;
       const data=snap.data()??{};
       if(String(data.hostId)!==uid)throw new Error('not host');
+      if(roomResultExpired(data))throw new Error('room expired');
       const players=Array.isArray(data.players)?data.players:[];
       const humanPlayers=players.filter((p)=>String(p.uid||'').startsWith('uid:')||String(p.uid||'').startsWith('guest:'));
       if(humanPlayers.length<2)throw new Error('need players');
@@ -5181,12 +5250,13 @@ async function restartRoomGame(){
         const game=buildRoomGameState(data);
         const bumped=bumpRoomPlayerLastSeen(players,uid,now);
         const nextPlayers=bumped.changed?bumped.players:data.players;
-        tx.update(ref,{status:'playing',game,updatedAt:now,gameVersion:Number(data.gameVersion||0)+1,players:nextPlayers});
+        tx.update(ref,{status:'playing',game,updatedAt:now,gameVersion:Number(data.gameVersion||0)+1,expiresAt:now+(24*60*60*1000),players:nextPlayers});
       });
   }catch(err){
     console.error('restart room failed',err);
     const msg=String(err?.message??'');
     if(msg.includes('need players'))setSoloStatus(t('roomNeedPlayers'));
+    else if(msg.includes('room expired'))setSoloStatus(t('roomHostSneakAway'));
   }
 }
 
@@ -5220,6 +5290,9 @@ function roomSeatForPlayer(roomData,playerId){
 function roomSelfSeat(roomData){
   return roomSeatForPlayer(roomData,currentRoomPlayerId());
 }
+function nextRoomIdleExpiry(now=Date.now()){
+  return now+ROOM_IDLE_KILL_MS;
+}
 function getRoomTurnTimeout(roomData){
   const v=Number(roomData?.settings?.turnTimeout);
   if(Number.isFinite(v)&&v>=5000&&v<=60000)return Math.trunc(v);
@@ -5227,6 +5300,133 @@ function getRoomTurnTimeout(roomData){
 }
 function getRoomTurnTimeoutWithGrace(roomData){
   return getRoomTurnTimeout(roomData)+ROOM_TIMEOUT_GRACE_MS;
+}
+function getRoomResultExpiresAt(roomData){
+  const status=String(roomData?.status??'');
+  if(status!=='finished')return 0;
+  const direct=Number(roomData?.resultExpiresAt||roomData?.game?.resultExpiresAt||0);
+  if(Number.isFinite(direct)&&direct>0)return direct;
+  const fallback=Number(roomData?.updatedAt||0);
+  return fallback>0?(fallback+ROOM_RESULT_IDLE_MS):0;
+}
+function getRoomWaitingExpiresAt(roomData){
+  const status=String(roomData?.status??'');
+  if(status!=='lobby'&&status!=='starting')return 0;
+  const direct=Number(roomData?.expiresAt||0);
+  if(Number.isFinite(direct)&&direct>0)return direct;
+  const fallback=Number(roomData?.updatedAt||roomData?.createdAt||0);
+  return fallback>0?(fallback+ROOM_IDLE_KILL_MS):0;
+}
+function getRoomLifecycleExpiresAt(roomData){
+  const status=String(roomData?.status??'');
+  if(status==='finished')return getRoomResultExpiresAt(roomData);
+  if(status==='lobby'||status==='starting')return getRoomWaitingExpiresAt(roomData);
+  return 0;
+}
+function roomLifecycleTimeLeftMs(roomData,now=Date.now()){
+  const expiresAt=getRoomLifecycleExpiresAt(roomData);
+  if(!(expiresAt>0))return 0;
+  return Math.max(0,expiresAt-now);
+}
+function roomLifecycleExpired(roomData,now=Date.now()){
+  const expiresAt=getRoomLifecycleExpiresAt(roomData);
+  return Boolean(expiresAt>0&&now>=expiresAt);
+}
+function roomLifecycleCountdownText(roomData,now=Date.now()){
+  const remaining=roomLifecycleTimeLeftMs(roomData,now);
+  return`${Math.ceil(remaining/1000)}s`;
+}
+function roomResultTimeLeftMs(roomData,now=Date.now()){
+  const expiresAt=getRoomResultExpiresAt(roomData);
+  if(!(expiresAt>0))return 0;
+  return Math.max(0,expiresAt-now);
+}
+function roomResultExpired(roomData,now=Date.now()){
+  const expiresAt=getRoomResultExpiresAt(roomData);
+  return Boolean(expiresAt>0&&now>=expiresAt);
+}
+function roomResultCountdownText(roomData,now=Date.now()){
+  const remaining=roomResultTimeLeftMs(roomData,now);
+  return`${Math.ceil(remaining/1000)}s`;
+}
+async function resetRoomExpiryTo60s(){
+  const roomId=String(state.room.id||'').trim();
+  const roomDb=currentRoomDb();
+  if(!roomId||!roomDb)return;
+  try{
+    const ref=roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(roomId);
+    await roomDb.runTransaction(async(tx)=>{
+      const snap=await tx.get(ref);
+      if(!snap.exists)return;
+      const data=snap.data()??{};
+      const status=String(data.status||'');
+      const now=Date.now();
+      if(status==='finished'){
+        tx.update(ref,{updatedAt:now,expiresAt:nextRoomIdleExpiry(now),resultExpiresAt:now+ROOM_RESULT_IDLE_MS});
+        return;
+      }
+      if(status==='lobby'||status==='starting'){
+        tx.update(ref,{updatedAt:now,expiresAt:nextRoomIdleExpiry(now)});
+      }
+    });
+  }catch(err){
+    console.error('reset room expiry failed',err);
+  }
+}
+function buildReplacementBotEntry(seat){
+  const bot=botProfileForSeat(seat);
+  return{
+    uid:`bot:${seat}:${bot.name}`,
+    name:String(bot.name||`Bot ${Number(seat)+1}`),
+    gender:String(bot.gender??'male')==='female'?'female':'male',
+    picture:'',
+    isHuman:false,
+    seat,
+    lastSeen:0,
+    timeoutStrikes:0
+  };
+}
+function replaceTimedOutPlayerWithBot(players,seat){
+  const next=Array.isArray(players)?players.map((p)=>({...p})):[];
+  const idx=next.findIndex((p)=>Number(p?.seat)===seat);
+  const replacement=buildReplacementBotEntry(seat);
+  if(idx>=0)next[idx]={...next[idx],...replacement};
+  else next.push(replacement);
+  return next;
+}
+function applyTimeoutStrikeToRoomState(players,game,seat,now=Date.now()){
+  const roster=Array.isArray(players)?players.map((p)=>({...p})):[];
+  const idx=roster.findIndex((p)=>Number(p?.seat)===seat);
+  if(idx<0)return{players:roster,game,changed:false,kicked:false};
+  const current=roster[idx]||{};
+  const strikes=(Number(current.timeoutStrikes)||0)+1;
+  let nextGame=game;
+  if(strikes<ROOM_TIMEOUT_STRIKES_MAX){
+    roster[idx]={...current,timeoutStrikes:strikes};
+    return{players:roster,game:nextGame,changed:true,kicked:false,strikes};
+  }
+  const kickedName=String(current.name||'Player');
+  const replaced=replaceTimedOutPlayerWithBot(roster,seat);
+  const replacement=replaced.find((p)=>Number(p?.seat)===seat)||buildReplacementBotEntry(seat);
+  nextGame=cloneRoomGame(game);
+  if(nextGame?.players?.[seat]){
+    nextGame.players[seat].isHuman=false;
+    nextGame.players[seat].uid=String(replacement.uid||`bot:${seat}:${replacement.name}`);
+    nextGame.players[seat].name=String(replacement.name||nextGame.players[seat].name||`Bot ${seat+1}`);
+    nextGame.players[seat].gender=String(replacement.gender??'male')==='female'?'female':'male';
+    nextGame.players[seat].picture='';
+  }
+  addRoomSystemLog(nextGame,`${kickedName} ${t('roomKickedTimeout')}`);
+  return{players:replaced,game:nextGame,changed:true,kicked:true,strikes,playerName:kickedName};
+}
+function resetTimeoutStrikeForSeat(players,seat){
+  const roster=Array.isArray(players)?players.map((p)=>({...p})):[];
+  const idx=roster.findIndex((p)=>Number(p?.seat)===seat);
+  if(idx<0)return{players:roster,changed:false};
+  const current=roster[idx]||{};
+  if(!Number(current.timeoutStrikes))return{players:roster,changed:false};
+  roster[idx]={...current,timeoutStrikes:0};
+  return{players:roster,changed:true};
 }
 const ROOM_PRESENCE_PING_MS=5000;
 async function pruneRoomIfNeeded(){
@@ -5368,11 +5568,11 @@ async function syncRoomSelfProfile(){
       let touched=false;
       const now=Date.now();
       const next=players.map((p)=>{
-        if(String(p.uid)!==uid)return p;
-        const patch={...p};
+        const patch=sanitizeRoomPlayerEntry(p);
+        if(String(p.uid)!==uid)return patch;
         if(desiredName&&String(p.name??'')!==desiredName){patch.name=desiredName;touched=true;}
         if(desiredGender&&String(p.gender??'')!==desiredGender){patch.gender=desiredGender;touched=true;}
-        if(desiredPic&&String(p.picture??'')!==desiredPic){patch.picture=desiredPic;touched=true;}
+        if(String(p.picture??'').trim()!==desiredPic){patch.picture=desiredPic;touched=true;}
         if(now-Number(p.lastSeen||0)>3000){patch.lastSeen=now;touched=true;}
         return patch;
       });
@@ -5733,13 +5933,25 @@ async function roomSubmitPlay(cards,seatOverride=null){
       if(!snap.exists)throw new Error('room missing');
       const data=snap.data()??{};
       if(data.status!=='playing'||!data.game)throw new Error('room not playing');
-      const game=data.game;
+      let game=data.game;
       if(Number(game.currentSeat)!==seat)throw new Error('not your turn');
       const selfSeat=roomSeatForPlayer(data,currentRoomPlayerId());
-      const target=game.players?.[seat];
+      let target=game.players?.[seat];
       const timeout=getRoomTurnTimeoutWithGrace(data);
       const startedAt=Number(game.turnStartedAt)||0;
       const timedOut=startedAt>0&&(Date.now()-startedAt)>=timeout;
+      let nextPlayers=Array.isArray(data.players)?data.players:[];
+      if(timedOut&&target?.isHuman){
+        const timeoutUpdate=applyTimeoutStrikeToRoomState(nextPlayers,game,seat,now);
+        if(timeoutUpdate.changed){
+          nextPlayers=timeoutUpdate.players;
+          game=timeoutUpdate.game||game;
+          target=game.players?.[seat];
+        }
+      }else if(target?.isHuman){
+        const reset=resetTimeoutStrikeForSeat(nextPlayers,seat);
+        if(reset.changed)nextPlayers=reset.players;
+      }
       const canAct=(selfSeat===seat)||(target&&!target.isHuman)||(timedOut&&target?.isHuman);
       if(!canAct)throw new Error('not allowed');
         const result=applyPlayToGame(game,seat,cards,now);
@@ -5750,11 +5962,21 @@ async function roomSubmitPlay(cards,seatOverride=null){
           updates.game={...result.game,emote:{id:reaction.id,ts:Math.trunc(now),by:reaction.by}};
         }
         const actorUid=(selfSeat===seat)?currentRoomPlayerId():'';
-        const bumped=bumpRoomPlayerLastSeen(Array.isArray(data.players)?data.players:[],actorUid,now);
+        const bumped=bumpRoomPlayerLastSeen(nextPlayers,actorUid,now);
         if(bumped.changed)updates.players=bumped.players;
+        else if(nextPlayers!==data.players)updates.players=nextPlayers;
+        if(updates.players){
+          const hostStillHuman=updates.players.some((p)=>String(p?.uid||'')===String(data.hostId||'')&&isRoomPlayerHuman(p));
+          if(!hostStillHuman){
+            const nextHost=selectRoomHostCandidate(updates.players,now)||updates.players.find((p)=>isRoomPlayerHuman(p))||updates.players[0];
+            updates.hostId=String(nextHost?.uid||'');
+            updates.hostName=String(nextHost?.name||'');
+          }
+        }
         if(result.finished){
           updates.status='finished';
-          updates.expiresAt=now+(10*60*1000);
+          updates.expiresAt=nextRoomIdleExpiry(now);
+          updates.resultExpiresAt=now+ROOM_RESULT_IDLE_MS;
           updates.totals=result.game.totals||[];
           updates.roundCount=Number(data.roundCount||0)+1;
       }
@@ -5782,11 +6004,26 @@ async function roomSubmitPass(seatOverride=null){
       if(!snap.exists)throw new Error('room missing');
       const data=snap.data()??{};
       if(data.status!=='playing'||!data.game)throw new Error('room not playing');
-      const game=data.game;
+      let game=data.game;
       if(Number(game.currentSeat)!==seat)throw new Error('not your turn');
       const selfSeat=roomSeatForPlayer(data,currentRoomPlayerId());
-        const target=game.players?.[seat];
-        const canAct=(selfSeat===seat)||(target&&!target.isHuman);
+      let target=game.players?.[seat];
+      const timeout=getRoomTurnTimeoutWithGrace(data);
+      const startedAt=Number(game.turnStartedAt)||0;
+      const timedOut=startedAt>0&&(Date.now()-startedAt)>=timeout;
+      let nextPlayers=Array.isArray(data.players)?data.players:[];
+      if(timedOut&&target?.isHuman){
+        const timeoutUpdate=applyTimeoutStrikeToRoomState(nextPlayers,game,seat,now);
+        if(timeoutUpdate.changed){
+          nextPlayers=timeoutUpdate.players;
+          game=timeoutUpdate.game||game;
+          target=game.players?.[seat];
+        }
+      }else if(target?.isHuman){
+        const reset=resetTimeoutStrikeForSeat(nextPlayers,seat);
+        if(reset.changed)nextPlayers=reset.players;
+      }
+        const canAct=(selfSeat===seat)||(target&&!target.isHuman)||(timedOut&&target?.isHuman);
         if(!canAct)throw new Error('not allowed');
         const result=applyPassToGame(game,seat,now);
         if(!result.ok)throw new Error(result.reason||'invalid');
@@ -5796,8 +6033,17 @@ async function roomSubmitPass(seatOverride=null){
           updates.game={...result.game,emote:{id:reaction.id,ts:Math.trunc(now),by:reaction.by}};
         }
         const actorUid=(selfSeat===seat)?currentRoomPlayerId():'';
-        const bumped=bumpRoomPlayerLastSeen(Array.isArray(data.players)?data.players:[],actorUid,now);
+        const bumped=bumpRoomPlayerLastSeen(nextPlayers,actorUid,now);
         if(bumped.changed)updates.players=bumped.players;
+        else if(nextPlayers!==data.players)updates.players=nextPlayers;
+        if(updates.players){
+          const hostStillHuman=updates.players.some((p)=>String(p?.uid||'')===String(data.hostId||'')&&isRoomPlayerHuman(p));
+          if(!hostStillHuman){
+            const nextHost=selectRoomHostCandidate(updates.players,now)||updates.players.find((p)=>isRoomPlayerHuman(p))||updates.players[0];
+            updates.hostId=String(nextHost?.uid||'');
+            updates.hostName=String(nextHost?.name||'');
+          }
+        }
         tx.update(ref,updates);
       });
       playSound('pass');
@@ -5855,22 +6101,40 @@ function maybeRunRoomAi(){
   },wait);
 }
 function syncRoomCountdownTicker(){
-  const shouldRun=state.screen==='game'&&state.home.mode==='room'&&state.room.data?.game&&!state.room.data.game.gameOver;
+  const roomData=state.room.data;
+  const status=String(roomData?.status||'');
+  const lifecycleCountdown=getRoomLifecycleExpiresAt(roomData)>0;
+  const activePlay=Boolean(roomData?.game&&!roomData.game.gameOver);
+  const waitingScreen=state.screen==='home'&&(status==='lobby'||status==='starting');
+  const shouldRun=state.home.mode==='room'&&Boolean(roomData)&&(activePlay||lifecycleCountdown)&&(state.screen==='game'||waitingScreen);
   if(!shouldRun){
     if(roomCountdownTimer){clearInterval(roomCountdownTimer);roomCountdownTimer=null;}
     return;
   }
   if(roomCountdownTimer)return;
   roomCountdownTimer=window.setInterval(()=>{
-    const active=state.screen==='game'&&state.home.mode==='room'&&state.room.data?.game&&!state.room.data.game.gameOver;
+    const liveRoom=state.room.data;
+    const liveStatus=String(liveRoom?.status||'');
+    const liveLifecycleCountdown=getRoomLifecycleExpiresAt(liveRoom)>0;
+    const liveActivePlay=Boolean(liveRoom?.game&&!liveRoom.game.gameOver);
+    const liveWaitingScreen=state.screen==='home'&&(liveStatus==='lobby'||liveStatus==='starting');
+    const active=state.home.mode==='room'&&Boolean(liveRoom)&&(liveActivePlay||liveLifecycleCountdown)&&(state.screen==='game'||liveWaitingScreen);
     if(!active){
       clearInterval(roomCountdownTimer);
       roomCountdownTimer=null;
       return;
     }
-    const countdownEl=document.getElementById('room-countdown-value');
-    if(countdownEl&&state.room.data){
-      countdownEl.textContent=roomCountdownText(state.room.data);
+    if(liveRoom){
+      document.querySelectorAll('[data-room-countdown-value]').forEach((el)=>{
+        el.textContent=roomCountdownText(liveRoom);
+      });
+    }
+    if((liveStatus==='finished'||liveStatus==='lobby'||liveStatus==='starting')&&liveRoom){
+      const expired=roomLifecycleExpired(liveRoom);
+      if(expired!==roomResultExpiryReached){
+        roomResultExpiryReached=expired;
+        render();
+      }
     }
   },1000);
 }
@@ -8499,6 +8763,8 @@ function isStatusDuplicatedByHistory(v){
   return false;
 }
 function roomCountdownText(roomData){
+  const status=String(roomData?.status||'');
+  if(status==='finished'||status==='lobby'||status==='starting')return roomLifecycleCountdownText(roomData);
   const game=roomData?.game;
   if(!game||game.gameOver)return'-';
   const startedAt=Number(game.turnStartedAt)||0;
@@ -8515,7 +8781,7 @@ function roomCenterMetaHtml(roomData){
   const countdown=roomCountdownText(roomData);
   return`<div class="room-center-meta">
     <div class="room-center-row"><span>${t('roomRound')}</span><strong>${Number.isFinite(round)?round:'-'}</strong></div>
-    <div class="room-center-row"><span>${t('roomCountdown')}</span><strong id="room-countdown-value">${esc(countdown)}</strong></div>
+    <div class="room-center-row"><span>${t('roomCountdown')}</span><strong data-room-countdown-value>${esc(countdown)}</strong></div>
   </div>`;
 }
 function addRoomSystemLog(game,text){
@@ -8826,10 +9092,13 @@ function revealHtml(){return'';}
 function resultScreenHtml(v,arr){
   const isRoom=state.home.mode==='room';
   const isHost=isRoom&&roomIsHost();
+  const roomExpired=isRoom&&roomResultExpired(state.room.data);
+  const roomCountdown=isRoom&&state.room.data?roomCountdownText(state.room.data):'';
   const roomHumanCount=isRoom&&state.room.data
     ?(Array.isArray(state.room.data.players)?state.room.data.players.filter((p)=>String(p.uid||'').startsWith('uid:')||String(p.uid||'').startsWith('guest:')).length:0)
     :0;
   const needsPlayers=isRoom&&roomHumanCount<2;
+  const canRoomAgain=isRoom&&!needsPlayers&&isHost&&!roomExpired;
   const roomPictureBySeat=(()=>{
     const list=isRoom&&state.room.data?Array.isArray(state.room.data.players)?state.room.data.players:[]:[];
     const entries=list.map((p)=>[Number.isFinite(Number(p?.seat))?Number(p.seat):-1,String(p?.picture||'').trim()]);
@@ -8904,13 +9173,16 @@ function resultScreenHtml(v,arr){
     <div class="result-card">
       <h2 class="title-with-icon"><span class="title-icon title-icon-result" aria-hidden="true"></span><span>${t('resultTitle')}</span></h2>
       <div class="hint">${esc(uiStatus(v.status,v.statusMeta))}</div>
+      ${isRoom?`<div class="room-expiry-row"><span>${t('roomCountdown')}</span><button type="button" class="room-expiry-reset-btn" data-room-expiry-reset="1"><strong data-room-countdown-value>${esc(roomCountdown)}</strong></button></div>`:''}
       <div class="result-list">${rows}</div>
+      ${roomExpired?`<div class="hint">${t('roomHostSneakAway')}</div>`:''}
       ${needsPlayers?`<div class="hint">${t('roomNeedPlayers')}</div>`:''}
       <div class="control-row">
         <button id="result-home" class="${isRoom?'primary':'secondary'}">${isRoom?t('roomLeave'):t('home')}</button>
-        ${(!isRoom||(!needsPlayers&&isHost))
-    ?`<button id="result-again" class="primary">${t('again')}</button>`
+        ${(!isRoom||canRoomAgain)
+    ?`<button id="result-again" class="primary" ${canRoomAgain||!isRoom?'':'disabled'}>${t('again')}</button>`
     :(!isRoom?'':
+      roomExpired?`<span class="hint">${t('roomHostSneakAway')}</span>`:
       needsPlayers?``:`<span class="hint">${t('roomWaitingHost')}</span>`)}
       </div>
     </div>
@@ -8920,10 +9192,12 @@ function congratsOverlayHtml(v,youWin){
   if(!youWin)return'';
   const isRoom=state.home.mode==='room';
   const isHost=isRoom&&roomIsHost();
-  const againHtml=(!isRoom||isHost)
+  const roomExpired=isRoom&&roomResultExpired(state.room.data);
+  const roomCountdown=isRoom&&state.room.data?roomCountdownText(state.room.data):'';
+  const againHtml=(!isRoom||(isHost&&!roomExpired))
     ?`<button id="congrats-again" class="primary">${t('again')}</button>`
-    :`<span class="hint">${t('roomWaitingHost')}</span>`;
-  return`<div class="congrats-screen"><div class="congrats-card"><h3 class="title-with-icon"><span class="title-icon title-icon-congrats" aria-hidden="true"></span><span>${t('congrats')}</span></h3><div class="hint">${esc(uiStatus(v.status,v.statusMeta))}</div><div class="control-row"><button id="congrats-home" class="secondary">${t('home')}</button>${againHtml}</div></div></div>`;
+    :`<span class="hint">${roomExpired?t('roomHostSneakAway'):t('roomWaitingHost')}</span>`;
+  return`<div class="congrats-screen"><div class="congrats-card"><h3 class="title-with-icon"><span class="title-icon title-icon-congrats" aria-hidden="true"></span><span>${t('congrats')}</span></h3><div class="hint">${esc(uiStatus(v.status,v.statusMeta))}</div>${isRoom?`<div class="room-expiry-row"><span>${t('roomCountdown')}</span><button type="button" class="room-expiry-reset-btn" data-room-expiry-reset="1"><strong data-room-countdown-value>${esc(roomCountdown)}</strong></button></div>`:''}<div class="control-row"><button id="congrats-home" class="secondary">${t('home')}</button>${againHtml}</div></div></div>`;
 }
 
 function markComboActive(comboId,value){
@@ -9646,6 +9920,7 @@ function renderHome(){
   const roomCanStart=roomHumanPlayers.length>=2;
   const roomPrivate=Boolean(roomData?.isPrivate);
   const roomStatus=String(roomData?.status??'');
+  const roomResultDead=roomResultExpired(roomData);
   const roomStarting=roomStatus==='starting';
   const roomGamePlayers=(roomStatus==='finished'&&Array.isArray(roomData?.game?.players))?roomData.game.players:null;
   const roomSeatMap=new Map(roomPlayers.map((p)=>[Number(p.seat),p]));
@@ -9655,7 +9930,7 @@ function renderHome(){
   const roomStatusText=(()=>{
     if(roomStatus==='playing')return t('roomStatusPlaying');
     if(roomStatus==='starting')return t('roomStarting');
-    if(roomStatus==='finished')return t('roomWaitingHost');
+    if(roomStatus==='finished')return roomResultDead?t('roomHostSneakAway'):t('roomWaitingHost');
     return roomIsHost?t('roomWaitingReady'):t('roomWaitingHost');
   })();
   const roomStatusLine=roomStatusText;
@@ -9720,7 +9995,8 @@ function renderHome(){
     :`<span class="hint">${roomStarting?t('roomStarting'):t('roomWaitingHost')}</span>`;
   const roomPendingHint='';
   const roomTitle=t('roomTableTitle');
-  const roomLobbyHtml=(inRoom&&roomStatus!=='playing')?`<div class="room-overlay"><div class="room-card room-lobby-card room-card-icon"><div class="room-head"><span class="room-corner-icon room-corner-icon-reception" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M4 17.5a1 1 0 0 1-1-1V15a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v1.5a1 1 0 1 1-2 0V15a2 2 0 0 0-2-2h-1v3a1 1 0 0 1-2 0v-3h-4v3a1 1 0 0 1-2 0v-3H7a2 2 0 0 0-2 2v1.5a1 1 0 0 1-1 1Z"/><path d="M7 10a3 3 0 1 1 3-3 3 3 0 0 1-3 3Zm10 0a3 3 0 1 1 3-3 3 3 0 0 1-3 3Z"/><path d="M2 20a1 1 0 0 1 1-1h18a1 1 0 1 1 0 2H3a1 1 0 0 1-1-1Z"/></svg></span><h3>${roomTitle}</h3>${roomHostLine}</div><div class="room-id-center"><span class="room-code">${esc(state.room.code)}</span><button id="room-copy" class="secondary">${t('roomCopy')}</button></div>${roomPrivacyRow}<div class="lobby-table">${roomSeats}</div>${roomErrorHtml}<div class="room-actions">${roomStartControl}${roomPendingHint}<button id="room-leave" class="secondary" ${roomStarting?'disabled':''}>${t('roomLeave')}</button></div></div></div>`:'';
+  const roomLobbyCountdown=(inRoom&&roomStatus!=='playing'&&state.room.data)?roomCountdownText(state.room.data):'';
+  const roomLobbyHtml=(inRoom&&roomStatus!=='playing')?`<div class="room-overlay"><div class="room-card room-lobby-card room-card-icon"><div class="room-head"><span class="room-corner-icon room-corner-icon-reception" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M4 17.5a1 1 0 0 1-1-1V15a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v1.5a1 1 0 1 1-2 0V15a2 2 0 0 0-2-2h-1v3a1 1 0 0 1-2 0v-3h-4v3a1 1 0 0 1-2 0v-3H7a2 2 0 0 0-2 2v1.5a1 1 0 0 1-1 1Z"/><path d="M7 10a3 3 0 1 1 3-3 3 3 0 0 1-3 3Zm10 0a3 3 0 1 1 3-3 3 3 0 0 1-3 3Z"/><path d="M2 20a1 1 0 0 1 1-1h18a1 1 0 1 1 0 2H3a1 1 0 0 1-1-1Z"/></svg></span><h3>${roomTitle}</h3>${roomHostLine}</div><div class="room-id-center"><span class="room-code">${esc(state.room.code)}</span><button id="room-copy" class="secondary">${t('roomCopy')}</button></div><div class="room-expiry-row"><span>${t('roomCountdown')}</span><button type="button" class="room-expiry-reset-btn" data-room-expiry-reset="1"><strong data-room-countdown-value>${esc(roomLobbyCountdown)}</strong></button></div>${roomPrivacyRow}<div class="lobby-table">${roomSeats}</div>${roomErrorHtml}<div class="room-actions">${roomStartControl}${roomPendingHint}<button id="room-leave" class="secondary" ${roomStarting?'disabled':''}>${t('roomLeave')}</button></div></div></div>`:'';
   const activeRoomsState=state.home.activeRooms;
   const activeRooms=Array.isArray(activeRoomsState?.rows)?activeRoomsState.rows:[];
   const createTableCard=`<button class="room-create-wide primary" id="room-create-card" type="button" aria-label="${t('roomCreate')}"><span class="room-create-icon" aria-hidden="true"><svg class="room-create-svg" viewBox="0 0 24 24" focusable="false"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H15a1 1 0 1 1 0 2H6v14h9a1 1 0 1 1 0 2H5.5A1.5 1.5 0 0 1 4 19.5v-15Z"/><path d="M15 8a1 1 0 0 1 1-1h3v-3a1 1 0 1 1 2 0v3h3a1 1 0 1 1 0 2h-3v3a1 1 0 1 1-2 0V9h-3a1 1 0 0 1-1-1Z"/><path d="M12 12.5a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0Z"/></svg></span><span>${t('roomCreate')}</span></button>`;
@@ -9919,6 +10195,9 @@ function renderHome(){
   document.getElementById('room-copy')?.addEventListener('click',async()=>{
     try{await navigator.clipboard?.writeText?.(String(state.room.code||''));}catch{}
   });
+  document.querySelectorAll('[data-room-expiry-reset]').forEach((btn)=>btn.addEventListener('click',async()=>{
+    await resetRoomExpiryTo60s();
+  }));
   document.getElementById('room-leave')?.addEventListener('click',async()=>{
     await leaveRoom(true);
   });
@@ -10577,7 +10856,7 @@ function renderGame(){
     const countdown=roomCountdownText(state.room.data);
     return`<div class="room-top-meta room-top-meta-inline">
       <span class="room-top-item"><span>${t('roomRound')}</span><strong>${Number.isFinite(round)?round:'-'}</strong></span>
-      <span class="room-top-item"><span>${t('roomCountdown')}</span><strong id="room-countdown-value">${esc(countdown)}</strong></span>
+      <span class="room-top-item"><span>${t('roomCountdown')}</span><strong data-room-countdown-value>${esc(countdown)}</strong></span>
     </div>`;
   })();
   const roomTopMetaTable=roomTopMeta?`<div class="room-top-meta room-top-meta-table">${roomTopMeta}</div>`:'';
@@ -11235,6 +11514,9 @@ function bindGameEvents(v,arr){
   });
   document.getElementById('result-home')?.addEventListener('click',()=>{if(aiTimer){clearTimeout(aiTimer);aiTimer=null;}state.opponentProfileName='';if(state.home.mode==='room'&&state.room.id){void leaveRoom();return;}state.screen='home';state.selected.clear();state.recommendation=null;setRecommendHint('');render();});
   document.getElementById('congrats-home')?.addEventListener('click',()=>{if(aiTimer){clearTimeout(aiTimer);aiTimer=null;}state.opponentProfileName='';if(state.home.mode==='room'&&state.room.id){void leaveRoom();return;}state.screen='home';state.selected.clear();state.recommendation=null;setRecommendHint('');render();});
+  document.querySelectorAll('[data-room-expiry-reset]').forEach((btn)=>btn.addEventListener('click',async()=>{
+    await resetRoomExpiryTo60s();
+  }));
   document.getElementById('log-sheet-close')?.addEventListener('click',()=>{state.showLogSheet=false;render();});
   document.getElementById('log-sheet-backdrop')?.addEventListener('click',()=>{state.showLogSheet=false;render();});
   const logFab=document.getElementById('game-log-fab');
@@ -11392,6 +11674,11 @@ function bindGameEvents(v,arr){
     state.recommendation=null;
     setRecommendHint('');
     if(state.home.mode==='room'){
+      if(roomResultExpired(state.room.data)){
+        setSoloStatus(t('roomHostSneakAway'));
+        render();
+        return;
+      }
       if(roomIsHost()){
         await restartRoomGame();
       }else{
@@ -11418,6 +11705,11 @@ function bindGameEvents(v,arr){
     state.recommendation=null;
     setRecommendHint('');
     if(state.home.mode==='room'){
+      if(roomResultExpired(state.room.data)){
+        setSoloStatus(t('roomHostSneakAway'));
+        render();
+        return;
+      }
       if(roomIsHost()){
         await restartRoomGame();
       }else{

@@ -29,6 +29,8 @@ service cloud.firestore {
             request.resource.data.gameVersion is int &&
             request.resource.data.gameVersion == currentGameVersion(resource.data))
           ||
+          isValidExpiryRefreshUpdate(request.resource.data,resource.data)
+          ||
           isValidEmoteUpdate(request.resource.data,resource.data)
           ||
           isValidPresenceUpdate(request.resource.data,resource.data)
@@ -227,6 +229,7 @@ service cloud.firestore {
       'createdAt',
       'updatedAt',
       'expiresAt',
+      'resultExpiresAt',
       'maxPlayers',
       'isPrivate',
       'players',
@@ -258,6 +261,7 @@ service cloud.firestore {
       d.createdAt is int &&
       d.updatedAt is int &&
       (!('expiresAt' in d) || d.expiresAt is int) &&
+      (!('resultExpiresAt' in d) || d.resultExpiresAt is int) &&
       d.maxPlayers is int &&
       d.maxPlayers >= 2 &&
       d.maxPlayers <= 4 &&
@@ -302,6 +306,16 @@ service cloud.firestore {
       next.status == prev.status &&
       currentGameVersion(next) == currentGameVersion(prev) &&
       next.players.size() == prev.players.size();
+  }
+  function isValidExpiryRefreshUpdate(next, prev) {
+    let changed = next.diff(prev).affectedKeys();
+    return
+      (
+        changed.hasOnly(['updatedAt','expiresAt']) ||
+        changed.hasOnly(['updatedAt','expiresAt','resultExpiresAt'])
+      ) &&
+      next.status == prev.status &&
+      currentGameVersion(next) == currentGameVersion(prev);
   }
 
   function isValidRoomTotals(v) {

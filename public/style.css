@@ -1204,6 +1204,28 @@ body[data-screen='home'] .home-wrap {
 .room-id-center button {
   letter-spacing: normal;
 }
+.room-expiry-row {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  align-self: center;
+  font-size: .85rem;
+  color: var(--muted);
+}
+.room-expiry-reset-btn {
+  border: 0;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(82, 210, 115, .16);
+  color: #e8fff0;
+  cursor: pointer;
+  font: inherit;
+}
+.room-expiry-reset-btn strong {
+  display: inline-block;
+  min-width: 2.6em;
+}
 .room-status-inline {
   font-size: .82rem;
   color: #f4fbff;
@@ -6805,6 +6827,10 @@ body[data-orientation='landscape'] .table { --table-tilt: 0deg; }
   text-align: center;
 }
 .congrats-card h3 { margin: 0; font-size: 1.3rem; }
+.congrats-card .room-expiry-row,
+.result-card .room-expiry-row {
+  justify-self: center;
+}
 
 .result-screen {
   position: fixed;
