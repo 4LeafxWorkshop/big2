@@ -7409,6 +7409,91 @@ body[data-screen='game'] .seat.west .seat-open-play,
 body[data-screen='game'] .seat.east .seat-open-play {
   z-index: 1 !important;
 }
+
+@media (min-width: 861px) and (orientation: landscape) {
+  body[data-screen='game'][data-orientation='landscape'] {
+    --landscape-side-station-top: clamp(50px, 7.2vh, 68px);
+    --landscape-side-station-inset: clamp(8px, 1vw, 14px);
+    --landscape-side-station-gap: 4px;
+  }
+  body[data-screen='game'][data-orientation='landscape'] .seat.west,
+  body[data-screen='game'][data-orientation='landscape'] .seat.east {
+    position: relative !important;
+    overflow: visible !important;
+  }
+  body[data-screen='game'][data-orientation='landscape'] .seat.west .seat-pack,
+  body[data-screen='game'][data-orientation='landscape'] .seat.east .seat-pack {
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: block !important;
+    padding: 0 !important;
+    align-content: normal !important;
+    justify-items: normal !important;
+  }
+  body[data-screen='game'][data-orientation='landscape'] .seat.west .side-station-stack,
+  body[data-screen='game'][data-orientation='landscape'] .seat.east .side-station-stack {
+    position: absolute !important;
+    top: var(--landscape-side-station-top) !important;
+    width: max-content !important;
+    min-height: 0 !important;
+    display: grid !important;
+    grid-template-areas:
+      "label"
+      "fan"
+      "last" !important;
+    grid-template-rows: auto auto auto !important;
+    justify-items: center !important;
+    align-content: start !important;
+    gap: var(--landscape-side-station-gap) !important;
+    transform: none !important;
+  }
+  body[data-screen='game'][data-orientation='landscape'] .seat.west .side-station-stack {
+    left: auto !important;
+    right: var(--landscape-side-station-inset) !important;
+  }
+  body[data-screen='game'][data-orientation='landscape'] .seat.east .side-station-stack {
+    left: var(--landscape-side-station-inset) !important;
+    right: auto !important;
+  }
+  body[data-screen='game'][data-orientation='landscape'] .seat.west .side-station-stack > .seat-name-fixed,
+  body[data-screen='game'][data-orientation='landscape'] .seat.east .side-station-stack > .seat-name-fixed,
+  body[data-screen='game'][data-orientation='landscape'] .seat.west .opponent-fan-wrap,
+  body[data-screen='game'][data-orientation='landscape'] .seat.east .opponent-fan-wrap,
+  body[data-screen='game'][data-orientation='landscape'] .seat.west .seat-open-play,
+  body[data-screen='game'][data-orientation='landscape'] .seat.east .seat-open-play {
+    position: static !important;
+    justify-self: center !important;
+    align-self: start !important;
+    margin: 0 !important;
+    left: auto !important;
+    right: auto !important;
+    top: auto !important;
+    transform: none !important;
+  }
+  body[data-screen='game'][data-orientation='landscape'] .seat.west .opponent-fan-wrap,
+  body[data-screen='game'][data-orientation='landscape'] .seat.east .opponent-fan-wrap {
+    position: relative !important;
+    overflow: visible !important;
+  }
+  body[data-screen='game'][data-orientation='landscape'] .seat.west .closed-count-pill,
+  body[data-screen='game'][data-orientation='landscape'] .seat.east .closed-count-pill {
+    right: -6px !important;
+    bottom: 6px !important;
+    left: auto !important;
+    top: auto !important;
+    z-index: 12 !important;
+  }
+  body[data-screen='game'][data-orientation='landscape'] .seat.west .opponent-fan,
+  body[data-screen='game'][data-orientation='landscape'] .seat.east .opponent-fan,
+  body[data-screen='game'][data-orientation='landscape'] .seat.west .seat-open-play .seat-played,
+  body[data-screen='game'][data-orientation='landscape'] .seat.east .seat-open-play .seat-played {
+    justify-self: center !important;
+    margin: 0 auto !important;
+    transform: none !important;
+  }
+}
 body[data-screen='game'] .seat.north .seat-open-play .seat-played,
 body[data-screen='game'] .seat.west .seat-open-play .seat-played,
 body[data-screen='game'] .seat.east .seat-open-play .seat-played,
@@ -10574,6 +10659,8 @@ body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .emote
     --opponent-open-row-h: calc(var(--opponent-open-card-h) + 6px);
     --opponent-open-row-w: calc((var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * 2.52) + 6px);
     --opponent-station-h: calc(40px + (var(--card-h) * 0.72) + var(--opponent-open-row-h) + 14px);
+    --opp-north-closed-scale: .864;
+    --opp-side-closed-scale: .864;
     --opp-side-fan-tilt: 0deg;
   }
   body[data-screen='game'][data-orientation='landscape'] .table-center-grid-wrap {
