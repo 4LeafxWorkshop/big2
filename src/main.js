@@ -8415,7 +8415,8 @@ function buildView(){
     canControl:!g.gameOver&&g.currentSeat===seatIndex,
     canPass:!g.gameOver&&g.currentSeat===seatIndex&&Boolean(g.lastPlay),
     revealedHands:g.gameOver?g.players.map((p)=>[...p.hand]):null,
-    roundSummary:g.roundSummary??null
+    roundSummary:g.roundSummary??null,
+    roundWins:Array.isArray(g.roundWins)&&g.roundWins.length===4?g.roundWins.map((v)=>Number(v)||0):[0,0,0,0]
   };
 }
 
