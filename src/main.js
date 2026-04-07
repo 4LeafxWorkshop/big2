@@ -4971,7 +4971,6 @@ function subscribeRoom(roomId,code,firebaseInstanceId='',roomDbOverride=null){
       return;
     }
     startRoomPresencePing();
-    syncRoomSelfProfile();
     syncRoomSelfScoreIfNeeded();
     const roomStatus=String(data.status);
     if(state.room.pendingStart&&(roomStatus==='starting'||roomStatus==='playing')){
