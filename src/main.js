@@ -4241,6 +4241,17 @@ function roomPlayerIds(players){
   });
   return Array.from(seen);
 }
+function normalizeRoomTotals(totals){
+  if(Array.isArray(totals)&&totals.length===4)return totals.map((v)=>clampScoreValue(v));
+  return[5000,5000,5000,5000];
+}
+function roomTotalsWithSeatScore(totals,seat,score){
+  const next=normalizeRoomTotals(totals);
+  const safeSeat=Number(seat);
+  if(!Number.isInteger(safeSeat)||safeSeat<0||safeSeat>3)return next;
+  next[safeSeat]=clampScoreValue(score);
+  return next;
+}
 function sanitizeRoomPlayerEntry(entry){
   const seatRaw=Number(entry?.seat);
   const lastSeenRaw=Number(entry?.lastSeen);
@@ -4703,7 +4714,7 @@ async function createRoom(){
         players:[{uid,name,gender:state.home.gender==='female'?'female':'male',picture:authPictureUrl(),isHost:true,seat:0,lastSeen:now}],
       playerIds:[uid],
       settings:collectMainSettings(),
-      totals:[5000,5000,5000,5000],
+      totals:[clampScoreValue(state.score),5000,5000,5000],
       roundCount:0,
       gameVersion:0
     };
@@ -4844,6 +4855,12 @@ async function joinRoomByCode(codeRaw){
         players.push({uid,name,gender,picture,isHost:false,seat,lastSeen:now});
       }
       const updates={players,playerIds:roomPlayerIds(players),updatedAt:now,hostId,hostName};
+      const selfSeat=Number(players.find((p)=>String(p?.uid||'')===uid)?.seat);
+      if(Number.isInteger(selfSeat)&&selfSeat>=0&&selfSeat<4){
+        const nextTotals=roomTotalsWithSeatScore(data.totals,selfSeat,state.score);
+        const prevTotals=normalizeRoomTotals(data.totals);
+        if(nextTotals.some((v,i)=>v!==prevTotals[i]))updates.totals=nextTotals;
+      }
       if(String(data.status)==='lobby'||String(data.status)==='starting'){
         updates.expiresAt=nextRoomIdleExpiry(now);
       }
@@ -4955,6 +4972,7 @@ function subscribeRoom(roomId,code,firebaseInstanceId='',roomDbOverride=null){
     }
     startRoomPresencePing();
     syncRoomSelfProfile();
+    syncRoomSelfScoreIfNeeded();
     const roomStatus=String(data.status);
     if(state.room.pendingStart&&(roomStatus==='starting'||roomStatus==='playing')){
       clearRoomStartPending();
@@ -5579,6 +5597,36 @@ async function syncRoomSelfProfile(){
       if(touched)tx.update(ref,{players:next,updatedAt:now});
     });
   }catch{}
+}
+async function syncRoomSelfScoreIfNeeded(){
+  const roomDb=currentRoomDb();
+  const roomData=state.room.data;
+  if(!state.room.id||!roomDb||!roomData)return;
+  const status=String(roomData.status||'');
+  if(status==='playing')return;
+  const uid=currentRoomPlayerId();
+  if(!uid)return;
+  const seat=roomSeatForPlayer(roomData,uid);
+  if(!Number.isInteger(seat)||seat<0||seat>3)return;
+  const desiredScore=clampScoreValue(state.score);
+  const currentTotals=normalizeRoomTotals(roomData.totals);
+  if(currentTotals[seat]===desiredScore)return;
+  try{
+    const ref=roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(state.room.id);
+    await roomDb.runTransaction(async(tx)=>{
+      const snap=await tx.get(ref);
+      if(!snap.exists)return;
+      const data=snap.data()??{};
+      if(String(data.status||'')==='playing')return;
+      const liveSeat=roomSeatForPlayer(data,uid);
+      if(!Number.isInteger(liveSeat)||liveSeat<0||liveSeat>3)return;
+      const prevTotals=normalizeRoomTotals(data.totals);
+      if(prevTotals[liveSeat]===desiredScore)return;
+      tx.update(ref,{totals:roomTotalsWithSeatScore(prevTotals,liveSeat,desiredScore),updatedAt:Date.now()});
+    });
+  }catch(err){
+    console.error('sync room self score failed',err);
+  }
 }
 function botProfileForSeat(seat){
   const list=Array.isArray(BOT_PROFILE_POOL)&&BOT_PROFILE_POOL.length?BOT_PROFILE_POOL:[{name:'Bot',gender:'male'}];
