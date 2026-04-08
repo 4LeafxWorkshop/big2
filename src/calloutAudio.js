@@ -365,11 +365,32 @@ export function createCalloutAudioController(deps){
         synth.speak(u);
       };
       const speakTts=()=>{
+        const trySpeakWithVoices=(attempt=0)=>{
+          if(speakSeq!==calloutSpeakSeq)return;
+          const voices=synth.getVoices?.()??[];
+          if(voices.length){
+            speechPrimed=true;
+            speakNow();
+            return;
+          }
+          if(attempt>=4){
+            speechPrimed=true;
+            speakNow();
+            return;
+          }
+          const retryDelay=attempt===0?120:attempt===1?280:attempt===2?520:900;
+          setTimeout(()=>{trySpeakWithVoices(attempt+1);},retryDelay);
+        };
+        const onVoices=()=>{
+          if(speakSeq!==calloutSpeakSeq)return;
+          speechPrimed=true;
+          speakNow();
+        };
         const voices=synth.getVoices?.()??[];
         if(!voices.length){
-          const onVoices=()=>{speechPrimed=true;speakNow();};
           synth.addEventListener('voiceschanged',onVoices,{once:true});
-          setTimeout(()=>{if(!speechPrimed)speakNow();},0);
+          synth.resume?.();
+          trySpeakWithVoices(0);
           return;
         }
         speechPrimed=true;

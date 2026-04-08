@@ -161,7 +161,12 @@ body[data-screen='game'] {
   overflow: hidden;
   background:
     radial-gradient(circle at top, rgba(20, 55, 68, .42), transparent 38%),
-    linear-gradient(180deg, #061420 0%, #0b2231 100%);
+    linear-gradient(rgba(6, 20, 32, .74), rgba(11, 34, 49, .84)),
+    url('./backup/images/home-bg-desktop.jpg');
+  background-color: #061420;
+  background-size: auto, auto, cover;
+  background-position: center, center, center;
+  background-repeat: no-repeat, no-repeat, no-repeat;
 }
 body[data-screen='game'][data-ios='1'] {
   background:
@@ -1545,7 +1550,7 @@ body[data-screen='home'] .home-wrap {
   margin-bottom: 2px;
 }
 .room-create-wide {
-  width: 100%;
+  width: auto;
   min-height: 60px;
   display: inline-flex;
   align-items: center;
@@ -1553,6 +1558,7 @@ body[data-screen='home'] .home-wrap {
   gap: 12px;
   position: relative;
   padding: 0 18px;
+  max-width: 100%;
 }
 .room-create-wide .room-create-icon {
   position: absolute;
@@ -4439,6 +4445,7 @@ body[data-screen='game'] .table-center-stack {
   top: calc(14px + var(--callout-jy, 0px));
   left: auto;
   right: calc(8px - var(--callout-jx, 0px));
+  z-index: 3400;
 }
 .play-type-call-self {
   top: calc(-112px + var(--callout-jy, 0px));
@@ -4729,6 +4736,13 @@ body[data-screen='game'] .table-center-stack {
   width: 100%;
   position: relative;
   z-index: 1;
+}
+.seat.east > .seat-name-fixed {
+  z-index: 3400 !important;
+}
+.seat.east .seat-open-play,
+.seat.east .opponent-fan {
+  z-index: 1 !important;
 }
 .seat-open-play .seat-played {
   transform: scale(.78);
@@ -11116,10 +11130,14 @@ body[data-screen='game'] .table-center-grid-wrap {
 body[data-screen='game'] .table {
   position: relative !important;
 }
+body[data-screen='game'] {
+  --room-top-meta-offset-top: 19px;
+  --room-top-meta-offset-left: 21px;
+}
 body[data-screen='game'] .room-top-meta-table {
   position: absolute !important;
-  top: 19px !important;
-  left: 21px !important;
+  top: var(--room-top-meta-offset-top) !important;
+  left: var(--room-top-meta-offset-left) !important;
   right: auto !important;
   transform: none !important;
   z-index: 20 !important;

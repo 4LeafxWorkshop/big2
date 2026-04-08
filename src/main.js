@@ -984,7 +984,7 @@ const I18N={
     voicePackMinimal:'Minimal',
     soundOn:'An',
     soundOff:'Aus',
-    home:'Start',
+    home:'Startseite',
     again:'Nochmal spielen',
     restart:'Neustart',
     play:'Ausspielen',
@@ -8243,7 +8243,7 @@ function resultScreenHtml(v,arr){
       ${roomExpired?`<div class="hint">${t('roomHostSneakAway')}</div>`:''}
       ${needsPlayers?`<div class="hint">${t('roomNeedPlayers')}</div>`:''}
       <div class="control-row">
-        <button id="result-home" class="${isRoom?'primary':'secondary'}">${isRoom?t('roomLeave'):t('home')}</button>
+        <button id="result-home" class="secondary">${isRoom?t('roomLeave'):t('home')}</button>
         ${(!isRoom||canRoomAgain)
     ?`<button id="result-again" class="primary" ${canRoomAgain||!isRoom?'':'disabled'}>${t('again')}</button>`
     :(!isRoom?'':
