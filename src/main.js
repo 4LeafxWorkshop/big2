@@ -1,6 +1,7 @@
 ﻿﻿﻿﻿﻿﻿﻿﻿import {createCalloutAudioController} from './calloutAudio.js';
 import {createLangMenuController} from './langMenu.js';
 import {createRoomLifecycleController} from './roomLifecycle.js';
+import {createRoomSubscriptionController} from './roomSubscription.js';
 
 const RANKS=['3','4','5','6','7','8','9','10','J','Q','K','A','2'];
 const SUITS=[
@@ -1896,6 +1897,8 @@ const FIRESTORE_USERS_COLLECTION='big2Users';
 const FIRESTORE_GAMELOGS_COLLECTION='big2GameLogs';
 const FIRESTORE_FIREBASE_INSTANCES_COLLECTION='big2FirebaseInstances';
 const FIRESTORE_ROOM_DIRECTORY_COLLECTION='big2RoomDirectory';
+const FIRESTORE_ROOM_ROUTING_COLLECTION='big2RoomRouting';
+const ROOM_ROUTING_DOC_ID='rotation';
 const THEMES={
   ocean:{'--bg-a':'#071a2f','--bg-b':'#0f4469','--bg-c':'#15808f','--panel':'rgba(255,255,255,0.08)','--panel-2':'rgba(7,22,34,0.62)','--table-a':'#17334f','--table-b':'#1f4468','--table-c':'#1c4262','--seat-a':'rgba(17,44,70,.82)','--seat-b':'rgba(9,33,55,.78)','--line-a':'rgba(126,177,215,.6)','--line-b':'rgba(126,177,215,.35)','--center-a':'rgba(19,88,49,.92)','--center-b':'rgba(12,63,35,.9)','--accent':'#f4a259','--danger':'#ef476f','--ok':'#52d273'},
   emerald:{'--bg-a':'#08261f','--bg-b':'#0f5a43','--bg-c':'#168f6a','--panel':'rgba(255,255,255,0.08)','--panel-2':'rgba(6,31,23,0.64)','--table-a':'#0e3a2e','--table-b':'#13614a','--table-c':'#15795a','--seat-a':'rgba(11,57,41,.82)','--seat-b':'rgba(8,40,29,.78)','--line-a':'rgba(120,196,156,.6)','--line-b':'rgba(120,196,156,.35)','--center-a':'rgba(23,103,62,.92)','--center-b':'rgba(13,73,44,.9)','--accent':'#f6c453','--danger':'#e95f6f','--ok':'#7ad97a'},
@@ -4002,76 +4005,30 @@ async function chooseNextRoomFirebaseInstanceId(){
     if(db)available.push(projectId);
   }
   if(!available.length)return primaryFirebaseInstanceId();
+  if(!firebaseDb)return available[0];
   try{
-    const snap=await firebaseDb.collection(FIRESTORE_ROOM_DIRECTORY_COLLECTION).orderBy('createdAt','desc').limit(1).get();
-    const last=snap.docs?.[0]?.data?.()??snap.docs?.[0]?.data()??{};
-    const lastId=String(last.firebaseInstanceId||'').trim();
-    const idx=available.indexOf(lastId);
-    if(idx<0)return available[0];
-    return available[(idx+1)%available.length];
+    const ref=firebaseDb.collection(FIRESTORE_ROOM_ROUTING_COLLECTION).doc(ROOM_ROUTING_DOC_ID);
+    return await firebaseDb.runTransaction(async(tx)=>{
+      const snap=await tx.get(ref);
+      const data=snap.exists?(snap.data()??{}):{};
+      const lastId=String(data.lastRoomFirebaseInstanceId||'').trim();
+      const idx=available.indexOf(lastId);
+      const nextId=idx<0?available[0]:available[(idx+1)%available.length];
+      tx.set(ref,{
+        lastRoomFirebaseInstanceId:nextId,
+        updatedAt:Date.now()
+      },{merge:true});
+      return nextId;
+    });
   }catch{
     return available[0];
   }
 }
-async function resolveRoomDocByDirectory(roomId='',code=''){
-  const roomIdText=String(roomId||'').trim();
-  const codeText=String(code||'').trim().toUpperCase();
-  const directory=roomIdText?await readRoomDirectory(roomIdText):(codeText?await findRoomDirectoryByCode(codeText):null);
-  if(!directory){
-    if(!firebaseDb)return null;
-    try{
-      const primaryRef=roomIdText
-        ?firebaseDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(roomIdText)
-        :null;
-      let primarySnap=primaryRef?await primaryRef.get():null;
-      if((!primarySnap||!primarySnap.exists)&&codeText){
-        const primaryByCode=await firebaseDb.collection(FIRESTORE_ROOMS_COLLECTION).where('code','==',codeText).limit(1).get();
-        primarySnap=primaryByCode.docs?.[0]??null;
-      }
-      if(!primarySnap||!primarySnap.exists)return null;
-      const docId=String(primarySnap.id||roomIdText||'').trim();
-      return{
-        doc:primarySnap,
-        ref:primarySnap.ref,
-        db:firebaseDb,
-        instanceId:primaryFirebaseInstanceId(),
-        directory:null,
-        legacy:true,
-        roomId:docId
-      };
-    }catch{
-      return null;
-    }
-  }
-  const dirData=directory.data()??{};
-  const liveRoomId=String(dirData.roomId||directory.id||'').trim();
-  const instanceId=String(dirData.firebaseInstanceId||primaryFirebaseInstanceId()).trim()||primaryFirebaseInstanceId();
-  const db=await getFirebaseDbForInstanceId(instanceId);
-  if(!db||!liveRoomId)return null;
-  const ref=db.collection(FIRESTORE_ROOMS_COLLECTION).doc(liveRoomId);
-  const snap=await ref.get();
-  if(!snap.exists){
-    await deleteRoomDirectory(directory.id);
-    return null;
-  }
-  return{doc:snap,ref,db,instanceId,directory,roomId:liveRoomId};
-}
 async function connectToRoom(roomId,code='',instanceId=''){
-  const targetRoomId=String(roomId||'').trim();
-  if(!targetRoomId)return false;
-  let shardDb=null;
-  let resolvedInstanceId=String(instanceId||'').trim();
-  if(resolvedInstanceId){
-    shardDb=await getFirebaseDbForInstanceId(resolvedInstanceId);
-  }
-  if(!shardDb){
-    const resolved=await resolveRoomDocByDirectory(targetRoomId,code);
-    if(!resolved)return false;
-    shardDb=resolved.db;
-    resolvedInstanceId=resolved.instanceId;
-  }
-  subscribeRoom(targetRoomId,code,resolvedInstanceId,shardDb);
-  return true;
+  return roomSubscriptionController.connectToRoom(roomId,code,instanceId);
+}
+async function resolveRoomDocByDirectory(roomId='',code=''){
+  return roomSubscriptionController.resolveRoomDocByDirectory(roomId,code);
 }
 async function ensureFirebaseWriteAuth(){
   return Boolean(firebaseDb||initFirebaseIfReady());
@@ -4241,6 +4198,42 @@ function resetRoomState(){
 function abandonRoomLocally(msg='',openLobby=true){
   roomLifecycleController.abandonRoomLocally(msg,openLobby);
 }
+const roomSubscriptionController=createRoomSubscriptionController({
+  FIRESTORE_ROOMS_COLLECTION,
+  FIRESTORE_USERS_COLLECTION,
+  LOCAL_ROOM_KEY,
+  ROOM_HOST_TAKEOVER_MS,
+  ROOM_STALE_MS,
+  abandonRoomLocally,
+  applyRoomGameSnapshot,
+  baseRoomPlayerId,
+  clearRoomStartPending,
+  currentAuthUserUid,
+  currentRoomDb,
+  deleteRoomDirectory,
+  findRoomDirectoryByCode,
+  getFirebaseDb:()=>firebaseDb,
+  getFirebaseDbForInstanceId,
+  getState:()=>state,
+  isRoomPlayerActive,
+  isRoomPresenceOnlyUpdate,
+  matchGuestPlayerId,
+  maybeRunRoomAi,
+  primaryFirebaseInstanceId,
+  readRoomDirectory,
+  render,
+  roomLifecycleExpired,
+  roomPlayerIds,
+  roomResultExpired,
+  roomSelfSeat,
+  selectRoomHostCandidate,
+  setRoomError,
+  setRoomResultExpiryReached:(value)=>{roomResultExpiryReached=Boolean(value);},
+  startRoomPresencePing,
+  syncRoomGameRoster,
+  syncRoomSelfScoreIfNeeded,
+  t
+});
 function setRoomError(msg){
   state.room.error=msg||'';
   render();
@@ -4923,192 +4916,11 @@ async function joinRoomByCode(codeRaw){
     else setRoomError(t('roomJoinFail'));
   }
 }
-function resolveRoomHostInfo(roomData){
-  const players=Array.isArray(roomData?.players)?roomData.players:[];
-  let hostId=String(roomData?.hostId??'').trim();
-  let hostName=String(roomData?.hostName??'').trim();
-  const hostExists=hostId&&players.some((p)=>String(p.uid)===hostId);
-  if(!hostExists){
-    const fallback=players[0];
-    hostId=String(fallback?.uid??'');
-    hostName=String(fallback?.name??'');
-  }else if(hostId&&!hostName){
-    const entry=players.find((p)=>String(p.uid)===hostId);
-    hostName=String(entry?.name??'');
-  }
-  return{hostId,hostName};
-}
-async function syncRoomHostIfNeeded(ref,roomData){
-  const status=String(roomData?.status??'');
-  if(status==='playing')return;
-  const next=resolveRoomHostInfo(roomData);
-  const currentId=String(roomData?.hostId??'').trim();
-  const currentName=String(roomData?.hostName??'').trim();
-  if(!next.hostId)return;
-  if(next.hostId===currentId&&(!next.hostName||next.hostName===currentName))return;
-  try{
-    await firebaseDb.runTransaction(async(tx)=>{
-      const snap=await tx.get(ref);
-      if(!snap.exists)return;
-      const data=snap.data()??{};
-      if(String(data.status??'')==='playing')return;
-      const latest=resolveRoomHostInfo(data);
-      if(!latest.hostId)return;
-      tx.update(ref,{hostId:latest.hostId,hostName:latest.hostName,updatedAt:Date.now()});
-    });
-  }catch{}
-}
 function subscribeRoom(roomId,code,firebaseInstanceId='',roomDbOverride=null){
-  if(state.room.unsub){try{state.room.unsub();}catch{}}
-  const roomDb=roomDbOverride||currentRoomDb()||firebaseDb;
-  if(!roomDb)return;
-  const resolvedInstanceId=String(firebaseInstanceId||state.room.firebaseInstanceId||primaryFirebaseInstanceId()).trim()||primaryFirebaseInstanceId();
-  const ref=roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(roomId);
-  const unsub=ref.onSnapshot((snap)=>{
-    if(!snap.exists){abandonRoomLocally('',true);return;}
-    const data=snap.data()??{};
-    const now=Date.now();
-    const reconnectMsg=t('roomReconnecting');
-    const staleMsg=t('roomStale');
-    const updatedAt=Number(data.updatedAt)||0;
-    const isStale=updatedAt>0&&(now-updatedAt>ROOM_STALE_MS);
-    if(isStale){
-      setRoomError(staleMsg);
-    }else if(state.room.error===reconnectMsg||state.room.error===staleMsg){
-      setRoomError('');
-    }
-      void syncRoomHostIfNeeded(ref,data);
-      const prevRoomData=state.room.data;
-    let resolvedId=String(state.room.playerId||'').trim();
-    if(!resolvedId||!Array.isArray(data.players)||!data.players.some((p)=>String(p?.uid||'')===resolvedId)){
-      const guestMatch=matchGuestPlayerId(data);
-      resolvedId=guestMatch||baseRoomPlayerId();
-    }
-    state.room.playerId=resolvedId;
-    state.home.mode='room';
-    state.room={...state.room,id:roomId,code:code||String(data.code??''),firebaseInstanceId:resolvedInstanceId,data,unsub,joinOpen:false,selfSeat:roomSelfSeat(data)};
-    const selfEntry=Array.isArray(data.players)
-      ?data.players.find((p)=>String(p?.uid||'')===String(resolvedId))
-      :null;
-    roomResultExpiryReached=roomResultExpired(data);
-    if(roomLifecycleExpired(data,now)){
-      void roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(roomId).delete().catch(()=>{});
-      void deleteRoomDirectory(roomId);
-      abandonRoomLocally(staleMsg,true);
-      return;
-    }
-    if(prevRoomData&&!selfEntry){
-      abandonRoomLocally(t('roomKickedTimeout'),true);
-      return;
-    }
-    startRoomPresencePing();
-    syncRoomSelfScoreIfNeeded();
-    const roomStatus=String(data.status);
-    if(state.room.pendingStart&&(roomStatus==='starting'||roomStatus==='playing')){
-      clearRoomStartPending();
-    }
-    const rosterAll=Array.isArray(data.players)?data.players:[];
-    const hasHuman=rosterAll.some((p)=>String(p.uid||'').startsWith('uid:')||String(p.uid||'').startsWith('guest:'));
-    if((roomStatus==='lobby'||roomStatus==='starting')&&!hasHuman){
-      void roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(roomId).delete().catch(()=>{});
-      void deleteRoomDirectory(roomId);
-      abandonRoomLocally(staleMsg,true);
-      return;
-    }
-    if(roomStatus==='lobby'||roomStatus==='starting'){
-      const rosterAll=Array.isArray(data.players)?data.players:[]; 
-      const active=rosterAll.filter((p)=>isRoomPlayerActive(p,roomStatus,now));
-      const expectedIds=roomPlayerIds(rosterAll);
-      const existingIds=Array.isArray(data.playerIds)?data.playerIds.map((v)=>String(v)):null;
-      const idsMatch=Array.isArray(existingIds)
-        && existingIds.length===expectedIds.length
-        && expectedIds.every((id)=>existingIds.includes(id));
-      const hostId=String(data.hostId||'').trim();
-      const hostEntry=rosterAll.find((p)=>String(p?.uid||'')===hostId)||null;
-      const hostLastSeen=Number(hostEntry?.lastSeen||0);
-      const hostStale=!hostEntry|| (hostLastSeen>0 && now-hostLastSeen>ROOM_HOST_TAKEOVER_MS);
-      if(active.length!==rosterAll.length){
-        const activeHumans=active.filter((p)=>String(p.uid||'').startsWith('uid:')||String(p.uid||'').startsWith('guest:'));
-        if(!activeHumans.length){
-          void roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(roomId).delete().catch(()=>{});
-          void deleteRoomDirectory(roomId);
-          abandonRoomLocally(staleMsg,true);
-          return;
-        }
-        const hostInfo=resolveRoomHostInfo({...data,players:active});
-        let nextHostId=hostInfo.hostId;
-        let nextHostName=hostInfo.hostName;
-        if(hostStale){
-          const candidate=selectRoomHostCandidate(active,now);
-          if(candidate){
-            nextHostId=String(candidate.uid||nextHostId||'');
-            nextHostName=String(candidate.name||nextHostName||'');
-          }
-        }
-        void roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(roomId).update({
-          players:active,
-          playerIds:roomPlayerIds(active),
-          hostId:nextHostId,
-          hostName:nextHostName,
-          updatedAt:now
-        }).catch(()=>{});
-      }else if(!idsMatch){
-        void roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(roomId).update({
-          playerIds:expectedIds,
-          updatedAt:now
-        }).catch(()=>{});
-      }
-      if(hostStale){
-        const candidate=selectRoomHostCandidate(active,now);
-        if(candidate&&String(candidate.uid||'')!==hostId){
-          void roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(roomId).update({
-            hostId:String(candidate.uid||''),
-            hostName:String(candidate.name||''),
-            updatedAt:now
-          }).catch(()=>{});
-        }
-      }
-    }
-      if(roomStatus==='playing'||roomStatus==='finished'){
-        const presenceOnly=isRoomPresenceOnlyUpdate(prevRoomData,data);
-        state.room.started=true;
-        if(data.game){
-          const updated=syncRoomGameRoster(data);
-          if(updated){
-          void roomDb.runTransaction(async(tx)=>{
-            const fresh=await tx.get(ref);
-            if(!fresh.exists)return;
-            const latest=fresh.data()??{};
-            if(String(latest.status)!=='playing'||!latest.game)return;
-            const now=Date.now();
-            const roster=Array.isArray(latest.players)?[...latest.players]:[];
-            const active=roster.filter((p)=>isRoomPlayerActive(p,latest.status,now));
-            const activeHumans=active.filter((p)=>String(p.uid||'').startsWith('uid:')||String(p.uid||'').startsWith('guest:'));
-            if(!activeHumans.length){
-              tx.delete(ref);
-              return;
-            }
-            let hostId=String(latest.hostId??'');
-            let hostName=String(latest.hostName??'');
-            if(hostId&&!active.some((p)=>String(p.uid)===hostId)){
-              const nextHost=active[0];
-              hostId=String(nextHost?.uid??'');
-              hostName=String(nextHost?.name??'');
-            }
-            tx.update(ref,{game:updated,players:active,hostId,hostName,updatedAt:now,gameVersion:Number(latest.gameVersion||0)+1});
-          });
-          }
-        }
-        if(!presenceOnly){
-          applyRoomGameSnapshot(data);
-        }else{
-          maybeRunRoomAi();
-        }
-        return;
-      }
-    render();
-  });
-  state.room={...state.room,id:roomId,code,firebaseInstanceId:resolvedInstanceId,unsub,started:false};
+  roomSubscriptionController.subscribeRoom(roomId,code,firebaseInstanceId,roomDbOverride);
+}
+function resolveRoomHostInfo(roomData){
+  return roomSubscriptionController.resolveRoomHostInfo(roomData);
 }
 async function leaveRoom(toLobby=false){
   await roomLifecycleController.leaveRoom(toLobby);
@@ -5506,25 +5318,7 @@ async function updateActiveRoomPointer(roomId){
   }catch{}
 }
 async function loadActiveRoomPointer(){
-  const uid=currentAuthUserUid();
-  if(!uid){
-    try{
-      const local=String(localStorage.getItem(LOCAL_ROOM_KEY)||'').trim();
-      if(local&&!state.room.id)void connectToRoom(local,'');
-    }catch{}
-    return;
-  }
-  if(!uid||!firebaseDb)return;
-  if(state.room.id)return;
-  try{
-    const ref=firebaseDb.collection(FIRESTORE_USERS_COLLECTION).doc(uid);
-    const snap=await ref.get();
-    if(!snap.exists)return;
-    const data=snap.data()??{};
-    const roomId=String(data.currentRoomId??'').trim();
-    if(!roomId)return;
-    void connectToRoom(roomId,'');
-  }catch{}
+  await roomSubscriptionController.loadActiveRoomPointer();
 }
 async function syncRoomSelfProfile(){
   const roomDb=currentRoomDb();

@@ -1,5 +1,10 @@
 # Big Two Web App Technical Specification
 
+Related engineering docs:
+- `GAME_BOT.md`
+- `STATE_CONTRACT.md`
+- `REGRESSION_CHECKLIST.md`
+
 ## 1. Technology Stack
 - Runtime: Browser (client-side app)
 - Language: JavaScript (ES modules)

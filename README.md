@@ -7,9 +7,9 @@ Notes:
 - Leaderboard sync requires Google sign-in.
 
 Key docs:
-- `FUNCTIONAL_SPEC.md`
 - `TECHNICAL_SPEC.md`
 - `ROOM_SPEC.md`
-- `USER_GUIDE.md`
 - `GAME_BOT.md`
+- `STATE_CONTRACT.md`
+- `REGRESSION_CHECKLIST.md`
 - `MP3_SPEC.md`
