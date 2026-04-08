@@ -268,19 +268,19 @@ h1, h2, h3, p { margin: 0; }
   -webkit-backdrop-filter: none;
 }
 .room-top-meta {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 2px 5px;
+  display: inline-grid;
+  grid-template-columns: 1fr;
+  gap: 3px;
+  padding: 5px 7px;
   border-radius: 8px;
   border: 1px solid rgba(255,255,255,.12);
   background: rgba(6, 17, 12, .34);
   font-size: .66rem;
-  line-height: 1;
+  line-height: 1.05;
   color: rgba(232, 242, 237, .88);
   transform: none;
 }
-.room-top-meta.room-top-meta-panel {
+.room-top-meta-panel {
   position: absolute;
   right: 58px;
   top: 5px;
@@ -292,7 +292,7 @@ h1, h2, h3, p { margin: 0; }
   z-index: auto;
 }
 @media (max-width: 860px) and (orientation: portrait) {
-  .room-top-meta.room-top-meta-center {
+  .room-top-meta-center {
     position: absolute;
     right: 8px;
     bottom: 8px;
@@ -320,10 +320,16 @@ h1, h2, h3, p { margin: 0; }
   }
 }
 .room-top-meta .room-top-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1px;
   white-space: nowrap;
+}
+.room-top-meta .room-top-label {
+  font-size: .56rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: rgba(214, 226, 220, .72);
 }
 .room-top-meta strong {
   font-weight: 800;
@@ -4693,6 +4699,7 @@ body[data-screen='game'] .table-center-stack {
   justify-content: center;
   align-items: flex-start;
   overflow: visible;
+  z-index: 1;
 }
 .closed-count-pill {
   position: absolute;
@@ -4719,6 +4726,8 @@ body[data-screen='game'] .table-center-stack {
   display: flex;
   justify-content: center;
   width: 100%;
+  position: relative;
+  z-index: 1;
 }
 .seat-open-play .seat-played {
   transform: scale(.78);
@@ -5763,7 +5772,7 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
     left: 50% !important;
     right: auto !important;
     transform: translateX(-50%) !important;
-    z-index: 30 !important;
+    z-index: 13011 !important;
     max-width: 72vw !important;
     white-space: normal !important;
     text-align: center !important;
@@ -11103,7 +11112,7 @@ body[data-screen='game'] .table-center-grid-wrap {
 body[data-screen='game'] .table {
   position: relative !important;
 }
-body[data-screen='game'] .room-top-meta.room-top-meta-table {
+body[data-screen='game'] .room-top-meta-table {
   position: absolute !important;
   top: 18px !important;
   left: 18px !important;
@@ -11112,7 +11121,7 @@ body[data-screen='game'] .room-top-meta.room-top-meta-table {
   z-index: 20 !important;
   pointer-events: none !important;
 }
-body[data-screen='game'] .room-top-meta.room-top-meta-table .room-top-meta.room-top-meta-inline {
+body[data-screen='game'] .room-top-meta-table .room-top-meta.room-top-meta-inline {
   transform: none !important;
 }
 body[data-screen='game'] .room-center-meta {

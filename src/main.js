@@ -295,7 +295,7 @@ const I18N={
     scoreDeduct:'扣分',
     scoreGain:'加分',
     scoreAnyTwo:'有2',
-    scoreTopTwo:'有頂大♠️2',
+    scoreTopTwo:'無頂大♠️2',
     scoreChao2:'雙炒',
     scoreChao3:'三炒',
     scoreChao4:'四炒',
@@ -542,7 +542,7 @@ const I18N={
     scoreDeduct:'Deduction',
     scoreGain:'Gain',
     scoreAnyTwo:'Has 2',
-    scoreTopTwo:'Has top ♠️Spade 2',
+    scoreTopTwo:'No top ♠️Spade 2',
     scoreChao2:'Chao Two',
     scoreChao3:'Chao Three',
     scoreChao4:'Chao Four',
@@ -788,7 +788,7 @@ const I18N={
     scoreDeduct:'Déduction',
     scoreGain:'Gain',
     scoreAnyTwo:'Possède un 2',
-    scoreTopTwo:'Possède le ♠️2',
+    scoreTopTwo:'Sans ♠️2 max',
     scoreChao2:'Chao deux',
     scoreChao3:'Chao trois',
     scoreChao4:'Chao quatre',
@@ -1034,7 +1034,7 @@ const I18N={
     scoreDeduct:'Abzug',
     scoreGain:'Gewinn',
     scoreAnyTwo:'Hat eine 2',
-    scoreTopTwo:'Hat ♠️2',
+    scoreTopTwo:'Ohne höchste ♠️2',
     scoreChao2:'Doppelt',
     scoreChao3:'Dreifach',
     scoreChao4:'Vierfach',
@@ -1280,7 +1280,7 @@ const I18N={
     scoreDeduct:'Deducción',
     scoreGain:'Ganancia',
     scoreAnyTwo:'Tiene un 2',
-    scoreTopTwo:'Tiene el ♠️2',
+    scoreTopTwo:'Sin ♠️2 mayor',
     scoreChao2:'Chao dos',
     scoreChao3:'Chao tres',
     scoreChao4:'Chao cuatro',
@@ -1527,7 +1527,7 @@ const I18N={
     scoreDeduct:'減点',
     scoreGain:'加点',
     scoreAnyTwo:'2を所持',
-    scoreTopTwo:'最強の♠️2を所持',
+    scoreTopTwo:'頂大♠️2なし',
     scoreChao2:'チャオ2',
     scoreChao3:'チャオ3',
     scoreChao4:'チャオ4',
@@ -9339,6 +9339,7 @@ function bindLangMenu(root,{reloadGoogle=false}={}){
     const pop=menu.querySelector('.lang-menu-pop');
     if(!(trigger instanceof HTMLElement)||!(pop instanceof HTMLElement))return;
     trigger.addEventListener('click',(ev)=>{
+      ev.preventDefault();
       ev.stopPropagation();
       if(openLangMenu&&openLangMenu!==menu)closeLangMenu();
       const isOpen=menu.classList.toggle('open');
@@ -9350,12 +9351,23 @@ function bindLangMenu(root,{reloadGoogle=false}={}){
         closeLangMenuPop(menu);
       }
     });
-    pop.querySelectorAll('.lang-menu-item').forEach((item)=>item.addEventListener('click',(ev)=>{
+    const selectLang=(ev,item)=>{
+      ev.preventDefault();
       ev.stopPropagation();
       const value=String(item.getAttribute('data-lang')||'');
-      closeLangMenu();
+      menu.classList.remove('open');
+      trigger.setAttribute('aria-expanded','false');
+      closeLangMenuPop(menu);
+      if(openLangMenu===menu)openLangMenu=null;
       setLanguage(value,{reloadGoogle});
-    }));
+    };
+    pop.querySelectorAll('.lang-menu-item').forEach((item)=>{
+      item.addEventListener('pointerdown',(ev)=>{
+        if(ev.pointerType==='mouse')return;
+        selectLang(ev,item);
+      });
+      item.addEventListener('click',(ev)=>{selectLang(ev,item);});
+    });
   });
   if(langMenuDocBound)return;
   langMenuDocBound=true;
@@ -9515,7 +9527,7 @@ function showHomeCardbackZoom(previewEl,options={}){
 function positionRoomTopMeta(){
   const meta=document.querySelector('.room-top-meta.room-top-meta-inline');
   if(!meta)return;
-  const tableOverlay=meta.closest('.room-top-meta.room-top-meta-table');
+  const tableOverlay=meta.closest('.room-top-meta-table');
   if(tableOverlay){
     tableOverlay.classList.remove('room-top-meta-center','room-top-meta-panel');
   }
@@ -10049,7 +10061,7 @@ function renderHome(){
   const roomLobbyHtml=(inRoom&&roomStatus!=='playing')?`<div class="room-overlay"><div class="room-card room-lobby-card room-card-icon"><div class="room-head"><span class="room-corner-icon room-corner-icon-reception" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M4 17.5a1 1 0 0 1-1-1V15a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v1.5a1 1 0 1 1-2 0V15a2 2 0 0 0-2-2h-1v3a1 1 0 0 1-2 0v-3h-4v3a1 1 0 0 1-2 0v-3H7a2 2 0 0 0-2 2v1.5a1 1 0 0 1-1 1Z"/><path d="M7 10a3 3 0 1 1 3-3 3 3 0 0 1-3 3Zm10 0a3 3 0 1 1 3-3 3 3 0 0 1-3 3Z"/><path d="M2 20a1 1 0 0 1 1-1h18a1 1 0 1 1 0 2H3a1 1 0 0 1-1-1Z"/></svg></span><h3>${roomTitle}</h3>${roomHostLine}</div><div class="room-id-center"><span class="room-code">${esc(state.room.code)}</span><button id="room-copy" class="secondary">${t('roomCopy')}</button></div><div class="room-expiry-row"><span>${t('roomCountdown')}</span><button type="button" class="room-expiry-reset-btn" data-room-expiry-reset="1"><strong data-room-countdown-value>${esc(roomLobbyCountdown)}</strong></button></div>${roomPrivacyRow}<div class="lobby-table">${roomSeats}</div>${roomErrorHtml}<div class="room-actions">${roomStartControl}${roomPendingHint}<button id="room-leave" class="secondary" ${roomStarting?'disabled':''}>${t('roomLeave')}</button></div></div></div>`:'';
   const activeRoomsState=state.home.activeRooms;
   const activeRooms=Array.isArray(activeRoomsState?.rows)?activeRoomsState.rows:[];
-  const createTableCard=`<button class="room-create-wide primary" id="room-create-card" type="button" aria-label="${t('roomCreate')}"><span class="room-create-icon" aria-hidden="true"><svg class="room-create-svg" viewBox="0 0 24 24" focusable="false"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H15a1 1 0 1 1 0 2H6v14h9a1 1 0 1 1 0 2H5.5A1.5 1.5 0 0 1 4 19.5v-15Z"/><path d="M15 8a1 1 0 0 1 1-1h3v-3a1 1 0 1 1 2 0v3h3a1 1 0 1 1 0 2h-3v3a1 1 0 1 1-2 0V9h-3a1 1 0 0 1-1-1Z"/><path d="M12 12.5a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0Z"/></svg></span><span>${t('roomCreate')}</span></button>`;
+  const createTableCard=`<button class="secondary room-card-join-btn room-icon-btn" id="room-create-card" type="button" aria-label="${t('roomCreate')}"><svg class="room-inline-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H15a1 1 0 1 1 0 2H6v14h9a1 1 0 1 1 0 2H5.5A1.5 1.5 0 0 1 4 19.5v-15Z"/><path d="M15 8a1 1 0 0 1 1-1h3v-3a1 1 0 1 1 2 0v3h3a1 1 0 1 1 0 2h-3v3a1 1 0 1 1-2 0V9h-3a1 1 0 0 1-1-1Z"/><path d="M12 12.5a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0Z"/></svg><span>${t('roomCreate')}</span></button>`;
   const maskRoomCode=(code)=>{
     const raw=String(code||'');
     if(!raw)return'';
@@ -10100,7 +10112,7 @@ function renderHome(){
         return`<div class="room-active-card room-active-list-item${isPrivate?' room-active-card-private':''}" data-code="${esc(r.code)}" data-private="${isPrivate?'1':'0'}"${joinDisabled?' disabled':''}><div class="room-card-top"><div class="room-active-code"><span class="room-active-code-text">${esc(displayCode)}</span></div><div class="room-active-count"><svg class="room-active-count-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M8 11a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7m8 1a3 3 0 1 1 0-6 3 3 0 0 1 0 6M2 20c0-2.761 3.134-5 7-5s7 2.239 7 5v1H2zm15.5-6c2.66.178 4.5 1.79 4.5 3.95V21h-4v-1c0-1.985-.95-3.72-2.5-4.92"/></svg><span>${displayPlayers}/${totalSeats}</span></div></div>${statusLine}<div class="room-seat-strip">${seatSlots}${joinInlineBtn}</div></div>`;
       }).join('')
       :'';
-  const activeRoomsEmpty=activeRooms.length?'':`<div class="room-active-card room-active-empty" aria-disabled="true"><div class="room-active-code">${t('roomActiveEmpty')}</div><div class="room-active-info"><div class="room-active-count">0/4</div></div></div>`;
+  const activeRoomsEmpty=activeRooms.length?'':`<div class="room-active-card room-active-empty" aria-disabled="true"><div class="room-active-code">${t('roomActiveEmpty')}</div></div>`;
   const hiddenCount=Number(state.home.activeRooms.hiddenCount)||0;
   const hiddenNote=hiddenCount?`<span class="room-active-hidden">Hidden: ${hiddenCount}</span>`:'';
   const refreshCountdownText=state.room.joinOpenCountdown&&state.room.joinOpenCountdown>0
@@ -10905,11 +10917,11 @@ function renderGame(){
     const round=baseRound+(status==='playing'||status==='starting'?1:0);
     const countdown=roomCountdownText(state.room.data);
     return`<div class="room-top-meta room-top-meta-inline">
-      <span class="room-top-item"><span>${t('roomRound')}</span><strong>${Number.isFinite(round)?round:'-'}</strong></span>
-      <span class="room-top-item"><span>${t('roomCountdown')}</span><strong data-room-countdown-value>${esc(countdown)}</strong></span>
+      <span class="room-top-item"><span class="room-top-label">${t('roomRound')}</span><strong>${Number.isFinite(round)?round:'-'}</strong></span>
+      <span class="room-top-item"><span class="room-top-label">${t('roomCountdown')}</span><strong data-room-countdown-value>${esc(countdown)}</strong></span>
     </div>`;
   })();
-  const roomTopMetaTable=roomTopMeta?`<div class="room-top-meta room-top-meta-table">${roomTopMeta}</div>`:'';
+  const roomTopMetaTable=roomTopMeta?`<div class="room-top-meta-table">${roomTopMeta}</div>`:'';
   const playTypeFresh=Boolean(playTypeCallState.startedAt&&Date.now()-playTypeCallState.startedAt<260);
   const passCall=currentPassCall(v);
   const passCallFresh=Boolean(passCallState.startedAt&&Date.now()-passCallState.startedAt<260);
