@@ -1,4 +1,7 @@
-﻿﻿﻿﻿﻿﻿﻿﻿const RANKS=['3','4','5','6','7','8','9','10','J','Q','K','A','2'];
+﻿﻿﻿﻿﻿﻿﻿﻿import {createCalloutAudioController} from './calloutAudio.js';
+import {createLangMenuController} from './langMenu.js';
+
+const RANKS=['3','4','5','6','7','8','9','10','J','Q','K','A','2'];
 const SUITS=[
   {symbol:'♦️',red:true},
   {symbol:'♣️',red:false},
@@ -1992,23 +1995,7 @@ function scheduleCalloutExpiry(until=0){
   },wait);
 }
 function resetCalloutPlaybackState(){
-  calloutSpeakSeq+=1;
-  calloutSpeechActive=false;
-  calloutSpeechUntil=0;
-  calloutSpeechEndedAt=Date.now();
-  calloutResumePending=false;
-  lastSpokenCalloutKey='';
-  lastSpokenCalloutAt=0;
-  speechPrimed=false;
-  try{window.speechSynthesis?.cancel?.();}catch{}
-  try{
-    if(iosSharedCalloutAudio){
-      iosSharedCalloutAudio.pause?.();
-      iosSharedCalloutAudio.currentTime=0;
-      iosSharedCalloutAudio.onended=null;
-      iosSharedCalloutAudio.onerror=null;
-    }
-  }catch{}
+  calloutAudioController.resetPlaybackState();
 }
 let lastCardProcessedHistoryLen=0;
 let googleInlineRetryTimer=null;
@@ -2025,14 +2012,6 @@ let leaderboardCloudLoaded=false;
 const sound={ctx:null,enabled:true};
 let winSfxAudio=null;
 let winSfxSeq=0;
-let speechPrimed=false;
-let lastSpokenCalloutKey='';
-let lastSpokenCalloutAt=0;
-let calloutSpeechActive=false;
-let calloutSpeechUntil=0;
-let calloutSpeechEndedAt=0;
-let calloutResumePending=false;
-let calloutSpeakSeq=0;
 let calloutGateUntilPlay=false;
 let turnLockUntil=0;
 let lastNamecardTapAt=0;
@@ -2042,11 +2021,47 @@ let calloutVoiceMode='auto'; // auto | recorded | off
 let calloutStylePack='energetic'; // forced energetic
 let autoSortMode='seq';
 let opponentProfileDelegateBound=false;
-const calloutAudioCache=new Map();
-let iosSharedCalloutAudio=null;
 let mobileTapAt=0;
 let orientationBlockActive=false;
 let lastOrientation=null;
+const calloutAudioController=createCalloutAudioController({
+  KIND,
+  deriveEnVariantClipKey,
+  deriveWinnerVariantClipKey,
+  deriveZhHkComposedClipKeys,
+  deriveZhHkVariantClipKey,
+  getCalloutGateUntilPlay:()=>calloutGateUntilPlay,
+  getCalloutStylePack:()=>calloutStylePack,
+  getCalloutVoiceMode:()=>calloutVoiceMode,
+  getSound:()=>sound,
+  getState:()=>state,
+  isCanonicalRecordedCalloutText,
+  isIOSDevice:()=>isIOSDevice(),
+  isLastCalloutText,
+  isPassCalloutText,
+  maybeRunSoloAi,
+  normalizeCalloutStylePack:(v)=>normalizeCalloutStylePack(v),
+  playTone,
+  unlockAudio,
+  withBase:(p)=>withBase(p)
+});
+const langMenuController=createLangMenuController({
+  LANGUAGE_NATIVE_LABEL,
+  LANGUAGE_OPTIONS,
+  getI18nLabel:(key)=>I18N[state.language]?.[key],
+  getLangAriaLabel:()=>t('lang'),
+  getLanguage:()=>state.language,
+  isValidLanguage:(value)=>LANGUAGE_OPTIONS.some((opt)=>opt.value===value),
+  onAfterLanguageChange:()=>{},
+  onBeforeLanguageChange:()=>{},
+  setLanguageState:(value,{reloadGoogle=false}={})=>{
+    if(state.language!==value)resetCalloutPlaybackState();
+    state.language=value;
+    relabelSoloBots();
+    if(reloadGoogle)reloadGoogleScriptForLocale();
+    render();
+  }
+});
 const BOT_PROFILE_POOL=[
   {name:'志明',gender:'male'},
   {name:'俊傑',gender:'male'},
@@ -2829,17 +2844,7 @@ function deriveWinnerVariantClipKey(msg=''){
 }
 
 async function playWinnerCallout(wc,gender='male',seat=0){
-  if(!wc||!wc.text)return;
-  if(calloutVoiceMode==='off')return;
-  const ttsOnlyLang=!(state.language==='zh-HK'||state.language==='en');
-  const clipKey=wc.repeat?'winner-repeat':'winner';
-  if(ttsOnlyLang){
-    speakCallout(wc.text,gender,{clipKey,seat});
-    return;
-  }
-  const speakSeq=++calloutSpeakSeq;
-  const ok=await playRecordedCalloutClip(clipKey,gender,speakSeq);
-  if(!ok)return;
+  await calloutAudioController.playWinnerCallout(wc,gender,seat);
 }
 
 function deriveZhHkVariantClipKey(msg='',meta={}){
@@ -6597,355 +6602,8 @@ function scoreGuideModalHtml(){
   const mulTableRows=`<tr><td><div class="score-guide-cards">${anyTwoCards}</div></td><td>x2</td><td>${colorizeSuitText(sx.anyTwo)}</td></tr><tr><td><div class="score-guide-cards">${topTwoCard}</div></td><td>x2</td><td>${colorizeSuitText(sx.topTwo)}</td></tr>`;
   return`<div class="intro-modal" id="score-guide-modal"><button class="intro-backdrop" id="score-guide-backdrop" aria-label="close"></button><section class="intro-sheet"><header class="intro-head"><div><h3 class="title-with-icon"><span class="title-icon title-icon-score" aria-hidden="true"></span><span>${t('scoreGuideTitle')}</span></h3><p class="score-guide-heading">${esc(sx.headingDesc)}</p></div><button id="score-guide-close" class="secondary">${sx.close}</button></header><div class="intro-grid"><article class="intro-block"><h4>${sx.baseTitle}</h4><div class="score-guide-table-wrap"><table class="score-guide-table"><thead><tr><th>${esc(sx.tableHeaders[0])}</th><th>${esc(sx.tableHeaders[1])}</th><th>${esc(sx.tableHeaders[2])}</th></tr></thead><tbody>${tableRows}</tbody></table></div></article><article class="intro-block"><h4>${sx.mulTitle}</h4><div class="score-guide-table-wrap"><table class="score-guide-table"><thead><tr><th>${esc(sx.mulTableHeaders[0])}</th><th>${esc(sx.mulTableHeaders[1])}</th><th>${esc(sx.mulTableHeaders[2])}</th></tr></thead><tbody>${mulTableRows}</tbody></table></div><div class="score-guide-table-wrap"><table class="score-guide-table"><thead><tr><th>${esc(sx.chaoTableHeaders[0])}</th><th>${esc(sx.chaoTableHeaders[1])}</th><th>${esc(sx.chaoTableHeaders[2])}</th></tr></thead><tbody>${chaoTableRows}</tbody></table></div><p class="score-guide-stack">${esc(sx.stack)}</p></article><article class="intro-block"><p class="score-guide-summary">${esc(sx.summary)}</p></article></div></section></div>`;
 }
-function deriveCalloutClipKey(msg='',meta={}){
-  const explicit=String(meta?.clipKey??meta?.key??'').trim().toLowerCase();
-  if(explicit)return explicit;
-  const raw=String(msg??'').trim();
-  if(isPassCalloutText(raw))return'pass';
-  if(isLastCalloutText(raw))return'last';
-  const kindMap=KIND[state.language]??KIND['zh-HK'];
-  for(const[k,v] of Object.entries(kindMap)){
-    if(raw.startsWith(String(v)))return`kind-${k}`;
-  }
-  return'generic';
-}
-async function playRecordedCalloutClip(clipKey='',gender='male',seq=0,opts={}){
-  const key=String(clipKey??'').trim().toLowerCase();
-  if(!key)return false;
-  const holdResume=Boolean(opts?.holdResume);
-  const waitForEnd=Boolean(opts?.waitForEnd);
-  const lang=state.language==='en'?'en':state.language==='zh-HK'?'zh-HK':'';
-  if(!lang)return false;
-  const g=String(gender??'male')==='female'?'female':'male';
-  const pack=normalizeCalloutStylePack(calloutStylePack);
-  const cacheKey=`${lang}|${key}|${g}`;
-  const exts=lang==='zh-HK'?['mp3']:['m4a','mp3','wav'];
-  const nameCandidates=[
-    `${key}-${pack}-${g}`,
-    `${key}-${pack}`,
-    `${key}-${g}`,
-    key
-  ];
-  for(const baseName of nameCandidates){
-    for(const ext of exts){
-      const src=withBase(`audio/callout/${lang}/${baseName}.${ext}`);
-      const token=`${cacheKey}|${baseName}|${ext}`;
-      let a=null;
-      if(isIOSDevice()){
-        if(!iosSharedCalloutAudio){
-          iosSharedCalloutAudio=new Audio();
-          iosSharedCalloutAudio.preload='auto';
-          iosSharedCalloutAudio.playsInline=true;
-          iosSharedCalloutAudio.setAttribute?.('playsinline','');
-        }
-        a=iosSharedCalloutAudio;
-      }else{
-        a=calloutAudioCache.get(token);
-        if(!a){
-          a=new Audio(src);
-          a.preload='auto';
-          calloutAudioCache.set(token,a);
-        }
-      }
-      a.src=src;
-      try{
-        if(seq&&seq!==calloutSpeakSeq)return false;
-        calloutSpeechActive=true;
-        calloutResumePending=false;
-        calloutSpeechEndedAt=0;
-        let settled=false;
-        let settlePlayback;
-        const playbackDone=waitForEnd?new Promise((resolve)=>{settlePlayback=resolve;}):null;
-        const finish=(ok)=>{
-          if(settled)return;
-          settled=true;
-          if(waitForEnd&&typeof settlePlayback==='function')settlePlayback(Boolean(ok));
-        };
-        const estimatedMs=Number.isFinite(a.duration)&&a.duration>0
-          ?Math.max(200,Math.min(2800,Math.round(a.duration*1000)))
-          :1200;
-        calloutSpeechUntil=Date.now()+estimatedMs;
-        a.onended=()=>{
-          if(seq&&seq!==calloutSpeakSeq)return;
-          calloutSpeechActive=false;
-          calloutSpeechUntil=0;
-          calloutSpeechEndedAt=Date.now();
-          calloutResumePending=!holdResume;
-          if(!holdResume)maybeRunSoloAi();
-          finish(true);
-        };
-        a.onerror=()=>{
-          if(seq&&seq!==calloutSpeakSeq)return;
-          calloutSpeechActive=false;
-          calloutSpeechUntil=0;
-          calloutSpeechEndedAt=Date.now();
-          calloutResumePending=!holdResume;
-          if(!holdResume)maybeRunSoloAi();
-          finish(false);
-        };
-        a.muted=false;
-        a.volume=1;
-        a.pause?.();
-        a.currentTime=0;
-        await a.play();
-        if(waitForEnd&&playbackDone){
-          const endedOk=await playbackDone;
-          return Boolean(endedOk);
-        }
-        return true;
-      }catch{
-        if(seq&&seq!==calloutSpeakSeq)return false;
-        calloutSpeechActive=false;
-        calloutSpeechUntil=0;
-        calloutSpeechEndedAt=Date.now();
-        calloutResumePending=!holdResume;
-        // try next extension/name
-      }
-    }
-  }
-  return false;
-}
-async function playRecordedCalloutClipSequence(clipKeys=[],gender='male',seq=0){
-  const keys=(Array.isArray(clipKeys)?clipKeys:[])
-    .map((k)=>String(k??'').trim().toLowerCase())
-    .filter(Boolean);
-  if(!keys.length)return false;
-  let playedAny=false;
-  for(let i=0;i<keys.length;i+=1){
-    const isLast=i===keys.length-1;
-    const ok=await playRecordedCalloutClip(keys[i],gender,seq,{
-      holdResume:!isLast,
-      waitForEnd:!isLast
-    });
-    if(!ok)return playedAny;
-    playedAny=true;
-  }
-  return playedAny;
-}
 function speakCallout(text,gender='male',meta={}){
-  try{
-    const msg=String(text??'').trim();
-    if(!msg)return;
-    if(calloutGateUntilPlay&&state.screen==='game'&&state.home.mode==='solo'&&((state.solo?.history?.length??0)===0)&&!meta?.force)return;
-    if(calloutVoiceMode==='off')return;
-    const speakSeq=++calloutSpeakSeq;
-    try{
-      window.speechSynthesis?.cancel?.();
-      if(iosSharedCalloutAudio){
-        iosSharedCalloutAudio.pause?.();
-        iosSharedCalloutAudio.currentTime=0;
-      }
-    }catch{}
-    calloutSpeechActive=false;
-    calloutSpeechUntil=0;
-    calloutResumePending=false;
-    const g=String(gender??'male')==='female'?'female':'male';
-    const seatNum=Number(meta?.seat);
-    const seatKey=Number.isFinite(seatNum)?`s${(Math.trunc(seatNum)%4+4)%4}`:'sX';
-    const key=`${state.language}|${seatKey}|${g}|${msg}`;
-    const now=Date.now();
-    if(key===lastSpokenCalloutKey&&(calloutSpeechActive||now-lastSpokenCalloutAt<1600))return;
-    lastSpokenCalloutKey=key;
-    lastSpokenCalloutAt=now;
-    const clipKey=deriveCalloutClipKey(msg,meta);
-    const variantClipKey=deriveWinnerVariantClipKey(msg)
-      ||deriveZhHkVariantClipKey(msg,meta)
-      ||deriveEnVariantClipKey(msg,meta);
-    const composedClipKeys=deriveZhHkComposedClipKeys(variantClipKey,clipKey);
-    const effectiveClipKey=variantClipKey||clipKey;
-    const calloutType=clipKey==='pass'
-      ?'pass'
-      :clipKey==='last'
-        ?'last'
-        :clipKey.startsWith('kind-')
-          ?'play'
-          :'generic';
-    const playCalloutToneFallback=()=>{
-      unlockAudio();
-      if(!sound.enabled||!sound.ctx)return;
-      if(calloutType==='pass'||isPassCalloutText(msg)){
-        playTone(240,0.12,'square',0.05);
-        playTone(180,0.12,'square',0.04,0.07);
-        return;
-      }
-      if(calloutType==='last'||isLastCalloutText(msg)){
-        playTone(740,0.12,'triangle',0.06);
-        playTone(920,0.14,'triangle',0.05,0.06);
-        return;
-      }
-      // play-type callout (pair/straight/etc.)
-      playTone(430,0.12,'square',0.055);
-      playTone(590,0.13,'triangle',0.05,0.06);
-    };
-    const tryRecorded=()=>{
-      if(composedClipKeys.length){
-        return playRecordedCalloutClipSequence(composedClipKeys,g,speakSeq);
-      }
-      return playRecordedCalloutClip(effectiveClipKey,g,speakSeq);
-    };
-    const forceExactTts=Boolean(meta?.forceExactTts);
-    const ttsOnlyLang=!(state.language==='zh-HK'||state.language==='en');
-    const useTts=Boolean(meta?.forceTts)||ttsOnlyLang;
-    const useRecorded=!ttsOnlyLang&&(calloutVoiceMode==='auto'||calloutVoiceMode==='recorded');
-    const recordedMatchesText=Boolean(variantClipKey)||Boolean(composedClipKeys.length)||isCanonicalRecordedCalloutText(msg,clipKey);
-    if(!useTts){
-      if(useRecorded){
-        void tryRecorded().then((ok)=>{if(!ok)playCalloutToneFallback();});
-      }else{
-        playCalloutToneFallback();
-      }
-      return;
-    }
-
-    if(!window.speechSynthesis||typeof window.SpeechSynthesisUtterance==='undefined'){
-      if(useRecorded){
-        void tryRecorded().then((ok)=>{if(!ok)playCalloutToneFallback();});
-      }else{
-        playCalloutToneFallback();
-      }
-      return;
-    }
-    if(!useTts&&useRecorded&&recordedMatchesText){
-      void tryRecorded().then((ok)=>{if(!ok)playCalloutToneFallback();});
-      return;
-    }
-    const synth=window.speechSynthesis;
-    const femaleHint=/(female|woman|girl|zira|samantha|victoria|karen|aria|ava|alloy|helena|sabina|dalia|paulina|monica|laura|denise|julie|amelie|hedda|katja|haruka|kyoko|ayumi|nanami|sayaka|ting[-\s]?ting|sin[-\s]?ji|sinji|mei[-\s]?jia|xiaoxiao|xiaoyi|xiaomeng|xiaohan|jia[-\s]?yi|yi[-\s]?ting|tracy|hiumaan|standard[-_\s]?a|standard[-_\s]?c|neural[-_\s]?a|neural[-_\s]?c|yue[-_\s]?hk[-_\s]?(female|a|c))/i;
-    const maleHint=/(male|\bman\b|boy|david|alex|daniel|fred|jorge|pablo|raul|diego|carlos|henri|thomas|stefan|klaus|ichiro|otoya|takumi|lee|jun[-\s]?jie|wei|ming|yunxi|yunyang|xiaoming|xiaogang|james|tom|kevin|danny|hiugaai|wanlung|aasing|standard[-_\s]?b|standard[-_\s]?d|neural[-_\s]?b|neural[-_\s]?d|yue[-_\s]?hk[-_\s]?(male|b|d))/i;
-    const voiceMeta=(v)=>`${v?.name||''} ${v?.voiceURI||''} ${v?.lang||''}`;
-    const isFemaleVoice=(v)=>femaleHint.test(voiceMeta(v))&&!maleHint.test(voiceMeta(v));
-    const isMaleVoice=(v)=>maleHint.test(voiceMeta(v))&&!femaleHint.test(voiceMeta(v));
-    const byLangPrefixes=(voices,prefixes)=>voices.filter((v)=>prefixes.some((p)=>String(v.lang??'').toLowerCase().startsWith(p)));
-    const speechLangMeta=(()=>{
-      if(state.language==='fr')return{tts:'fr-FR',prefixes:['fr']};
-      if(state.language==='de')return{tts:'de-DE',prefixes:['de']};
-      if(state.language==='es')return{tts:'es-ES',prefixes:['es']};
-      if(state.language==='en')return{tts:'en-US',prefixes:['en']};
-      if(state.language==='ja')return{tts:'ja-JP',prefixes:['ja']};
-      return{tts:'yue-HK',prefixes:['yue','zh-hk','zh-hant-hk']};
-    })();
-    const isCantoneseVoice=(v)=>{
-      const meta=voiceMeta(v).toLowerCase();
-      const lang=String(v?.lang??'').toLowerCase();
-      return /^yue(-|$)/i.test(lang) || /^zh[-_]?hk(-|$)/i.test(lang) || /cantonese|hong kong|heung gong/.test(meta);
-    };
-    const isMandarinVoice=(v)=>{
-      const meta=voiceMeta(v).toLowerCase();
-      const lang=String(v?.lang??'').toLowerCase();
-      return /^zh[-_]?cn(-|$)/i.test(lang)
-        || /^zh[-_]?sg(-|$)/i.test(lang)
-        || /mandarin|putonghua|guoyu|普通话|普通話|國語/.test(meta);
-    };
-    const chooseVoice=(voices)=>{
-      const source=voices??[];
-      if(!source.length)return null;
-      const langPool=state.language==='zh-HK'
-        ?source.filter((v)=>isCantoneseVoice(v)&&!isMandarinVoice(v))
-        :byLangPrefixes(source,speechLangMeta.prefixes);
-      const set=langPool.filter((v)=>!isMandarinVoice(v));
-      if(!set.length)return null;
-      if(g==='female')return set.find(isFemaleVoice) ?? set.find((v)=>!isMaleVoice(v)) ?? null;
-      return set.find(isMaleVoice) ?? set.find((v)=>!isFemaleVoice(v)) ?? null;
-    };
-    const chooseAnyCantonese=(voices)=>{
-      const source=voices??[];
-      const set=source.filter((v)=>isCantoneseVoice(v)&&!isMandarinVoice(v));
-      return set[0]??null;
-    };
-    const chooseFallbackVoice=(voices)=>{
-      const source=voices??[];
-      if(!source.length)return null;
-      if(state.language==='zh-HK'){
-        const cantonese=source.find((v)=>isCantoneseVoice(v));
-        if(cantonese)return cantonese;
-        const mandarin=source.find((v)=>isMandarinVoice(v));
-        if(mandarin)return mandarin;
-      }
-      const locale=source.find((v)=>byLangPrefixes([v],speechLangMeta.prefixes).length);
-      return locale??source[0]??null;
-    };
-    const speakNow=()=>{
-      if(speakSeq!==calloutSpeakSeq)return;
-      const emojiPattern=/[\uD83C-\uDBFF\uDC00-\uDFFF]/g;
-      const spokenMsg=msg
-        .replace(emojiPattern,'')
-        .replace(/\uFE0F/gu,'')
-        .replace(/[!!]/g,'')
-        .trim();
-      const u=new SpeechSynthesisUtterance(spokenMsg||msg.replace(/[!!]/g,''));
-      const pack=normalizeCalloutStylePack(calloutStylePack);
-      const packRate=pack==='energetic'?0.835:pack==='minimal'?0.56:0.62;
-      const femalePitch=pack==='energetic'?1.38:pack==='minimal'?1.18:1.28;
-      const malePitch=pack==='energetic'?1.0:pack==='minimal'?0.84:0.92;
-      const seatNum=Number(meta?.seat);
-      const seatOffset=Number.isFinite(seatNum)?((Math.trunc(seatNum)%4+4)%4)-1.5:0;
-      const seatRateOffset=seatOffset*0.01;
-      const seatPitchOffset=seatOffset*0.015;
-      const basePitch=g==='female'?femalePitch:malePitch;
-      u.rate=Math.max(0.55,Math.min(1.2,packRate+seatRateOffset));
-      u.pitch=Math.max(0.7,Math.min(1.8,basePitch+seatPitchOffset));
-      const voices=synth.getVoices?.()??[];
-      let voice=chooseVoice(voices);
-      // If browser does not expose gender metadata, keep Cantonese-only and bias by pitch.
-      if(!voice&&g==='female'){
-        if(state.language==='zh-HK'){
-          voice=chooseAnyCantonese(voices);
-        }else{
-          voice=byLangPrefixes(voices,speechLangMeta.prefixes)[0]??null;
-        }
-        if(!voice&&state.language==='en'&&isIOSDevice())voice=voices[0]??null;
-        if(!voice)voice=chooseFallbackVoice(voices);
-        if(!voice){playCalloutToneFallback();return;}
-        u.pitch=Math.max(u.pitch,1.18);
-      }else if(!voice){
-        if(state.language==='zh-HK')voice=chooseAnyCantonese(voices);
-        if(isIOSDevice()){
-          const localeVoice=voices.find((v)=>byLangPrefixes([v],speechLangMeta.prefixes).length);
-          if(!voice)voice=localeVoice??(state.language==='en'?(voices[0]??null):null);
-        }
-        if(!voice)voice=chooseFallbackVoice(voices);
-        if(!voice){playCalloutToneFallback();return;}
-      }
-      const estimatedMs=Math.max(120,Math.min(420,Math.round((msg.length*62)/Math.max(0.55,u.rate))));
-      calloutSpeechActive=true;
-      calloutSpeechUntil=Date.now()+estimatedMs;
-      u.onend=()=>{if(speakSeq!==calloutSpeakSeq)return;calloutSpeechActive=false;calloutSpeechUntil=0;calloutSpeechEndedAt=Date.now();calloutResumePending=true;maybeRunSoloAi();};
-      u.onerror=()=>{if(speakSeq!==calloutSpeakSeq)return;calloutSpeechActive=false;calloutSpeechUntil=0;calloutSpeechEndedAt=Date.now();calloutResumePending=true;maybeRunSoloAi();};
-      u.voice=voice;
-      u.lang=String(voice.lang||speechLangMeta.tts);
-      synth.resume?.();
-      synth.speak(u);
-    };
-    const speakTts=()=>{
-      const voices=synth.getVoices?.()??[];
-      if(!voices.length){
-        const onVoices=()=>{speechPrimed=true;speakNow();};
-        synth.addEventListener('voiceschanged',onVoices,{once:true});
-        setTimeout(()=>{if(!speechPrimed)speakNow();},0);
-        return;
-      }
-      speechPrimed=true;
-      speakNow();
-    };
-    const voices=synth.getVoices?.()??[];
-    if(forceExactTts){
-      speakTts();
-      return;
-    }
-    if(!voices.length){
-      if(useRecorded&&calloutVoiceMode==='auto'&&recordedMatchesText){
-        void tryRecorded().then((ok)=>{if(!ok)speakTts();});
-      }else{
-        speakTts();
-      }
-      return;
-    }
-    if(useRecorded&&calloutVoiceMode==='auto'&&recordedMatchesText){
-      void tryRecorded().then((ok)=>{if(!ok)speakTts();});
-    }else{
-      speakTts();
-    }
-  }catch{}
+  calloutAudioController.speakCallout(text,gender,meta);
 }
 function parseJwtPayload(token){try{const p=String(token??'').split('.')[1];if(!p)return null;const b=p.replace(/-/g,'+').replace(/_/g,'/');const json=decodeURIComponent(atob(b).split('').map((c)=>`%${c.charCodeAt(0).toString(16).padStart(2,'0')}`).join(''));return JSON.parse(json);}catch{return null;}}
 async function handleCredentialResponse(response){
@@ -8501,33 +8159,21 @@ function maybeRunSoloAi(){
   const current=g?.players?.[g?.currentSeat];
   if(!g||g.gameOver||!current||current.isHuman)return;
   const now=Date.now();
-  // iOS Safari can occasionally miss speech onend/onerror; force-release stale speech lock.
-  if(calloutSpeechActive&&calloutSpeechUntil>0&&now>calloutSpeechUntil+800){
-    calloutSpeechActive=false;
-    calloutSpeechUntil=0;
-    calloutSpeechEndedAt=now;
-    try{window.speechSynthesis?.cancel?.();}catch{}
-  }
+  calloutAudioController.forceReleaseStale(now);
   const turnLockRemaining=Math.max(0,turnLockUntil-now);
-  const remaining=Math.max(0,calloutSpeechUntil-Date.now());
-  const afterCallout=calloutResumePending;
-  if(afterCallout)calloutResumePending=false;
+  const remaining=Math.max(0,calloutAudioController.getSpeechUntil()-Date.now());
+  const afterCallout=calloutAudioController.consumeResumePending();
   const DEFAULT_AI_DELAY_MS=350;
   const POST_CALLOUT_DELAY_MS=320;
   const MIN_AI_DELAY_MS=250;
-  const wait=(calloutSpeechActive||remaining>0||turnLockRemaining>0)
+  const wait=(calloutAudioController.isSpeechActive()||remaining>0||turnLockRemaining>0)
     ?Math.max(MIN_AI_DELAY_MS,remaining,turnLockRemaining)
     :afterCallout?POST_CALLOUT_DELAY_MS:DEFAULT_AI_DELAY_MS;
   aiTimer=window.setTimeout(()=>{
     try{
       const tickNow=Date.now();
-      if(calloutSpeechActive&&calloutSpeechUntil>0&&tickNow>calloutSpeechUntil+800){
-        calloutSpeechActive=false;
-        calloutSpeechUntil=0;
-        calloutSpeechEndedAt=tickNow;
-        try{window.speechSynthesis?.cancel?.();}catch{}
-      }
-      if(calloutSpeechActive||tickNow<calloutSpeechUntil){
+      calloutAudioController.forceReleaseStale(tickNow);
+      if(calloutAudioController.isSpeechActive()||tickNow<calloutAudioController.getSpeechUntil()){
         maybeRunSoloAi();
         return;
       }
@@ -8576,43 +8222,13 @@ function unlockAudio(){
         }catch{}
       }
     }
-    // iOS Safari: prime a single HTMLAudio element during user gesture so recorded clips can play later.
-    try{
-      if(isIOSDevice()){
-        if(!iosSharedCalloutAudio){
-          iosSharedCalloutAudio=new Audio();
-          iosSharedCalloutAudio.preload='auto';
-          iosSharedCalloutAudio.playsInline=true;
-          iosSharedCalloutAudio.setAttribute?.('playsinline','');
-        }
-        const a=iosSharedCalloutAudio;
-        if(!a.src)a.src=withBase('audio/silence.mp3');
-        const prevVolume=Number.isFinite(a.volume)?a.volume:1;
-        a.muted=false;
-        a.volume=0;
-        const p=a.play?.();
-        if(p?.then){
-          p.then(()=>{
-            try{a.pause?.();a.currentTime=0;}catch{}
-            a.volume=prevVolume;
-          }).catch(()=>{a.volume=prevVolume;});
-        }else{
-          a.volume=prevVolume;
-        }
-      }
-    }catch{}
+    calloutAudioController.primeHtmlAudioIfNeeded();
   }catch{
     // Keep user preference unchanged even if runtime audio context cannot initialize.
   }
 }
 function primeSpeech(){
-  try{
-    if(isIOSDevice())return;
-    const synth=window.speechSynthesis;
-    if(!synth)return;
-    synth.getVoices?.();
-    speechPrimed=true;
-  }catch{}
+  calloutAudioController.primeSpeech();
 }
 function isAudioReady(){
   return Boolean(sound.enabled&&sound.ctx&&sound.ctx.state==='running');
@@ -8633,8 +8249,7 @@ function runtimeDiagnosticsText(){
   return zh?`診斷: 音效 ${audio} | 報牌語音 ${speech}`:`Diag: Audio ${audio} | Callout Speech ${speech}`;
 }
 function currentSfxDuckFactor(){
-  const now=Date.now();
-  return (calloutSpeechActive||now<calloutSpeechUntil+250)?0.45:1;
+  return calloutAudioController.currentSfxDuckFactor();
 }
 function playTone(freq,d,type='sine',g=0.03,delay=0){
   if(!sound.ctx)return;
@@ -9276,72 +8891,10 @@ function markComboActive(comboId,value){
   });
 }
 function renderLangMenu(id){
-  const items=LANGUAGE_OPTIONS.map((opt)=>{
-    const label=LANGUAGE_NATIVE_LABEL[opt.value]??I18N[state.language]?.[opt.labelKey]??opt.value;
-    const selected=state.language===opt.value;
-    return `<button class="lang-menu-item" type="button" role="option" data-lang="${opt.value}" aria-selected="${selected?'true':'false'}">${label}</button>`;
-  }).join('');
-  const shortLabel=state.language==='zh-HK'?'中':state.language==='fr'?'FR':state.language==='de'?'DE':state.language==='es'?'ES':state.language==='ja'?'JA':'EN';
-  const globeSvg=`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm7.7 9h-3.2a15.8 15.8 0 0 0-1.1-5.1 8.03 8.03 0 0 1 4.3 5.1Zm-7.7-7a13.6 13.6 0 0 1 1.8 6H10.2a13.6 13.6 0 0 1 1.8-6Zm-5.4 7h-3.2a8.03 8.03 0 0 1 4.3-5.1 15.8 15.8 0 0 0-1.1 5.1Zm0 2a15.8 15.8 0 0 0 1.1 5.1A8.03 8.03 0 0 1 3.4 13h3.2Zm5.4 7a13.6 13.6 0 0 1-1.8-6h3.6a13.6 13.6 0 0 1-1.8 6Zm3.6-7h3.2a8.03 8.03 0 0 1-4.3 5.1 15.8 15.8 0 0 0 1.1-5.1Z"/></svg>`;
-  return `<div class="lang-menu" data-lang-menu="1" data-lang-menu-id="${id}"><button id="${id}" class="lang-menu-trigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="${t('lang')}"><span class="lang-icon" aria-hidden="true">${globeSvg}</span><span class="lang-short">${shortLabel}</span></button><div class="lang-menu-pop" role="listbox" aria-label="${t('lang')}" data-lang-menu-owner="${id}">${items}</div></div>`;
-}
-let langMenuDocBound=false;
-let openLangMenu=null;
-const langMenuPortals=new WeakMap();
-let langMenuTouchSelectionUntil=0;
-function positionLangMenuPop(trigger,pop){
-  const rect=trigger.getBoundingClientRect();
-  const padding=8;
-  pop.style.display='grid';
-  const popRect=pop.getBoundingClientRect();
-  let left=rect.right-popRect.width;
-  left=Math.max(padding,Math.min(left,window.innerWidth-popRect.width-padding));
-  let top=rect.bottom+6;
-  if(top+popRect.height>window.innerHeight-padding){
-    top=rect.top-popRect.height-6;
-  }
-  top=Math.max(padding,top);
-  pop.style.left=`${left}px`;
-  pop.style.top=`${top}px`;
-  pop.style.right='auto';
-  pop.style.bottom='auto';
-}
-function openLangMenuPop(menu,trigger,pop){
-  if(!langMenuPortals.has(pop)){
-    langMenuPortals.set(pop,{parent:pop.parentElement,next:pop.nextSibling});
-  }
-  document.body.appendChild(pop);
-  pop.style.position='fixed';
-  pop.style.zIndex='20000';
-  positionLangMenuPop(trigger,pop);
-}
-function closeLangMenuPop(menu){
-  const owner=menu?.dataset?.langMenuId;
-  const pop=menu?.querySelector?.('.lang-menu-pop')||document.querySelector(`.lang-menu-pop[data-lang-menu-owner="${owner}"]`);
-  if(!(pop instanceof HTMLElement))return;
-  pop.style.display='none';
-  pop.style.left='';
-  pop.style.top='';
-  pop.style.right='';
-  pop.style.bottom='';
-  pop.style.position='';
-  pop.style.zIndex='';
-  const portal=langMenuPortals.get(pop);
-  if(portal?.parent){
-    if(portal.next&&portal.next.parentElement===portal.parent){
-      portal.parent.insertBefore(pop,portal.next);
-    }else{
-      portal.parent.appendChild(pop);
-    }
-  }
+  return langMenuController.renderLangMenu(id);
 }
 function closeLangMenu(){
-  if(!openLangMenu)return;
-  openLangMenu.classList.remove('open');
-  const trigger=openLangMenu.querySelector('.lang-menu-trigger');
-  if(trigger)trigger.setAttribute('aria-expanded','false');
-  closeLangMenuPop(openLangMenu);
-  openLangMenu=null;
+  langMenuController.closeLangMenu();
 }
 function setLanguage(value,{reloadGoogle=false}={}){
   if(!LANGUAGE_OPTIONS.some((opt)=>opt.value===value))return;
@@ -9352,57 +8905,7 @@ function setLanguage(value,{reloadGoogle=false}={}){
   render();
 }
 function bindLangMenu(root,{reloadGoogle=false}={}){
-  if(!root)return;
-  const menus=root.matches?.('.lang-menu')?[root]:[...root.querySelectorAll('.lang-menu')];
-  menus.forEach((menu)=>{
-    if(menu.dataset.langBound)return;
-    menu.dataset.langBound='1';
-    const trigger=menu.querySelector('.lang-menu-trigger');
-    const pop=menu.querySelector('.lang-menu-pop');
-    if(!(trigger instanceof HTMLElement)||!(pop instanceof HTMLElement))return;
-    trigger.addEventListener('click',(ev)=>{
-      ev.preventDefault();
-      ev.stopPropagation();
-      if(openLangMenu&&openLangMenu!==menu)closeLangMenu();
-      const isOpen=menu.classList.toggle('open');
-      trigger.setAttribute('aria-expanded',isOpen?'true':'false');
-      openLangMenu=isOpen?menu:null;
-      if(isOpen){
-        openLangMenuPop(menu,trigger,pop);
-      }else{
-        closeLangMenuPop(menu);
-      }
-    });
-    const selectLang=(ev,item)=>{
-      ev.preventDefault();
-      ev.stopPropagation();
-      const value=String(item.getAttribute('data-lang')||'');
-      menu.classList.remove('open');
-      trigger.setAttribute('aria-expanded','false');
-      closeLangMenuPop(menu);
-      if(openLangMenu===menu)openLangMenu=null;
-      setLanguage(value,{reloadGoogle});
-    };
-    pop.querySelectorAll('.lang-menu-item').forEach((item)=>{
-      item.addEventListener('pointerdown',(ev)=>{
-        if(ev.pointerType==='mouse')return;
-        langMenuTouchSelectionUntil=Date.now()+600;
-        selectLang(ev,item);
-      });
-      item.addEventListener('click',(ev)=>{
-        if(Date.now()<langMenuTouchSelectionUntil){
-          ev.preventDefault();
-          ev.stopPropagation();
-          return;
-        }
-        selectLang(ev,item);
-      });
-    });
-  });
-  if(langMenuDocBound)return;
-  langMenuDocBound=true;
-  document.addEventListener('click',()=>{closeLangMenu();});
-  document.addEventListener('keydown',(ev)=>{if(ev.key==='Escape')closeLangMenu();});
+  langMenuController.bindLangMenu(root,{reloadGoogle});
 }
 function backAssetFile(value){
   const found=BACK_OPTIONS.find((x)=>x.value===value);
@@ -12224,10 +11727,7 @@ document.addEventListener('visibilitychange',()=>{
     void touchRoomPresence(true);
     unlockAudio();
     if(state.screen==='game'){
-      calloutSpeechActive=false;
-      calloutSpeechUntil=0;
-      calloutSpeechEndedAt=Date.now();
-      calloutResumePending=false;
+      calloutAudioController.markInterrupted(Date.now());
       if(state.home.mode==='room')maybeRunRoomAi();
       else maybeRunSoloAi();
       scheduleViewportRecovery(30);
