@@ -11118,8 +11118,8 @@ body[data-screen='game'] .table {
 }
 body[data-screen='game'] .room-top-meta-table {
   position: absolute !important;
-  top: 21px !important;
-  left: 23px !important;
+  top: 19px !important;
+  left: 21px !important;
   right: auto !important;
   transform: none !important;
   z-index: 20 !important;

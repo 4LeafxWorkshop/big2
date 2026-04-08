@@ -1991,6 +1991,25 @@ function scheduleCalloutExpiry(until=0){
     if(state.screen==='game')render();
   },wait);
 }
+function resetCalloutPlaybackState(){
+  calloutSpeakSeq+=1;
+  calloutSpeechActive=false;
+  calloutSpeechUntil=0;
+  calloutSpeechEndedAt=Date.now();
+  calloutResumePending=false;
+  lastSpokenCalloutKey='';
+  lastSpokenCalloutAt=0;
+  speechPrimed=false;
+  try{window.speechSynthesis?.cancel?.();}catch{}
+  try{
+    if(iosSharedCalloutAudio){
+      iosSharedCalloutAudio.pause?.();
+      iosSharedCalloutAudio.currentTime=0;
+      iosSharedCalloutAudio.onended=null;
+      iosSharedCalloutAudio.onerror=null;
+    }
+  }catch{}
+}
 let lastCardProcessedHistoryLen=0;
 let googleInlineRetryTimer=null;
 let googleIdentityInitialized=false;
@@ -6724,7 +6743,7 @@ function speakCallout(text,gender='male',meta={}){
     const seatKey=Number.isFinite(seatNum)?`s${(Math.trunc(seatNum)%4+4)%4}`:'sX';
     const key=`${state.language}|${seatKey}|${g}|${msg}`;
     const now=Date.now();
-    if(key===lastSpokenCalloutKey&&now-lastSpokenCalloutAt<900)return;
+    if(key===lastSpokenCalloutKey&&(calloutSpeechActive||now-lastSpokenCalloutAt<1600))return;
     lastSpokenCalloutKey=key;
     lastSpokenCalloutAt=now;
     const clipKey=deriveCalloutClipKey(msg,meta);
@@ -9324,6 +9343,7 @@ function closeLangMenu(){
 }
 function setLanguage(value,{reloadGoogle=false}={}){
   if(!LANGUAGE_OPTIONS.some((opt)=>opt.value===value))return;
+  if(state.language!==value)resetCalloutPlaybackState();
   state.language=value;
   relabelSoloBots();
   if(reloadGoogle)reloadGoogleScriptForLocale();
