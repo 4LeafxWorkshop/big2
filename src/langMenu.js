@@ -67,6 +67,27 @@ export function createLangMenuController(deps){
     }
   }
 
+  function closeOrphanedLangMenuPops(){
+    document.querySelectorAll('.lang-menu-pop').forEach((pop)=>{
+      if(!(pop instanceof HTMLElement))return;
+      pop.style.display='none';
+      pop.style.left='';
+      pop.style.top='';
+      pop.style.right='';
+      pop.style.bottom='';
+      pop.style.position='';
+      pop.style.zIndex='';
+      const portal=langMenuPortals.get(pop);
+      if(portal?.parent){
+        if(portal.next&&portal.next.parentElement===portal.parent){
+          portal.parent.insertBefore(pop,portal.next);
+        }else{
+          portal.parent.appendChild(pop);
+        }
+      }
+    });
+  }
+
   function forceCloseAllLangMenus(){
     document.querySelectorAll('.lang-menu').forEach((menu)=>{
       if(!(menu instanceof HTMLElement))return;
@@ -75,6 +96,7 @@ export function createLangMenuController(deps){
       if(trigger instanceof HTMLElement)trigger.setAttribute('aria-expanded','false');
       closeLangMenuPop(menu);
     });
+    closeOrphanedLangMenuPops();
     openLangMenu=null;
   }
 
