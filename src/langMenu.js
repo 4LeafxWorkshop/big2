@@ -93,6 +93,7 @@ export function createLangMenuController(deps){
     deps.setLanguageState(value,{reloadGoogle});
     deps.onAfterLanguageChange(value,{reloadGoogle});
     requestAnimationFrame(()=>{forceCloseAllLangMenus();});
+    setTimeout(()=>{forceCloseAllLangMenus();},120);
   }
 
   function bindLangMenu(root,{reloadGoogle=false}={}){
@@ -105,6 +106,11 @@ export function createLangMenuController(deps){
       const pop=menu.querySelector('.lang-menu-pop');
       if(!(trigger instanceof HTMLElement)||!(pop instanceof HTMLElement))return;
       trigger.addEventListener('click',(ev)=>{
+        if(Date.now()<langMenuTouchSelectionUntil){
+          ev.preventDefault();
+          ev.stopPropagation();
+          return;
+        }
         ev.preventDefault();
         ev.stopPropagation();
         if(openLangMenu&&openLangMenu!==menu)closeLangMenu();
@@ -120,6 +126,7 @@ export function createLangMenuController(deps){
       const selectLang=(ev,item)=>{
         ev.preventDefault();
         ev.stopPropagation();
+        langMenuTouchSelectionUntil=Date.now()+700;
         const value=String(item.getAttribute('data-lang')||'');
         menu.classList.remove('open');
         trigger.setAttribute('aria-expanded','false');

@@ -8164,11 +8164,13 @@ function resultScreenHtml(v,arr){
     :0;
   const needsPlayers=isRoom&&roomHumanCount<2;
   const canRoomAgain=isRoom&&!needsPlayers&&isHost&&!roomExpired;
+  const statusHint=uiStatus(v.status,v.statusMeta);
   const footerHint=roomExpired
     ?t('roomHostSneakAway')
     :needsPlayers
       ?t('roomNeedPlayers')
       :(!canRoomAgain&&isRoom?t('roomWaitingHost'):'');
+  const topHint=footerHint&&statusHint===footerHint?'':statusHint;
   const roomPictureBySeat=(()=>{
     const list=isRoom&&state.room.data?Array.isArray(state.room.data.players)?state.room.data.players:[]:[];
     const entries=list.map((p)=>[Number.isFinite(Number(p?.seat))?Number(p.seat):-1,String(p?.picture||'').trim()]);
@@ -8242,16 +8244,16 @@ function resultScreenHtml(v,arr){
     ${showConfetti?`<canvas class="confetti-canvas result-confetti-canvas" data-confetti="result" aria-hidden="true"></canvas>`:''}
     <div class="result-card">
       <h2 class="title-with-icon"><span class="title-icon title-icon-result" aria-hidden="true"></span><span>${t('resultTitle')}</span></h2>
-      <div class="hint">${esc(uiStatus(v.status,v.statusMeta))}</div>
+      ${topHint?`<div class="hint">${esc(topHint)}</div>`:''}
       ${isRoom?`<div class="room-expiry-row"><span>${t('roomCountdown')}</span><button type="button" class="room-expiry-reset-btn" data-room-expiry-reset="1"><strong data-room-countdown-value>${esc(roomCountdown)}</strong></button></div>`:''}
       <div class="result-list">${rows}</div>
-      ${footerHint?`<div class="hint">${footerHint}</div>`:''}
       <div class="control-row">
         <button id="result-home" class="secondary">${isRoom?t('roomLeave'):t('home')}</button>
         ${(!isRoom||canRoomAgain)
     ?`<button id="result-again" class="primary" ${canRoomAgain||!isRoom?'':'disabled'}>${t('again')}</button>`
     :(!isRoom?'':
       footerHint?``:`<span class="hint">${t('roomWaitingHost')}</span>`)}
+        ${footerHint?`<span class="hint">${footerHint}</span>`:''}
       </div>
     </div>
   </section>`;
@@ -10164,6 +10166,8 @@ function retargetCalloutTails(){
     }
     tail.classList.remove('tail-north','tail-south','tail-east','tail-west');
     tail.classList.add(`tail-${dir}`);
+    tail.style.removeProperty('--tail-anchor-x');
+    tail.style.removeProperty('--tail-anchor-y');
     let sx=0;
     let sy=0;
     if(vw&&vh){
@@ -10189,6 +10193,14 @@ function retargetCalloutTails(){
       bubble.style.removeProperty('--callout-shift-y');
       bubble.style.removeProperty('--callout-box-shift-x');
       bubble.style.removeProperty('--callout-box-shift-y');
+    }
+    const shiftedBubbleRect=bubble.getBoundingClientRect();
+    const anchorX=Math.max(10,Math.min(shiftedBubbleRect.width-10,ax-shiftedBubbleRect.left));
+    const anchorY=Math.max(10,Math.min(shiftedBubbleRect.height-10,ay-shiftedBubbleRect.top));
+    if(dir==='north'||dir==='south'){
+      tail.style.setProperty('--tail-anchor-x',`${anchorX.toFixed(1)}px`);
+    }else{
+      tail.style.setProperty('--tail-anchor-y',`${anchorY.toFixed(1)}px`);
     }
   }
 }
