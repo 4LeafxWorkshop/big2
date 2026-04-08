@@ -8164,6 +8164,11 @@ function resultScreenHtml(v,arr){
     :0;
   const needsPlayers=isRoom&&roomHumanCount<2;
   const canRoomAgain=isRoom&&!needsPlayers&&isHost&&!roomExpired;
+  const footerHint=roomExpired
+    ?t('roomHostSneakAway')
+    :needsPlayers
+      ?t('roomNeedPlayers')
+      :(!canRoomAgain&&isRoom?t('roomWaitingHost'):'');
   const roomPictureBySeat=(()=>{
     const list=isRoom&&state.room.data?Array.isArray(state.room.data.players)?state.room.data.players:[]:[];
     const entries=list.map((p)=>[Number.isFinite(Number(p?.seat))?Number(p.seat):-1,String(p?.picture||'').trim()]);
@@ -8240,15 +8245,13 @@ function resultScreenHtml(v,arr){
       <div class="hint">${esc(uiStatus(v.status,v.statusMeta))}</div>
       ${isRoom?`<div class="room-expiry-row"><span>${t('roomCountdown')}</span><button type="button" class="room-expiry-reset-btn" data-room-expiry-reset="1"><strong data-room-countdown-value>${esc(roomCountdown)}</strong></button></div>`:''}
       <div class="result-list">${rows}</div>
-      ${roomExpired?`<div class="hint">${t('roomHostSneakAway')}</div>`:''}
-      ${needsPlayers?`<div class="hint">${t('roomNeedPlayers')}</div>`:''}
+      ${footerHint?`<div class="hint">${footerHint}</div>`:''}
       <div class="control-row">
         <button id="result-home" class="secondary">${isRoom?t('roomLeave'):t('home')}</button>
         ${(!isRoom||canRoomAgain)
     ?`<button id="result-again" class="primary" ${canRoomAgain||!isRoom?'':'disabled'}>${t('again')}</button>`
     :(!isRoom?'':
-      roomExpired?`<span class="hint">${t('roomHostSneakAway')}</span>`:
-      needsPlayers?``:`<span class="hint">${t('roomWaitingHost')}</span>`)}
+      footerHint?``:`<span class="hint">${t('roomWaitingHost')}</span>`)}
       </div>
     </div>
   </section>`;
