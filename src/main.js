@@ -1,5 +1,6 @@
 ﻿﻿﻿﻿﻿﻿﻿﻿import {createCalloutAudioController} from './calloutAudio.js';
 import {createLangMenuController} from './langMenu.js';
+import {createRoomLifecycleController} from './roomLifecycle.js';
 
 const RANKS=['3','4','5','6','7','8','9','10','J','Q','K','A','2'];
 const SUITS=[
@@ -4211,34 +4212,34 @@ function currentRoomPlayerId(){
   if(pinned)return pinned;
   return baseRoomPlayerId();
 }
+const roomLifecycleController=createRoomLifecycleController({
+  FIRESTORE_ROOMS_COLLECTION,
+  addRoomSystemLog,
+  botProfileForSeat,
+  clearRoomStartPending,
+  cloneRoomGame,
+  currentRoomDb,
+  currentRoomPlayerId,
+  deleteRoomDirectory,
+  getRoomPresenceTimer:()=>roomPresenceTimer,
+  getState:()=>state,
+  loadActiveRooms,
+  render,
+  roomLeaveLogText:(name)=>t('roomLeaveLog').replace('{{name}}',name),
+  roomPlayerIds,
+  setRecommendHint,
+  setRoomPresenceTimer:(value)=>{roomPresenceTimer=value;},
+  setRoomResultExpiryReached:(value)=>{roomResultExpiryReached=Boolean(value);},
+  updateActiveRoomPointer
+});
 function isValidDifficulty(value){
   return value==='easy'||value==='normal'||value==='hard';
 }
 function resetRoomState(){
-  if(state.room.unsub){try{state.room.unsub();}catch{}}
-  if(roomPresenceTimer){clearInterval(roomPresenceTimer);roomPresenceTimer=null;}
-  roomResultExpiryReached=false;
-  void updateActiveRoomPointer('');
-  clearRoomStartPending();
-  state.room={id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:false,error:'',started:false,unsub:null,selfSeat:-1,recordedGameKey:'',pendingStart:false};
-  state.room.playerId='';
-  if(state.home.mode==='room')state.home.mode='solo';
+  roomLifecycleController.resetRoomState();
 }
 function abandonRoomLocally(msg='',openLobby=true){
-  if(state.room.unsub){try{state.room.unsub();}catch{}}
-  if(roomPresenceTimer){clearInterval(roomPresenceTimer);roomPresenceTimer=null;}
-  roomResultExpiryReached=false;
-  void updateActiveRoomPointer('');
-  clearRoomStartPending();
-  state.screen='home';
-  state.selected.clear();
-  state.recommendation=null;
-  setRecommendHint('');
-  state.opponentProfileName='';
-  state.home.mode='solo';
-  state.room={id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:Boolean(openLobby),error:String(msg||''),started:false,unsub:null,selfSeat:-1,recordedGameKey:'',pendingStart:false};
-  state.room.playerId='';
-  render();
+  roomLifecycleController.abandonRoomLocally(msg,openLobby);
 }
 function setRoomError(msg){
   state.room.error=msg||'';
@@ -5110,77 +5111,7 @@ function subscribeRoom(roomId,code,firebaseInstanceId='',roomDbOverride=null){
   state.room={...state.room,id:roomId,code,firebaseInstanceId:resolvedInstanceId,unsub,started:false};
 }
 async function leaveRoom(toLobby=false){
-  const roomId=String(state.room.id||'').trim();
-  const uid=currentRoomPlayerId();
-  const roomDb=currentRoomDb();
-  let refreshLobbyAfterLeave=false;
-  if(roomId){
-    resetRoomState();
-    state.screen='home';
-    state.selected.clear();
-    state.recommendation=null;
-    setRecommendHint('');
-    state.opponentProfileName='';
-    if(toLobby){
-      state.room.joinOpen=true;
-      state.room.error='';
-      refreshLobbyAfterLeave=true;
-    }
-    render();
-  }
-  if(!roomId||!roomDb||!uid)return;
-  try{
-    const ref=roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(roomId);
-    let shouldDeleteDirectory=false;
-    await roomDb.runTransaction(async(tx)=>{
-      const snap=await tx.get(ref);
-      if(!snap.exists)return;
-      const data=snap.data()??{};
-      const players=Array.isArray(data.players)?[...data.players]:[];
-      const remaining=players.filter((p)=>String(p.uid)!==uid);
-      const leaving=players.find((p)=>String(p.uid)===uid);
-      const hostLeaving=String(data.hostId)===uid;
-      const status=String(data.status??'lobby');
-      if(!remaining.length){
-        tx.delete(ref);
-        shouldDeleteDirectory=true;
-        return;
-      }
-        const remainingHumans=remaining.filter((p)=>String(p.uid||'').startsWith('uid:')||String(p.uid||'').startsWith('guest:'));
-        if(!remainingHumans.length){
-          tx.delete(ref);
-          shouldDeleteDirectory=true;
-          return;
-        }
-      const hostUpdate=hostLeaving?{hostId:String(remainingHumans[0]?.uid??remaining[0]?.uid??''),hostName:String(remainingHumans[0]?.name??remaining[0]?.name??'')}:{};
-      const now=Date.now();
-      if(status==='playing'&&data.game&&leaving&&Number.isFinite(Number(leaving.seat))){
-        const game=cloneRoomGame(data.game);
-        const seat=Number(leaving.seat);
-        if(game&&game.players&&game.players[seat]){
-          const bp=botProfileForSeat(seat);
-          const target=game.players[seat];
-          target.isHuman=false;
-          target.uid=`bot:${seat}:${bp.name}`;
-          target.name=bp.name;
-          target.gender=bp.gender;
-          target.picture='';
-        }
-        if(game){
-          const text=t('roomLeaveLog').replace('{{name}}',String(leaving.name||''));
-          addRoomSystemLog(game,text);
-        }
-        tx.update(ref,{players:remaining,playerIds:roomPlayerIds(remaining),game,updatedAt:now,gameVersion:Number(data.gameVersion||0)+1,...hostUpdate});
-        return;
-      }
-      tx.update(ref,{players:remaining,playerIds:roomPlayerIds(remaining),updatedAt:now,...hostUpdate});
-    });
-    if(shouldDeleteDirectory)await deleteRoomDirectory(roomId);
-  }catch(err){
-    console.error('leave room failed',err);
-  }finally{
-    if(refreshLobbyAfterLeave)void loadActiveRooms();
-  }
+  await roomLifecycleController.leaveRoom(toLobby);
 }
 async function setRoomPrivacy(isPrivate){
   const roomDb=currentRoomDb();
