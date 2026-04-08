@@ -47,6 +47,9 @@ function createController(overrides={}){
       if(cards.length===1)return{valid:true,count:1,kind:'single',power:[cards[0].rank],sorted:[...cards]};
       return{valid:false,reason:'bad'};
     },
+    getStartingScoreForSeat(player,seat,storedTotal){
+      return Number.isFinite(Number(storedTotal))?Number(storedTotal):5000;
+    },
     getDefaultDifficulty(){
       return'normal';
     },
@@ -99,6 +102,22 @@ test('buildRoomGameState creates a 4-seat room game with preserved totals and ro
   assert.deepEqual(game.totals,[5400,5000,4900,4700]);
   assert.deepEqual(game.roundWins,[2,0,1,0]);
   assert.equal(game.aiDifficulty,'hard');
+});
+
+test('buildRoomGameState seeds bot totals from latest score helper when stored totals are missing', ()=>{
+  const controller=createController({
+    getStartingScoreForSeat(player,seat,storedTotal){
+      if(Number.isFinite(Number(storedTotal)))return Number(storedTotal);
+      return player.isHuman?6100:4800+(seat*75);
+    }
+  });
+  const game=controller.buildRoomGameState({
+    players:[
+      {uid:'uid:1',name:'Alice',gender:'female',picture:'pic-a',seat:0,isHuman:true}
+    ],
+    settings:{aiDifficulty:'normal'}
+  });
+  assert.deepEqual(game.totals,[6100,4875,4950,5025]);
 });
 
 test('applyPlayToGame removes cards and advances turn on a valid play', ()=>{

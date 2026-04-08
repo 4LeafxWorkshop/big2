@@ -225,7 +225,7 @@ export function createRoomMutationsController(deps){
     if(!uid)return;
     const seat=deps.roomSeatForPlayer(roomData,uid);
     if(!Number.isInteger(seat)||seat<0||seat>3)return;
-    const desiredScore=deps.clampScoreValue(state.score);
+    const desiredScore=deps.currentHumanScoreValue();
     const currentTotals=deps.normalizeRoomTotals(roomData.totals);
     if(currentTotals[seat]===desiredScore)return;
     try{

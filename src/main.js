@@ -3757,6 +3757,29 @@ function clampScoreValue(v){
 function scoreFromStoredTotal(totalScore){
   return clampScoreValue(totalScore);
 }
+function currentScoreForIdentity(identity){
+  const entry=ensureLeaderboardEntry(loadLeaderboardStore(),identity);
+  if(entry)return scoreFromStoredTotal(entry.totalScore);
+  return 5000;
+}
+function currentHumanScoreValue(){
+  return currentScoreForIdentity(currentLeaderboardIdentity());
+}
+function botScoreValue(name,gender){
+  return currentScoreForIdentity(botLeaderboardIdentity(name,gender));
+}
+function soloStartingTotals(players){
+  return players.map((player,seat)=>roomSeatStartingScore(player,seat,state.solo.totals?.[seat]));
+}
+function roomSeatStartingScore(player,seat,storedTotal){
+  if(player?.isHuman){
+    if(Number(seat)===Number(state.room.selfSeat)||String(player?.uid??'')===currentRoomPlayerId()){
+      return currentHumanScoreValue();
+    }
+    return clampScoreValue(storedTotal);
+  }
+  return botScoreValue(String(player?.name||`Bot ${Number(seat)+1}`),String(player?.gender||'male'));
+}
 function collectMainSettings(){
   const lang=LANGUAGE_OPTIONS.some((opt)=>opt.value===state.language)?state.language:'zh-HK';
   return{
@@ -4211,6 +4234,7 @@ const roomMutationsController=createRoomMutationsController({
   bumpRoomPlayerLastSeen,
   clampScoreValue,
   clearRoomStartPending,
+  currentHumanScoreValue,
   currentRoomDb,
   currentRoomPlayerId,
   getState:()=>state,
@@ -4765,7 +4789,7 @@ async function createRoom(){
         players:[{uid,name,gender:state.home.gender==='female'?'female':'male',picture:authPictureUrl(),isHost:true,seat:0,lastSeen:now}],
       playerIds:[uid],
       settings:collectMainSettings(),
-      totals:[clampScoreValue(state.score),5000,5000,5000],
+      totals:[currentHumanScoreValue(),5000,5000,5000],
       roundCount:0,
       gameVersion:0
     };
@@ -4908,7 +4932,7 @@ async function joinRoomByCode(codeRaw){
       const updates={players,playerIds:roomPlayerIds(players),updatedAt:now,hostId,hostName};
       const selfSeat=Number(players.find((p)=>String(p?.uid||'')===uid)?.seat);
       if(Number.isInteger(selfSeat)&&selfSeat>=0&&selfSeat<4){
-        const nextTotals=roomTotalsWithSeatScore(data.totals,selfSeat,state.score);
+        const nextTotals=roomTotalsWithSeatScore(data.totals,selfSeat,currentHumanScoreValue());
         const prevTotals=normalizeRoomTotals(data.totals);
         if(nextTotals.some((v,i)=>v!==prevTotals[i]))updates.totals=nextTotals;
       }
@@ -5192,6 +5216,7 @@ const roomGameRuntimeController=createRoomGameRuntimeController({
   comparePower,
   createDeck,
   evaluatePlay,
+  getStartingScoreForSeat:roomSeatStartingScore,
   getDefaultDifficulty:()=>state.home.aiDifficulty,
   has3d:(cards)=>has3d(cards),
   isBotRoomEntry,
@@ -7416,7 +7441,7 @@ function triggerMust3LeadCallout(game,selfSeat=0){
   scheduleCalloutExpiry(must3CallState.until);
   speakCallout(text,pick.player?.gender??'male',{seat:pick.seat,force:true,clipKey:'line-must3'});
 }
-function startSoloGame(options={}){randomizeNpcColors();const preserveOpponents=options?.preserveOpponents!==false;const resetRoundWins=options?.resetRoundWins===true;const resetTotals=options?.resetTotals===true;const storedBotProfiles=Array.isArray(state.solo.botProfiles)&&state.solo.botProfiles.length===3?state.solo.botProfiles.map((bp)=>({name:String(bp?.name||''),gender:String(bp?.gender||'male')})):null;const botProfiles=preserveOpponents&&storedBotProfiles&&storedBotProfiles.every((bp)=>bp.name)?storedBotProfiles:randomBotProfiles();const p=[{name:state.home.name||t('name'),gender:state.home.gender==='female'?'female':'male',hand:[],isHuman:true},{name:botProfiles[0].name,gender:botProfiles[0].gender,hand:[],isHuman:false},{name:botProfiles[1].name,gender:botProfiles[1].gender,hand:[],isHuman:false},{name:botProfiles[2].name,gender:botProfiles[2].gender,hand:[],isHuman:false}];const deck=shuffle(createDeck());p.forEach((x)=>{x.hand=deck.splice(0,13).sort(cmpCard);});const start=p.findIndex((x)=>x.hand.some((c)=>c.rank===0&&c.suit===0));const totals=getNextSoloTotals(state.solo.totals,{resetTotals});const roundWins=getNextSoloRoundWins(state.solo.roundWins,{resetTotals,resetRoundWins});state.solo={players:p,botProfiles:botProfiles.map((bp)=>({name:bp.name,gender:bp.gender})),botNames:botProfiles.map((bp)=>bp.name),totals,roundWins,currentSeat:start,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',systemLog:[],history:[],aiDifficulty:state.home.aiDifficulty,lastCardBreach:null,roundSummary:null};setSoloStatus(`${p[start].name} ${t('start')}`);state.selected.clear();state.recommendation=null;state.logTouched=false;state.showLog=false;state.showLogSheet=false;state.screen='game';state.home.mode='solo';state.home.showIntro=false;state.home.showLeaderboard=false;state.showScoreGuide=false;calloutGateUntilPlay=true;playSound('start');triggerMust3LeadCallout(state.solo,0);render();maybeRunSoloAi();}
+function startSoloGame(options={}){randomizeNpcColors();const preserveOpponents=options?.preserveOpponents!==false;const resetRoundWins=options?.resetRoundWins===true;const resetTotals=options?.resetTotals===true;const storedBotProfiles=Array.isArray(state.solo.botProfiles)&&state.solo.botProfiles.length===3?state.solo.botProfiles.map((bp)=>({name:String(bp?.name||''),gender:String(bp?.gender||'male')})):null;const botProfiles=preserveOpponents&&storedBotProfiles&&storedBotProfiles.every((bp)=>bp.name)?storedBotProfiles:randomBotProfiles();const p=[{name:state.home.name||t('name'),gender:state.home.gender==='female'?'female':'male',hand:[],isHuman:true},{name:botProfiles[0].name,gender:botProfiles[0].gender,hand:[],isHuman:false},{name:botProfiles[1].name,gender:botProfiles[1].gender,hand:[],isHuman:false},{name:botProfiles[2].name,gender:botProfiles[2].gender,hand:[],isHuman:false}];const deck=shuffle(createDeck());p.forEach((x)=>{x.hand=deck.splice(0,13).sort(cmpCard);});const start=p.findIndex((x)=>x.hand.some((c)=>c.rank===0&&c.suit===0));const totals=resetTotals?soloStartingTotals(p):getNextSoloTotals(state.solo.totals,{resetTotals});const roundWins=getNextSoloRoundWins(state.solo.roundWins,{resetTotals,resetRoundWins});state.solo={players:p,botProfiles:botProfiles.map((bp)=>({name:bp.name,gender:bp.gender})),botNames:botProfiles.map((bp)=>bp.name),totals,roundWins,currentSeat:start,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',systemLog:[],history:[],aiDifficulty:state.home.aiDifficulty,lastCardBreach:null,roundSummary:null};setSoloStatus(`${p[start].name} ${t('start')}`);state.selected.clear();state.recommendation=null;state.logTouched=false;state.showLog=false;state.showLogSheet=false;state.screen='game';state.home.mode='solo';state.home.showIntro=false;state.home.showLeaderboard=false;state.showScoreGuide=false;calloutGateUntilPlay=true;playSound('start');triggerMust3LeadCallout(state.solo,0);render();maybeRunSoloAi();}
 function startRoomLocalGame(roomData,options={}){
   randomizeNpcColors();
   const preserveOpponents=options?.preserveOpponents!==false;
@@ -7712,7 +7737,7 @@ function buildView(){
     status:g.status,
     statusMeta:g.statusMeta??null,
     systemLog:g.systemLog??[],
-    participants:g.players.map((p,seat)=>({seat,name:p.name,gender:p.gender??'male',picture:p.picture??'',isBot:!p.isHuman,count:p.hand.length,score:g.totals?.[seat]??0})),
+    participants:g.players.map((p,seat)=>({seat,name:p.name,gender:p.gender??'male',picture:p.picture??'',isBot:!p.isHuman,count:p.hand.length,score:(!p.isHuman&&String(p.uid??'')===currentRoomPlayerId())?currentHumanScoreValue():(g.totals?.[seat]??0)})),
     hand:selfPlayer?.hand??[],
     history:g.history,
     selfSeat:seatIndex,
@@ -9788,8 +9813,8 @@ function renderGame(){
   const canReorder=!isMobilePointer()&&!v.gameOver&&v.hand.length>0;
   const canAutoSort=!v.gameOver&&v.hand.length>0;
   const selfScoreValue=v.mode==='solo'
-    ?(state.solo.totals?.[0]??state.score)
-    :(state.solo.totals?.[v.selfSeat]??state.score);
+    ?(state.solo.totals?.[0]??currentHumanScoreValue())
+    :(state.solo.totals?.[v.selfSeat]??currentHumanScoreValue());
   const roundWinsBySeat=Array.isArray(v.roundWins)&&v.roundWins.length===4
     ?v.roundWins.map((vv)=>Number(vv)||0)
     :[0,0,0,0];

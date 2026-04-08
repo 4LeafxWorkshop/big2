@@ -41,7 +41,10 @@ export function createRoomGameRuntimeController(deps){
     const start=players.findIndex((x)=>x.hand.some((c)=>c.rank===0&&c.suit===0));
     const storedTotals=Array.isArray(roomData?.totals)&&roomData.totals.length===4?roomData.totals
       :(Array.isArray(roomData?.game?.totals)&&roomData.game.totals.length===4?roomData.game.totals:null);
-    const totals=storedTotals?[...storedTotals]:[5000,5000,5000,5000];
+    const totals=players.map((player,seat)=>{
+      const storedTotal=storedTotals?.[seat];
+      return deps.getStartingScoreForSeat(player,seat,storedTotal);
+    });
     const roundWins=Array.isArray(roomData?.game?.roundWins)&&roomData.game.roundWins.length===4
       ?roomData.game.roundWins.map((v)=>Number(v)||0)
       :[0,0,0,0];

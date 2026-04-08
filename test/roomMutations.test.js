@@ -63,6 +63,7 @@ function createController(state,updates,overrides={}){
     clampScoreValue(value){return Math.max(0,Math.trunc(Number(value)||0));},
     clearRoomStartPending(){},
     currentRoomDb(){return createRoomDb(state.room.data,updates);},
+    currentHumanScoreValue(){return 5400;},
     currentRoomPlayerId(){return 'uid:123';},
     getState(){return state;},
     nextRoomIdleExpiry(now){return now+60000;},
