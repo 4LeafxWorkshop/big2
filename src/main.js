@@ -1,6 +1,7 @@
 ﻿﻿﻿﻿﻿﻿﻿﻿import {createCalloutAudioController} from './calloutAudio.js';
 import {createLangMenuController} from './langMenu.js';
 import {createRoomLifecycleController} from './roomLifecycle.js';
+import {createRoomMutationsController} from './roomMutations.js';
 import {createRoomSubscriptionController} from './roomSubscription.js';
 import {getNextSoloRoundWins, getNextSoloTotals, resetSoloSessionCarryoverState} from './soloState.js';
 
@@ -4199,6 +4200,28 @@ function resetRoomState(){
 function abandonRoomLocally(msg='',openLobby=true){
   roomLifecycleController.abandonRoomLocally(msg,openLobby);
 }
+const roomMutationsController=createRoomMutationsController({
+  FIRESTORE_ROOMS_COLLECTION,
+  ROOM_RESULT_IDLE_MS,
+  authPictureUrl,
+  buildRoomGameState,
+  bumpRoomPlayerLastSeen,
+  clampScoreValue,
+  clearRoomStartPending,
+  currentRoomDb,
+  currentRoomPlayerId,
+  getState:()=>state,
+  nextRoomIdleExpiry,
+  normalizeRoomTotals,
+  roomPlayerIds,
+  roomResultExpired,
+  roomSeatForPlayer,
+  roomTotalsWithSeatScore,
+  sanitizeRoomPlayerEntry,
+  setRoomError,
+  setSoloStatus,
+  t
+});
 const roomSubscriptionController=createRoomSubscriptionController({
   FIRESTORE_ROOMS_COLLECTION,
   FIRESTORE_USERS_COLLECTION,
@@ -4926,126 +4949,16 @@ async function leaveRoom(toLobby=false){
   await roomLifecycleController.leaveRoom(toLobby);
 }
 async function setRoomPrivacy(isPrivate){
-  const roomDb=currentRoomDb();
-  if(!state.room.id||!roomDb)return;
-  try{
-    const uid=currentRoomPlayerId();
-    if(!uid)return;
-    const ref=roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(state.room.id);
-    await roomDb.runTransaction(async(tx)=>{
-      const snap=await tx.get(ref);
-      if(!snap.exists)return;
-      const data=snap.data()??{};
-      if(String(data.status)==='playing')return;
-      const hostId=String(data.hostId??'').trim();
-      if(hostId&&hostId!==uid)throw new Error('not host');
-      tx.update(ref,{isPrivate:Boolean(isPrivate),updatedAt:Date.now()});
-    });
-  }catch(err){
-    console.error('privacy update failed',err);
-  }
+  await roomMutationsController.setRoomPrivacy(isPrivate);
 }
 async function startRoom(){
-  const roomDb=currentRoomDb();
-  if(!state.room.id||!roomDb)return;
-  const uid=currentRoomPlayerId();
-  try{
-    const ref=roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(state.room.id);
-    await roomDb.runTransaction(async(tx)=>{
-      const snap=await tx.get(ref);
-      if(!snap.exists)return;
-      const data=snap.data()??{};
-      const players=Array.isArray(data.players)?data.players:[];
-      let hostId=String(data.hostId??'').trim();
-      let hostName=String(data.hostName??'').trim();
-      if(!hostId){
-        const fallback=players[0];
-        hostId=String(fallback?.uid??'');
-        hostName=String(fallback?.name??'');
-      }
-      if(uid){
-        if(String(hostId)!==uid)throw new Error('not host');
-      }else if(hostId){
-        throw new Error('not host');
-      }
-      const humanPlayers=players.filter((p)=>String(p.uid||'').startsWith('uid:')||String(p.uid||'').startsWith('guest:'));
-      if(humanPlayers.length<2)throw new Error('need players');
-      const now=Date.now();
-        const hostUpdate=(hostId&&String(data.hostId??'').trim()!==hostId)?{hostId,hostName}:{};
-        const bumped=bumpRoomPlayerLastSeen(players,uid,now);
-        const nextPlayers=bumped.changed?bumped.players:players;
-        tx.update(ref,{status:'starting',updatedAt:now,expiresAt:nextRoomIdleExpiry(now),playerIds:roomPlayerIds(nextPlayers),players:nextPlayers,...hostUpdate});
-      });
-    window.setTimeout(async()=>{
-      try{
-        await roomDb.runTransaction(async(tx)=>{
-          const snap=await tx.get(ref);
-          if(!snap.exists)return;
-          const data=snap.data()??{};
-          if(String(data.status)!=='starting')return;
-        const now=Date.now();
-        const game=buildRoomGameState(data);
-        const bumped=bumpRoomPlayerLastSeen(Array.isArray(data.players)?data.players:[],String(data.hostId||''),now);
-        const nextPlayers=bumped.changed?bumped.players:data.players;
-        tx.update(ref,{status:'playing',game,gameVersion:Number(data.gameVersion||0)+1,updatedAt:now,expiresAt:now+(24*60*60*1000),players:nextPlayers});
-      });
-      }catch(err){
-        console.error('start room finalize failed',err);
-      }
-    },200);
-  }catch(err){
-    console.error('start room failed',err);
-    const msg=String(err?.message??'');
-    if(msg.includes('need players'))setRoomError(t('roomNeedPlayers'));
-    clearRoomStartPending();
-  }
+  await roomMutationsController.startRoom();
 }
 async function roomReset(){
-  const roomDb=currentRoomDb();
-  if(!state.room.id||!roomDb)return;
-  const uid=currentRoomPlayerId();
-  try{
-    const ref=roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(state.room.id);
-    await roomDb.runTransaction(async(tx)=>{
-      const snap=await tx.get(ref);
-      if(!snap.exists)return;
-      const data=snap.data()??{};
-      if(String(data.hostId)!==uid)throw new Error('not host');
-      const now=Date.now();
-      const players=Array.isArray(data.players)?data.players:[];
-      tx.update(ref,{status:'lobby',game:null,updatedAt:now,expiresAt:nextRoomIdleExpiry(now),players});
-    });
-  }catch(err){
-    console.error('room reset failed',err);
-  }
+  await roomMutationsController.roomReset();
 }
 async function restartRoomGame(){
-  const roomDb=currentRoomDb();
-  if(!state.room.id||!roomDb)return;
-  const uid=currentRoomPlayerId();
-  try{
-    const ref=roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(state.room.id);
-    await roomDb.runTransaction(async(tx)=>{
-      const snap=await tx.get(ref);
-      if(!snap.exists)return;
-      const data=snap.data()??{};
-      if(String(data.hostId)!==uid)throw new Error('not host');
-      if(roomResultExpired(data))throw new Error('room expired');
-      const players=Array.isArray(data.players)?data.players:[];
-      const humanPlayers=players.filter((p)=>String(p.uid||'').startsWith('uid:')||String(p.uid||'').startsWith('guest:'));
-      if(humanPlayers.length<2)throw new Error('need players');
-        const now=Date.now();
-        const game=buildRoomGameState(data);
-        const bumped=bumpRoomPlayerLastSeen(players,uid,now);
-        const nextPlayers=bumped.changed?bumped.players:data.players;
-        tx.update(ref,{status:'playing',game,updatedAt:now,gameVersion:Number(data.gameVersion||0)+1,expiresAt:now+(24*60*60*1000),players:nextPlayers});
-      });
-  }catch(err){
-    console.error('restart room failed',err);
-    const msg=String(err?.message??'');
-    if(msg.includes('need players'))setSoloStatus(t('roomNeedPlayers'));
-    else if(msg.includes('room expired'))setSoloStatus(t('roomHostSneakAway'));
-  }
+  await roomMutationsController.restartRoomGame();
 }
 
 function cloneRoomGame(game){
@@ -5138,28 +5051,7 @@ function roomResultCountdownText(roomData,now=Date.now()){
   return`${Math.ceil(remaining/1000)}s`;
 }
 async function resetRoomExpiryTo60s(){
-  const roomId=String(state.room.id||'').trim();
-  const roomDb=currentRoomDb();
-  if(!roomId||!roomDb)return;
-  try{
-    const ref=roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(roomId);
-    await roomDb.runTransaction(async(tx)=>{
-      const snap=await tx.get(ref);
-      if(!snap.exists)return;
-      const data=snap.data()??{};
-      const status=String(data.status||'');
-      const now=Date.now();
-      if(status==='finished'){
-        tx.update(ref,{updatedAt:now,expiresAt:nextRoomIdleExpiry(now),resultExpiresAt:now+ROOM_RESULT_IDLE_MS});
-        return;
-      }
-      if(status==='lobby'||status==='starting'){
-        tx.update(ref,{updatedAt:now,expiresAt:nextRoomIdleExpiry(now)});
-      }
-    });
-  }catch(err){
-    console.error('reset room expiry failed',err);
-  }
+  await roomMutationsController.resetRoomExpiryTo60s();
 }
 function buildReplacementBotEntry(seat){
   const bot=botProfileForSeat(seat);
@@ -5263,29 +5155,7 @@ async function pruneRoomIfNeeded(){
   }catch{}
 }
 async function touchRoomPresence(force=false){
-  const roomDb=currentRoomDb();
-  if(!state.room.id||!roomDb)return;
-  const uid=currentRoomPlayerId();
-  if(!uid)return;
-  try{
-    const ref=roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(state.room.id);
-    await roomDb.runTransaction(async(tx)=>{
-      const snap=await tx.get(ref);
-      if(!snap.exists)return;
-      const data=snap.data()??{};
-      const players=Array.isArray(data.players)?[...data.players]:[];
-      let touched=false;
-      const now=Date.now();
-      const next=players.map((p)=>{
-        if(String(p.uid)!==uid)return p;
-        const prev=Number(p.lastSeen)||0;
-          if(!force&&now-prev<1000)return p;
-        touched=true;
-        return{...p,lastSeen:now};
-      });
-      if(touched)tx.update(ref,{players:next,updatedAt:now});
-    });
-  }catch{}
+  await roomMutationsController.touchRoomPresence(force);
 }
 function startRoomPresencePing(){
   if(roomPresenceTimer||!state.room.id||!currentRoomDb())return;
@@ -5321,64 +5191,10 @@ async function loadActiveRoomPointer(){
   await roomSubscriptionController.loadActiveRoomPointer();
 }
 async function syncRoomSelfProfile(){
-  const roomDb=currentRoomDb();
-  if(!state.room.id||!roomDb)return;
-  const uid=currentRoomPlayerId();
-  if(!uid)return;
-  const desiredName=String(state.home.name||'Player').slice(0,32);
-  const desiredGender=state.home.gender==='female'?'female':'male';
-  const desiredPic=authPictureUrl();
-  try{
-    const ref=roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(state.room.id);
-    await roomDb.runTransaction(async(tx)=>{
-      const snap=await tx.get(ref);
-      if(!snap.exists)return;
-      const data=snap.data()??{};
-      const players=Array.isArray(data.players)?[...data.players]:[];
-      let touched=false;
-      const now=Date.now();
-      const next=players.map((p)=>{
-        const patch=sanitizeRoomPlayerEntry(p);
-        if(String(p.uid)!==uid)return patch;
-        if(desiredName&&String(p.name??'')!==desiredName){patch.name=desiredName;touched=true;}
-        if(desiredGender&&String(p.gender??'')!==desiredGender){patch.gender=desiredGender;touched=true;}
-        if(String(p.picture??'').trim()!==desiredPic){patch.picture=desiredPic;touched=true;}
-        if(now-Number(p.lastSeen||0)>3000){patch.lastSeen=now;touched=true;}
-        return patch;
-      });
-      if(touched)tx.update(ref,{players:next,updatedAt:now});
-    });
-  }catch{}
+  await roomMutationsController.syncRoomSelfProfile();
 }
 async function syncRoomSelfScoreIfNeeded(){
-  const roomDb=currentRoomDb();
-  const roomData=state.room.data;
-  if(!state.room.id||!roomDb||!roomData)return;
-  const status=String(roomData.status||'');
-  if(status==='playing')return;
-  const uid=currentRoomPlayerId();
-  if(!uid)return;
-  const seat=roomSeatForPlayer(roomData,uid);
-  if(!Number.isInteger(seat)||seat<0||seat>3)return;
-  const desiredScore=clampScoreValue(state.score);
-  const currentTotals=normalizeRoomTotals(roomData.totals);
-  if(currentTotals[seat]===desiredScore)return;
-  try{
-    const ref=roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(state.room.id);
-    await roomDb.runTransaction(async(tx)=>{
-      const snap=await tx.get(ref);
-      if(!snap.exists)return;
-      const data=snap.data()??{};
-      if(String(data.status||'')==='playing')return;
-      const liveSeat=roomSeatForPlayer(data,uid);
-      if(!Number.isInteger(liveSeat)||liveSeat<0||liveSeat>3)return;
-      const prevTotals=normalizeRoomTotals(data.totals);
-      if(prevTotals[liveSeat]===desiredScore)return;
-      tx.update(ref,{totals:roomTotalsWithSeatScore(prevTotals,liveSeat,desiredScore),updatedAt:Date.now()});
-    });
-  }catch(err){
-    console.error('sync room self score failed',err);
-  }
+  await roomMutationsController.syncRoomSelfScoreIfNeeded();
 }
 function botProfileForSeat(seat){
   const list=Array.isArray(BOT_PROFILE_POOL)&&BOT_PROFILE_POOL.length?BOT_PROFILE_POOL:[{name:'Bot',gender:'male'}];
