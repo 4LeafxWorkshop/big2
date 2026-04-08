@@ -4246,6 +4246,10 @@ function clearRoomStartPending(){
 function resetSoloRoundWins(){
   state.solo.roundWins=[0,0,0,0];
 }
+function resetSoloSessionCarryover(){
+  state.solo.totals=[5000,5000,5000,5000];
+  state.solo.roundWins=[0,0,0,0];
+}
 function generateRoomCode(len=6){
   const chars='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
   let out='';
@@ -4955,7 +4959,7 @@ function subscribeRoom(roomId,code,firebaseInstanceId='',roomDbOverride=null){
   const resolvedInstanceId=String(firebaseInstanceId||state.room.firebaseInstanceId||primaryFirebaseInstanceId()).trim()||primaryFirebaseInstanceId();
   const ref=roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(roomId);
   const unsub=ref.onSnapshot((snap)=>{
-    if(!snap.exists){resetRoomState();render();return;}
+    if(!snap.exists){abandonRoomLocally('',true);return;}
     const data=snap.data()??{};
     const now=Date.now();
     const reconnectMsg=t('roomReconnecting');
@@ -4984,8 +4988,7 @@ function subscribeRoom(roomId,code,firebaseInstanceId='',roomDbOverride=null){
     if(roomLifecycleExpired(data,now)){
       void roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(roomId).delete().catch(()=>{});
       void deleteRoomDirectory(roomId);
-      resetRoomState();
-      render();
+      abandonRoomLocally(staleMsg,true);
       return;
     }
     if(prevRoomData&&!selfEntry){
@@ -5003,8 +5006,7 @@ function subscribeRoom(roomId,code,firebaseInstanceId='',roomDbOverride=null){
     if((roomStatus==='lobby'||roomStatus==='starting')&&!hasHuman){
       void roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(roomId).delete().catch(()=>{});
       void deleteRoomDirectory(roomId);
-      resetRoomState();
-      render();
+      abandonRoomLocally(staleMsg,true);
       return;
     }
     if(roomStatus==='lobby'||roomStatus==='starting'){
@@ -5024,8 +5026,7 @@ function subscribeRoom(roomId,code,firebaseInstanceId='',roomDbOverride=null){
         if(!activeHumans.length){
           void roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(roomId).delete().catch(()=>{});
           void deleteRoomDirectory(roomId);
-          resetRoomState();
-          render();
+          abandonRoomLocally(staleMsg,true);
           return;
         }
         const hostInfo=resolveRoomHostInfo({...data,players:active});
@@ -8402,7 +8403,7 @@ function triggerMust3LeadCallout(game,selfSeat=0){
   scheduleCalloutExpiry(must3CallState.until);
   speakCallout(text,pick.player?.gender??'male',{seat:pick.seat,force:true,clipKey:'line-must3'});
 }
-function startSoloGame(options={}){randomizeNpcColors();const preserveOpponents=options?.preserveOpponents!==false;const resetRoundWins=options?.resetRoundWins===true;const storedBotProfiles=Array.isArray(state.solo.botProfiles)&&state.solo.botProfiles.length===3?state.solo.botProfiles.map((bp)=>({name:String(bp?.name||''),gender:String(bp?.gender||'male')})):null;const botProfiles=preserveOpponents&&storedBotProfiles&&storedBotProfiles.every((bp)=>bp.name)?storedBotProfiles:randomBotProfiles();const p=[{name:state.home.name||t('name'),gender:state.home.gender==='female'?'female':'male',hand:[],isHuman:true},{name:botProfiles[0].name,gender:botProfiles[0].gender,hand:[],isHuman:false},{name:botProfiles[1].name,gender:botProfiles[1].gender,hand:[],isHuman:false},{name:botProfiles[2].name,gender:botProfiles[2].gender,hand:[],isHuman:false}];const deck=shuffle(createDeck());p.forEach((x)=>{x.hand=deck.splice(0,13).sort(cmpCard);});const start=p.findIndex((x)=>x.hand.some((c)=>c.rank===0&&c.suit===0));const totals=Array.isArray(state.solo.totals)&&state.solo.totals.length===4?[...state.solo.totals]:[5000,5000,5000,5000];const roundWins=resetRoundWins?[0,0,0,0]:(Array.isArray(state.solo.roundWins)&&state.solo.roundWins.length===4?state.solo.roundWins.map((v)=>Number(v)||0):[0,0,0,0]);state.solo={players:p,botProfiles:botProfiles.map((bp)=>({name:bp.name,gender:bp.gender})),botNames:botProfiles.map((bp)=>bp.name),totals,roundWins,currentSeat:start,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',systemLog:[],history:[],aiDifficulty:state.home.aiDifficulty,lastCardBreach:null,roundSummary:null};setSoloStatus(`${p[start].name} ${t('start')}`);state.selected.clear();state.recommendation=null;state.logTouched=false;state.showLog=false;state.showLogSheet=false;state.screen='game';state.home.mode='solo';state.home.showIntro=false;state.home.showLeaderboard=false;state.showScoreGuide=false;calloutGateUntilPlay=true;playSound('start');triggerMust3LeadCallout(state.solo,0);render();maybeRunSoloAi();}
+function startSoloGame(options={}){randomizeNpcColors();const preserveOpponents=options?.preserveOpponents!==false;const resetRoundWins=options?.resetRoundWins===true;const resetTotals=options?.resetTotals===true;const storedBotProfiles=Array.isArray(state.solo.botProfiles)&&state.solo.botProfiles.length===3?state.solo.botProfiles.map((bp)=>({name:String(bp?.name||''),gender:String(bp?.gender||'male')})):null;const botProfiles=preserveOpponents&&storedBotProfiles&&storedBotProfiles.every((bp)=>bp.name)?storedBotProfiles:randomBotProfiles();const p=[{name:state.home.name||t('name'),gender:state.home.gender==='female'?'female':'male',hand:[],isHuman:true},{name:botProfiles[0].name,gender:botProfiles[0].gender,hand:[],isHuman:false},{name:botProfiles[1].name,gender:botProfiles[1].gender,hand:[],isHuman:false},{name:botProfiles[2].name,gender:botProfiles[2].gender,hand:[],isHuman:false}];const deck=shuffle(createDeck());p.forEach((x)=>{x.hand=deck.splice(0,13).sort(cmpCard);});const start=p.findIndex((x)=>x.hand.some((c)=>c.rank===0&&c.suit===0));const totals=resetTotals?[5000,5000,5000,5000]:(Array.isArray(state.solo.totals)&&state.solo.totals.length===4?[...state.solo.totals]:[5000,5000,5000,5000]);const roundWins=(resetTotals||resetRoundWins)?[0,0,0,0]:(Array.isArray(state.solo.roundWins)&&state.solo.roundWins.length===4?state.solo.roundWins.map((v)=>Number(v)||0):[0,0,0,0]);state.solo={players:p,botProfiles:botProfiles.map((bp)=>({name:bp.name,gender:bp.gender})),botNames:botProfiles.map((bp)=>bp.name),totals,roundWins,currentSeat:start,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',systemLog:[],history:[],aiDifficulty:state.home.aiDifficulty,lastCardBreach:null,roundSummary:null};setSoloStatus(`${p[start].name} ${t('start')}`);state.selected.clear();state.recommendation=null;state.logTouched=false;state.showLog=false;state.showLogSheet=false;state.screen='game';state.home.mode='solo';state.home.showIntro=false;state.home.showLeaderboard=false;state.showScoreGuide=false;calloutGateUntilPlay=true;playSound('start');triggerMust3LeadCallout(state.solo,0);render();maybeRunSoloAi();}
 function startRoomLocalGame(roomData,options={}){
   randomizeNpcColors();
   const preserveOpponents=options?.preserveOpponents!==false;
@@ -9626,6 +9627,7 @@ function setSoundEnabled(on){
     try{sound.ctx?.resume?.();}catch{}
     return;
   }
+  resetCalloutPlaybackState();
   sound.enabled=false;
   try{sound.ctx?.suspend?.();}catch{}
 }
@@ -10213,7 +10215,7 @@ function renderHome(){
       if(!synced)await waitMs(250);
     }
     if(!synced)console.warn('profile sync failed on start; continuing to game');
-    startSoloGame({preserveOpponents:false});
+    startSoloGame({preserveOpponents:false,resetTotals:true});
     schedulePopunderAfterRender(350);
   };
   const soloStartBtn=document.getElementById('solo-start');
@@ -11597,15 +11599,15 @@ function bindGameEvents(v,arr){
       void leaveRoom();
       return;
     }
-    resetSoloRoundWins();
+    resetSoloSessionCarryover();
     state.screen='home';
     state.selected.clear();
     state.recommendation=null;
     setRecommendHint('');
     render();
   });
-  document.getElementById('result-home')?.addEventListener('click',()=>{if(aiTimer){clearTimeout(aiTimer);aiTimer=null;}state.opponentProfileName='';if(state.home.mode==='room'&&state.room.id){void leaveRoom();return;}resetSoloRoundWins();state.screen='home';state.selected.clear();state.recommendation=null;setRecommendHint('');render();});
-  document.getElementById('congrats-home')?.addEventListener('click',()=>{if(aiTimer){clearTimeout(aiTimer);aiTimer=null;}state.opponentProfileName='';if(state.home.mode==='room'&&state.room.id){void leaveRoom();return;}resetSoloRoundWins();state.screen='home';state.selected.clear();state.recommendation=null;setRecommendHint('');render();});
+  document.getElementById('result-home')?.addEventListener('click',()=>{if(aiTimer){clearTimeout(aiTimer);aiTimer=null;}state.opponentProfileName='';if(state.home.mode==='room'&&state.room.id){void leaveRoom();return;}resetSoloSessionCarryover();state.screen='home';state.selected.clear();state.recommendation=null;setRecommendHint('');render();});
+  document.getElementById('congrats-home')?.addEventListener('click',()=>{if(aiTimer){clearTimeout(aiTimer);aiTimer=null;}state.opponentProfileName='';if(state.home.mode==='room'&&state.room.id){void leaveRoom();return;}resetSoloSessionCarryover();state.screen='home';state.selected.clear();state.recommendation=null;setRecommendHint('');render();});
   document.querySelectorAll('[data-room-expiry-reset]').forEach((btn)=>btn.addEventListener('click',async()=>{
     await resetRoomExpiryTo60s();
   }));
@@ -11748,7 +11750,7 @@ function bindGameEvents(v,arr){
     if(state.home.mode==='room'&&state.room.id){
       await leaveRoom();
     }
-    startSoloGame({preserveOpponents:false,resetRoundWins:true});
+    startSoloGame({preserveOpponents:false,resetTotals:true,resetRoundWins:true});
     schedulePopunderAfterRender(1200);
   };
   const restartBtn=document.getElementById('restart-btn');
