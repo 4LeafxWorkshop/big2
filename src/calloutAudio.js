@@ -1,10 +1,8 @@
 export function createCalloutAudioController(deps){
-  let speechPrimed=false;
   let lastSpokenCalloutKey='';
   let lastSpokenCalloutAt=0;
   let calloutSpeechActive=false;
   let calloutSpeechUntil=0;
-  let calloutSpeechEndedAt=0;
   let calloutResumePending=false;
   let calloutSpeakSeq=0;
   const calloutAudioCache=new Map();
@@ -19,11 +17,9 @@ export function createCalloutAudioController(deps){
     calloutSpeakSeq+=1;
     calloutSpeechActive=false;
     calloutSpeechUntil=0;
-    calloutSpeechEndedAt=Date.now();
     calloutResumePending=false;
     lastSpokenCalloutKey='';
     lastSpokenCalloutAt=0;
-    speechPrimed=false;
     try{window.speechSynthesis?.cancel?.();}catch{}
     try{
       if(iosSharedCalloutAudio){
@@ -98,7 +94,6 @@ export function createCalloutAudioController(deps){
           if(seq&&seq!==calloutSpeakSeq)return false;
           calloutSpeechActive=true;
           calloutResumePending=false;
-          calloutSpeechEndedAt=0;
           let settled=false;
           let settlePlayback;
           const playbackDone=waitForEnd?new Promise((resolve)=>{settlePlayback=resolve;}):null;
@@ -115,7 +110,6 @@ export function createCalloutAudioController(deps){
             if(seq&&seq!==calloutSpeakSeq)return;
             calloutSpeechActive=false;
             calloutSpeechUntil=0;
-            calloutSpeechEndedAt=Date.now();
             calloutResumePending=!holdResume;
             if(!holdResume)deps.maybeRunSoloAi();
             finish(true);
@@ -124,7 +118,6 @@ export function createCalloutAudioController(deps){
             if(seq&&seq!==calloutSpeakSeq)return;
             calloutSpeechActive=false;
             calloutSpeechUntil=0;
-            calloutSpeechEndedAt=Date.now();
             calloutResumePending=!holdResume;
             if(!holdResume)deps.maybeRunSoloAi();
             finish(false);
@@ -143,7 +136,6 @@ export function createCalloutAudioController(deps){
           if(seq&&seq!==calloutSpeakSeq)return false;
           calloutSpeechActive=false;
           calloutSpeechUntil=0;
-          calloutSpeechEndedAt=Date.now();
           calloutResumePending=!holdResume;
         }
       }
@@ -357,8 +349,8 @@ export function createCalloutAudioController(deps){
         const estimatedMs=Math.max(120,Math.min(420,Math.round((msg.length*62)/Math.max(0.55,u.rate))));
         calloutSpeechActive=true;
         calloutSpeechUntil=Date.now()+estimatedMs;
-        u.onend=()=>{if(speakSeq!==calloutSpeakSeq)return;calloutSpeechActive=false;calloutSpeechUntil=0;calloutSpeechEndedAt=Date.now();calloutResumePending=true;deps.maybeRunSoloAi();};
-        u.onerror=()=>{if(speakSeq!==calloutSpeakSeq)return;calloutSpeechActive=false;calloutSpeechUntil=0;calloutSpeechEndedAt=Date.now();calloutResumePending=true;deps.maybeRunSoloAi();};
+        u.onend=()=>{if(speakSeq!==calloutSpeakSeq)return;calloutSpeechActive=false;calloutSpeechUntil=0;calloutResumePending=true;deps.maybeRunSoloAi();};
+        u.onerror=()=>{if(speakSeq!==calloutSpeakSeq)return;calloutSpeechActive=false;calloutSpeechUntil=0;calloutResumePending=true;deps.maybeRunSoloAi();};
         u.voice=voice;
         u.lang=String(voice.lang||speechLangMeta.tts);
         synth.resume?.();
@@ -369,12 +361,10 @@ export function createCalloutAudioController(deps){
           if(speakSeq!==calloutSpeakSeq)return;
           const voices=synth.getVoices?.()??[];
           if(voices.length){
-            speechPrimed=true;
             speakNow();
             return;
           }
           if(attempt>=4){
-            speechPrimed=true;
             speakNow();
             return;
           }
@@ -383,7 +373,6 @@ export function createCalloutAudioController(deps){
         };
         const onVoices=()=>{
           if(speakSeq!==calloutSpeakSeq)return;
-          speechPrimed=true;
           speakNow();
         };
         const voices=synth.getVoices?.()??[];
@@ -393,7 +382,6 @@ export function createCalloutAudioController(deps){
           trySpeakWithVoices(0);
           return;
         }
-        speechPrimed=true;
         speakNow();
       };
       const voices=synth.getVoices?.()??[];
@@ -436,7 +424,6 @@ export function createCalloutAudioController(deps){
     if(calloutSpeechActive&&calloutSpeechUntil>0&&now>calloutSpeechUntil+800){
       calloutSpeechActive=false;
       calloutSpeechUntil=0;
-      calloutSpeechEndedAt=now;
       try{window.speechSynthesis?.cancel?.();}catch{}
     }
   }
@@ -453,7 +440,6 @@ export function createCalloutAudioController(deps){
       const synth=window.speechSynthesis;
       if(!synth)return;
       synth.getVoices?.();
-      speechPrimed=true;
     }catch{}
   }
 
@@ -477,10 +463,9 @@ export function createCalloutAudioController(deps){
     }catch{}
   }
 
-  function markInterrupted(now=Date.now()){
+  function markInterrupted(_now=Date.now()){
     calloutSpeechActive=false;
     calloutSpeechUntil=0;
-    calloutSpeechEndedAt=now;
     calloutResumePending=false;
   }
 

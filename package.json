@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "lint": "eslint src test tools",
     "test": "node --test",
     "build:cap": "cross-env CAPACITOR=1 vite build",
     "preview": "vite preview",
@@ -28,7 +29,10 @@
     "@capacitor/android": "^7.0.0",
     "@capacitor/cli": "^7.0.0",
     "@capacitor/ios": "^7.0.0",
+    "@eslint/js": "^10.0.1",
     "cross-env": "^7.0.3",
+    "eslint": "^10.2.0",
+    "globals": "^17.4.0",
     "prettier": "^3.3.1",
     "vite": "^5.4.21"
   }

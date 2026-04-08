@@ -1,0 +1,111 @@
+export function renderGameTopbar(params){
+  const {
+    renderLangMenu,
+    introButtonLabel,
+    t,
+    esc,
+    withBase
+  }=params;
+  return`<header class="topbar"><div class="game-title-wrap"><span class="game-logo-block"><img class="title-logo title-logo-game" src="${withBase('title-lockup-game.png')}" alt="鋤大D TRADITIONAL BIG TWO"/></span></div><div class="topbar-right"><div class="control-row">${renderLangMenu('game-lang-menu')}<button id="game-intro-toggle" class="secondary">${esc(introButtonLabel)}</button><button id="score-guide-toggle" class="secondary">${t('scoreGuide')}</button><button id="game-lb-toggle" class="secondary">${t('lb')}</button><button id="home-btn" class="secondary">${t('home')}</button><button id="restart-btn" class="primary">${t('restart')}</button></div></div></header>`;
+}
+
+export function renderGameSideZone(params){
+  const {
+    portraitMode,
+    logToggleStateText,
+    historyHtml,
+    t,
+    esc
+  }=params;
+  if(portraitMode)return'';
+  return`<aside class="side-zone"><section class="side-card log-side-card"><h3 class="log-toggle-title title-with-icon" aria-label="${esc(logToggleStateText)}"><span class="title-icon title-icon-log" aria-hidden="true"></span><span>${t('log')}</span></h3><div class="history-list">${historyHtml}</div></section></aside>`;
+}
+
+export function renderGameLogSheet(params){
+  const {
+    logSheetOpen,
+    closeLabel,
+    historyHtml,
+    t
+  }=params;
+  if(!logSheetOpen)return'';
+  return`<div class="log-sheet" id="log-sheet"><button class="log-sheet-backdrop" id="log-sheet-backdrop" aria-label="close"></button><section class="log-sheet-panel side-card log-side-card"><header class="log-sheet-head"><h3 class="log-toggle-title title-with-icon"><span class="title-icon title-icon-log" aria-hidden="true"></span><span>${t('log')}</span></h3><button id="log-sheet-close" class="secondary">${closeLabel}</button></header><div class="history-list">${historyHtml}</div></section></div>`;
+}
+
+export function renderGameActionZone(params){
+  const {
+    canControl,
+    gameOver,
+    playerColor,
+    selfAvatar,
+    selfName,
+    selfScore,
+    selfRoundWinsHtml,
+    selfCalloutHtml,
+    isRecPlay,
+    canPlay,
+    isRecPass,
+    canPass,
+    canSuggest,
+    showRecommendHint,
+    isRecEmpty,
+    recommendHint,
+    t,
+    esc,
+    canAutoSort,
+    emotePanel,
+    handHtml
+  }=params;
+  return`<section class="action-zone"><div class="action-strip ${canControl&&!gameOver?'active':''}" style="--player-color:${playerColor};"><div class="seat-name-fixed player-tag"><div class="name">${selfAvatar}<span class="seat-identity"><span class="seat-name-text">${esc(selfName)}</span><span class="seat-subline"><span>${selfScore}</span>${selfRoundWinsHtml}</span></span></div>${selfCalloutHtml}</div><div class="control-row"><button id="play-btn" class="primary game-cta-btn ${isRecPlay?'recommend-glow-play':''}" ${canPlay?'':'disabled'}><span aria-hidden="true">▶</span><span>${t('play')}</span></button><button id="pass-btn" class="danger game-cta-btn ${isRecPass?'recommend-glow':''}" ${canPass?'':'disabled'}><svg class="pass-icon" aria-hidden="true" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span>${t('pass')}</span></button><span class="recommend-anchor"><button id="suggest-btn" class="secondary game-cta-btn" ${canSuggest?'':'disabled'}><span aria-hidden="true">💡</span><span>${t('suggest')}</span></button>${showRecommendHint?`<span class="recommend-layer"><span class="hint recommend-hint ${isRecEmpty?'rec-empty':''}"><span class="recommend-bulb" aria-hidden="true">💡</span><span>${esc(recommendHint)}</span></span></span>`:''}</span><button id="emote-toggle" class="secondary game-cta-btn emote-toggle" type="button"><span aria-hidden="true">😆</span><span>${t('emote')}</span></button><button id="auto-sort-btn" class="secondary game-cta-btn auto-sort-btn" ${canAutoSort?'':'disabled'}><svg class="sort-icon" aria-hidden="true" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827 1.24 4.874 2.418.49.552.865 1.102 1.126 1.532.26-.430.636-.980 1.126-1.532C9.173 4.24 10.798 3 13 3v1c-1.798 0-3.173 1.01-4.126 2.082A9.6 9.6 0 0 0 7.556 8a9.6 9.6 0 0 0 1.317 1.918C9.828 10.99 11.204 12 13 12v1c-2.202 0-3.827-1.24-4.874-2.418A10.6 10.6 0 0 1 7 9.05c-.26.43-.636.980-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173-1.01 4.126-2.082A9.6 9.6 0 0 0 6.444 8a9.6 9.6 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1-.5-.5"/><path d="M13 5.466V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192m0 9v-3.932a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.120.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192"/></svg></button></div>${emotePanel}<div class="hand">${handHtml}</div><div class="drag-popup" id="drag-popup">${t('drag')}</div></div></section>`;
+}
+
+export function renderGameTable(params){
+  const {
+    roomTopMetaTable,
+    seatHtml,
+    mobileNamesHtml,
+    mobileDiscardHtml,
+    centerMovesHtml,
+    centerLastMovesHtml,
+    showWinCelebrate,
+    t
+  }=params;
+  return`<section class="table">${roomTopMetaTable}${seatHtml}<div class="table-center-stack">${mobileNamesHtml}${mobileDiscardHtml}${centerMovesHtml}${centerLastMovesHtml}</div>${showWinCelebrate?`<div class="win-celebrate"><div class="confetti-layer"></div><div class="win-banner">${t('congrats')}</div></div>`:''}</section>`;
+}
+
+export function renderOpponentSeat(params){
+  const {
+    cls,
+    active,
+    seatAttrs,
+    shellStyle,
+    outerLabelHtml,
+    sectionStyle,
+    sideStationFlowHtml
+  }=params;
+  return`<div class="seat ${cls} ${active?'active':''}"${seatAttrs} style="${shellStyle}">${outerLabelHtml}<div class="seat-pack seat-section" style="${sectionStyle}">${sideStationFlowHtml}</div></div>`;
+}
+
+export function renderOpponentSeats(seats){
+  return seats.join('');
+}
+
+export function renderGameShell(params){
+  const {
+    gameOver,
+    showLog,
+    gameTopbarHtml,
+    gameTableHtml,
+    gameActionZoneHtml,
+    selfTableEmoteHtml,
+    congratsOverlayHtml,
+    revealHtml,
+    sideZoneHtml,
+    resultScreenHtml,
+    opponentProfileModalHtml,
+    scoreGuideModalHtml,
+    introPanelHtml,
+    leaderboardModalHtml
+  }=params;
+  return`<section class="game-shell ${gameOver?'game-over':''} ${showLog?'log-open':''}"><div class="main-zone">${gameTopbarHtml}${gameTableHtml}${gameActionZoneHtml}${selfTableEmoteHtml}${congratsOverlayHtml}${revealHtml}</div>${sideZoneHtml}${resultScreenHtml}${opponentProfileModalHtml}${scoreGuideModalHtml}${introPanelHtml}${leaderboardModalHtml}</section>`;
+}

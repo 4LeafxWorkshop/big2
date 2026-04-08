@@ -1,0 +1,112 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+
+import {
+  formatLeaderboardDateTime,
+  formatLeaderboardPct,
+  renderIntroPanel,
+  renderLeaderboardModal,
+  renderLeaderboardPanel,
+  renderScoreGuideModal
+} from '../src/modalViews.js';
+
+test('formatLeaderboardPct rounds to a percentage string', ()=>{
+  assert.equal(formatLeaderboardPct(0.456),'46%');
+});
+
+test('formatLeaderboardDateTime returns dash for invalid values', ()=>{
+  assert.equal(formatLeaderboardDateTime(0,'en'),'-');
+});
+
+test('renderIntroPanel includes sample cards and close controls', ()=>{
+  const html=renderIntroPanel({
+    intro:{
+      panelTitle:'Guide',
+      panelSub:'Sub',
+      btnHide:'Hide',
+      historyTitle:'History',
+      historyBody:'Para one',
+      howTitle:'How',
+      howBody:'How body',
+      flowTitle:'Flow',
+      flowList:['Play {{3D}} first'],
+      playTitle:'Play',
+      playList:['Play line'],
+      guideHowTitle:'Guide How',
+      guideHowIntro:'Intro',
+      guideHowList:['One'],
+      guideHomeTitle:'Home',
+      guideHomeIntro:'Intro',
+      guideAndroidTitle:'Android',
+      guideAndroidSteps:['A1'],
+      guideIosTitle:'iOS',
+      guideIosSteps:['I1'],
+      guideHomeNotes:'Notes'
+    },
+    language:'en',
+    colorizeSuitText:(value)=>value,
+    esc:(value)=>String(value),
+    renderStaticCard:()=>'<div class="card"></div>',
+    introHandSamples:[{name:'Single',desc:'One card',cards:[{rank:0,suit:0}]}]
+  });
+  assert.match(html,/id="intro-modal"/);
+  assert.match(html,/Diamond 3/);
+  assert.match(html,/class="card"/);
+});
+
+test('renderLeaderboardPanel renders rows and controls', ()=>{
+  const html=renderLeaderboardPanel({
+    leaderboard:{
+      rows:[{id:'u1',name:'Alice',gender:'female',picture:'',games:4,wins:3,winRate:0.75,totalScore:5300,updatedAt:1710000000000}],
+      sort:'totalDelta',
+      period:'all'
+    },
+    botProfiles:[{name:'Bot A',gender:'male'}],
+    authPictureUrlFrom:(value)=>`pic:${value}`,
+    avatarDataUri:(name)=>`avatar:${name}`,
+    esc:(value)=>String(value),
+    t:(key)=>key,
+    language:'en'
+  });
+  assert.match(html,/id="lb-sort"/);
+  assert.match(html,/Alice/);
+  assert.match(html,/Bot A/);
+});
+
+test('renderLeaderboardModal wraps panel content', ()=>{
+  const html=renderLeaderboardModal({
+    t:(key)=>key,
+    esc:(value)=>String(value),
+    leaderboardPanelHtml:'<div id="panel"></div>'
+  });
+  assert.match(html,/id="lb-modal"/);
+  assert.match(html,/id="panel"/);
+});
+
+test('renderScoreGuideModal renders tables and special 2-card rows', ()=>{
+  const html=renderScoreGuideModal({
+    scoreGuideText:{
+      close:'Close',
+      headingDesc:'Heading',
+      baseTitle:'Base',
+      mulTitle:'Multiplier',
+      summary:'Summary',
+      tableHeaders:['A','B','C'],
+      tableRows:[['1-9','x1','desc']],
+      mulTableHeaders:['Cond','Mul','Rule'],
+      chaoTableHeaders:['Rem','Mul','Name'],
+      chaoTableRows:[['8-9','x2','Chao']],
+      anyTwo:'Any 2',
+      topTwo:'Top 2',
+      stack:'Stack'
+    },
+    esc:(value)=>String(value),
+    cardImagePath:({rank,suit})=>`/cards/${rank}-${suit}.png`,
+    colorizeSuitText:(value)=>value,
+    t:(key)=>key
+  });
+  assert.match(html,/id="score-guide-modal"/);
+  assert.match(html,/\/cards\/12-0\.png/);
+  assert.match(html,/\/cards\/12-3\.png/);
+  assert.match(html,/scoreGuideTitle/);
+});

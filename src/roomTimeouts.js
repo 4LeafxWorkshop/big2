@@ -22,7 +22,7 @@ export function createRoomTimeoutController(deps){
     return next;
   }
 
-  function applyTimeoutStrikeToRoomState(players,game,seat,now=Date.now()){
+  function applyTimeoutStrikeToRoomState(players,game,seat,_now=Date.now()){
     const roster=Array.isArray(players)?players.map((p)=>({...p})):[];
     const idx=roster.findIndex((p)=>Number(p?.seat)===seat);
     if(idx<0)return{players:roster,game,changed:false,kicked:false};
