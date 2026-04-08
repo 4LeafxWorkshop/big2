@@ -4452,16 +4452,18 @@ body[data-screen='game'] .table-center-stack {
   z-index: 3400;
 }
 .play-type-call-self {
-  top: calc(-112px + var(--callout-jy, 0px));
-  left: calc(50% + var(--callout-jx, 0px));
+  top: auto;
+  bottom: calc(100% + 67px + var(--callout-jy, 0px));
+  left: calc(10px + var(--callout-jx, 0px));
   right: auto;
-  transform: translateX(-50%);
+  transform: none;
 }
 .last-card-call-self {
-  top: calc(-112px + var(--callout-jy, 0px));
-  left: calc(50% + var(--callout-jx, 0px));
+  top: auto;
+  bottom: calc(100% + 67px + var(--callout-jy, 0px));
+  left: calc(10px + var(--callout-jx, 0px));
   right: auto;
-  transform: translateX(-50%);
+  transform: none;
 }
 @keyframes fadeIn {
   from { opacity: 0; }
@@ -4923,6 +4925,7 @@ body[data-screen='game'] .table-center-stack {
   left: 50% !important;
   right: auto !important;
   transform: translateX(-50%) !important;
+  overflow: visible !important;
 }
 .action-strip .control-row {
   grid-area: controls;
@@ -5879,12 +5882,11 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
     transform: translateX(-50%) !important;
   }
 
-  /* Portrait mobile: place south callout above the seat name, tail pointing at the tag. */
   body[data-screen='game'][data-orientation='portrait'] .action-strip .play-type-call-self,
   body[data-screen='game'][data-orientation='portrait'] .action-strip .last-card-call-self {
     top: auto !important;
-    bottom: calc(100% + 67px) !important;
-    left: 10px !important;
+    bottom: calc(100% + 67px + var(--callout-jy, 0px)) !important;
+    left: calc(10px + var(--callout-jx, 0px)) !important;
     right: auto !important;
     transform: none !important;
   }
