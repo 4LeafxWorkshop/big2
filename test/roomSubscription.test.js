@@ -102,3 +102,45 @@ test('resolveRoomDocByDirectory returns a legacy primary-room result when no dir
   assert.equal(resolved?.doc,primarySnap);
 });
 
+test('resolveRoomDocByDirectory removes a stale directory entry when the shard room is missing', async()=>{
+  const deleted=[];
+  const directoryDoc={
+    id:'dir-1',
+    data(){return{roomId:'room-404',firebaseInstanceId:'shard-a'};}
+  };
+  const shardDb={
+    collection(name){
+      assert.equal(name,'big2Rooms');
+      return{
+        doc(id){
+          assert.equal(id,'room-404');
+          return{
+            get:async()=>({exists:false})
+          };
+        }
+      };
+    }
+  };
+  const controller=createController({
+    readRoomDirectory:async(id)=>{
+      assert.equal(id,'dir-1');
+      return directoryDoc;
+    },
+    getFirebaseDbForInstanceId:async(instanceId)=>{
+      assert.equal(instanceId,'shard-a');
+      return shardDb;
+    },
+    deleteRoomDirectory:async(id)=>{deleted.push(id);}
+  });
+  const resolved=await controller.resolveRoomDocByDirectory('dir-1','');
+  assert.equal(resolved,null);
+  assert.deepEqual(deleted,['dir-1']);
+});
+
+test('resolveRoomDocByDirectory returns null when no firebase db is available', async()=>{
+  const controller=createController({
+    getFirebaseDb(){return null;}
+  });
+  const resolved=await controller.resolveRoomDocByDirectory('room-1','');
+  assert.equal(resolved,null);
+});

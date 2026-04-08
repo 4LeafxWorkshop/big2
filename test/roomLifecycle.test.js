@@ -109,3 +109,22 @@ test('abandonRoomLocally clears ephemeral game state and opens lobby when reques
   assert.deepEqual(deps.calls.recommendHints,['']);
   assert.equal(deps.calls.render,1);
 });
+
+test('leaveRoom with lobby return clears local state and opens the lobby immediately', async()=>{
+  const state=createBaseState();
+  const deps=createDeps(state,{
+    currentRoomDb(){return null;}
+  });
+  await deps.controller.leaveRoom(true);
+  assert.equal(state.screen,'home');
+  assert.equal(state.home.mode,'solo');
+  assert.equal(state.selected.size,0);
+  assert.equal(state.recommendation,null);
+  assert.equal(state.opponentProfileName,'');
+  assert.equal(state.room.id,'');
+  assert.equal(state.room.playerId,'');
+  assert.equal(state.room.joinOpen,true);
+  assert.equal(state.room.error,'');
+  assert.deepEqual(deps.calls.recommendHints,['']);
+  assert.equal(deps.calls.render,1);
+});
