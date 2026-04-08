@@ -4224,6 +4224,9 @@ function clearRoomStartPending(){
   state.room.pendingStart=false;
   if(roomStartPendingTimer){clearTimeout(roomStartPendingTimer);roomStartPendingTimer=null;}
 }
+function resetSoloRoundWins(){
+  state.solo.roundWins=[0,0,0,0];
+}
 function generateRoomCode(len=6){
   const chars='ABCDEFGHJKMNPQRSTUVWXYZ23456789';
   let out='';
@@ -11553,14 +11556,15 @@ function bindGameEvents(v,arr){
       void leaveRoom();
       return;
     }
+    resetSoloRoundWins();
     state.screen='home';
     state.selected.clear();
     state.recommendation=null;
     setRecommendHint('');
     render();
   });
-  document.getElementById('result-home')?.addEventListener('click',()=>{if(aiTimer){clearTimeout(aiTimer);aiTimer=null;}state.opponentProfileName='';if(state.home.mode==='room'&&state.room.id){void leaveRoom();return;}state.screen='home';state.selected.clear();state.recommendation=null;setRecommendHint('');render();});
-  document.getElementById('congrats-home')?.addEventListener('click',()=>{if(aiTimer){clearTimeout(aiTimer);aiTimer=null;}state.opponentProfileName='';if(state.home.mode==='room'&&state.room.id){void leaveRoom();return;}state.screen='home';state.selected.clear();state.recommendation=null;setRecommendHint('');render();});
+  document.getElementById('result-home')?.addEventListener('click',()=>{if(aiTimer){clearTimeout(aiTimer);aiTimer=null;}state.opponentProfileName='';if(state.home.mode==='room'&&state.room.id){void leaveRoom();return;}resetSoloRoundWins();state.screen='home';state.selected.clear();state.recommendation=null;setRecommendHint('');render();});
+  document.getElementById('congrats-home')?.addEventListener('click',()=>{if(aiTimer){clearTimeout(aiTimer);aiTimer=null;}state.opponentProfileName='';if(state.home.mode==='room'&&state.room.id){void leaveRoom();return;}resetSoloRoundWins();state.screen='home';state.selected.clear();state.recommendation=null;setRecommendHint('');render();});
   document.querySelectorAll('[data-room-expiry-reset]').forEach((btn)=>btn.addEventListener('click',async()=>{
     await resetRoomExpiryTo60s();
   }));
