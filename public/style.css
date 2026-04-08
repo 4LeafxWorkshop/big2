@@ -7273,6 +7273,9 @@ body[data-screen='game'] .table-center-grid-wrap {
 body[data-screen='game'][data-orientation='portrait'] .table {
   padding: clamp(12px, 2.1vw, 20px) !important;
 }
+body[data-screen='game'][data-orientation='portrait'] {
+  --table-felt-inset: clamp(12px, 2.1vw, 20px);
+}
 
 body[data-screen='game'] .north .seat-section {
   overflow: visible !important;
@@ -11119,8 +11122,9 @@ body[data-screen='game'] .table {
   position: relative !important;
 }
 body[data-screen='game'] {
-  --room-top-meta-offset-top: 19px;
-  --room-top-meta-offset-left: 21px;
+  --table-felt-inset: clamp(12px, 1.7vw, 20px);
+  --room-top-meta-offset-top: var(--table-felt-inset);
+  --room-top-meta-offset-left: var(--table-felt-inset);
 }
 body[data-screen='game'] .room-top-meta-table {
   position: absolute !important;
