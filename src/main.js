@@ -9287,6 +9287,7 @@ function renderLangMenu(id){
 let langMenuDocBound=false;
 let openLangMenu=null;
 const langMenuPortals=new WeakMap();
+let langMenuTouchSelectionUntil=0;
 function positionLangMenuPop(trigger,pop){
   const rect=trigger.getBoundingClientRect();
   const padding=8;
@@ -9384,9 +9385,17 @@ function bindLangMenu(root,{reloadGoogle=false}={}){
     pop.querySelectorAll('.lang-menu-item').forEach((item)=>{
       item.addEventListener('pointerdown',(ev)=>{
         if(ev.pointerType==='mouse')return;
+        langMenuTouchSelectionUntil=Date.now()+600;
         selectLang(ev,item);
       });
-      item.addEventListener('click',(ev)=>{selectLang(ev,item);});
+      item.addEventListener('click',(ev)=>{
+        if(Date.now()<langMenuTouchSelectionUntil){
+          ev.preventDefault();
+          ev.stopPropagation();
+          return;
+        }
+        selectLang(ev,item);
+      });
     });
   });
   if(langMenuDocBound)return;
