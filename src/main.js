@@ -10142,8 +10142,9 @@ function retargetCalloutTails(){
     if(!(bubble instanceof HTMLElement))continue;
     const tail=bubble.querySelector('.tail');
     if(!(tail instanceof HTMLElement))continue;
+    const isSelfBubble=bubble.classList.contains('play-type-call-self')||bubble.classList.contains('last-card-call-self');
     let avatar=null;
-    if(bubble.classList.contains('play-type-call-self')||bubble.classList.contains('last-card-call-self')){
+    if(isSelfBubble){
       avatar=document.querySelector('.player-avatar-wrap-self')||document.getElementById('self-avatar-img');
     }else{
       const seat=bubble.closest('.seat');
@@ -10159,10 +10160,12 @@ function retargetCalloutTails(){
     const dx=ax-bx;
     const dy=ay-by;
     let dir='south';
-    if(Math.abs(dx)>Math.abs(dy)){
-      dir=dx<0?'west':'east';
-    }else{
-      dir=dy<0?'north':'south';
+    if(!isSelfBubble){
+      if(Math.abs(dx)>Math.abs(dy)){
+        dir=dx<0?'west':'east';
+      }else{
+        dir=dy<0?'north':'south';
+      }
     }
     tail.classList.remove('tail-north','tail-south','tail-east','tail-west');
     tail.classList.add(`tail-${dir}`);

@@ -3,6 +3,7 @@ export function createLangMenuController(deps){
   let openLangMenu=null;
   const langMenuPortals=new WeakMap();
   let langMenuTouchSelectionUntil=0;
+  const hasRecentTouchSelection=()=>Date.now()<langMenuTouchSelectionUntil;
 
   function renderLangMenu(id){
     const items=deps.LANGUAGE_OPTIONS.map((opt)=>{
@@ -106,7 +107,7 @@ export function createLangMenuController(deps){
       const pop=menu.querySelector('.lang-menu-pop');
       if(!(trigger instanceof HTMLElement)||!(pop instanceof HTMLElement))return;
       trigger.addEventListener('click',(ev)=>{
-        if(Date.now()<langMenuTouchSelectionUntil){
+        if(hasRecentTouchSelection()){
           ev.preventDefault();
           ev.stopPropagation();
           return;
@@ -140,8 +141,12 @@ export function createLangMenuController(deps){
           langMenuTouchSelectionUntil=Date.now()+600;
           selectLang(ev,item);
         });
+        item.addEventListener('touchend',(ev)=>{
+          langMenuTouchSelectionUntil=Date.now()+600;
+          selectLang(ev,item);
+        },{passive:false});
         item.addEventListener('click',(ev)=>{
-          if(Date.now()<langMenuTouchSelectionUntil){
+          if(hasRecentTouchSelection()){
             ev.preventDefault();
             ev.stopPropagation();
             return;
@@ -152,7 +157,18 @@ export function createLangMenuController(deps){
     });
     if(langMenuDocBound)return;
     langMenuDocBound=true;
-    document.addEventListener('click',()=>{closeLangMenu();});
+    document.addEventListener('click',(ev)=>{
+      if(hasRecentTouchSelection()){
+        const target=ev.target;
+        if(target instanceof Element&&target.closest('.lang-menu')){
+          ev.preventDefault();
+          ev.stopPropagation();
+          closeLangMenu();
+          return;
+        }
+      }
+      closeLangMenu();
+    },true);
     document.addEventListener('keydown',(ev)=>{if(ev.key==='Escape')closeLangMenu();});
   }
 
