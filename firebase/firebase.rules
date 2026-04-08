@@ -61,6 +61,12 @@ service cloud.firestore {
       allow update: if false;
       allow delete: if true;
     }
+    match /big2RoomRouting/{docId} {
+      allow read: if true;
+      allow create: if isValidRoomRoutingDoc(request.resource.data);
+      allow update: if isValidRoomRoutingDoc(request.resource.data);
+      allow delete: if false;
+    }
   }
 
   function topLevelAllowedKeys() {
@@ -115,6 +121,13 @@ service cloud.firestore {
     ];
   }
 
+  function roomRoutingAllowedKeys() {
+    return [
+      'lastRoomFirebaseInstanceId',
+      'updatedAt'
+    ];
+  }
+
   function isValidRoomDirectoryDoc(d) {
     return
       d.keys().hasOnly(roomDirectoryAllowedKeys()) &&
@@ -136,6 +149,15 @@ service cloud.firestore {
       d.firebaseInstanceId.size() <= 80;
   }
 
+  function isValidRoomRoutingDoc(d) {
+    return
+      d.keys().hasOnly(roomRoutingAllowedKeys()) &&
+      d.lastRoomFirebaseInstanceId is string &&
+      d.lastRoomFirebaseInstanceId.size() >= 1 &&
+      d.lastRoomFirebaseInstanceId.size() <= 80 &&
+      d.updatedAt is int;
+  }
+
   function settingsAllowedKeys() {
     return [
       'language',
@@ -155,7 +177,13 @@ service cloud.firestore {
   }
 
   function isValidLanguage(v) {
-    return v == 'zh-HK' || v == 'en';
+    return
+      v == 'zh-HK' ||
+      v == 'en' ||
+      v == 'fr' ||
+      v == 'de' ||
+      v == 'es' ||
+      v == 'ja';
   }
 
   function isValidDifficulty(v) {
@@ -168,6 +196,7 @@ service cloud.firestore {
       v == 'red' ||
       v == 'green' ||
       v == 'gold' ||
+      v == 'silver' ||
       v == 'purple';
   }
 
