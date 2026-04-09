@@ -5947,15 +5947,15 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
 }
 .history-cards { display: flex; gap: 0; flex-wrap: nowrap; overflow-x: auto; min-width: 0; max-width: 100%; }
 .history-cards .card.mini {
-  width: var(--card-w);
-  height: var(--card-h);
+  width: var(--guide-card-w, clamp(36px, 5.7vw, 58px));
+  height: var(--guide-card-h, calc(var(--guide-card-w, clamp(36px, 5.7vw, 58px)) * 1.392857));
   overflow: visible;
   flex: 0 0 auto;
   border-radius: 0;
   box-shadow: none;
 }
 .history-cards .card.mini + .card.mini {
-  margin-left: calc(var(--card-w) * -0.5);
+  margin-left: calc(var(--guide-card-w, clamp(36px, 5.7vw, 58px)) * -0.5);
 }
 .history-cards .card.mini .card-art {
   width: 100%;
@@ -6824,8 +6824,8 @@ body[data-screen='home'] .score-guide-modal,
 body[data-screen='game'] .score-guide-modal,
 body[data-screen='home'] .intro-modal,
 body[data-screen='game'] .intro-modal {
-  --guide-card-w: var(--card-w);
-  --guide-card-h: var(--card-h);
+  --guide-card-w: clamp(36px, 5.7vw, 58px);
+  --guide-card-h: calc(var(--guide-card-w) * 1.392857);
 }
 @media (max-width: 860px) and (orientation: portrait) {
   body[data-screen='home'] #app {
@@ -7240,11 +7240,11 @@ body[data-log-sheet='1'] .history-cards {
   mask-repeat: repeat !important;
 }
 body[data-log-sheet='1'] .history-cards .card.mini {
-  width: var(--card-w) !important;
-  height: var(--card-h) !important;
+  width: var(--guide-card-w, clamp(36px, 5.7vw, 58px)) !important;
+  height: var(--guide-card-h, calc(var(--guide-card-w, clamp(36px, 5.7vw, 58px)) * 1.392857)) !important;
 }
 body[data-log-sheet='1'] .history-cards .card.mini + .card.mini {
-  margin-left: calc(var(--card-w) * -0.5) !important;
+  margin-left: calc(var(--guide-card-w, clamp(36px, 5.7vw, 58px)) * -0.5) !important;
 }
 body[data-screen='game'] .congrats-screen,
 body[data-screen='game'] .result-screen {
@@ -7400,6 +7400,8 @@ body[data-screen='game'] .result-card > * {
   font-weight: 800;
 }
 .result-cards {
+  --guide-card-w: clamp(36px, 5.7vw, 58px);
+  --guide-card-h: calc(var(--guide-card-w) * 1.392857);
   display: flex;
   gap: 0;
   flex-wrap: nowrap;
@@ -7408,7 +7410,7 @@ body[data-screen='game'] .result-card > * {
   overflow-x: auto;
   min-width: 0;
   max-width: 100%;
-  min-height: calc(var(--card-h) * 0.82);
+  min-height: var(--guide-card-h);
 }
 @media (max-width: 760px) {
   .result-row {
@@ -7698,15 +7700,15 @@ body[data-screen='game'] .action-strip .player-tag .seat-subline {
   color: rgba(214, 232, 222, .9) !important;
 }
 body[data-screen='game'] .result-cards .card.mini {
-  width: var(--card-w);
-  height: var(--card-h);
+  width: var(--guide-card-w, clamp(36px, 5.7vw, 58px));
+  height: var(--guide-card-h, calc(var(--guide-card-w, clamp(36px, 5.7vw, 58px)) * 1.392857));
   overflow: visible;
   flex: 0 0 auto;
   border-radius: 0;
   box-shadow: none;
 }
 body[data-screen='game'] .result-cards .card.mini + .card.mini {
-  margin-left: calc(var(--card-w) * -0.5);
+  margin-left: calc(var(--guide-card-w, clamp(36px, 5.7vw, 58px)) * -0.5);
 }
 body[data-screen='game'] .result-cards .card.mini .card-art {
   width: 100%;
