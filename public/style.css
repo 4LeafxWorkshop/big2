@@ -7783,19 +7783,12 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-round-wins-i
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .play-type-call-seat,
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-seat,
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat {
-  top: calc(100% + 8px) !important;
-  bottom: auto !important;
-  left: 50% !important;
-  right: auto !important;
-  --callout-base-x: -50%;
-  --callout-base-y: 0px;
   z-index: 13001 !important;
   max-width: none !important;
   text-align: center !important;
 }
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat {
   --callout-size: .74;
-  top: calc(100% + 4px) !important;
 }
 body[data-screen='game'] .seat.north .seat-pack,
 body[data-screen='game'] .seat.west .seat-pack,
@@ -11087,20 +11080,6 @@ body[data-screen='game'] .seat.north.active .seat-section {
   }
 }
 
-body[data-screen='game'] .seat.west .seat-name-fixed[data-opponent-name] .play-type-call-seat,
-body[data-screen='game'] .seat.west .seat-name-fixed[data-opponent-name] .last-card-call-seat,
-body[data-screen='game'] .seat.west .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat,
-body[data-screen='game'] .seat.east .seat-name-fixed[data-opponent-name] .play-type-call-seat,
-body[data-screen='game'] .seat.east .seat-name-fixed[data-opponent-name] .last-card-call-seat,
-body[data-screen='game'] .seat.east .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat {
-  top: auto !important;
-  bottom: calc(100% + 10px) !important;
-  left: 50% !important;
-  right: auto !important;
-  --callout-base-x: -50%;
-  --callout-base-y: 0px;
-}
-
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .play-type-call-seat,
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-seat {
   max-inline-size: none !important;
@@ -11119,69 +11098,6 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-se
   overflow: visible !important;
   text-overflow: clip !important;
   max-inline-size: none !important;
-}
-
-body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .play-type-call-seat,
-body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .last-card-call-seat,
-body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat {
-  top: 50% !important;
-  bottom: auto !important;
-  left: calc(100% + 18px) !important;
-  right: auto !important;
-  --callout-base-x: 10px;
-  --callout-base-y: -50%;
-}
-
-body[data-screen='game'] .seat.west .seat-name-fixed[data-opponent-name] .play-type-call-seat .tail,
-body[data-screen='game'] .seat.west .seat-name-fixed[data-opponent-name] .last-card-call-seat .tail,
-body[data-screen='game'] .seat.west .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat .tail,
-body[data-screen='game'] .seat.east .seat-name-fixed[data-opponent-name] .play-type-call-seat .tail,
-body[data-screen='game'] .seat.east .seat-name-fixed[data-opponent-name] .last-card-call-seat .tail,
-body[data-screen='game'] .seat.east .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat .tail {
-  top: auto !important;
-  bottom: calc(-20px * var(--callout-size, 1)) !important;
-  left: 50% !important;
-  right: auto !important;
-  transform: translateX(-50%) !important;
-  border-color: transparent !important;
-  border-top-color: var(--bubble-border) !important;
-}
-
-body[data-screen='game'] .seat.west .seat-name-fixed[data-opponent-name] .play-type-call-seat .tail::after,
-body[data-screen='game'] .seat.west .seat-name-fixed[data-opponent-name] .last-card-call-seat .tail::after,
-body[data-screen='game'] .seat.west .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat .tail::after,
-body[data-screen='game'] .seat.east .seat-name-fixed[data-opponent-name] .play-type-call-seat .tail::after,
-body[data-screen='game'] .seat.east .seat-name-fixed[data-opponent-name] .last-card-call-seat .tail::after,
-body[data-screen='game'] .seat.east .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat .tail::after {
-  top: calc(-14px * var(--callout-size, 1)) !important;
-  bottom: auto !important;
-  left: calc(-10px * var(--callout-size, 1)) !important;
-  right: auto !important;
-  border-color: transparent !important;
-  border-top-color: var(--bubble-fill) !important;
-}
-
-body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .play-type-call-seat .tail,
-body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .last-card-call-seat .tail,
-body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat .tail {
-  top: 50% !important;
-  bottom: auto !important;
-  left: calc(-20px * var(--callout-size, 1)) !important;
-  right: auto !important;
-  transform: translateY(-50%) !important;
-  border-color: transparent !important;
-  border-right-color: var(--bubble-border) !important;
-}
-
-body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .play-type-call-seat .tail::after,
-body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .last-card-call-seat .tail::after,
-body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat .tail::after {
-  top: calc(-10px * var(--callout-size, 1)) !important;
-  bottom: auto !important;
-  left: calc(-6px * var(--callout-size, 1)) !important;
-  right: auto !important;
-  border-color: transparent !important;
-  border-right-color: var(--bubble-fill) !important;
 }
 
 @media (max-width: 860px) {
@@ -11522,30 +11438,6 @@ body[data-screen='game'] .table-center-grid-wrap {
   body[data-screen='game'][data-orientation='portrait'] .seat.north .opponent-fan {
     margin-top: -3px !important;
   }
-  body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-pack > .seat-name-fixed,
-  body[data-screen='game'][data-orientation='portrait'] .seat.west .seat-pack > .seat-name-fixed,
-  body[data-screen='game'][data-orientation='portrait'] .seat.east .seat-pack > .seat-name-fixed,
-  body[data-screen='game'][data-orientation='portrait'] .seat.west .side-station-stack > .seat-name-fixed,
-  body[data-screen='game'][data-orientation='portrait'] .seat.east .side-station-stack > .seat-name-fixed {
-    z-index: 13010 !important;
-  }
-  body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-pack > .seat-name-fixed .play-type-call-seat,
-  body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-pack > .seat-name-fixed .last-card-call-seat,
-  body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-pack > .seat-name-fixed .emote-callout.play-type-call-seat,
-  body[data-screen='game'][data-orientation='portrait'] .seat.west .seat-pack > .seat-name-fixed .play-type-call-seat,
-  body[data-screen='game'][data-orientation='portrait'] .seat.west .seat-pack > .seat-name-fixed .last-card-call-seat,
-  body[data-screen='game'][data-orientation='portrait'] .seat.west .seat-pack > .seat-name-fixed .emote-callout.play-type-call-seat,
-  body[data-screen='game'][data-orientation='portrait'] .seat.east .seat-pack > .seat-name-fixed .play-type-call-seat,
-  body[data-screen='game'][data-orientation='portrait'] .seat.east .seat-pack > .seat-name-fixed .last-card-call-seat,
-  body[data-screen='game'][data-orientation='portrait'] .seat.east .seat-pack > .seat-name-fixed .emote-callout.play-type-call-seat,
-  body[data-screen='game'][data-orientation='portrait'] .seat.west .side-station-stack > .seat-name-fixed .play-type-call-seat,
-  body[data-screen='game'][data-orientation='portrait'] .seat.west .side-station-stack > .seat-name-fixed .last-card-call-seat,
-  body[data-screen='game'][data-orientation='portrait'] .seat.west .side-station-stack > .seat-name-fixed .emote-callout.play-type-call-seat,
-  body[data-screen='game'][data-orientation='portrait'] .seat.east .side-station-stack > .seat-name-fixed .play-type-call-seat,
-  body[data-screen='game'][data-orientation='portrait'] .seat.east .side-station-stack > .seat-name-fixed .last-card-call-seat,
-  body[data-screen='game'][data-orientation='portrait'] .seat.east .side-station-stack > .seat-name-fixed .emote-callout.play-type-call-seat {
-    z-index: 13011 !important;
-  }
   body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-open-play,
   body[data-screen='game'][data-orientation='portrait'] .seat.west .seat-open-play,
   body[data-screen='game'][data-orientation='portrait'] .seat.east .seat-open-play,
@@ -11725,29 +11617,29 @@ body[data-screen='game'][data-ios='1'] .action-strip .hand .hand-card {
 
 @media (max-width: 860px) {
   body[data-screen='game'] .self-table-emote {
-    width: clamp(120px, 24vmin, 190px) !important;
+    width: clamp(140px, 28vw, 210px) !important;
   }
   body[data-screen='game'] .self-table-emote.emote-throw {
-    width: clamp(145px, 28vmin, 220px) !important;
+    width: clamp(165px, 34vw, 250px) !important;
   }
   body[data-screen='game'] .self-table-emote.emote-smash {
-    width: clamp(150px, 29vmin, 230px) !important;
+    width: clamp(170px, 35vw, 260px) !important;
   }
   body[data-screen='game'] .self-table-emote.emote-cheers,
   body[data-screen='game'] .self-table-emote.emote-champagne,
   body[data-screen='game'] .self-table-emote.emote-shock {
-    width: clamp(150px, 30vmin, 230px) !important;
+    width: clamp(175px, 36vw, 265px) !important;
   }
   body[data-screen='game'] .self-table-emote.emote-love,
   body[data-screen='game'] .self-table-emote.emote-crack {
-    width: clamp(135px, 26vmin, 205px) !important;
+    width: clamp(155px, 31vw, 225px) !important;
   }
   body[data-screen='game'] .self-table-emote.emote-sleep {
-    width: clamp(125px, 24vmin, 195px) !important;
+    width: clamp(145px, 29vw, 215px) !important;
   }
   body[data-screen='game'] .self-table-emote.emote-rude {
-    width: clamp(180px, 34vmin, 260px) !important;
-    height: clamp(118px, 22vmin, 170px) !important;
+    width: clamp(210px, 42vw, 300px) !important;
+    height: clamp(138px, 27vw, 190px) !important;
   }
 }
 
