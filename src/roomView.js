@@ -38,7 +38,6 @@ export function renderRoomJoinOverlay(params){
     activeRoomsLoading,
     hiddenCount,
     joinOpenCountdown,
-    language,
     roomErrorHtml,
     t,
     esc,
@@ -64,7 +63,7 @@ export function renderRoomJoinOverlay(params){
         const totalSeats=Number.isFinite(Number(r.maxPlayers))?Number(r.maxPlayers):4;
         const joinDisabled=isPrivate||r.status==='playing';
         const bottomHint=isPrivate&&r.status!=='playing'
-          ?(language==='zh-HK'?'輸入代碼即可加入':'Enter room code to join.')
+          ?t('roomEnterCodeHint')
           :'';
         const statusText=(()=>{
           if(r.status==='playing')return statusLabel.replace(/<[^>]+>/g,'');
@@ -87,10 +86,10 @@ export function renderRoomJoinOverlay(params){
       }).join('')
     :'';
   const empty=activeRooms.length?'':`<div class="room-active-card room-active-empty" aria-disabled="true"><div class="room-active-code">${t('roomActiveEmpty')}</div></div>`;
-  const hiddenNote=hiddenCount?`<span class="room-active-hidden">Hidden: ${hiddenCount}</span>`:'';
+  const hiddenNote=hiddenCount?`<span class="room-active-hidden">${t('roomActiveHidden')}: ${hiddenCount}</span>`:'';
   const refreshCountdownText=joinOpenCountdown&&joinOpenCountdown>0
     ?`<span class="room-active-refresh-countdown">${joinOpenCountdown}s</span>`
     :'';
-  const activeRoomsBlock=`<div class="room-active-block"><div class="room-create-section">${createTableCard}</div><div class="room-active-head"><span>${t('roomActiveList')}</span>${hiddenNote}<button id="room-active-refresh" class="secondary"><span class="room-active-refresh-label">${language==='zh-HK'?'更新':'Refresh'}</span>${refreshCountdownText}</button></div><div class="room-active-grid">${cards}${empty}</div></div>`;
+  const activeRoomsBlock=`<div class="room-active-block"><div class="room-create-section">${createTableCard}</div><div class="room-active-head"><span>${t('roomActiveList')}</span>${hiddenNote}<button id="room-active-refresh" class="secondary"><span class="room-active-refresh-label">${t('roomActiveRefresh')}</span>${refreshCountdownText}</button></div><div class="room-active-grid">${cards}${empty}</div></div>`;
   return`<div class="room-overlay"><div class="room-card room-join-card room-card-icon"><div class="room-head"><span class="room-corner-icon room-corner-icon-reception" aria-hidden="true"><svg viewBox="0 0 24 24" focusable="false"><path d="M4 17.5a1 1 0 0 1-1-1V15a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4v1.5a1 1 0 1 1-2 0V15a2 2 0 0 0-2-2h-1v3a1 1 0 0 1-2 0v-3h-4v3a1 1 0 0 1-2 0v-3H7a2 2 0 0 0-2 2v1.5a1 1 0 0 1-1 1Z"/><path d="M7 10a3 3 0 1 1 3-3 3 3 0 0 1-3 3Zm10 0a3 3 0 1 1 3-3 3 3 0 0 1-3 3Z"/><path d="M2 20a1 1 0 0 1 1-1h18a1 1 0 1 1 0 2H3a1 1 0 0 1-1-1Z"/></svg></span><h3>${t('roomLobby')}</h3></div><label class="field"><span>${t('roomCode')}</span><div class="room-code-row"><input id="room-code-input" class="room-input" maxlength="8" placeholder="ABC123"/><button id="room-join-confirm" class="secondary room-icon-btn room-join-top-btn"><svg class="room-inline-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M10 6a4 4 0 1 1 0 8 4 4 0 0 1 0-8m0 10c4.418 0 8 1.79 8 4v1H2v-1c0-2.21 3.582-4 8-4m10-8h-2V6h-2v2h-2v2h2v2h2v-2h2z"/></svg><span>${t('roomJoin')}</span></button></div></label>${activeRoomsLoading?`<div class="hint">...</div>`:activeRoomsBlock}${roomErrorHtml}<div class="room-actions"><button id="room-join-cancel" class="secondary room-icon-btn"><span>${t('home')}</span></button></div></div></div>`;
 }

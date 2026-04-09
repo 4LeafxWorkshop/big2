@@ -1,0 +1,57 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+
+import {createAvatarProfileHelpers} from '../src/avatarProfile.js';
+
+function createHelpers({
+  googlePicture='',
+  signedIn=false
+}={}){
+  return createAvatarProfileHelpers({
+    withBase:(value)=>`/base/${value}`,
+    hashNameSeed:()=>12345,
+    pick:(arr)=>arr[0],
+    getGooglePicture:()=>googlePicture,
+    isGoogleSignedIn:()=>signedIn
+  });
+}
+
+test('authPictureUrlFrom normalizes protocol-relative urls', ()=>{
+  const helpers=createHelpers();
+  assert.equal(helpers.authPictureUrlFrom('//example.com/avatar.png'),'https://example.com/avatar.png');
+});
+
+test('authPictureUrlFrom preserves data urls', ()=>{
+  const helpers=createHelpers();
+  assert.equal(helpers.authPictureUrlFrom('data:image/png;base64,abc'),'data:image/png;base64,abc');
+});
+
+test('selfAvatarDataUri prefers signed-in google picture', ()=>{
+  const helpers=createHelpers({googlePicture:'avatars.example.com/self.png',signedIn:true});
+  assert.equal(helpers.selfAvatarDataUri('Player','#7aaed8','female'),'https://avatars.example.com/self.png');
+});
+
+test('selfAvatarDataUri falls back to base avatar by gender', ()=>{
+  const helpers=createHelpers();
+  assert.equal(helpers.selfAvatarDataUri('Player','#7aaed8','female'),'/base/avatar-female.png');
+  assert.equal(helpers.selfAvatarDataUri('Player','#7aaed8','male'),'/base/avatar-male.png');
+});
+
+test('avatarGenderClass maps female and defaults male', ()=>{
+  const helpers=createHelpers();
+  assert.equal(helpers.avatarGenderClass('female'),'avatar-female');
+  assert.equal(helpers.avatarGenderClass('anything'),'avatar-male');
+});
+
+test('avatarDataUri uses bot override image when available', ()=>{
+  const helpers=createHelpers();
+  assert.match(helpers.avatarDataUri('志明','#7aaed8','male',true),/^https:\/\/avataaars\.io\//);
+});
+
+test('avatarDataUri builds dicebear url for non-bot avatars', ()=>{
+  const helpers=createHelpers();
+  const avatarUrl=helpers.avatarDataUri('Player','#7aaed8','female',false);
+  assert.match(avatarUrl,/^https:\/\/api\.dicebear\.com\/9\.x\/avataaars\/svg\?/);
+  assert.match(avatarUrl,/seed=female-Player/);
+  assert.match(avatarUrl,/backgroundColor=transparent/);
+});

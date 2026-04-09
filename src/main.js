@@ -1,6 +1,8 @@
 ﻿﻿﻿﻿﻿﻿﻿﻿import {createCalloutAudioController} from './calloutAudio.js';
 import {createCardUiHelpers} from './cardUi.js';
-import {renderHomeMarkup} from './homeView.js';
+import {createAvatarProfileHelpers} from './avatarProfile.js';
+import {createGameEventsBinder} from './gameEvents.js';
+import {renderConfigMarkup, renderHomeMarkup} from './homeView.js';
 import {createLangMenuController} from './langMenu.js';
 import {renderGameActionZone, renderGameLogSheet, renderGameShell, renderGameSideZone, renderGameTable, renderGameTopbar, renderOpponentSeat, renderOpponentSeats} from './gameView.js';
 import {renderIntroPanel, renderLeaderboardModal, renderLeaderboardPanel, renderScoreGuideModal} from './modalViews.js';
@@ -351,6 +353,7 @@ const I18N={
     roomSeatOpen:'吉位',
     roomActiveList:'房間列表',
     roomActiveEmpty:'未有可加入房間。',
+    roomActiveHidden:'隱藏',
     roomActiveRefresh:'更新列表',
     roomStatusLabel:'房間狀態',
     roomStatusPlaying:'戰鬥中',
@@ -598,6 +601,7 @@ const I18N={
     roomSeatOpen:'Open Seat',
     roomActiveList:'Available Tables',
     roomActiveEmpty:'No tables available.',
+    roomActiveHidden:'Hidden',
     roomActiveRefresh:'Refresh',
     roomStatusLabel:'Room status',
     roomStatusPlaying:'In Game',
@@ -844,6 +848,7 @@ const I18N={
     roomSeatOpen:'Siège libre',
     roomActiveList:'Tables disponibles',
     roomActiveEmpty:'Aucune table disponible.',
+    roomActiveHidden:'Masquées',
     roomActiveRefresh:'Actualiser',
     roomStatusLabel:'Statut de la salle',
     roomStatusPlaying:'En jeu',
@@ -1090,6 +1095,7 @@ const I18N={
     roomSeatOpen:'Freier Sitz',
     roomActiveList:'Verfügbare Tische',
     roomActiveEmpty:'Keine Tische verfügbar.',
+    roomActiveHidden:'Versteckt',
     roomActiveRefresh:'Aktualisieren',
     roomStatusLabel:'Raumstatus',
     roomStatusPlaying:'Im Spiel',
@@ -1336,6 +1342,7 @@ const I18N={
     roomSeatOpen:'Asiento libre',
     roomActiveList:'Mesas disponibles',
     roomActiveEmpty:'No hay mesas.',
+    roomActiveHidden:'Ocultas',
     roomActiveRefresh:'Actualizar',
     roomStatusLabel:'Estado de sala',
     roomStatusPlaying:'En juego',
@@ -1583,6 +1590,7 @@ const I18N={
     roomSeatOpen:'空席',
     roomActiveList:'参加可能なテーブル',
     roomActiveEmpty:'参加可能なテーブルはありません。',
+    roomActiveHidden:'非表示',
     roomActiveRefresh:'更新',
     roomStatusLabel:'ルーム状態',
     roomStatusPlaying:'プレイ中',
@@ -1953,14 +1961,10 @@ let winSfxAudio=null;
 let winSfxSeq=0;
 let calloutGateUntilPlay=false;
 let turnLockUntil=0;
-let lastNamecardTapAt=0;
 let calloutDisplayEnabled=true;
 let emoteDisplayEnabled=true;
 let calloutVoiceMode='auto'; // auto | recorded | off
 let calloutStylePack='energetic'; // forced energetic
-let autoSortMode='seq';
-let opponentProfileDelegateBound=false;
-let mobileTapAt=0;
 let orientationBlockActive=false;
 let lastOrientation=null;
 const calloutAudioController=createCalloutAudioController({
@@ -3685,6 +3689,20 @@ const {
   loadLeaderboardStore,
   botLeaderboardIdentity,
   currentRoomPlayerId
+});
+const {
+  AVATAR_BASE_SRC,
+  authPictureUrl,
+  authPictureUrlFrom,
+  avatarDataUri,
+  selfAvatarDataUri,
+  avatarGenderClass
+}=createAvatarProfileHelpers({
+  withBase,
+  hashNameSeed,
+  pick,
+  getGooglePicture:()=>String(state.home.google?.picture??'').trim(),
+  isGoogleSignedIn:()=>Boolean(state.home.google?.signedIn)
 });
 function syncSessionScoreFromStore(store,{force=false}={}){
   if(!store||typeof store!=='object'||!store.players||typeof store.players!=='object')return;
@@ -5984,212 +6002,15 @@ function hashNameSeed(name){
   return h>>>0;
 }
 function pick(arr,seed,offset=0){return arr[(seed+offset)%arr.length];}
-const AVATAR_BASE_SRC={male:withBase('avatar-male.png'),female:withBase('avatar-female.png')};
-const AVATAR_DICEBEAR_BASE='https://api.dicebear.com/9.x/avataaars/svg';
-const AVATAR_A4_COMMON={
-  backgroundColor:'transparent',
-  backgroundType:'solid',
-  clip:'true',
-  style:'default'
-};
-const AVATAR_A4_HK={
-  skinColor:['d08b5b','edb98a','ffdbb4','f8d25c'],
-  hairColor:['2c1b18','4a312c','724133','a55728']
-};
-const AVATAR_A4_ENERGETIC={
-  eyes:['happy','surprised','wink','default'],
-  mouth:['smile','twinkle','default'],
-  eyebrows:['raisedExcited','raisedExcitedNatural','upDown','defaultNatural'],
-  accessories:['round','prescription01','prescription02'],
-  clothing:['blazerAndShirt','blazerAndSweater','collarAndSweater','hoodie','shirtCrewNeck'],
-  clothesColor:['65c9ff','5199e4','ff5c5c','ff488e','a7ffc4','b1e2ff','ffffb1','ffdeb5']
-};
-const AVATAR_A4_TOP={
-  male:['shortFlat','shortRound','shortWaved','shortCurly','theCaesar','theCaesarAndSidePart','shaggy'],
-  female:['longButNotTooLong','straight01','straight02','straightAndStrand','bob','bun','curvy','curly','bigHair']
-};
-const AVATAR_A4_FACIAL_HAIR={
-  list:['beardLight','beardMedium','moustacheFancy']
-};
-const AVATAR_VARIANT_BY_NAME={
-  '俊傑':'v2',
-  '穎欣':'v2'
-};
-const AVATAR_IMAGE_BY_BOT_NAME={
-  '志明':'https://avataaars.io/?topType=WinterHat3&accessoriesType=Round&hatColor=Blue02&facialHairType=Blank&clotheType=GraphicShirt&clotheColor=Blue02&graphicType=Bear&eyeType=Squint&eyebrowType=UpDown&mouthType=Smile&skinColor=Light',
-  '子朗':'https://avataaars.io/?topType=Hat&accessoriesType=Prescription02&facialHairType=BeardLight&facialHairColor=BrownDark&clotheType=BlazerShirt&eyeType=EyeRoll&eyebrowType=Default&mouthType=Twinkle&skinColor=Light&scale=200',
-  '家樂':'https://avataaars.io/?topType=ShortHairDreads02&accessoriesType=Sunglasses&hairColor=BrownDark&facialHairType=BeardLight&facialHairColor=BrownDark&clotheType=Hoodie&clotheColor=PastelRed&eyeType=Wink&eyebrowType=Default&mouthType=Grimace&skinColor=Pale',
-  '嘉欣':'https://avataaars.io/?topType=LongHairCurvy&accessoriesType=Round&hairColor=Black&facialHairType=Blank&clotheType=GraphicShirt&clotheColor=Pink&graphicType=Diamond&eyeType=Default&eyebrowType=RaisedExcited&mouthType=Smile&skinColor=Light',
-  '芷晴':'https://avataaars.io/?topType=LongHairStraightStrand&accessoriesType=Blank&hairColor=BrownDark&facialHairType=Blank&clotheType=GraphicShirt&clotheColor=Blue03&graphicType=Selena&eyeType=Happy&eyebrowType=Default&mouthType=Smile&skinColor=Light',
-  'ReXX':'https://avataaars.io/?topType=ShortHairShortFlat&accessoriesType=Prescription02&hairColor=Black&facialHairType=Blank&clotheType=BlazerShirt&eyeType=Wink&eyebrowType=DefaultNatural&mouthType=Smile&skinColor=Light',
-  'Axel':'https://avataaars.io/?topType=ShortHairDreads02&accessoriesType=Round&hairColor=Red&facialHairType=BeardMajestic&facialHairColor=Red&clotheType=Hoodie&clotheColor=Red&eyeType=Default&eyebrowType=UnibrowNatural&mouthType=Eating&skinColor=Pale',
-  '穎欣':'https://avataaars.io/?topType=LongHairFroBand&accessoriesType=Kurt&hairColor=Blonde&facialHairType=Blank&clotheType=ShirtVNeck&clotheColor=Red&eyeType=Squint&eyebrowType=RaisedExcitedNatural&mouthType=Twinkle&skinColor=Light',
-  '佩儀':'https://avataaars.io/?topType=LongHairFrida&accessoriesType=Round&hairColor=Blonde&facialHairType=Blank&clotheType=CollarSweater&clotheColor=Pink&eyeType=WinkWacky&eyebrowType=Default&mouthType=Grimace&skinColor=Pale&backgroundColor=b6e3f4,c0aede,d1d4f9',
-  '少龍':'https://avataaars.io/?avatarStyle=Transparent&topType=ShortHairDreads01&accessoriesType=Sunglasses&hairColor=Brown&facialHairType=BeardLight&facialHairColor=BrownDark&clotheType=BlazerShirt&eyeType=Side&eyebrowType=AngryNatural&mouthType=Concerned&skinColor=Brown&backgroundColor=b6e3f4,c0aede,d1d4f9',
-  'Kane':'https://avataaars.io/?topType=Eyepatch&facialHairType=BeardMedium&facialHairColor=Black&clotheType=ShirtVNeck&clotheColor=Black&eyeType=Surprised&eyebrowType=AngryNatural&mouthType=Grimace&skinColor=DarkBrown&scale=150',
-  'Milo':'https://avataaars.io/?topType=WinterHat2&accessoriesType=Blank&hatColor=Blue03&facialHairType=Blank&clotheType=Hoodie&clotheColor=Heather&eyeType=Squint&eyebrowType=UpDownNatural&mouthType=Smile&skinColor=Light',
-  'Jade':'https://avataaars.io/?topType=LongHairFro&accessoriesType=Blank&hairColor=PastelPink&facialHairType=Blank&clotheType=ShirtScoopNeck&clotheColor=PastelRed&eyeType=Happy&eyebrowType=UpDown&mouthType=Twinkle&skinColor=Pale',
-  'Nora':'https://avataaars.io/?topType=LongHairFroBand&accessoriesType=Blank&hairColor=Auburn&facialHairType=Blank&clotheType=ShirtScoopNeck&clotheColor=Pink&eyeType=Close&eyebrowType=RaisedExcited&mouthType=Smile&skinColor=Light',
-  '天樂':'https://avataaars.io/?topType=ShortHairDreads01&accessoriesType=Prescription01&hairColor=Black&facialHairType=Blank&clotheType=BlazerShirt&eyeType=Wink&eyebrowType=RaisedExcited&mouthType=Smile&skinColor=Brown'
-  ,
-  'Nova':'https://avataaars.io/?topType=LongHairDreads&accessoriesType=Blank&hairColor=Black&facialHairType=Blank&clotheType=ShirtScoopNeck&clotheColor=Pink&eyeType=Default&eyebrowType=RaisedExcited&mouthType=Smile&skinColor=Brown',
-  'Skye':'https://avataaars.io/?topType=LongHairStraight&accessoriesType=Prescription01&hairColor=Black&facialHairType=Blank&clotheType=GraphicShirt&clotheColor=Blue03&graphicType=Cumbia&eyeType=Close&eyebrowType=RaisedExcitedNatural&mouthType=Smile&skinColor=Light',
-  'Iris':'https://avataaars.io/?topType=LongHairBun&accessoriesType=Kurt&hairColor=Red&facialHairType=Blank&clotheType=ShirtVNeck&clotheColor=Pink&eyeType=Close&eyebrowType=UpDown&mouthType=Disbelief&skinColor=Light',
-  '葵芳':'https://avataaars.io/?topType=LongHairCurvy&accessoriesType=Blank&hairColor=Black&facialHairType=Blank&clotheType=Overall&clotheColor=Red&eyeType=Side&eyebrowType=Default&mouthType=Concerned&skinColor=Light',
-  '葵兄':'https://avataaars.io/?topType=ShortHairShaggyMullet&accessoriesType=Sunglasses&hairColor=Black&facialHairType=Blank&clotheType=BlazerShirt&eyeType=WinkWacky&eyebrowType=Default&mouthType=Serious&skinColor=Light',
-  'Jax':'https://avataaars.io/?topType=ShortHairShortRound&accessoriesType=Round&hairColor=BrownDark&facialHairType=Blank&clotheType=Hoodie&clotheColor=Heather&eyeType=Happy&eyebrowType=RaisedExcitedNatural&mouthType=Grimace&skinColor=Light'
-};
-const AVATAR_OVERRIDE_BY_NAME={
-  '少龍':{
-    eyes:'default',
-    eyebrows:'upDown',
-    mouth:'smile',
-    accessories:'prescription02',
-    top:'shortCurly',
-    skinColor:'d08b5b',
-    hairColor:'2c1b18'
-  }
-};
-const avatarClothesMaskCache=new Map();
-function clamp255(v){return Math.max(0,Math.min(255,Math.round(v)));}
-function normalizeAvatarColor(color){
-  const raw=String(color??'').trim();
-  if(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(raw)){
-    if(raw.length===4)return`#${raw[1]}${raw[1]}${raw[2]}${raw[2]}${raw[3]}${raw[3]}`.toLowerCase();
-    return raw.toLowerCase();
-  }
-  const m=raw.match(/^rgba?\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
-  if(m){
-    const r=clamp255(Number(m[1])),g=clamp255(Number(m[2])),b=clamp255(Number(m[3]));
-    return`#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
-  }
-  return '#7aaed8';
-}
 function hexToRgb(hex){
-  const h=normalizeAvatarColor(hex);
-  return{r:parseInt(h.slice(1,3),16),g:parseInt(h.slice(3,5),16),b:parseInt(h.slice(5,7),16)};
+  const raw=String(hex??'').trim().replace(/^#/,'');
+  if(raw.length!==6)return[];
+  return[
+    parseInt(raw.slice(0,2),16),
+    parseInt(raw.slice(2,4),16),
+    parseInt(raw.slice(4,6),16)
+  ];
 }
-function colorDistSq(r1,g1,b1,r2,g2,b2){
-  const dr=r1-r2,dg=g1-g2,db=b1-b2;
-  return dr*dr+dg*dg+db*db;
-}
-function computeAvatarClothesMask(data,w,h){
-  const yMin=Math.floor(h*0.42);
-  const xMin=Math.floor(w*0.2);
-  const xMax=Math.ceil(w*0.8);
-  let seedX=-1,seedY=-1,seedR=0,seedG=0,seedB=0,best=-1;
-  for(let y=h-1;y>=yMin;y--){
-    for(let x=xMin;x<xMax;x++){
-      const i=(y*w+x)*4;
-      const a=data[i+3];
-      if(a<40)continue;
-      const r=data[i],g=data[i+1],b=data[i+2];
-      const max=Math.max(r,g,b),min=Math.min(r,g,b);
-      const sat=max-min;
-      if(sat<18)continue;
-      const skinLike=(r>g&&g>b&&r>90&&b<140&&(r-g)<95);
-      if(skinLike)continue;
-      const score=sat+(y/h)*48-Math.abs(x-(w/2))*0.45;
-      if(score>best){
-        best=score;
-        seedX=x;seedY=y;seedR=r;seedG=g;seedB=b;
-      }
-    }
-  }
-  const mask=new Uint8Array(w*h);
-  if(seedX<0)return mask;
-  const qx=[seedX];
-  const qy=[seedY];
-  mask[seedY*w+seedX]=1;
-  const tolSq=145*145;
-  for(let qi=0;qi<qx.length;qi++){
-    const x=qx[qi],y=qy[qi];
-    const next=[[x+1,y],[x-1,y],[x,y+1],[x,y-1]];
-    for(const [nx,ny] of next){
-      if(nx<0||ny<0||nx>=w||ny>=h||ny<yMin)continue;
-      const p=ny*w+nx;
-      if(mask[p])continue;
-      const i=p*4;
-      if(data[i+3]<24)continue;
-      const r=data[i],g=data[i+1],b=data[i+2];
-      if(colorDistSq(r,g,b,seedR,seedG,seedB)>tolSq)continue;
-      mask[p]=1;
-      qx.push(nx);
-      qy.push(ny);
-    }
-  }
-  return mask;
-}
-function avatarDataUri(name,color,gender='male',isBot=false){
-  const g=String(gender??'male')==='female'?'female':'male';
-  const baseName=String(name??'player')||'player';
-  const overrideImage=isBot?AVATAR_IMAGE_BY_BOT_NAME[baseName]??'':'';
-  if(overrideImage)return overrideImage;
-  const variant=AVATAR_VARIANT_BY_NAME[baseName]??'';
-  const seedText=`${g}-${baseName}${variant?`-${variant}`:''}`;
-  const seedHash=hashNameSeed(seedText);
-  const seatColor=normalizeAvatarColor(color);
-  const seatRgb=seatColor?hexToRgb(seatColor):null;
-  const seatLight=seatRgb
-    ?`#${clamp255(seatRgb.r+(255-seatRgb.r)*0.65).toString(16).padStart(2,'0')}${clamp255(seatRgb.g+(255-seatRgb.g)*0.65).toString(16).padStart(2,'0')}${clamp255(seatRgb.b+(255-seatRgb.b)*0.65).toString(16).padStart(2,'0')}`
-    :'';
-  const params=new URLSearchParams();
-  params.set('seed',seedText);
-  const override=AVATAR_OVERRIDE_BY_NAME[baseName]??null;
-  params.set('top',override?.top??pick(AVATAR_A4_TOP[g],seedHash,1));
-  params.set('eyes',override?.eyes??pick(AVATAR_A4_ENERGETIC.eyes,seedHash,2));
-  params.set('mouth',override?.mouth??pick(AVATAR_A4_ENERGETIC.mouth,seedHash,3));
-  params.set('eyebrows',override?.eyebrows??pick(AVATAR_A4_ENERGETIC.eyebrows,seedHash,4));
-  params.set('accessories',override?.accessories??pick(AVATAR_A4_ENERGETIC.accessories,seedHash,5));
-  params.set('clothing',pick(AVATAR_A4_ENERGETIC.clothing,seedHash,6));
-  params.set('clothesColor',pick(AVATAR_A4_ENERGETIC.clothesColor,seedHash,7));
-  params.set('skinColor',override?.skinColor??pick(AVATAR_A4_HK.skinColor,seedHash,8));
-  params.set('hairColor',override?.hairColor??pick(AVATAR_A4_HK.hairColor,seedHash,9));
-  params.set('facialHair',pick(AVATAR_A4_FACIAL_HAIR.list,seedHash,10));
-  params.set('facialHairProbability','0');
-  void seatColor;
-  void seatLight;
-  Object.entries(AVATAR_A4_COMMON).forEach(([k,v])=>{
-    if(params.has(k))return;
-    params.set(k,v);
-  });
-  return `${AVATAR_DICEBEAR_BASE}?${params.toString()}`;
-}
-function authPictureUrl(){
-  const pic=String(state.home.google?.picture??'').trim();
-  if(!pic)return'';
-  try{
-    let url=pic;
-    if(/^data:|^blob:/i.test(url))return url;
-    if(/^\/\//.test(url))url=`https:${url}`;
-    if(!/^https?:\/\//i.test(url))url=`https://${url.replace(/^\/+/,'')}`;
-    if(!/^https?:\/\//i.test(url))return'';
-    return url;
-  }catch{
-    return pic;
-  }
-}
-function authPictureUrlFrom(picRaw){
-  const pic=String(picRaw??'').trim();
-  if(!pic)return'';
-  try{
-    let url=pic;
-    if(/^data:|^blob:/i.test(url))return url;
-    if(/^\/\//.test(url))url=`https:${url}`;
-    if(!/^https?:\/\//i.test(url))url=`https://${url.replace(/^\/+/,'')}`;
-    if(!/^https?:\/\//i.test(url))return'';
-    return url;
-  }catch{
-    return pic;
-  }
-}
-function selfAvatarDataUri(name,color,gender='male'){
-  const authPic=authPictureUrl();
-  if(state.home.google?.signedIn&&authPic)return authPic;
-  const g=String(gender??'male')==='female'?'female':'male';
-  return AVATAR_BASE_SRC[g];
-}
-const avatarGenderClass=(gender)=>String(gender??'male')==='female'?'avatar-female':'avatar-male';
 const cardId=(c)=>`${c.rank}-${c.suit}`;
 const compareSingleCardPower=(a,b)=>a.rank-b.rank||a.suit-b.suit;
 const cmpCard=compareSingleCardPower;
@@ -7808,6 +7629,49 @@ function closeLangMenu(){
 function bindLangMenu(root,{reloadGoogle=false}={}){
   langMenuController.bindLangMenu(root,{reloadGoogle});
 }
+const bindGameEvents=createGameEventsBinder({
+  state,
+  app,
+  bindLangMenu,
+  closeLangMenu,
+  clearAiTimer:()=>{if(aiTimer){clearTimeout(aiTimer);aiTimer=null;}},
+  refreshLeaderboard,
+  render,
+  handleGameTopbarClick,
+  leaveRoom,
+  resetSoloSessionCarryover,
+  setRecommendHint,
+  resetRoomExpiryTo60s,
+  waitMs:(ms)=>waitMs(ms),
+  guardAction,
+  schedulePopunderAfterRender,
+  startSoloGame,
+  roomResultExpired,
+  t,
+  roomIsHost,
+  restartRoomGame,
+  isPortraitMode,
+  openEmotePicker,
+  triggerEmoteSticker,
+  unlockAudio,
+  playSound,
+  roomSubmitPass,
+  soloPass,
+  maybeRunSoloAi,
+  evaluatePlay,
+  has3d,
+  canBeat,
+  roomSubmitPlay,
+  setRoomError,
+  setSoloStatus,
+  soloApplyPlay,
+  shouldRecommendPass,
+  suggestPlay,
+  cardId,
+  reorderCurrent,
+  isMobilePointer,
+  autoArrangeCurrent
+});
 function backAssetFile(value){
   const found=BACK_OPTIONS.find((x)=>x.value===value);
   return found?.file??'back-red.png';
@@ -7819,13 +7683,7 @@ function renderBackCarouselItems(){
 function renderBackCarousel(comboId){
   return `<div class="cardback-carousel" data-carousel="${comboId}"><button class="carousel-btn prev" type="button" data-carousel-dir="prev" aria-label="${state.language==='zh-HK'?'上一個':'Previous'}">‹</button><div class="option-combo cardback-combo cardback-track" id="${comboId}" data-carousel-track="1"><div class="cardback-rail">${renderBackCarouselItems()}</div></div><button class="carousel-btn next" type="button" data-carousel-dir="next" aria-label="${state.language==='zh-HK'?'下一個':'Next'}">›</button></div>`;
 }
-let topbarDelegateBound=false;
 let roomTopMetaLayoutBound=false;
-let logSheetSwipeBound=false;
-let logSwipeActive=false;
-let logSwipeStartX=0;
-let logSwipeStartY=0;
-let logSwipeStartAt=0;
 let discardSizeObserver=null;
 let homeCardbackZoomCleanup=null;
 function clearHomeCardbackZoom(){
@@ -8410,19 +8268,12 @@ function renderHome(){
   const roomCanStart=roomHumanPlayers.length>=2;
   const roomPrivate=Boolean(roomData?.isPrivate);
   const roomStatus=String(roomData?.status??'');
-  const roomResultDead=roomResultExpired(roomData);
   const roomStarting=roomStatus==='starting';
   const roomGamePlayers=(roomStatus==='finished'&&Array.isArray(roomData?.game?.players))?roomData.game.players:null;
   const roomSeatMap=new Map(roomPlayers.map((p)=>[Number(p.seat),p]));
   const gameSeatMap=roomGamePlayers?new Map(roomGamePlayers.map((p,i)=>[Number.isFinite(Number(p?.seat))?Number(p.seat):i,p])):null;
   const useGameRoster=roomStatus==='finished'&&Boolean(gameSeatMap);
   const roomStartPending=Boolean(state.room.pendingStart);
-  const roomStatusText=(()=>{
-    if(roomStatus==='playing')return t('roomStatusPlaying');
-    if(roomStatus==='starting')return t('roomStarting');
-    if(roomStatus==='finished')return roomResultDead?t('roomHostSneakAway'):t('roomWaitingHost');
-    return roomIsHost?t('roomWaitingReady'):t('roomWaitingHost');
-  })();
   if(state.home.avatarChoice==='google'){
     state.home.avatarChoice=state.home.gender==='female'?'female':'male';
   }
@@ -8504,7 +8355,6 @@ function renderHome(){
     activeRoomsLoading:Boolean(activeRoomsState?.loading),
     hiddenCount,
     joinOpenCountdown:state.room.joinOpenCountdown,
-    language:state.language,
     roomErrorHtml,
     t,
     esc,
@@ -8728,7 +8578,16 @@ function renderHome(){
 }
 function renderConfig(){
   const diffIndex=difficultyIndex(state.home.aiDifficulty);
-  app.innerHTML=`<section class="home-wrap"><header class="topbar home-topbar"><div><h2>${t('config')}</h2></div><div class="topbar-right"><div class="control-row"><button id="config-back" class="secondary">${t('home')}</button>${renderLangMenu('config-lang-menu')}</div></div></header><section class="home-panel"><div class="field-grid config-audio-voice-row"><label class="field"><span>${t('ai')}</span><div class="option-combo toggle-combo difficulty-combo" id="config-difficulty-combo" style="--difficulty-index:${diffIndex};"><div class="difficulty-pill" aria-hidden="true"></div><button class="combo-btn toggle-btn ${state.home.aiDifficulty==='easy'?'active':''}" data-value="easy">${t('easy')}</button><button class="combo-btn toggle-btn ${state.home.aiDifficulty==='normal'?'active':''}" data-value="normal">${t('normal')}</button><button class="combo-btn toggle-btn ${state.home.aiDifficulty==='hard'?'active':''}" data-value="hard">${t('hard')}</button></div></label><label class="field"><span>${t('cardBack')}</span>${renderBackCarousel('config-back-combo')}</label><label class="field"><span>${t('audioVoice')}</span><div class="option-combo toggle-combo" id="config-sound-combo"><button class="combo-btn toggle-btn sound-toggle-btn ${sound.enabled?'active':''}" data-value="on" aria-label="${t('soundOn')}"><svg class="sound-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h3l4 3V7l-4 3H4z"></path><path d="M15 9c1.6 1.2 1.6 4.8 0 6"></path><path d="M17.5 7c2.8 2.4 2.8 7.6 0 10"></path></svg></button><button class="combo-btn toggle-btn sound-toggle-btn ${sound.enabled?'':'active'}" data-value="off" aria-label="${t('soundOff')}"><svg class="sound-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10v4h3l4 3V7l-4 3H4z"></path><path d="M16 8l4 8"></path><path d="M20 8l-4 8"></path></svg></button></div></label><label class="field"><span>${t('calloutDisplay')}</span><div class="option-combo toggle-combo" id="config-callout-display-combo"><button class="combo-btn toggle-btn ${calloutDisplayEnabled?'active':''}" data-value="on">${t('calloutDisplayOn')}</button><button class="combo-btn toggle-btn ${calloutDisplayEnabled?'':'active'}" data-value="off">${t('calloutDisplayOff')}</button></div></label><label class="field"><span>${t('emoteDisplay')}</span><div class="option-combo toggle-combo" id="config-emote-display-combo"><button class="combo-btn toggle-btn ${emoteDisplayEnabled?'active':''}" data-value="on">${t('calloutDisplayOn')}</button><button class="combo-btn toggle-btn ${emoteDisplayEnabled?'':'active'}" data-value="off">${t('calloutDisplayOff')}</button></div></label></div></section></section>`;
+  app.innerHTML=renderConfigMarkup({
+    diffIndex,
+    renderLangMenu,
+    state,
+    t,
+    soundEnabled:Boolean(sound.enabled),
+    calloutDisplayEnabled:Boolean(calloutDisplayEnabled),
+    emoteDisplayEnabled:Boolean(emoteDisplayEnabled),
+    renderBackCarousel
+  });
   document.getElementById('config-back')?.addEventListener('click',()=>{
     const target=state.screenBeforeConfig||'home';
     state.screen=target;
@@ -9913,602 +9772,6 @@ function autoArrangeCurrent(v,mode='seq'){
   const seat=Number.isInteger(v?.selfSeat)?v.selfSeat:0;
   if(!state.solo.players?.[seat])return;
   state.solo.players[seat].hand=mode==='pattern'?patternSortCards(state.solo.players[seat].hand):[...state.solo.players[seat].hand].sort(cmpCard);
-}
-
-function bindGameEvents(v,_arr){
-  const canReorder=!isMobilePointer()&&!v.gameOver&&v.hand.length>0;
-  const canAutoSort=!v.gameOver&&v.hand.length>0;
-  const dragEnabled=canReorder&&!isMobilePointer();
-  let dragPopupTimer=null;
-  let dragPopupActive=false;
-  const popupEl=()=>document.getElementById('drag-popup');
-  const positionDragPopup=(x,y)=>{
-    const el=popupEl();
-    if(!el)return;
-    const offset=18;
-    el.style.left=`${Math.round(x+offset)}px`;
-    el.style.top=`${Math.round(y+offset)}px`;
-  };
-  const hideDragPopup=()=>{
-    const el=popupEl();
-    if(dragPopupTimer){clearTimeout(dragPopupTimer);dragPopupTimer=null;}
-    el?.classList.remove('show');
-    dragPopupActive=false;
-  };
-  const showDragPopup=(autoHideMs=0)=>{
-    const el=popupEl();
-    if(!el)return;
-    if(dragPopupTimer){clearTimeout(dragPopupTimer);dragPopupTimer=null;}
-    el.classList.remove('show');
-    void el.offsetWidth;
-    el.classList.add('show');
-    dragPopupActive=true;
-    if(autoHideMs>0){
-      dragPopupTimer=window.setTimeout(()=>{dragPopupTimer=null;popupEl()?.classList.remove('show');},autoHideMs);
-    }
-  };
-  const runPass=()=>{
-    if(!v.canPass)return;
-    state.recommendation=null;
-    setRecommendHint('');
-    if(v.mode==='room'){
-      state.selected.clear();
-      render();
-      void roomSubmitPass();
-    }else{
-      soloPass(0);
-      state.selected.clear();
-      render();
-      maybeRunSoloAi();
-    }
-  };
-  const runPlay=async(cards)=>{
-    if(!v.canControl)return;
-    setRecommendHint('');
-    if(!cards.length){
-      if(v.mode==='solo'){setSoloStatus(t('pick'));render();}
-      return;
-    }
-    state.recommendation=null;
-    if(v.mode==='room'){
-      const ev=evaluatePlay(cards);
-      if(!ev.valid){
-        setSoloStatus(ev.reason||t('illegal'));
-        render();
-        return;
-      }
-      if(v.isFirstTrick&&!has3d(cards)){
-        setSoloStatus(t('must3'));
-        render();
-        return;
-      }
-      if(v.lastPlay&&!canBeat(ev,v.lastPlay.eval)){
-        setSoloStatus(t('beat'));
-        render();
-        return;
-      }
-      const ok=await roomSubmitPlay(cards);
-      if(ok){
-        state.selected.clear();
-        render();
-      }
-    }else{
-      const ok=soloApplyPlay(0,cards);
-      if(ok){
-        state.selected.clear();
-        render();
-        maybeRunSoloAi();
-      }else render();
-    }
-  };
-  const triggerClickBanner=(el)=>{
-    if(!(el instanceof HTMLElement))return;
-    el.classList.remove('click-banner');
-    void el.offsetWidth;
-    el.classList.add('click-banner');
-    setTimeout(()=>{el.classList.remove('click-banner');},520);
-  };
-
-  bindLangMenu(document.querySelector('.topbar-right'),{reloadGoogle:!state.home.google?.signedIn});
-  document.getElementById('intro-close')?.addEventListener('click',()=>{state.home.showIntro=false;render();});
-  document.getElementById('intro-backdrop')?.addEventListener('click',()=>{state.home.showIntro=false;render();});
-  document.getElementById('lb-close')?.addEventListener('click',()=>{state.home.showLeaderboard=false;render();});
-  document.getElementById('lb-backdrop')?.addEventListener('click',()=>{state.home.showLeaderboard=false;render();});
-  document.getElementById('lb-sort')?.addEventListener('change',(e)=>{state.home.leaderboard.sort=e.target.value;refreshLeaderboard();render();});
-  document.getElementById('lb-period')?.addEventListener('change',(e)=>{state.home.leaderboard.period=e.target.value;refreshLeaderboard();render();});
-  if(!topbarDelegateBound){
-    document.body.addEventListener('click',handleGameTopbarClick,true);
-    topbarDelegateBound=true;
-  }
-  if(!opponentProfileDelegateBound){
-    document.body.addEventListener('click',(e)=>{
-      const btn=e.target.closest?.('#opponent-profile-close,#opponent-profile-backdrop');
-      if(!btn)return;
-      e.preventDefault();
-      state.opponentProfileName='';
-      render();
-    });
-    opponentProfileDelegateBound=true;
-  }
-  document.getElementById('home-btn')?.addEventListener('click',()=>{
-    closeLangMenu();
-    if(aiTimer){clearTimeout(aiTimer);aiTimer=null;}
-    state.opponentProfileName='';
-    if(state.home.mode==='room'&&state.room.id){
-      void leaveRoom();
-      return;
-    }
-    resetSoloSessionCarryover();
-    state.screen='home';
-    state.selected.clear();
-    state.recommendation=null;
-    setRecommendHint('');
-    render();
-  });
-  document.getElementById('result-home')?.addEventListener('click',()=>{if(aiTimer){clearTimeout(aiTimer);aiTimer=null;}state.opponentProfileName='';if(state.home.mode==='room'&&state.room.id){void leaveRoom();return;}resetSoloSessionCarryover();state.screen='home';state.selected.clear();state.recommendation=null;setRecommendHint('');render();});
-  document.getElementById('congrats-home')?.addEventListener('click',()=>{if(aiTimer){clearTimeout(aiTimer);aiTimer=null;}state.opponentProfileName='';if(state.home.mode==='room'&&state.room.id){void leaveRoom();return;}resetSoloSessionCarryover();state.screen='home';state.selected.clear();state.recommendation=null;setRecommendHint('');render();});
-  document.querySelectorAll('[data-room-expiry-reset]').forEach((btn)=>btn.addEventListener('click',async()=>{
-    await resetRoomExpiryTo60s();
-  }));
-  document.getElementById('log-sheet-close')?.addEventListener('click',()=>{state.showLogSheet=false;render();});
-  document.getElementById('log-sheet-backdrop')?.addEventListener('click',()=>{state.showLogSheet=false;render();});
-  const logFab=document.getElementById('game-log-fab');
-  if(logFab){
-    let dragActive=false;
-    let moved=false;
-    let startX=0;
-    let startY=0;
-    let originX=0;
-    let originY=0;
-    const clamp=(val,min,max)=>Math.max(min,Math.min(max,val));
-    const setFabPos=(x,y)=>{
-      const maxX=Math.max(0,window.innerWidth-logFab.offsetWidth);
-      const maxY=Math.max(0,window.innerHeight-logFab.offsetHeight);
-      const nx=clamp(x,8,maxX-8);
-      const ny=clamp(y,8,maxY-8);
-      state.logFab.x=nx;
-      state.logFab.y=ny;
-      state.logFab.vw=window.innerWidth||0;
-      state.logFab.vh=window.innerHeight||0;
-      logFab.style.left=`${nx}px`;
-      logFab.style.top=`${ny}px`;
-      logFab.style.right='auto';
-      logFab.style.bottom='auto';
-    };
-    const startDrag=(clientX,clientY)=>{
-      dragActive=true;
-      moved=false;
-      startX=clientX;
-      startY=clientY;
-      const rect=logFab.getBoundingClientRect();
-      originX=rect.left;
-      originY=rect.top;
-    };
-    const moveDrag=(clientX,clientY)=>{
-      if(!dragActive)return;
-      const dx=clientX-startX;
-      const dy=clientY-startY;
-      if(!moved && Math.hypot(dx,dy)>6){
-        moved=true;
-        logFab.setAttribute('data-ignore-click','1');
-      }
-      if(moved)setFabPos(originX+dx,originY+dy);
-    };
-    const endDrag=()=>{
-      dragActive=false;
-    };
-    logFab.addEventListener('pointerdown',(ev)=>{
-      if(ev.pointerType==='mouse')return;
-      startDrag(ev.clientX,ev.clientY);
-    },{passive:true});
-    logFab.addEventListener('pointermove',(ev)=>{
-      if(ev.pointerType==='mouse')return;
-      moveDrag(ev.clientX,ev.clientY);
-    },{passive:true});
-    logFab.addEventListener('pointerup',endDrag,{passive:true});
-    logFab.addEventListener('pointercancel',endDrag,{passive:true});
-    if(!window.PointerEvent){
-      logFab.addEventListener('touchstart',(ev)=>{
-        const t=ev.changedTouches?.[0];
-        if(!t)return;
-        startDrag(t.clientX,t.clientY);
-      },{passive:true});
-      logFab.addEventListener('touchmove',(ev)=>{
-        const t=ev.changedTouches?.[0];
-        if(!t)return;
-        moveDrag(t.clientX,t.clientY);
-      },{passive:true});
-      logFab.addEventListener('touchend',endDrag,{passive:true});
-      logFab.addEventListener('touchcancel',endDrag,{passive:true});
-    }
-  }
-  if(!logSheetSwipeBound){
-    const shouldHandle=(target)=>{
-      if(!(target instanceof Element))return false;
-      if(!target.closest('.table'))return false;
-      if(target.closest('.log-sheet,.topbar,.action-zone,.hand,.game-cta-btn,.side-zone,.log-side-card'))return false;
-      return true;
-    };
-    document.body.addEventListener('touchstart',(ev)=>{
-      if(state.screen!=='game')return;
-      if(!isMobilePointer())return;
-      if(state.showLogSheet)return;
-      const portrait=window.matchMedia?.('(orientation: portrait)')?.matches ?? (window.innerHeight>window.innerWidth);
-      if(!portrait)return;
-      const t=ev.changedTouches?.[0];
-      if(!t||!shouldHandle(ev.target))return;
-      logSwipeActive=true;
-      logSwipeStartX=t.clientX;
-      logSwipeStartY=t.clientY;
-      logSwipeStartAt=Date.now();
-    },{passive:true});
-    document.body.addEventListener('touchend',(ev)=>{
-      if(!logSwipeActive)return;
-      logSwipeActive=false;
-      if(state.screen!=='game'||state.showLogSheet)return;
-      const t=ev.changedTouches?.[0];
-      if(!t)return;
-      const dt=Date.now()-logSwipeStartAt;
-      if(dt>700)return;
-      const dx=t.clientX-logSwipeStartX;
-      const dy=logSwipeStartY-t.clientY;
-      const absDy=Math.abs(t.clientY-logSwipeStartY);
-      if(dx>90&&absDy<Math.max(28,dx*0.5)){
-        const suggestBtn=document.getElementById('suggest-btn');
-        if(suggestBtn&&!suggestBtn.hasAttribute('disabled')){
-          suggestBtn.click();
-        }
-        return;
-      }
-      if(dx<-90&&absDy<Math.max(28,Math.abs(dx)*0.5)){
-        const emoteBtn=document.getElementById('emote-toggle');
-        if(emoteBtn&&!emoteBtn.hasAttribute('disabled')){
-          emoteBtn.click();
-        }
-        return;
-      }
-      if(dy<90)return;
-      if(Math.abs(dx)>Math.max(28,dy*0.5))return;
-      state.showLogSheet=true;
-      render();
-    },{passive:true});
-    document.body.addEventListener('touchcancel',()=>{logSwipeActive=false;},{passive:true});
-    logSheetSwipeBound=true;
-  }
-  document.getElementById('score-guide-close')?.addEventListener('click',()=>{state.showScoreGuide=false;render();});
-  document.getElementById('score-guide-backdrop')?.addEventListener('click',()=>{state.showScoreGuide=false;render();});
-  document.getElementById('opponent-profile-close')?.addEventListener('click',()=>{state.opponentProfileName='';render();});
-  document.getElementById('opponent-profile-backdrop')?.addEventListener('click',()=>{state.opponentProfileName='';render();});
-  const handleRestart=async()=>{
-    closeLangMenu();
-    triggerClickBanner(document.getElementById('restart-btn'));
-    await waitMs(120);
-    state.opponentProfileName='';
-    state.recommendation=null;
-    setRecommendHint('');
-    if(state.home.mode==='room'&&state.room.id){
-      await leaveRoom();
-    }
-    startSoloGame({preserveOpponents:false,resetTotals:true,resetRoundWins:true});
-    schedulePopunderAfterRender(1200);
-  };
-  const restartBtn=document.getElementById('restart-btn');
-  restartBtn?.addEventListener('pointerdown',(e)=>{
-    if(!guardAction('restart-btn'))return;
-    e.preventDefault();
-    e.stopPropagation();
-    void handleRestart();
-  },true);
-  restartBtn?.addEventListener('click',()=>{if(!guardAction('restart-btn'))return;void handleRestart();});
-  const handleResultAgain=async()=>{
-    triggerClickBanner(document.getElementById('result-again'));
-    await waitMs(120);
-    state.opponentProfileName='';
-    state.recommendation=null;
-    setRecommendHint('');
-    if(state.home.mode==='room'){
-      if(roomResultExpired(state.room.data)){
-        setSoloStatus(t('roomHostSneakAway'));
-        render();
-        return;
-      }
-      if(roomIsHost()){
-        await restartRoomGame();
-      }else{
-        setSoloStatus(t('roomWaitingHost'));
-        render();
-      }
-      return;
-    }
-    startSoloGame();
-    schedulePopunderAfterRender(350);
-  };
-  const resultAgainBtn=document.getElementById('result-again');
-  resultAgainBtn?.addEventListener('pointerdown',(e)=>{
-    if(!guardAction('result-again'))return;
-    e.preventDefault();
-    e.stopPropagation();
-    void handleResultAgain();
-  },true);
-  resultAgainBtn?.addEventListener('click',()=>{if(!guardAction('result-again'))return;void handleResultAgain();});
-  const handleCongratsAgain=async()=>{
-    triggerClickBanner(document.getElementById('congrats-again'));
-    await waitMs(120);
-    state.opponentProfileName='';
-    state.recommendation=null;
-    setRecommendHint('');
-    if(state.home.mode==='room'){
-      if(roomResultExpired(state.room.data)){
-        setSoloStatus(t('roomHostSneakAway'));
-        render();
-        return;
-      }
-      if(roomIsHost()){
-        await restartRoomGame();
-      }else{
-        setSoloStatus(t('roomWaitingHost'));
-        render();
-      }
-      return;
-    }
-    startSoloGame();
-    schedulePopunderAfterRender(350);
-  };
-  const congratsAgainBtn=document.getElementById('congrats-again');
-  congratsAgainBtn?.addEventListener('pointerdown',(e)=>{
-    if(!guardAction('congrats-again'))return;
-    e.preventDefault();
-    e.stopPropagation();
-    void handleCongratsAgain();
-  },true);
-  congratsAgainBtn?.addEventListener('click',()=>{if(!guardAction('congrats-again'))return;void handleCongratsAgain();});
-  const controlRow=app.querySelector('.action-zone .control-row');
-  if(controlRow){
-    const suggestAnchor=controlRow.querySelector('.recommend-anchor');
-    const playBtn=controlRow.querySelector('#play-btn');
-    const passBtn=controlRow.querySelector('#pass-btn');
-    const sortBtn=controlRow.querySelector('#auto-sort-btn');
-    const emoteBtn=controlRow.querySelector('#emote-toggle');
-    const order=[suggestAnchor,playBtn,passBtn,sortBtn,emoteBtn].filter(Boolean);
-    order.forEach((node)=>controlRow.appendChild(node));
-    const suggestBtn=controlRow.querySelector('#suggest-btn');
-    if(suggestBtn){
-      const label=suggestBtn.querySelector('span:not([aria-hidden])');
-      if(!label){
-        const text=document.createElement('span');
-        text.textContent=t('suggest');
-        suggestBtn.appendChild(text);
-      }else{
-        label.textContent=t('suggest');
-      }
-      suggestBtn.setAttribute('aria-label',t('suggest'));
-      suggestBtn.setAttribute('title',t('suggest'));
-    }
-    if(emoteBtn){
-      const label=emoteBtn.querySelector('span:not([aria-hidden])');
-      if(label)label.remove();
-      emoteBtn.setAttribute('aria-label',t('emote'));
-      emoteBtn.setAttribute('title',t('emote'));
-    }
-    if(isPortraitMode()){
-      const portraitOrder=[suggestAnchor,playBtn,passBtn,sortBtn,emoteBtn].filter(Boolean);
-      portraitOrder.forEach((node)=>controlRow.appendChild(node));
-    }
-  }
-  document.getElementById('auto-sort-btn')?.addEventListener('click',()=>{
-    if(!canAutoSort)return;
-    const mode=autoSortMode;
-    autoArrangeCurrent(v,mode);
-    autoSortMode=mode==='seq'?'pattern':'seq';
-    render();
-  });
-  document.getElementById('suggest-btn')?.addEventListener('click',()=>{
-    if(!v.canControl)return;
-    if(state.recommendation){
-      if(state.recommendation.action==='pass'){
-        setRecommendHint('');
-        setRecommendHint(t('recPass'));
-        playSound('select');
-        render();
-        return;
-      }
-      state.recommendation=null;
-      state.selected.clear();
-      setRecommendHint('');
-      render();
-      return;
-    }
-    if(shouldRecommendPass(v.hand,v.lastPlay,v.isFirstTrick,v.canPass,state.solo)){
-      state.recommendation={action:'pass',cardIds:[]};
-      state.selected.clear();
-      setRecommendHint(t('recPass'));
-      playSound('select');
-      render();
-      return;
-    }
-    const rec=suggestPlay(v.hand,v.lastPlay,v.isFirstTrick,state.solo);
-    if(!rec){
-      setRecommendHint(t('noSuggest'));
-      render();
-      return;
-    }
-    const ids=rec.cards.map(cardId);
-    state.recommendation={action:'play',cardIds:ids};
-    state.selected=new Set(ids);
-    playSound('select');
-    render();
-  },()=>{
-    setRoomError(t('roomReconnecting'));
-    render();
-  });
-  document.getElementById('emote-toggle')?.addEventListener('click',()=>{
-    if(v.gameOver)return;
-    openEmotePicker(!state.emote.open);
-  });
-  app.querySelectorAll('[data-emote-id]').forEach((el)=>{
-    const id=el.getAttribute('data-emote-id');
-    if(!id)return;
-    el.addEventListener('click',()=>{
-      if(v.gameOver)return;
-      triggerEmoteSticker(id);
-    });
-  });
-  app.querySelectorAll('[data-card-id]').forEach((n)=>{
-    const id=n.getAttribute('data-card-id');
-    let pointerTapActive=false;
-    let pointerTapId=-1;
-    let pointerStartX=0;
-    let pointerStartY=0;
-    let touchTapActive=false;
-    let touchStartX=0;
-    let touchStartY=0;
-    const toggleSelect=()=>{
-      unlockAudio();
-      if(!v.canControl||!id)return;
-      if(state.drag.moved){state.drag.moved=false;return;}
-      if(state.selected.has(id))state.selected.delete(id);else state.selected.add(id);
-      playSound('select');
-      render();
-    };
-    n.addEventListener('mouseenter',()=>{if(!dragEnabled||!id)return;playSound('select');});
-    n.addEventListener('dragstart',(e)=>{
-      if(!dragEnabled||!id)return;
-      state.drag.id=id;
-      state.drag.moved=false;
-      positionDragPopup(e.clientX,e.clientY);
-      showDragPopup();
-      e.dataTransfer?.setData('text/plain',id);
-    });
-    n.addEventListener('dragover',(e)=>{
-      if(!dragEnabled)return;
-      e.preventDefault();
-      if(dragPopupActive)positionDragPopup(e.clientX,e.clientY);
-    });
-    n.addEventListener('drop',(e)=>{if(!dragEnabled||!id)return;e.preventDefault();hideDragPopup();const fromId=state.drag.id||e.dataTransfer?.getData('text/plain');if(!fromId||fromId===id)return;reorderCurrent(v,fromId,id);state.drag.moved=true;render();});
-    n.addEventListener('dragend',()=>{hideDragPopup();setTimeout(()=>{state.drag.id=null;},0);});
-    if(isMobilePointer()){
-      if(window.PointerEvent){
-        n.addEventListener('pointerdown',(e)=>{
-          if(e.pointerType==='mouse')return;
-          hideDragPopup();
-          pointerTapActive=true;
-          pointerTapId=e.pointerId;
-          pointerStartX=e.clientX;
-          pointerStartY=e.clientY;
-        });
-        n.addEventListener('pointerup',(e)=>{
-          if(e.pointerType==='mouse')return;
-          if(!pointerTapActive||e.pointerId!==pointerTapId)return;
-          pointerTapActive=false;
-          const moved=Math.hypot(e.clientX-pointerStartX,e.clientY-pointerStartY);
-          if(moved>12)return;
-          e.preventDefault();
-          mobileTapAt=Date.now();
-          toggleSelect();
-        });
-        n.addEventListener('pointercancel',()=>{pointerTapActive=false;hideDragPopup();});
-      }else{
-        n.addEventListener('touchstart',(e)=>{
-          hideDragPopup();
-          const t=e.changedTouches?.[0];
-          if(!t)return;
-          touchTapActive=true;
-          touchStartX=t.clientX;
-          touchStartY=t.clientY;
-        },{passive:true});
-        n.addEventListener('touchend',(e)=>{
-          if(!touchTapActive)return;
-          touchTapActive=false;
-          const t=e.changedTouches?.[0];
-          if(!t)return;
-          const moved=Math.hypot(t.clientX-touchStartX,t.clientY-touchStartY);
-          if(moved>12)return;
-          e.preventDefault();
-          mobileTapAt=Date.now();
-          toggleSelect();
-        },{passive:false});
-        n.addEventListener('touchcancel',()=>{touchTapActive=false;hideDragPopup();},{passive:true});
-      }
-    }
-    n.addEventListener('click',(e)=>{
-      if(isMobilePointer()&&Date.now()-mobileTapAt<500){
-        e.preventDefault();
-        return;
-      }
-      toggleSelect();
-    });
-  });
-
-  document.addEventListener('dragover',(e)=>{
-    if(!dragEnabled||!dragPopupActive)return;
-    positionDragPopup(e.clientX,e.clientY);
-  },{passive:true});
-
-  document.querySelectorAll('.locked-btn').forEach((wrap)=>{
-    wrap.addEventListener('click',(ev)=>{
-      ev.preventDefault();
-      ev.stopPropagation();
-      wrap.classList.add('show-tip');
-      const timer=wrap.getAttribute('data-tip-timer');
-      if(timer)window.clearTimeout(Number(timer));
-      const t=window.setTimeout(()=>{wrap.classList.remove('show-tip');},1600);
-      wrap.setAttribute('data-tip-timer',String(t));
-    });
-  });
-
-  const openNamecardProfile=(btn,ev)=>{
-    if(ev){
-      ev.preventDefault();
-      ev.stopPropagation();
-    }
-    const now=Date.now();
-    if(now-lastNamecardTapAt<350)return;
-    lastNamecardTapAt=now;
-    const name=btn.getAttribute('data-opponent-name')||btn.closest?.('[data-opponent-name]')?.getAttribute('data-opponent-name');
-    if(!name)return;
-    state.mottoPeekName='';
-    state.opponentProfileName=name;
-    render();
-  };
-  app.querySelectorAll('.seat-namecard').forEach((btn)=>{
-    btn.addEventListener('click',(ev)=>openNamecardProfile(btn,ev));
-    btn.addEventListener('touchstart',(ev)=>openNamecardProfile(btn,ev),{passive:false});
-  });
-
-  app.querySelectorAll('[data-opponent-name]').forEach((el)=>{
-    const name=el.getAttribute('data-opponent-name');
-    if(!name)return;
-    el.addEventListener('click',(ev)=>{
-      ev.preventDefault();
-      ev.stopPropagation();
-      const directProfile=Boolean(ev.target?.closest?.('.seat-namecard'));
-      if(isMobilePointer()&&!directProfile){
-        if(state.mottoPeekName!==name){
-          state.mottoPeekName=name;
-          render();
-          return;
-        }
-        state.mottoPeekName='';
-      }
-      state.opponentProfileName=name;
-      render();
-    });
-  });
-  app.querySelectorAll('.seat-motto-callout').forEach((el)=>{
-    el.addEventListener('click',(ev)=>{
-      const host=el.closest?.('[data-opponent-name]');
-      const name=host?.getAttribute('data-opponent-name');
-      if(!name)return;
-      ev.preventDefault();
-      ev.stopPropagation();
-      state.mottoPeekName='';
-      state.opponentProfileName=name;
-      render();
-    });
-  });
-
-  document.getElementById('pass-btn')?.addEventListener('click',()=>{unlockAudio();runPass();});
-  document.getElementById('play-btn')?.addEventListener('click',()=>{closeLangMenu();unlockAudio();const cards=v.hand.filter((c)=>state.selected.has(cardId(c)));void runPlay(cards);});
 }
 
 function isPortraitMode(){

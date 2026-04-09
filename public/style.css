@@ -4453,14 +4453,14 @@ body[data-screen='game'] .table-center-stack {
 }
 .play-type-call-self {
   top: auto;
-  bottom: calc(100% + 67px + var(--callout-jy, 0px));
+  bottom: calc(100% + 42px + var(--callout-jy, 0px));
   left: calc(10px + var(--callout-jx, 0px));
   right: auto;
   transform: none;
 }
 .last-card-call-self {
   top: auto;
-  bottom: calc(100% + 67px + var(--callout-jy, 0px));
+  bottom: calc(100% + 42px + var(--callout-jy, 0px));
   left: calc(10px + var(--callout-jx, 0px));
   right: auto;
   transform: none;
@@ -10684,6 +10684,23 @@ body[data-screen='game'] .seat.east .seat-name-fixed[data-opponent-name] .emote-
   left: 50% !important;
   right: auto !important;
   transform: translateX(-50%) !important;
+}
+
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .play-type-call-seat,
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-seat {
+  max-inline-size: min(220px, calc(100vw - 24px));
+}
+
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .play-type-call-seat .callout-box,
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-seat .callout-box {
+  max-inline-size: 100%;
+}
+
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .play-type-call-seat .hk-inner,
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-seat .hk-inner {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
 }
 
 body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .play-type-call-seat,

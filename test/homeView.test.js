@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import {renderHomeMarkup} from '../src/homeView.js';
+import {renderConfigMarkup, renderHomeMarkup} from '../src/homeView.js';
 
 function render(overrides={}){
   return renderHomeMarkup({
@@ -56,4 +56,24 @@ test('renderHomeMarkup omits opponent button when not allowed', ()=>{
   });
   assert.doesNotMatch(html,/home-opponents-toggle/);
   assert.match(html,/id="lb-panel"/);
+});
+
+test('renderConfigMarkup includes config controls and back carousel', ()=>{
+  const html=renderConfigMarkup({
+    diffIndex:2,
+    renderLangMenu:()=>'<div id="config-lang"></div>',
+    state:{home:{aiDifficulty:'hard'}},
+    t:(key)=>key,
+    soundEnabled:true,
+    calloutDisplayEnabled:false,
+    emoteDisplayEnabled:true,
+    renderBackCarousel:(id)=>`<div id="${id}"></div>`
+  });
+
+  assert.match(html,/id="config-back"/);
+  assert.match(html,/id="config-difficulty-combo"/);
+  assert.match(html,/id="config-back-combo"/);
+  assert.match(html,/id="config-sound-combo"/);
+  assert.match(html,/id="config-callout-display-combo"/);
+  assert.match(html,/id="config-emote-display-combo"/);
 });

@@ -47,6 +47,7 @@ export default [
       'src/gameView.js',
       'src/homeView.js',
       'src/langMenu.js',
+      'src/main.js',
       'src/modalViews.js',
       'src/profileSettings.js',
       'src/roomView.js',
