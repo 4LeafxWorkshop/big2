@@ -11657,6 +11657,40 @@ body[data-screen='game'] .seat.east .seat-open-play {
   z-index: 1 !important;
 }
 
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .play-type-call-seat,
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-seat,
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat {
+  top: auto !important;
+  bottom: calc(100% + 10px) !important;
+  left: 50% !important;
+  right: auto !important;
+  --callout-base-x: -50%;
+  --callout-base-y: 0px;
+}
+
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .play-type-call-seat .tail,
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-seat .tail,
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat .tail {
+  top: auto !important;
+  bottom: calc(-20px * var(--callout-size, 1)) !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+  border-color: transparent !important;
+  border-top-color: var(--bubble-border) !important;
+}
+
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .play-type-call-seat .tail::after,
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-seat .tail::after,
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat .tail::after {
+  top: calc(-14px * var(--callout-size, 1)) !important;
+  bottom: auto !important;
+  left: calc(-10px * var(--callout-size, 1)) !important;
+  right: auto !important;
+  border-color: transparent !important;
+  border-top-color: var(--bubble-fill) !important;
+}
+
 body[data-screen='game'] .history-detail-row .history-cards {
   height: auto !important;
   align-items: flex-start !important;
@@ -11687,6 +11721,34 @@ body[data-screen='game'][data-ios='1'] .action-strip .hand {
 }
 body[data-screen='game'][data-ios='1'] .action-strip .hand .hand-card {
   margin-bottom: 4px !important;
+}
+
+@media (max-width: 860px) {
+  body[data-screen='game'] .self-table-emote {
+    width: clamp(120px, 24vmin, 190px) !important;
+  }
+  body[data-screen='game'] .self-table-emote.emote-throw {
+    width: clamp(145px, 28vmin, 220px) !important;
+  }
+  body[data-screen='game'] .self-table-emote.emote-smash {
+    width: clamp(150px, 29vmin, 230px) !important;
+  }
+  body[data-screen='game'] .self-table-emote.emote-cheers,
+  body[data-screen='game'] .self-table-emote.emote-champagne,
+  body[data-screen='game'] .self-table-emote.emote-shock {
+    width: clamp(150px, 30vmin, 230px) !important;
+  }
+  body[data-screen='game'] .self-table-emote.emote-love,
+  body[data-screen='game'] .self-table-emote.emote-crack {
+    width: clamp(135px, 26vmin, 205px) !important;
+  }
+  body[data-screen='game'] .self-table-emote.emote-sleep {
+    width: clamp(125px, 24vmin, 195px) !important;
+  }
+  body[data-screen='game'] .self-table-emote.emote-rude {
+    width: clamp(180px, 34vmin, 260px) !important;
+    height: clamp(118px, 22vmin, 170px) !important;
+  }
 }
 
 @media (max-width: 860px) and (orientation: portrait) {
