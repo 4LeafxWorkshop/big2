@@ -56,7 +56,7 @@ function createController(state,updates,overrides={}){
   const calls={roomErrors:[],soloStatuses:[]};
   const deps={
     FIRESTORE_ROOMS_COLLECTION:'big2Rooms',
-    ROOM_RESULT_IDLE_MS:60000,
+    ROOM_RESULT_IDLE_MS:120000,
     authPictureUrl(){return '';},
     buildRoomGameState(){return {players:[]};},
     bumpRoomPlayerLastSeen(players){return{players,changed:false};},
@@ -66,7 +66,7 @@ function createController(state,updates,overrides={}){
     currentHumanScoreValue(){return 5400;},
     currentRoomPlayerId(){return 'uid:123';},
     getState(){return state;},
-    nextRoomIdleExpiry(now){return now+60000;},
+    nextRoomIdleExpiry(now){return now+120000;},
     normalizeRoomTotals(totals){return Array.isArray(totals)&&totals.length===4?totals.map((v)=>Number(v)||0):[5000,5000,5000,5000];},
     roomPlayerIds(players){return players.map((p)=>String(p.uid));},
     roomResultExpired(){return false;},
@@ -118,11 +118,11 @@ test('resetRoomExpiryTo60s refreshes finished-room expiry and result expiry toge
   });
   const updates=[];
   const {controller}=createController(state,updates,{
-    nextRoomIdleExpiry(now){return now+60000;}
+    nextRoomIdleExpiry(now){return now+120000;}
   });
   await controller.resetRoomExpiryTo60s();
   assert.equal(updates.length,1);
   assert.equal(typeof updates[0].payload.updatedAt,'number');
-  assert.equal(updates[0].payload.expiresAt,updates[0].payload.updatedAt+60000);
-  assert.equal(updates[0].payload.resultExpiresAt,updates[0].payload.updatedAt+60000);
+  assert.equal(updates[0].payload.expiresAt,updates[0].payload.updatedAt+120000);
+  assert.equal(updates[0].payload.resultExpiresAt,updates[0].payload.updatedAt+120000);
 });
