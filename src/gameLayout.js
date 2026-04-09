@@ -24,6 +24,27 @@ export function retargetCalloutTails({
   const viewportRight=viewportLeft+viewportWidth;
   const viewportBottom=viewportTop+viewportHeight;
   const margin=isMobilePointer()?5:8;
+  const rectArea=(rect)=>Math.max(0,rect.width)*Math.max(0,rect.height);
+  const overlapArea=(a,b)=>{
+    const left=Math.max(a.left,b.left);
+    const top=Math.max(a.top,b.top);
+    const right=Math.min(a.right,b.right);
+    const bottom=Math.min(a.bottom,b.bottom);
+    return Math.max(0,right-left)*Math.max(0,bottom-top);
+  };
+  const clampRectToViewport=(left,top,width,height)=>({
+    left: Math.max(viewportLeft+margin, Math.min(left, viewportRight-width-margin)),
+    top: Math.max(viewportTop+margin, Math.min(top, viewportBottom-height-margin)),
+    width,
+    height,
+    right: 0,
+    bottom: 0
+  });
+  const finalizeRect=(rect)=>({
+    ...rect,
+    right: rect.left+rect.width,
+    bottom: rect.top+rect.height
+  });
   const overflowShiftFor=(rect)=>{
     let sx=0;
     let sy=0;
@@ -70,7 +91,23 @@ export function retargetCalloutTails({
     tail.classList.add(`tail-${dir}`);
     tail.style.removeProperty('--tail-anchor-x');
     tail.style.removeProperty('--tail-anchor-y');
-    let {sx,sy}=overflowShiftFor(b);
+    bubble.classList.remove('callout-screen-float');
+    bubble.style.removeProperty('position');
+    bubble.style.removeProperty('left');
+    bubble.style.removeProperty('top');
+    bubble.style.removeProperty('right');
+    bubble.style.removeProperty('bottom');
+    bubble.style.removeProperty('z-index');
+    bubble.style.removeProperty('--callout-fit-scale');
+    if(viewportWidth){
+      const availableWidth=Math.max(0,viewportWidth-(margin*2));
+      if(availableWidth>0&&b.width>availableWidth){
+        const fitScale=Math.max(0.4,Math.min(1,availableWidth/b.width));
+        bubble.style.setProperty('--callout-fit-scale',fitScale.toFixed(4));
+      }
+    }
+    const scaledRect=bubble.getBoundingClientRect();
+    let {sx,sy}=overflowShiftFor(scaledRect);
     if(sx||sy){
       bubble.style.setProperty('--callout-shift-x',`${sx.toFixed(1)}px`);
       bubble.style.setProperty('--callout-shift-y',`${sy.toFixed(1)}px`);
@@ -90,7 +127,82 @@ export function retargetCalloutTails({
       bubble.style.removeProperty('--callout-box-shift-x');
       bubble.style.removeProperty('--callout-box-shift-y');
     }
-    const shiftedBubbleRect=bubble.getBoundingClientRect();
+    let shiftedBubbleRect=bubble.getBoundingClientRect();
+    const stillOverflowing=(
+      shiftedBubbleRect.left<viewportLeft+margin||
+      shiftedBubbleRect.right>viewportRight-margin||
+      shiftedBubbleRect.top<viewportTop+margin||
+      shiftedBubbleRect.bottom>viewportBottom-margin
+    );
+    const seat=bubble.closest('.seat');
+    const blockerElements=isSelfBubble
+      ?[
+          doc.querySelector('.action-strip .seat-name-fixed.player-tag'),
+          doc.querySelector('.action-strip .hand')
+        ]
+      :[
+          seat?.querySelector('.seat-name-fixed[data-opponent-name], .seat-name-fixed'),
+          seat?.querySelector('.player-avatar-wrap-opponent, .player-avatar-opponent'),
+          seat?.querySelector('.opponent-fan, .opponent-fan-wrap'),
+          seat?.querySelector('.seat-open-play')
+        ];
+    const blockerRects=blockerElements
+      .filter((el)=>el instanceof HTMLElement)
+      .map((el)=>el.getBoundingClientRect())
+      .filter((rect)=>rectArea(rect)>0);
+    const overlapsBlockers=blockerRects.some((rect)=>overlapArea(shiftedBubbleRect,rect)>0);
+    if((!isSelfBubble||stillOverflowing||overlapsBlockers)&&viewportWidth&&viewportHeight){
+      const availableWidth=Math.max(0,viewportWidth-(margin*2));
+      if(availableWidth>0&&shiftedBubbleRect.width>availableWidth){
+        const fitScale=Math.max(0.4,Math.min(1,availableWidth/shiftedBubbleRect.width));
+        bubble.style.setProperty('--callout-fit-scale',fitScale.toFixed(4));
+        shiftedBubbleRect=bubble.getBoundingClientRect();
+      }
+      const gap=12;
+      const anchorRect=(avatar instanceof HTMLElement?avatar.getBoundingClientRect():shiftedBubbleRect);
+      const candidates=[
+        finalizeRect(clampRectToViewport(anchorRect.right+gap, anchorRect.top+(anchorRect.height-shiftedBubbleRect.height)/2, shiftedBubbleRect.width, shiftedBubbleRect.height)),
+        finalizeRect(clampRectToViewport(anchorRect.left-gap-shiftedBubbleRect.width, anchorRect.top+(anchorRect.height-shiftedBubbleRect.height)/2, shiftedBubbleRect.width, shiftedBubbleRect.height)),
+        finalizeRect(clampRectToViewport(anchorRect.left+(anchorRect.width-shiftedBubbleRect.width)/2, anchorRect.top-gap-shiftedBubbleRect.height, shiftedBubbleRect.width, shiftedBubbleRect.height)),
+        finalizeRect(clampRectToViewport(anchorRect.left+(anchorRect.width-shiftedBubbleRect.width)/2, anchorRect.bottom+gap, shiftedBubbleRect.width, shiftedBubbleRect.height))
+      ];
+      const scoreCandidate=(rect)=>{
+        const overlapPenalty=blockerRects.reduce((sum,blocker)=>sum+overlapArea(rect,blocker),0);
+        const overflowPenalty=
+          Math.max(0,viewportLeft+margin-rect.left)+
+          Math.max(0,rect.right-(viewportRight-margin))+
+          Math.max(0,viewportTop+margin-rect.top)+
+          Math.max(0,rect.bottom-(viewportBottom-margin));
+        const cx=rect.left+rect.width/2;
+        const cy=rect.top+rect.height/2;
+        const distancePenalty=Math.abs(cx-ax)+Math.abs(cy-ay);
+        return overlapPenalty*1000+overflowPenalty*1000+distancePenalty;
+      };
+      const bestRect=candidates.slice().sort((r1,r2)=>scoreCandidate(r1)-scoreCandidate(r2))[0];
+      bubble.classList.add('callout-screen-float');
+      bubble.style.setProperty('position','fixed','important');
+      bubble.style.setProperty('left',`${bestRect.left.toFixed(1)}px`,'important');
+      bubble.style.setProperty('top',`${bestRect.top.toFixed(1)}px`,'important');
+      bubble.style.setProperty('right','auto','important');
+      bubble.style.setProperty('bottom','auto','important');
+      bubble.style.setProperty('z-index','2147483647','important');
+      bubble.style.setProperty('--callout-base-x','0px');
+      bubble.style.setProperty('--callout-base-y','0px');
+      bubble.style.removeProperty('--callout-shift-x');
+      bubble.style.removeProperty('--callout-shift-y');
+      shiftedBubbleRect=bubble.getBoundingClientRect();
+      const fbx=shiftedBubbleRect.left+shiftedBubbleRect.width/2;
+      const fby=shiftedBubbleRect.top+shiftedBubbleRect.height/2;
+      const fdx=ax-fbx;
+      const fdy=ay-fby;
+      if(Math.abs(fdx)>Math.abs(fdy)){
+        dir=fdx<0?'west':'east';
+      }else{
+        dir=fdy<0?'north':'south';
+      }
+      tail.classList.remove('tail-north','tail-south','tail-east','tail-west');
+      tail.classList.add(`tail-${dir}`);
+    }
     const anchorX=Math.max(10,Math.min(shiftedBubbleRect.width-10,ax-shiftedBubbleRect.left));
     const anchorY=Math.max(10,Math.min(shiftedBubbleRect.height-10,ay-shiftedBubbleRect.top));
     if(dir==='north'||dir==='south'){
