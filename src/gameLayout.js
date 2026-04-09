@@ -60,7 +60,12 @@ export function retargetCalloutTails({
     const dy=ay-by;
     let dir='south';
     if(!isSelfBubble){
-      if(Math.abs(dx)>Math.abs(dy)){
+      const seat=bubble.closest('.seat');
+      if(seat?.classList.contains('west')||seat?.classList.contains('east')){
+        dir='south';
+      }else if(seat?.classList.contains('north')){
+        dir='west';
+      }else if(Math.abs(dx)>Math.abs(dy)){
         dir=dx<0?'west':'east';
       }else{
         dir=dy<0?'north':'south';
