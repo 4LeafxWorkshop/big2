@@ -11560,6 +11560,17 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .emote-callout.pla
   --callout-base-y: 0px;
 }
 
+body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .play-type-call-seat,
+body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .last-card-call-seat,
+body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat {
+  top: 50% !important;
+  bottom: auto !important;
+  left: calc(100% + 18px) !important;
+  right: auto !important;
+  --callout-base-x: 10px;
+  --callout-base-y: -50%;
+}
+
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .play-type-call-seat .tail,
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-seat .tail,
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat .tail {
@@ -11572,6 +11583,18 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .emote-callout.pla
   border-top-color: var(--bubble-border) !important;
 }
 
+body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .play-type-call-seat .tail,
+body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .last-card-call-seat .tail,
+body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat .tail {
+  top: 50% !important;
+  bottom: auto !important;
+  left: calc(-20px * var(--callout-size, 1)) !important;
+  right: auto !important;
+  transform: translateY(-50%) !important;
+  border-color: transparent !important;
+  border-right-color: var(--bubble-border) !important;
+}
+
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .play-type-call-seat .tail::after,
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-seat .tail::after,
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat .tail::after {
@@ -11581,6 +11604,18 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .emote-callout.pla
   right: auto !important;
   border-color: transparent !important;
   border-top-color: var(--bubble-fill) !important;
+}
+
+body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .play-type-call-seat .tail::after,
+body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .last-card-call-seat .tail::after,
+body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat .tail::after {
+  top: calc(-10px * var(--callout-size, 1)) !important;
+  bottom: auto !important;
+  left: calc(-6px * var(--callout-size, 1)) !important;
+  right: auto !important;
+  border-color: transparent !important;
+  border-top-color: transparent !important;
+  border-right-color: var(--bubble-fill) !important;
 }
 
 body[data-screen='game'] .history-detail-row .history-cards {
