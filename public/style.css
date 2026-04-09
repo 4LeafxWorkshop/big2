@@ -11710,7 +11710,7 @@ body[data-screen='game'][data-ios='1'] .action-strip .hand .hand-card {
   body[data-screen='game'][data-ios='1'] .seat.north .seat-open-play .seat-played .card.mini + .card.mini,
   body[data-screen='game'][data-ios='1'] .seat.west .seat-open-play .seat-played .card.mini + .card.mini,
   body[data-screen='game'][data-ios='1'] .seat.east .seat-open-play .seat-played .card.mini + .card.mini {
-    margin-left: calc(var(--card-w) * -0.5) !important;
+    margin-left: calc(var(--card-w) * -0.98) !important;
   }
   body[data-screen='game'][data-ios='1'] .seat-played.seat-played-fan .card.mini + .card.mini,
   body[data-screen='game'][data-ios='1'] .center-last .seat-played.seat-played-fan .card.mini + .card.mini,

@@ -111,23 +111,11 @@ function matchGuestPlayerId(roomData){
 }
 function runPopunderAd(){
   if(APP_CHANNEL==='STORE')return;
+  if(isIOSDevice())return;
   try{
     const url='https://omg10.com/4/10798765';
-    if(isIOSDevice()&&armedPopunderWindow&&!armedPopunderWindow.closed){
-      try{
-        armedPopunderWindow.location.replace(url);
-      }catch{
-        armedPopunderWindow.location.href=url;
-      }
-      armedPopunderWindow=null;
-      return;
-    }
     const win=window.open(url,'big2_ad_tab');
     if(!win){
-      if(isIOSDevice()){
-        console.warn('popunder ad blocked on iOS; skipping same-tab fallback');
-        return;
-      }
       window.location.href=url;
     }
   }catch(err){
@@ -137,26 +125,11 @@ function runPopunderAd(){
 let armedPopunderWindow=null;
 function armPopunderForGesture(){
   if(APP_CHANNEL==='STORE')return;
-  if(!isIOSDevice())return;
-  try{
-    if(armedPopunderWindow&&!armedPopunderWindow.closed)return;
-  }catch{
-    armedPopunderWindow=null;
-  }
-  try{
-    const armedWindow=window.open('about:blank','big2_ad_tab');
-    if(!armedWindow)return;
-    try{
-      armedWindow.document?.write?.('<!doctype html><title>Loading…</title>');
-      armedWindow.document?.close?.();
-    }catch{}
-    armedPopunderWindow=armedWindow;
-  }catch(err){
-    console.warn('popunder arm failed',err);
-  }
+  if(isIOSDevice())return;
 }
 function schedulePopunderAfterRender(delayMs=250){
   if(APP_CHANNEL==='STORE')return;
+  if(isIOSDevice())return;
   const delay=Math.max(0,Number(delayMs)||0);
   const invoke=()=>window.setTimeout(runPopunderAd,delay);
   window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>{
