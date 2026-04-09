@@ -3491,12 +3491,11 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   border-radius: 0;
 }
 .intro-inline-card-art {
-  display: inline-block;
+  display: block;
   width: var(--guide-card-w, var(--card-w));
   height: var(--guide-card-h, var(--card-h));
   object-fit: contain;
   object-position: top;
-  vertical-align: middle;
   margin: 0 2px;
   border-radius: 0;
 }
@@ -3561,6 +3560,7 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   overflow-x: auto;
 }
 .score-guide-card-art {
+  display: block;
   width: var(--guide-card-w, var(--card-w));
   height: var(--guide-card-h, var(--card-h));
   object-fit: contain;
@@ -7232,12 +7232,12 @@ body[data-log-sheet='1'] .history-detail-row {
 }
 body[data-log-sheet='1'] .history-cards {
   gap: 0 !important;
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 58%, rgba(0,0,0,.72) 76%, transparent 92%) !important;
-  mask-image: linear-gradient(to bottom, #000 0%, #000 58%, rgba(0,0,0,.72) 76%, transparent 92%) !important;
-  -webkit-mask-size: 100% 100% !important;
-  mask-size: 100% 100% !important;
-  -webkit-mask-repeat: no-repeat !important;
-  mask-repeat: no-repeat !important;
+  -webkit-mask-image: none !important;
+  mask-image: none !important;
+  -webkit-mask-size: auto !important;
+  mask-size: auto !important;
+  -webkit-mask-repeat: repeat !important;
+  mask-repeat: repeat !important;
 }
 body[data-log-sheet='1'] .history-cards .card.mini {
   width: var(--card-w) !important;
@@ -8647,7 +8647,6 @@ body[data-screen='game'] .center-last .seat-played {
   padding: 0 !important;
   min-height: 0 !important;
 }
-/* Fade bottom third of cards in game log and guide page. */
 .history-cards,
 .intro-hand-cards,
 .score-guide-cards,
@@ -8655,17 +8654,16 @@ body[data-screen='game'] .center-last .seat-played {
 body[data-screen='game'] .reveal-cards {
   position: relative;
 }
-/* Fade cards out to transparent at the bottom. */
 .history-cards,
 .intro-hand-cards,
 .score-guide-cards,
 .result-cards {
-  -webkit-mask-image: linear-gradient(to bottom, #000 0%, #000 58%, rgba(0,0,0,.72) 76%, transparent 92%);
-  mask-image: linear-gradient(to bottom, #000 0%, #000 58%, rgba(0,0,0,.72) 76%, transparent 92%);
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 100%;
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
+  -webkit-mask-image: none;
+  mask-image: none;
+  -webkit-mask-size: auto;
+  mask-size: auto;
+  -webkit-mask-repeat: repeat;
+  mask-repeat: repeat;
 }
 /* Remove remaining-card number badges for all players in game view. */
 body[data-screen='game'] .seat-count-tag {
@@ -11644,14 +11642,13 @@ body[data-screen='game'] .seat.east .seat-open-play {
   z-index: 1 !important;
 }
 
-/* Keep trimmed game-log card stacks from reserving full-card height. */
 body[data-screen='game'] .history-detail-row .history-cards {
-  height: calc(var(--card-h) * 0.82) !important;
+  height: auto !important;
   align-items: flex-start !important;
-  overflow-y: hidden !important;
+  overflow-y: visible !important;
 }
 body[data-log-sheet='1'] .history-detail-row .history-cards {
-  height: calc(var(--card-h) * 0.82) !important;
+  height: auto !important;
 }
 
 /* Lift the south hand slightly so there is visible breathing room underneath. */
