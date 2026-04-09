@@ -6022,7 +6022,8 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
     bottom: -42px !important;
     left: 50% !important;
     right: auto !important;
-    transform: translateX(-50%) !important;
+    --callout-base-x: -50%;
+    --callout-base-y: 0px;
     z-index: 13011 !important;
     max-width: 72vw !important;
     white-space: normal !important;
@@ -6071,7 +6072,8 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
   body[data-screen='game'][data-orientation='portrait'] .seat.west .last-card-call-seat {
     left: 0 !important;
     right: auto !important;
-    transform: none !important;
+    --callout-base-x: 0px;
+    --callout-base-y: 0px;
     text-align: left !important;
     transform-origin: left top !important;
   }
@@ -6079,7 +6081,8 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
   body[data-screen='game'][data-orientation='portrait'] .seat.east .last-card-call-seat {
     left: auto !important;
     right: 0 !important;
-    transform: none !important;
+    --callout-base-x: 0px;
+    --callout-base-y: 0px;
     text-align: right !important;
     transform-origin: right top !important;
   }
@@ -6088,7 +6091,8 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
   body[data-screen='game'][data-orientation='portrait'] .seat.north .pass-call.play-type-call-seat {
     left: 50% !important;
     right: auto !important;
-    transform: translateX(-50%) !important;
+    --callout-base-x: -50%;
+    --callout-base-y: 0px;
     text-align: center !important;
   }
   body[data-screen='game'][data-orientation='portrait'] .seat.west .play-type-call-seat::after,
@@ -10686,21 +10690,24 @@ body[data-screen='game'] .seat.east {
     top: 44px !important;
     left: 50% !important;
     right: auto !important;
-    transform: translateX(-50%) !important;
+    --callout-base-x: -50%;
+    --callout-base-y: 0px;
   }
   body[data-screen='game'] .seat.west .play-type-call-seat,
   body[data-screen='game'] .seat.west .last-card-call-seat {
     top: calc(33% + 34px) !important;
     left: 50% !important;
     right: auto !important;
-    transform: translateX(-50%) !important;
+    --callout-base-x: -50%;
+    --callout-base-y: 0px;
   }
   body[data-screen='game'] .seat.east .play-type-call-seat,
   body[data-screen='game'] .seat.east .last-card-call-seat {
     top: calc(33% + 34px) !important;
     left: 50% !important;
     right: auto !important;
-    transform: translateX(-50%) !important;
+    --callout-base-x: -50%;
+    --callout-base-y: 0px;
   }
 }
 
