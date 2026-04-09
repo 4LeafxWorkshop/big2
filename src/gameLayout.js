@@ -151,7 +151,7 @@ export function retargetCalloutTails({
       .map((el)=>el.getBoundingClientRect())
       .filter((rect)=>rectArea(rect)>0);
     const overlapsBlockers=blockerRects.some((rect)=>overlapArea(shiftedBubbleRect,rect)>0);
-    if((!isSelfBubble||stillOverflowing||overlapsBlockers)&&viewportWidth&&viewportHeight){
+    if((stillOverflowing||overlapsBlockers)&&viewportWidth&&viewportHeight){
       const availableWidth=Math.max(0,viewportWidth-(margin*2));
       if(availableWidth>0&&shiftedBubbleRect.width>availableWidth){
         const fitScale=Math.max(0.4,Math.min(1,availableWidth/shiftedBubbleRect.width));
