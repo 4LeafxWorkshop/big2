@@ -4326,7 +4326,7 @@ body[data-screen='game'] .table-center-stack {
   z-index: 2600;
   display: inline-block;
   pointer-events: none;
-  transform: translate3d(var(--callout-shift-x, 0px), var(--callout-shift-y, 0px), 0) rotate(var(--callout-tilt, 0deg)) scale(var(--callout-scale, 1));
+  transform: translate3d(calc(var(--callout-base-x, 0px) + var(--callout-shift-x, 0px)), calc(var(--callout-base-y, 0px) + var(--callout-shift-y, 0px)), 0) rotate(var(--callout-tilt, 0deg)) scale(var(--callout-scale, 1));
   animation: calloutFloat var(--callout-float-dur, 2.6s) ease-in-out infinite;
 }
 .emote-callout {
@@ -4337,7 +4337,7 @@ body[data-screen='game'] .table-center-stack {
   z-index: 2600;
   display: inline-block;
   pointer-events: none;
-  transform: translate3d(var(--callout-shift-x, 0px), var(--callout-shift-y, 0px), 0) rotate(var(--callout-tilt, 0deg)) scale(var(--callout-scale, 1));
+  transform: translate3d(calc(var(--callout-base-x, 0px) + var(--callout-shift-x, 0px)), calc(var(--callout-base-y, 0px) + var(--callout-shift-y, 0px)), 0) rotate(var(--callout-tilt, 0deg)) scale(var(--callout-scale, 1));
   animation: none;
 }
 .play-type-call .callout-box,
@@ -4587,13 +4587,13 @@ body[data-screen='game'] .table-center-stack {
   to { opacity: 1; }
 }
 @keyframes calloutPop {
-  0% { opacity: 0; transform: translate3d(var(--callout-shift-x, 0px), calc(var(--callout-shift-y, 0px) + 4px), 0) scale(.9) rotate(var(--callout-tilt, 0deg)) scale(var(--callout-scale, 1)); }
-  100% { opacity: 1; transform: translate3d(var(--callout-shift-x, 0px), var(--callout-shift-y, 0px), 0) rotate(var(--callout-tilt, 0deg)) scale(var(--callout-scale, 1)); }
+  0% { opacity: 0; transform: translate3d(calc(var(--callout-base-x, 0px) + var(--callout-shift-x, 0px)), calc(var(--callout-base-y, 0px) + var(--callout-shift-y, 0px) + 4px), 0) scale(.9) rotate(var(--callout-tilt, 0deg)) scale(var(--callout-scale, 1)); }
+  100% { opacity: 1; transform: translate3d(calc(var(--callout-base-x, 0px) + var(--callout-shift-x, 0px)), calc(var(--callout-base-y, 0px) + var(--callout-shift-y, 0px)), 0) rotate(var(--callout-tilt, 0deg)) scale(var(--callout-scale, 1)); }
 }
 @keyframes calloutFloat {
-  0% { transform: translate3d(var(--callout-shift-x, 0px), var(--callout-shift-y, 0px), 0) rotate(var(--callout-tilt, 0deg)) scale(var(--callout-scale, 1)); }
-  50% { transform: translate3d(var(--callout-shift-x, 0px), calc(var(--callout-shift-y, 0px) + (var(--callout-float-amp, 3px) * -1)), 0) rotate(calc(var(--callout-tilt, 0deg) * .6)) scale(var(--callout-scale, 1)); }
-  100% { transform: translate3d(var(--callout-shift-x, 0px), var(--callout-shift-y, 0px), 0) rotate(var(--callout-tilt, 0deg)) scale(var(--callout-scale, 1)); }
+  0% { transform: translate3d(calc(var(--callout-base-x, 0px) + var(--callout-shift-x, 0px)), calc(var(--callout-base-y, 0px) + var(--callout-shift-y, 0px)), 0) rotate(var(--callout-tilt, 0deg)) scale(var(--callout-scale, 1)); }
+  50% { transform: translate3d(calc(var(--callout-base-x, 0px) + var(--callout-shift-x, 0px)), calc(var(--callout-base-y, 0px) + var(--callout-shift-y, 0px) + (var(--callout-float-amp, 3px) * -1)), 0) rotate(calc(var(--callout-tilt, 0deg) * .6)) scale(var(--callout-scale, 1)); }
+  100% { transform: translate3d(calc(var(--callout-base-x, 0px) + var(--callout-shift-x, 0px)), calc(var(--callout-base-y, 0px) + var(--callout-shift-y, 0px)), 0) rotate(var(--callout-tilt, 0deg)) scale(var(--callout-scale, 1)); }
 }
 @keyframes calloutGlow {
   0% {
@@ -7781,9 +7781,10 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .emote-callout.pla
   bottom: auto !important;
   left: 50% !important;
   right: auto !important;
-  transform: translateX(-50%) !important;
+  --callout-base-x: -50%;
+  --callout-base-y: 0px;
   z-index: 13001 !important;
-  max-width: min(260px, 72vw) !important;
+  max-width: none !important;
   text-align: center !important;
 }
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat {
@@ -11087,24 +11088,25 @@ body[data-screen='game'] .seat.east .seat-name-fixed[data-opponent-name] .emote-
   bottom: calc(100% + 10px) !important;
   left: 50% !important;
   right: auto !important;
-  transform: translateX(-50%) !important;
+  --callout-base-x: -50%;
+  --callout-base-y: 0px;
 }
 
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .play-type-call-seat,
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-seat {
-  max-inline-size: none;
+  max-inline-size: none !important;
 }
 
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .play-type-call-seat .callout-box,
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-seat .callout-box {
-  max-inline-size: none;
+  max-inline-size: none !important;
 }
 
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .play-type-call-seat .hk-inner,
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-seat .hk-inner {
-  white-space: nowrap;
-  overflow-wrap: normal;
-  text-wrap: nowrap;
+  white-space: nowrap !important;
+  overflow-wrap: normal !important;
+  text-wrap: nowrap !important;
 }
 
 body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .play-type-call-seat,
@@ -11113,8 +11115,9 @@ body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .emote
   top: 50% !important;
   bottom: auto !important;
   left: auto !important;
-  right: calc(100% + 10px) !important;
-  transform: translateY(-50%) !important;
+  right: calc(100% + 18px) !important;
+  --callout-base-x: -10px;
+  --callout-base-y: -50%;
 }
 
 body[data-screen='game'] .seat.west .seat-name-fixed[data-opponent-name] .play-type-call-seat .tail,
