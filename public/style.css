@@ -5083,10 +5083,10 @@ body[data-screen='game'] .table-center-stack {
   gap: 3px;
   grid-area: hand;
   padding-top: 8px;
-  padding-bottom: 10px;
+  padding-bottom: 6px;
   padding-left: 0;
   padding-right: 0;
-  min-height: calc(var(--card-h) * 1.14 + 28px);
+  min-height: calc(var(--card-h) * 1.14 + 24px);
   transform: none;
   scroll-padding-left: 0;
   scroll-padding-right: 0;
@@ -11622,22 +11622,22 @@ body[data-log-sheet='1'] .history-detail-row .history-cards {
 /* Lift the south hand slightly so there is visible breathing room underneath. */
 @media (max-width: 860px) {
   body[data-screen='game'] .action-strip {
-    padding-bottom: 14px !important;
+    padding-bottom: 10px !important;
   }
   body[data-screen='game'] .action-strip .hand {
-    min-height: calc(var(--card-h) * 1.02 + 22px) !important;
-    padding-bottom: 10px !important;
-    transform: translateY(-6px) !important;
+    min-height: calc(var(--card-h) * 1.02 + 18px) !important;
+    padding-bottom: 6px !important;
+    transform: translateY(-4px) !important;
   }
   body[data-screen='game'] .action-strip .hand .hand-card {
-    margin-bottom: 8px !important;
+    margin-bottom: 4px !important;
   }
 }
 body[data-screen='game'][data-ios='1'] .action-strip .hand {
-  min-height: calc(var(--card-h) * 1.14 + 30px) !important;
-  padding-bottom: 10px !important;
-  transform: translateY(-6px) !important;
+  min-height: calc(var(--card-h) * 1.14 + 24px) !important;
+  padding-bottom: 6px !important;
+  transform: translateY(-4px) !important;
 }
 body[data-screen='game'][data-ios='1'] .action-strip .hand .hand-card {
-  margin-bottom: 8px !important;
+  margin-bottom: 4px !important;
 }
