@@ -11109,6 +11109,9 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-se
   white-space: nowrap !important;
   overflow-wrap: normal !important;
   text-wrap: nowrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  max-inline-size: none !important;
 }
 
 body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .play-type-call-seat,

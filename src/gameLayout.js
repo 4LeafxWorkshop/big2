@@ -6,9 +6,37 @@ export function retargetCalloutTails({
   const doc=documentRef();
   const win=windowRef();
   const bubbles=[...doc.querySelectorAll('.play-type-call, .last-card-call, .emote-callout')];
-  const vw=Math.max(0,win.innerWidth||0);
-  const vh=Math.max(0,win.innerHeight||0);
+  const visualViewport=win.visualViewport||null;
+  const viewportLeft=Math.max(0,Number(visualViewport?.offsetLeft)||0);
+  const viewportTop=Math.max(0,Number(visualViewport?.offsetTop)||0);
+  const viewportWidth=Math.max(
+    0,
+    Number(visualViewport?.width)||0,
+    Number(doc.documentElement?.clientWidth)||0,
+    Number(win.innerWidth)||0
+  );
+  const viewportHeight=Math.max(
+    0,
+    Number(visualViewport?.height)||0,
+    Number(doc.documentElement?.clientHeight)||0,
+    Number(win.innerHeight)||0
+  );
+  const viewportRight=viewportLeft+viewportWidth;
+  const viewportBottom=viewportTop+viewportHeight;
   const margin=isMobilePointer()?5:8;
+  const overflowShiftFor=(rect)=>{
+    let sx=0;
+    let sy=0;
+    if(viewportWidth&&viewportHeight){
+      // Clamp horizontally and vertically inside the visible viewport:
+      // too far left -> move right, too far right -> move left, too high -> move down.
+      if(rect.left<viewportLeft+margin)sx=(viewportLeft+margin)-rect.left;
+      if(rect.right>viewportRight-margin)sx=(viewportRight-margin)-rect.right;
+      if(rect.top<viewportTop+margin)sy=(viewportTop+margin)-rect.top;
+      if(rect.bottom>viewportBottom-margin)sy=(viewportBottom-margin)-rect.bottom;
+    }
+    return{sx,sy};
+  };
   for(const bubble of bubbles){
     if(!(bubble instanceof HTMLElement))continue;
     const tail=bubble.querySelector('.tail');
@@ -42,19 +70,20 @@ export function retargetCalloutTails({
     tail.classList.add(`tail-${dir}`);
     tail.style.removeProperty('--tail-anchor-x');
     tail.style.removeProperty('--tail-anchor-y');
-    let sx=0;
-    let sy=0;
-    if(vw&&vh){
-      if(b.left<margin)sx=margin-b.left;
-      else if(b.right>vw-margin)sx=(vw-margin)-b.right;
-      if(b.top<margin)sy=margin-b.top;
-      else if(b.bottom>vh-margin)sy=(vh-margin)-b.bottom;
-    }
+    let {sx,sy}=overflowShiftFor(b);
     if(sx||sy){
       bubble.style.setProperty('--callout-shift-x',`${sx.toFixed(1)}px`);
       bubble.style.setProperty('--callout-shift-y',`${sy.toFixed(1)}px`);
       bubble.style.removeProperty('--callout-box-shift-x');
       bubble.style.removeProperty('--callout-box-shift-y');
+      const secondPass=bubble.getBoundingClientRect();
+      const extra=overflowShiftFor(secondPass);
+      if(extra.sx||extra.sy){
+        sx+=extra.sx;
+        sy+=extra.sy;
+        bubble.style.setProperty('--callout-shift-x',`${sx.toFixed(1)}px`);
+        bubble.style.setProperty('--callout-shift-y',`${sy.toFixed(1)}px`);
+      }
     }else{
       bubble.style.removeProperty('--callout-shift-x');
       bubble.style.removeProperty('--callout-shift-y');
