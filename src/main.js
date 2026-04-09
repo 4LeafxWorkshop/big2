@@ -3720,6 +3720,7 @@ function introPanelHtml(){
     language:state.language,
     colorizeSuitText,
     esc,
+    withBase,
     renderStaticCard,
     introHandSamples:introHandSamples()
   });

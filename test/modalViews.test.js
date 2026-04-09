@@ -47,12 +47,15 @@ test('renderIntroPanel includes sample cards and close controls', ()=>{
     language:'en',
     colorizeSuitText:(value)=>value,
     esc:(value)=>String(value),
+    withBase:(value)=>`base:${value}`,
     renderStaticCard:()=>'<div class="card"></div>',
     introHandSamples:[{name:'Single',desc:'One card',cards:[{rank:0,suit:0}]}]
   });
   assert.match(html,/id="intro-modal"/);
   assert.match(html,/Diamond 3/);
   assert.match(html,/class="card"/);
+  assert.match(html,/class="intro-home-icon"/);
+  assert.match(html,/src="base:icons\/icon-192\.png"/);
 });
 
 test('renderLeaderboardPanel renders rows and controls', ()=>{
