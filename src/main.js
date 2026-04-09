@@ -111,25 +111,51 @@ function matchGuestPlayerId(roomData){
 }
 function runPopunderAd(){
   if(APP_CHANNEL==='STORE')return;
-  if(isIOSDevice())return;
+  const url='https://omg10.com/4/10798765';
+  const isIos=isIOSDevice();
   try{
-    const url='https://omg10.com/4/10798765';
-    const win=window.open(url,'big2_ad_tab');
-    if(!win){
-      window.location.href=url;
+    let win=armedPopunderWindow;
+    if(win&&!win.closed){
+      try{
+        win.opener=null;
+      }catch{}
+      try{
+        win.location.replace(url);
+      }catch{
+        win.location.href=url;
+      }
+    }else{
+      win=window.open(url,'big2_ad_tab');
     }
+    armedPopunderWindow=win&&!win.closed?win:null;
+    if(!win){
+      if(isIos)return;
+      window.location.href=url;
+      return;
+    }
+    try{win.blur();}catch{}
+    try{window.focus();}catch{}
   }catch(err){
     console.warn('popunder ad failed',err);
+  }finally{
+    if(armedPopunderWindow?.closed)armedPopunderWindow=null;
   }
 }
 let armedPopunderWindow=null;
 function armPopunderForGesture(){
   if(APP_CHANNEL==='STORE')return;
-  if(isIOSDevice())return;
+  if(!isIOSDevice())return;
+  if(armedPopunderWindow&&!armedPopunderWindow.closed)return;
+  try{
+    armedPopunderWindow=window.open('about:blank','big2_ad_tab');
+    try{armedPopunderWindow?.blur();}catch{}
+    try{window.focus();}catch{}
+  }catch{
+    armedPopunderWindow=null;
+  }
 }
 function schedulePopunderAfterRender(delayMs=250){
   if(APP_CHANNEL==='STORE')return;
-  if(isIOSDevice())return;
   const delay=Math.max(0,Number(delayMs)||0);
   const invoke=()=>window.setTimeout(runPopunderAd,delay);
   window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>{
