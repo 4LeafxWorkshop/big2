@@ -33,6 +33,7 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
     unlockAudio,
     initFirebaseIfReady,
     startSoloGame,
+    armPopunderForGesture=()=>{},
     schedulePopunderAfterRender,
     legalMiniCopy
   }){
@@ -157,12 +158,14 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
     const soloStartBtn=doc.getElementById('solo-start');
     soloStartBtn?.addEventListener('pointerdown',(e)=>{
       if(!guardAction('solo-start'))return;
+      armPopunderForGesture();
       e.preventDefault();
       e.stopPropagation();
       void handleSoloStart();
     },true);
     soloStartBtn?.addEventListener('click',()=>{
       if(!guardAction('solo-start'))return;
+      armPopunderForGesture();
       void handleSoloStart();
     });
 

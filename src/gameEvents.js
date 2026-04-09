@@ -31,15 +31,20 @@ function createDragPopupController(){
   return{positionDragPopup,hideDragPopup,showDragPopup,isActive};
 }
 
-function bindResultActionButton(buttonId,guardKey,handler,guardAction){
+function bindResultActionButton(buttonId,guardKey,handler,guardAction,beforeAction=()=>{}){
   const button=document.getElementById(buttonId);
   button?.addEventListener('pointerdown',(e)=>{
     if(!guardAction(guardKey))return;
+    beforeAction();
     e.preventDefault();
     e.stopPropagation();
     void handler();
   },true);
-  button?.addEventListener('click',()=>{if(!guardAction(guardKey))return;void handler();});
+  button?.addEventListener('click',()=>{
+    if(!guardAction(guardKey))return;
+    beforeAction();
+    void handler();
+  });
 }
 
 function bindControlRowLabels({app,t,isPortraitMode}){
@@ -391,6 +396,7 @@ function bindHomeAndResultActions({
   waitMs,
   triggerClickBanner,
   startSoloGame,
+  armPopunderForGesture=()=>{},
   schedulePopunderAfterRender,
   roomResultExpired,
   t,
@@ -433,7 +439,7 @@ function bindHomeAndResultActions({
     startSoloGame({preserveOpponents:false,resetTotals:true,resetRoundWins:true});
     schedulePopunderAfterRender(1200);
   };
-  bindResultActionButton('restart-btn','restart-btn',handleRestart,guardAction);
+  bindResultActionButton('restart-btn','restart-btn',handleRestart,guardAction,armPopunderForGesture);
 
   const handleResultAgain=async()=>{
     triggerClickBanner(document.getElementById('result-again'));
@@ -458,7 +464,7 @@ function bindHomeAndResultActions({
     startSoloGame();
     schedulePopunderAfterRender(350);
   };
-  bindResultActionButton('result-again','result-again',handleResultAgain,guardAction);
+  bindResultActionButton('result-again','result-again',handleResultAgain,guardAction,armPopunderForGesture);
 
   const handleCongratsAgain=async()=>{
     triggerClickBanner(document.getElementById('congrats-again'));
@@ -483,7 +489,7 @@ function bindHomeAndResultActions({
     startSoloGame();
     schedulePopunderAfterRender(350);
   };
-  bindResultActionButton('congrats-again','congrats-again',handleCongratsAgain,guardAction);
+  bindResultActionButton('congrats-again','congrats-again',handleCongratsAgain,guardAction,armPopunderForGesture);
 }
 
 function bindActionControls({
@@ -585,6 +591,7 @@ export function createGameEventsBinder({
   resetRoomExpiryTo60s,
   waitMs,
   guardAction,
+  armPopunderForGesture,
   schedulePopunderAfterRender,
   startSoloGame,
   roomResultExpired,
@@ -746,6 +753,7 @@ export function createGameEventsBinder({
       waitMs,
       triggerClickBanner,
       startSoloGame,
+      armPopunderForGesture,
       schedulePopunderAfterRender,
       roomResultExpired,
       t,

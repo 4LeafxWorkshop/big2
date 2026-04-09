@@ -6,9 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:store": "cross-env VITE_APP_CHANNEL=store vite build",
     "lint": "eslint src test tools",
     "test": "node --test",
     "build:cap": "cross-env CAPACITOR=1 vite build",
+    "build:cap:store": "cross-env CAPACITOR=1 VITE_APP_CHANNEL=store vite build",
     "preview": "vite preview",
     "cap:sync": "npx cap sync",
     "cap:open:ios": "npx cap open ios",

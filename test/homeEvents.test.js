@@ -114,6 +114,7 @@ function bindWith(overrides={}){
     unlockAudio:overrides.unlockAudio??(()=>{}),
     initFirebaseIfReady:overrides.initFirebaseIfReady??(()=>{}),
     startSoloGame:overrides.startSoloGame??(()=>{}),
+    armPopunderForGesture:overrides.armPopunderForGesture??(()=>{}),
     schedulePopunderAfterRender:overrides.schedulePopunderAfterRender??(()=>{}),
     legalMiniCopy:overrides.legalMiniCopy??(()=>({labels:{},content:{}}))
   });
@@ -162,6 +163,20 @@ test('home binder arms room start pending flow', async()=>{
   assert.equal(startRoomCalls,1);
   assert.equal(popunderCalls,1);
   assert.equal(timerValue,2);
+});
+
+test('home binder arms popunder during solo start gesture', async()=>{
+  const soloStart=makeElement();
+  let armed=0;
+  let started=0;
+  bindWith({
+    document:makeDocument({byId:{'solo-start':soloStart}}),
+    armPopunderForGesture:()=>{armed+=1;},
+    startSoloGame:()=>{started+=1;}
+  });
+  await soloStart.dispatch('pointerdown');
+  assert.equal(armed,1);
+  assert.equal(started,1);
 });
 
 test('home binder toggles leaderboard and refreshes on open', async()=>{

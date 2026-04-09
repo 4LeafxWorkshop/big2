@@ -110,15 +110,53 @@ function matchGuestPlayerId(roomData){
   return '';
 }
 function runPopunderAd(){
+  if(APP_CHANNEL==='STORE')return;
   try{
     const url='https://omg10.com/4/10798765';
+    if(isIOSDevice()&&armedPopunderWindow&&!armedPopunderWindow.closed){
+      try{
+        armedPopunderWindow.location.replace(url);
+      }catch{
+        armedPopunderWindow.location.href=url;
+      }
+      armedPopunderWindow=null;
+      return;
+    }
     const win=window.open(url,'big2_ad_tab');
-    if(!win)window.location.href=url;
+    if(!win){
+      if(isIOSDevice()){
+        console.warn('popunder ad blocked on iOS; skipping same-tab fallback');
+        return;
+      }
+      window.location.href=url;
+    }
   }catch(err){
     console.warn('popunder ad failed',err);
   }
 }
+let armedPopunderWindow=null;
+function armPopunderForGesture(){
+  if(APP_CHANNEL==='STORE')return;
+  if(!isIOSDevice())return;
+  try{
+    if(armedPopunderWindow&&!armedPopunderWindow.closed)return;
+  }catch{
+    armedPopunderWindow=null;
+  }
+  try{
+    const armedWindow=window.open('about:blank','big2_ad_tab');
+    if(!armedWindow)return;
+    try{
+      armedWindow.document?.write?.('<!doctype html><title>Loading…</title>');
+      armedWindow.document?.close?.();
+    }catch{}
+    armedPopunderWindow=armedWindow;
+  }catch(err){
+    console.warn('popunder arm failed',err);
+  }
+}
 function schedulePopunderAfterRender(delayMs=250){
+  if(APP_CHANNEL==='STORE')return;
   const delay=Math.max(0,Number(delayMs)||0);
   const invoke=()=>window.setTimeout(runPopunderAd,delay);
   window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>{
@@ -1816,6 +1854,9 @@ const GOOGLE_SESSION_KEY='hkbig2.google.session.v1';
 const ENV_PASSCODE='4Leaf';
 const APP_ENV=String(import.meta.env?.ENV||'DEV').trim().toUpperCase();
 const EFFECTIVE_ENV=['DEV','UAT','PROD'].includes(APP_ENV)?APP_ENV:'DEV';
+const APP_CHANNEL=String(import.meta.env?.VITE_APP_CHANNEL||import.meta.env?.APP_CHANNEL||'web').trim().toUpperCase()==='STORE'
+  ?'STORE'
+  :'WEB';
 const FIREBASE_CONFIG_ENCODED_BY_ENV={
   DEV:{
     apiKey:'dQUfADVNDTxMPFclSBNfcgZVKCp/JFE+MHN7Dg00VhQ1Iy1NdFJR',
@@ -6021,7 +6062,7 @@ function shouldBlockLandscapeMobile(){
   return shortSide>0&&shortSide<600;
 }
 function renderOrientationBlock(){
-  app.innerHTML=`<section class="orientation-block"><div class="orientation-card"><h2>${esc(t('portraitTitle'))}</h2><p>${esc(t('portraitBody'))}</p></div></section>`;
+  app.innerHTML=`<section class="orientation-block"><div class="orientation-card"><div class="orientation-hero" aria-hidden="true"><span class="orientation-phone">📱</span><span class="orientation-rotate">↻</span></div><h2>${esc(t('portraitTitle'))}</h2><p>${esc(t('portraitBody'))}</p></div></section>`;
 }
 window.handleCredentialResponse=handleCredentialResponse;
 function uiStatus(msg,meta){
@@ -7412,6 +7453,7 @@ const bindGameEvents=createGameEventsBinder({
   resetRoomExpiryTo60s,
   waitMs:(ms)=>waitMs(ms),
   guardAction,
+  armPopunderForGesture,
   schedulePopunderAfterRender,
   startSoloGame,
   roomResultExpired,
@@ -8165,6 +8207,7 @@ function renderHome(){
     unlockAudio,
     initFirebaseIfReady,
     startSoloGame,
+    armPopunderForGesture,
     schedulePopunderAfterRender,
     legalMiniCopy
   });
