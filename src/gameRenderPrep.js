@@ -65,7 +65,7 @@ export function buildGameAuxRenderState(params){
   const logSheetOpen=portraitMode&&state.showLogSheet;
   const logToggleStateText=t('log');
   const gameHistoryHtml=historyHtml(v.history,v.selfSeat,v.systemLog);
-  const closeLabel=state.language==='zh-HK'?'關閉':'Close';
+  const closeLabel=t('close');
   const isRecPass=state.recommendHint===t('recPass');
   const isRecEmpty=state.recommendHint===t('noSuggest');
   const showRecommendHint=Boolean(state.recommendHint)&&!isRecPass;
@@ -333,4 +333,224 @@ export function buildCalloutRenderState(params){
     seatCalloutHtml,
     seatEmoteHtml
   };
+}
+
+export function buildRoomMetaTableHtml(params){
+  const {
+    v,
+    state,
+    t,
+    esc,
+    roomCountdownText
+  }=params;
+  if(v.mode!=='room'||!state.room.data)return'';
+  const baseRound=Number(state.room.data.roundCount||0);
+  const status=String(state.room.data.status||'');
+  const round=baseRound+(status==='playing'||status==='starting'?1:0);
+  const countdown=roomCountdownText(state.room.data);
+  return`<div class="room-top-meta-table"><div class="room-top-meta room-top-meta-inline">
+      <span class="room-top-item"><span class="room-top-label">${t('roomRound')}</span><strong>${Number.isFinite(round)?round:'-'}</strong></span>
+      <span class="room-top-item"><span class="room-top-label">${t('roomCountdown')}</span><strong data-room-countdown-value>${esc(countdown)}</strong></span>
+    </div></div>`;
+}
+
+export function buildGameShellMarkup(params){
+  const {
+    v,
+    youWin,
+    state,
+    t,
+    roomTopMetaTable,
+    seatHtml,
+    lastActions,
+    selfTableEmoteHtml,
+    sideZoneHtml,
+    gameTopbarHtml,
+    gameActionZoneHtml,
+    renderGameTable,
+    renderGameShell,
+    centerMovesHtml,
+    centerLastMovesHtml,
+    congratsOverlayHtml,
+    revealHtml,
+    resultScreenHtml,
+    opponentProfileModalHtml,
+    scoreGuideModalHtml,
+    introPanelHtml,
+    leaderboardModalHtml
+  }=params;
+  const gameTableHtml=renderGameTable({
+    roomTopMetaTable,
+    seatHtml,
+    mobileNamesHtml:'',
+    mobileDiscardHtml:'',
+    centerMovesHtml:centerMovesHtml(v),
+    centerLastMovesHtml:centerLastMovesHtml(lastActions,v.selfSeat),
+    showWinCelebrate:!v.gameOver&&youWin,
+    t
+  });
+  let shellHtml=renderGameShell({
+    gameOver:v.gameOver,
+    showLog:state.showLog,
+    gameTopbarHtml,
+    gameTableHtml,
+    gameActionZoneHtml,
+    selfTableEmoteHtml,
+    congratsOverlayHtml:v.gameOver?'':congratsOverlayHtml(v,youWin),
+    revealHtml:revealHtml(v),
+    sideZoneHtml,
+    resultScreenHtml:v.gameOver?resultScreenHtml(v):'',
+    opponentProfileModalHtml:state.opponentProfileName?opponentProfileModalHtml(state.opponentProfileName):'',
+    scoreGuideModalHtml:state.showScoreGuide?scoreGuideModalHtml():'',
+    introPanelHtml:state.home.showIntro?introPanelHtml():'',
+    leaderboardModalHtml:state.home.showLeaderboard?leaderboardModalHtml():''
+  });
+  if(!v.gameOver&&youWin){
+    shellHtml=shellHtml.replace('<div class="win-celebrate"><div class="confetti-layer"></div>','<div class="win-celebrate"><canvas class="confetti-canvas" data-confetti="win" aria-hidden="true"></canvas>');
+  }
+  return shellHtml;
+}
+
+export function buildResultScreenHtml(params){
+  const {
+    v,
+    arr,
+    state,
+    t,
+    esc,
+    roomIsHost,
+    roomResultExpired,
+    roomCountdownText,
+    uiStatus,
+    playerColorByViewClass,
+    calcPenaltyDetail,
+    renderStaticCard,
+    authPictureUrl,
+    authPictureUrlFrom,
+    avatarDataUri
+  }=params;
+  const isRoom=state.home.mode==='room';
+  const isHost=isRoom&&roomIsHost();
+  const roomExpired=isRoom&&roomResultExpired(state.room.data);
+  const roomCountdown=isRoom&&state.room.data?roomCountdownText(state.room.data):'';
+  const roomHumanCount=isRoom&&state.room.data
+    ?(Array.isArray(state.room.data.players)?state.room.data.players.filter((p)=>String(p.uid||'').startsWith('uid:')||String(p.uid||'').startsWith('guest:')).length:0)
+    :0;
+  const needsPlayers=isRoom&&roomHumanCount<2;
+  const canRoomAgain=isRoom&&!needsPlayers&&isHost&&!roomExpired;
+  const statusHint=uiStatus(v.status,v.statusMeta);
+  const footerHint=roomExpired
+    ?t('roomHostSneakAway')
+    :needsPlayers
+      ?t('roomNeedPlayers')
+      :(!canRoomAgain&&isRoom?t('roomWaitingHost'):'');
+  const topHint=footerHint&&statusHint===footerHint?'':statusHint;
+  const roomPictureBySeat=(()=>{
+    const list=isRoom&&state.room.data?Array.isArray(state.room.data.players)?state.room.data.players:[]:[];
+    const entries=list.map((p)=>[Number.isFinite(Number(p?.seat))?Number(p.seat):-1,String(p?.picture||'').trim()]);
+    return new Map(entries.filter((entry)=>entry[0]!==-1&&entry[1]));
+  })();
+  const hostSeat=(()=>{
+    if(!isRoom||!state.room.data)return null;
+    const hostId=String(state.room.data.hostId||'').trim();
+    if(!hostId)return null;
+    const players=Array.isArray(state.room.data.players)?state.room.data.players:[];
+    const host=players.find((p)=>String(p?.uid||'')===hostId);
+    const seat=Number(host?.seat);
+    return Number.isFinite(seat)?seat:null;
+  })();
+  const resultSnapshot=Array.isArray(state.room.lastResultPlayers)?state.room.lastResultPlayers:null;
+  const snapshotBySeat=resultSnapshot?new Map(resultSnapshot.map((p)=>[Number.isFinite(Number(p?.seat))?Number(p.seat):-1,p])):null;
+  const winner=arr.find((p)=>p.count===0)??arr[0];
+  const winnerLastPlay=(v.history??[]).slice().reverse().find((e)=>e.action==='play'&&e.seat===winner.seat&&Array.isArray(e.cards)&&e.cards.length);
+  const winnerLastDiscardCards=winnerLastPlay?.cards??[];
+  const selfSeatNum=Number.isFinite(Number(v.selfSeat))?Number(v.selfSeat):null;
+  const showConfetti=selfSeatNum!==null&&winner.seat===selfSeatNum;
+  const deductions=v.roundSummary?.deductions??arr.map((p)=>p.seat===winner.seat?0:calcPenaltyDetail(v.revealedHands?.[p.seat]??[]).deduction);
+  const winnerGain=Number(v.roundSummary?.winnerGain??deductions.reduce((sum,vv)=>sum+vv,0));
+  const detailBySeat=v.roundSummary?.details??arr.map((p)=>p.seat===winner.seat?{remain:0,base:0,multiplier:1,deduction:0,anyTwo:false,topTwo:false,chaoMultiplier:1,chaoKey:''}:calcPenaltyDetail(v.revealedHands?.[p.seat]??[]));
+  const rows=arr.map((p)=>{
+    const isWinner=p.seat===winner.seat;
+    const isSelf=p.seat===v.selfSeat;
+    const color=playerColorByViewClass(p.cls);
+    const isHostSeat=hostSeat!==null&&hostSeat===p.seat;
+    const hostBadgeHtml=isHostSeat?`<span class="lobby-seat-host-badge">🚩</span>`:'';
+    const snapshot=snapshotBySeat?snapshotBySeat.get(p.seat)||null:null;
+    const snapName=String(snapshot?.name||p.name||'');
+    const snapGender=String(snapshot?.gender||p.gender||'male')==='female'?'female':'male';
+    const snapPicture=String(snapshot?.picture||'').trim();
+    const remain=(v.revealedHands?.[p.seat]??[]);
+    const detail=detailBySeat[p.seat]??{remain:remain.length,base:0,multiplier:1,deduction:Number(deductions[p.seat])||0,anyTwo:false,topTwo:false,chaoMultiplier:1,chaoKey:''};
+    const delta=isWinner?winnerGain:-(Number(deductions[p.seat])||0);
+    const total=p.score??0;
+    const remainCards=remain.length?remain.map((c)=>renderStaticCard(c,true)).join(''):`<span class="hint">-</span>`;
+    const mulTags=[
+      detail.anyTwo?`<span class="result-score-chip boosted">${t('scoreAnyTwo')} x2</span>`:'',
+      detail.topTwo?`<span class="result-score-chip boosted">${t('scoreTopTwo')} x2</span>`:'',
+      detail.chaoMultiplier>1&&detail.chaoKey?`<span class="result-score-chip boosted">${t(detail.chaoKey)} x${detail.chaoMultiplier}</span>`:''
+    ].filter(Boolean).join('');
+    const detailLine=isWinner
+      ?`<div class="result-score-detail">${t('resultDetail')}: ${t('scoreGain')} +${winnerGain}</div>`
+      :`<div class="result-score-detail">${t('resultDetail')}: ${t('scoreBase')} ${detail.base} x ${detail.multiplier} · ${t('scoreDeduct')} ${detail.deduction}${mulTags?` · ${t('scorePenaltyBoost')}: ${mulTags}`:''}</div>`;
+    const selfPic=isSelf?authPictureUrl():'';
+    const fallbackPicture=snapPicture||roomPictureBySeat.get(p.seat)||String(p.picture||'').trim();
+    const avatarSrc=(selfPic||fallbackPicture)
+      ?authPictureUrlFrom(selfPic||fallbackPicture)
+      :avatarDataUri(snapName,color,snapGender,Boolean(p.isBot));
+    const botNameAttr=p.isBot?` data-bot-name="${esc(p.name)}"`:'';
+    const winnerLastDiscardHtml=isWinner
+      ?`<div class="result-card-block"><div class="result-block-title">${t('resultLastDiscard')}</div><div class="result-cards" aria-label="${t('resultLastDiscard')}">${winnerLastDiscardCards.length?winnerLastDiscardCards.map((c)=>renderStaticCard(c,true)).join(''):`<span class="hint">-</span>`}</div></div>`
+      :'';
+    const remainBlockHtml=!isWinner
+      ?`<div class="result-card-block"><div class="result-block-title">${t('resultRemain')}</div><div class="result-cards" aria-label="${t('resultRemain')}">${remainCards}</div></div>`
+      :'';
+    const rightColHtml=`<div class="result-side">${winnerLastDiscardHtml}${remainBlockHtml}</div>`;
+    return`<div class="result-row ${isWinner?'winner':''}" style="--winner-color:${color};">
+      <div class="result-main">
+        <div class="result-head"><span class="player-color-chip" style="--player-color:${color};"></span><span class="result-avatar-wrap" style="--avatar-seat-color:${color};"><img class="result-avatar" src="${avatarSrc}" alt="${esc(p.name)}"${botNameAttr}/>${hostBadgeHtml}</span><span class="result-player-name"><strong>${esc(p.name)}</strong>${isWinner?`<span class="result-winner-medal" aria-hidden="true">🏅</span>`:''}</span>${isWinner?`<span class="result-winner-tag">${t('resultWinner')}</span>`:''}</div>
+        <div class="result-meta">${t('resultDelta')}: ${delta>=0?`+${delta}`:`${delta}`} · ${t('score')}: ${total}</div>
+        ${detailLine}
+      </div>
+      ${rightColHtml}
+    </div>`;
+  }).join('');
+  return`<section class="result-screen">
+    ${showConfetti?`<canvas class="confetti-canvas result-confetti-canvas" data-confetti="result" aria-hidden="true"></canvas>`:''}
+    <div class="result-card">
+      <h2 class="title-with-icon"><span class="title-icon title-icon-result" aria-hidden="true"></span><span>${t('resultTitle')}</span></h2>
+      ${topHint?`<div class="hint">${esc(topHint)}</div>`:''}
+      ${isRoom?`<div class="room-expiry-row"><span>${t('roomCountdown')}</span><button type="button" class="room-expiry-reset-btn" data-room-expiry-reset="1"><strong data-room-countdown-value>${esc(roomCountdown)}</strong></button></div>`:''}
+      <div class="result-list">${rows}</div>
+      <div class="control-row">
+        <button id="result-home" class="secondary">${isRoom?t('roomLeave'):t('home')}</button>
+        ${(!isRoom||canRoomAgain)
+    ?`<button id="result-again" class="primary" ${canRoomAgain||!isRoom?'':'disabled'}>${t('again')}</button>`
+    :(!isRoom?'':footerHint?``:`<span class="hint">${t('roomWaitingHost')}</span>`)}
+        ${footerHint?`<span class="hint">${footerHint}</span>`:''}
+      </div>
+    </div>
+  </section>`;
+}
+
+export function buildCongratsOverlayHtml(params){
+  const {
+    v,
+    youWin,
+    state,
+    t,
+    esc,
+    roomIsHost,
+    roomResultExpired,
+    roomCountdownText,
+    uiStatus
+  }=params;
+  if(!youWin)return'';
+  const isRoom=state.home.mode==='room';
+  const isHost=isRoom&&roomIsHost();
+  const roomExpired=isRoom&&roomResultExpired(state.room.data);
+  const roomCountdown=isRoom&&state.room.data?roomCountdownText(state.room.data):'';
+  const againHtml=(!isRoom||(isHost&&!roomExpired))
+    ?`<button id="congrats-again" class="primary">${t('again')}</button>`
+    :`<span class="hint">${roomExpired?t('roomHostSneakAway'):t('roomWaitingHost')}</span>`;
+  return`<div class="congrats-screen"><div class="congrats-card"><h3 class="title-with-icon"><span class="title-icon title-icon-congrats" aria-hidden="true"></span><span>${t('congrats')}</span></h3><div class="hint">${esc(uiStatus(v.status,v.statusMeta))}</div>${isRoom?`<div class="room-expiry-row"><span>${t('roomCountdown')}</span><button type="button" class="room-expiry-reset-btn" data-room-expiry-reset="1"><strong data-room-countdown-value>${esc(roomCountdown)}</strong></button></div>`:''}<div class="control-row"><button id="congrats-home" class="secondary">${t('home')}</button>${againHtml}</div></div></div>`;
 }

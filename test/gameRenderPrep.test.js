@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import {buildCalloutRenderState, buildGameAuxRenderState, buildOpponentSeatsHtml, buildSelfRenderState} from '../src/gameRenderPrep.js';
+import {buildCalloutRenderState, buildCongratsOverlayHtml, buildGameAuxRenderState, buildGameShellMarkup, buildOpponentSeatsHtml, buildResultScreenHtml, buildRoomMetaTableHtml, buildSelfRenderState} from '../src/gameRenderPrep.js';
 
 test('buildSelfRenderState assembles self avatar and callout state', ()=>{
   const result=buildSelfRenderState({
@@ -60,7 +60,7 @@ test('buildGameAuxRenderState assembles log and hand render data', ()=>{
   });
   assert.equal(result.portraitMode,true);
   assert.equal(result.logSheetOpen,true);
-  assert.equal(result.closeLabel,'關閉');
+  assert.equal(result.closeLabel,'close');
   assert.equal(result.isRecPass,true);
   assert.equal(result.isRecEmpty,false);
   assert.equal(result.showRecommendHint,false);
@@ -174,4 +174,109 @@ test('buildCalloutRenderState resolves room emote seat and builds self table emo
   assert.equal(result.emoteSeat,2);
   assert.match(result.selfTableEmoteHtml,/self-table-emote emote-rude/);
   assert.match(result.selfTableEmoteHtml,/\/base\/emotes\/rude\.png/);
+});
+
+test('buildRoomMetaTableHtml renders room round and countdown', ()=>{
+  const html=buildRoomMetaTableHtml({
+    v:{mode:'room'},
+    state:{room:{data:{roundCount:3,status:'playing'}}},
+    t:(key)=>key,
+    esc:(value)=>String(value),
+    roomCountdownText:()=> '15s'
+  });
+  assert.match(html,/room-top-meta-table/);
+  assert.match(html,/roomRound/);
+  assert.match(html,/>4</);
+  assert.match(html,/15s/);
+});
+
+test('buildGameShellMarkup assembles overlays and swaps win confetti canvas', ()=>{
+  const html=buildGameShellMarkup({
+    v:{gameOver:false,selfSeat:0},
+    youWin:true,
+    state:{
+      showLog:true,
+      opponentProfileName:'Bot A',
+      showScoreGuide:true,
+      home:{showIntro:true,showLeaderboard:true}
+    },
+    t:(key)=>key,
+    roomTopMetaTable:'<div id="meta"></div>',
+    seatHtml:'<div id="seats"></div>',
+    lastActions:new Map(),
+    selfTableEmoteHtml:'<div id="self-emote"></div>',
+    sideZoneHtml:'<aside id="side"></aside>',
+    gameTopbarHtml:'<header id="topbar"></header>',
+    gameActionZoneHtml:'<section id="action"></section>',
+    renderGameTable:({showWinCelebrate})=>`<section id="table">${showWinCelebrate?'<div class="win-celebrate"><div class="confetti-layer"></div></div>':''}</section>`,
+    renderGameShell:({gameTableHtml,opponentProfileModalHtml,scoreGuideModalHtml,introPanelHtml,leaderboardModalHtml,revealHtml,resultScreenHtml})=>`${gameTableHtml}${opponentProfileModalHtml}${scoreGuideModalHtml}${introPanelHtml}${leaderboardModalHtml}${revealHtml}${resultScreenHtml}`,
+    centerMovesHtml:()=>'<div id="center"></div>',
+    centerLastMovesHtml:()=>'<div id="last"></div>',
+    congratsOverlayHtml:()=>'<div id="congrats"></div>',
+    revealHtml:()=>'<div id="reveal"></div>',
+    resultScreenHtml:()=>'<div id="result"></div>',
+    opponentProfileModalHtml:(name)=>`<div id="profile">${name}</div>`,
+    scoreGuideModalHtml:()=>'<div id="score-guide"></div>',
+    introPanelHtml:()=>'<div id="intro"></div>',
+    leaderboardModalHtml:()=>'<div id="leaderboard"></div>'
+  });
+  assert.match(html,/confetti-canvas/);
+  assert.match(html,/id="profile">Bot A/);
+  assert.match(html,/id="score-guide"/);
+  assert.match(html,/id="intro"/);
+  assert.match(html,/id="leaderboard"/);
+  assert.match(html,/id="reveal"/);
+});
+
+test('buildResultScreenHtml renders winner row and room footer state', ()=>{
+  const html=buildResultScreenHtml({
+    v:{
+      selfSeat:0,
+      status:'won',
+      statusMeta:null,
+      history:[{action:'play',seat:0,cards:[{id:'c1'}]}],
+      revealedHands:{0:[],1:[{id:'c2'}]},
+      roundSummary:{deductions:[0,8],winnerGain:8,details:[{base:0,multiplier:1,deduction:0,anyTwo:false,topTwo:false,chaoMultiplier:1,chaoKey:''},{base:4,multiplier:2,deduction:8,anyTwo:true,topTwo:false,chaoMultiplier:1,chaoKey:''}]}
+    },
+    arr:[
+      {seat:0,count:0,cls:'south',name:'You',score:5008,isBot:false,picture:''},
+      {seat:1,count:1,cls:'west',name:'Bot A',score:4992,isBot:true,picture:''}
+    ],
+    state:{home:{mode:'room'},room:{data:{hostId:'uid:self',roundCount:2,status:'finished',players:[{uid:'uid:self',seat:0,picture:''},{uid:'guest:friend',seat:1,picture:''}]},lastResultPlayers:null}},
+    t:(key)=>key,
+    esc:(value)=>String(value),
+    roomIsHost:()=>true,
+    roomResultExpired:()=>false,
+    roomCountdownText:()=> '12s',
+    uiStatus:()=> 'Great round',
+    playerColorByViewClass:()=>'#123456',
+    calcPenaltyDetail:()=>({base:4,multiplier:2,deduction:8,anyTwo:true,topTwo:false,chaoMultiplier:1,chaoKey:''}),
+    renderStaticCard:(card)=>`<span>${card.id}</span>`,
+    authPictureUrl:()=> '',
+    authPictureUrlFrom:(value)=>`pic:${value}`,
+    avatarDataUri:(name)=>`avatar:${name}`
+  });
+  assert.match(html,/result-confetti-canvas/);
+  assert.match(html,/resultWinner/);
+  assert.match(html,/scoreGain \+8/);
+  assert.match(html,/scoreAnyTwo/);
+  assert.match(html,/roomCountdown/);
+  assert.match(html,/id="result-again"/);
+});
+
+test('buildCongratsOverlayHtml renders host waiting hint for room guest', ()=>{
+  const html=buildCongratsOverlayHtml({
+    v:{status:'won',statusMeta:null},
+    youWin:true,
+    state:{home:{mode:'room'},room:{data:{}}},
+    t:(key)=>key,
+    esc:(value)=>String(value),
+    roomIsHost:()=>false,
+    roomResultExpired:()=>false,
+    roomCountdownText:()=> '9s',
+    uiStatus:()=> 'Nice'
+  });
+  assert.match(html,/congrats-screen/);
+  assert.match(html,/roomWaitingHost/);
+  assert.match(html,/roomCountdown/);
 });

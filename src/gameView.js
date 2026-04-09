@@ -73,6 +73,50 @@ export function renderGameTable(params){
   return`<section class="table">${roomTopMetaTable}${seatHtml}<div class="table-center-stack">${mobileNamesHtml}${mobileDiscardHtml}${centerMovesHtml}${centerLastMovesHtml}</div>${showWinCelebrate?`<div class="win-celebrate"><div class="confetti-layer"></div><div class="win-banner">${t('congrats')}</div></div>`:''}</section>`;
 }
 
+export function renderSeatLastAction(action,{
+  t,
+  renderStaticCard,
+  fanNoise,
+  cardId,
+  sizeMultiplier=1
+}){
+  if(!action)return'';
+  if(action.type==='pass')return`<div class="seat-played seat-played-pass"><span class="seat-pass-label"><span class="seat-pass-icon" aria-hidden="true"></span><span class="seat-pass-text">${t('pass')}</span></span></div>`;
+  const ts=Number(action.ts)||0;
+  const list=action.cards??[];
+  const isFan=list.length===3||list.length===5;
+  const isFive=list.length===5;
+  const scale=Math.max(0.1,Number(sizeMultiplier)||1);
+  const sizeStyle=`width:calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * ${scale}) !important;height:calc(var(--discard-card-h, calc(var(--card-h) * var(--hand-card-scale) * var(--card-scale))) * ${scale}) !important;`;
+  const cards=list.map((card,index)=>{
+    if(isFan){
+      const mid=(list.length-1)/2;
+      const offset=index-mid;
+      const rot=offset*8;
+      const lift=Math.abs(offset)*3.2;
+      return renderStaticCard(card,true,'discard-card',`${sizeStyle}transform:rotate(${rot.toFixed(2)}deg) translateY(${lift.toFixed(2)}px);`);
+    }
+    const rot=((fanNoise(`${action.seat}|${ts}|${cardId(card)}`,index,'played')*2)-1)*8.84;
+    return renderStaticCard(card,true,'discard-card',`${sizeStyle}transform:rotate(${rot.toFixed(2)}deg);`);
+  }).join('');
+  return`<div class="seat-played${isFan?' seat-played-fan':''}${isFive?' seat-played-five':''}">${cards}</div>`;
+}
+
+export function renderCenterLastMoves(lastActions,selfSeat,{
+  seatCls,
+  renderSeatLastAction,
+  tablePlayScale=1
+}){
+  const slots=['north','west','east','south'];
+  return slots.map((cls)=>{
+    if(cls!=='south')return'';
+    const seat=(selfSeat+seatCls.indexOf(cls))%4;
+    const action=lastActions.get(seat);
+    if(!action)return'';
+    return`<div class="center-last center-last-${cls}">${renderSeatLastAction(action,tablePlayScale)}</div>`;
+  }).join('');
+}
+
 export function renderOpponentSeat(params){
   const {
     cls,

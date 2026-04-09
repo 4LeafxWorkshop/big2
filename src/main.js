@@ -1,13 +1,23 @@
 ﻿﻿﻿﻿﻿﻿﻿﻿import {createCalloutAudioController} from './calloutAudio.js';
+import {createCalloutStateController} from './calloutState.js';
 import {createCardUiHelpers} from './cardUi.js';
 import {createAvatarProfileHelpers} from './avatarProfile.js';
 import {createConfigEventsBinder} from './configEvents.js';
 import {createGameEventsBinder} from './gameEvents.js';
+import {
+  createDiscardSizeObserver,
+  createRoomTopMetaLayoutBinder,
+  positionRoomTopMeta as positionRoomTopMetaDom,
+  retargetCalloutTails as retargetCalloutTailsDom,
+  syncDiscardSizeFromHand as syncDiscardSizeFromHandDom,
+  syncHandStackMode as syncHandStackModeDom
+} from './gameLayout.js';
+import {runGamePostRender} from './gamePostRender.js';
 import {createHomeEventsBinder} from './homeEvents.js';
 import {renderConfigMarkup, renderHomeMarkup, renderOpponentCard, renderOpponentsMarkup} from './homeView.js';
 import {createLangMenuController} from './langMenu.js';
-import {renderGameActionZone, renderGameLogSheet, renderGameShell, renderGameSideZone, renderGameTable, renderGameTopbar, renderOpponentLabel, renderOpponentSeat, renderOpponentSeats, renderOpponentStationFlow} from './gameView.js';
-import {buildCalloutRenderState, buildGameAuxRenderState, buildOpponentSeatsHtml, buildSelfRenderState} from './gameRenderPrep.js';
+import {renderCenterLastMoves, renderGameActionZone, renderGameLogSheet, renderGameShell, renderGameSideZone, renderGameTable, renderGameTopbar, renderOpponentLabel, renderOpponentSeat, renderOpponentSeats, renderOpponentStationFlow, renderSeatLastAction} from './gameView.js';
+import {buildCalloutRenderState, buildCongratsOverlayHtml, buildGameAuxRenderState, buildGameShellMarkup, buildOpponentSeatsHtml, buildResultScreenHtml, buildRoomMetaTableHtml, buildSelfRenderState} from './gameRenderPrep.js';
 import {renderIntroPanel, renderLeaderboardModal, renderLeaderboardPanel, renderOpponentProfileModal, renderScoreGuideModal} from './modalViews.js';
 import {createOpponentProfileHelpers} from './opponentProfile.js';
 import {createOpponentsEventsBinder} from './opponentsEvents.js';
@@ -142,6 +152,8 @@ const I18N={
     close:'關閉',
     carouselPrev:'上一個',
     carouselNext:'下一個',
+    supportCoffee:'支持我們一杯咖啡',
+    supportCoffeeQr:'支持我們一杯咖啡 QR',
     roomEnterCodeHint:'輸入代碼即可加入。',
     roomCreateCallout:'歡近光臨😀',
     webTooSmall:'視窗太小（目前 {{w}} x {{h}}），請將瀏覽器放大至至少 {{minW}} x {{minH}} 後繼續。',
@@ -313,6 +325,7 @@ const I18N={
     roomJoin:'加入房間',
     roomEnter:'進入大堂',
     roomCode:'房號',
+    roomCodeExample:'ABC123',
     roomCopy:'複製代碼',
     roomReady:'準備好',
     roomNotReady:'未準備',
@@ -361,6 +374,7 @@ const I18N={
     roomActiveEmpty:'未有可加入房間。',
     roomActiveHidden:'隱藏',
     roomActiveRefresh:'更新列表',
+    secondsShort:'秒',
     roomStatusLabel:'房間狀態',
     roomStatusPlaying:'戰鬥中',
     roomWaitingReady:'等待玩家加入',
@@ -391,6 +405,8 @@ const I18N={
     close:'Close',
     carouselPrev:'Previous',
     carouselNext:'Next',
+    supportCoffee:'Buy Me a Coffee',
+    supportCoffeeQr:'Buy Me a Coffee QR',
     roomEnterCodeHint:'Enter room code to join.',
     roomCreateCallout:'Welcome😀',
     webTooSmall:'Window too small (current {{w}} x {{h}}). Please resize to at least {{minW}} x {{minH}}.',
@@ -562,6 +578,7 @@ const I18N={
     roomJoin:'Join Table',
     roomEnter:'Enter Lobby',
     roomCode:'Table Code',
+    roomCodeExample:'ABC123',
     roomCopy:'Copy Code',
     roomReady:'Ready',
     roomNotReady:'Not Ready',
@@ -610,6 +627,7 @@ const I18N={
     roomActiveEmpty:'No tables available.',
     roomActiveHidden:'Hidden',
     roomActiveRefresh:'Refresh',
+    secondsShort:'s',
     roomStatusLabel:'Room status',
     roomStatusPlaying:'In Game',
     roomWaitingReady:'Waiting for players to join',
@@ -639,6 +657,8 @@ const I18N={
     close:'Fermer',
     carouselPrev:'Précédent',
     carouselNext:'Suivant',
+    supportCoffee:'Offrez-nous un café',
+    supportCoffeeQr:'QR Offrez-nous un café',
     roomEnterCodeHint:'Entrez le code pour rejoindre.',
     roomCreateCallout:'Bienvenue😀',
     webTooSmall:'Fenêtre trop petite ({{w}} x {{h}}). Redimensionnez au moins {{minW}} x {{minH}}.',
@@ -810,6 +830,7 @@ const I18N={
     roomJoin:'Rejoindre une table',
     roomEnter:'Entrer dans le hall',
     roomCode:'Code de table',
+    roomCodeExample:'ABC123',
     roomCopy:'Copier le code',
     roomReady:'Prêt',
     roomNotReady:'Pas prêt',
@@ -858,6 +879,7 @@ const I18N={
     roomActiveEmpty:'Aucune table disponible.',
     roomActiveHidden:'Masquées',
     roomActiveRefresh:'Actualiser',
+    secondsShort:'s',
     roomStatusLabel:'Statut de la salle',
     roomStatusPlaying:'En jeu',
     roomWaitingReady:'En attente des joueurs',
@@ -887,6 +909,8 @@ const I18N={
     close:'Schließen',
     carouselPrev:'Zurück',
     carouselNext:'Weiter',
+    supportCoffee:'Kaffee spendieren',
+    supportCoffeeQr:'QR Kaffee spendieren',
     roomEnterCodeHint:'Raumcode eingeben, um beizutreten.',
     roomCreateCallout:'Willkommen😀',
     webTooSmall:'Fenster zu klein ({{w}} x {{h}}). Bitte auf mindestens {{minW}} x {{minH}} vergrößern.',
@@ -1058,6 +1082,7 @@ const I18N={
     roomJoin:'Tisch beitreten',
     roomEnter:'Lobby betreten',
     roomCode:'Tisch‑Code',
+    roomCodeExample:'ABC123',
     roomCopy:'Code kopieren',
     roomReady:'Bereit',
     roomNotReady:'Nicht bereit',
@@ -1106,6 +1131,7 @@ const I18N={
     roomActiveEmpty:'Keine Tische verfügbar.',
     roomActiveHidden:'Versteckt',
     roomActiveRefresh:'Aktualisieren',
+    secondsShort:'s',
     roomStatusLabel:'Raumstatus',
     roomStatusPlaying:'Im Spiel',
     roomWaitingReady:'Warte auf Spieler',
@@ -1135,6 +1161,8 @@ const I18N={
     close:'Cerrar',
     carouselPrev:'Anterior',
     carouselNext:'Siguiente',
+    supportCoffee:'Invítanos un café',
+    supportCoffeeQr:'QR Invítanos un café',
     roomEnterCodeHint:'Ingresa el código para unirte.',
     roomCreateCallout:'Bienvenido😀',
     webTooSmall:'Ventana demasiado pequeña ({{w}} x {{h}}). Redimensiona al menos a {{minW}} x {{minH}}.',
@@ -1306,6 +1334,7 @@ const I18N={
     roomJoin:'Unirse a mesa',
     roomEnter:'Entrar al lobby',
     roomCode:'Código de mesa',
+    roomCodeExample:'ABC123',
     roomCopy:'Copiar código',
     roomReady:'Listo',
     roomNotReady:'No listo',
@@ -1354,6 +1383,7 @@ const I18N={
     roomActiveEmpty:'No hay mesas.',
     roomActiveHidden:'Ocultas',
     roomActiveRefresh:'Actualizar',
+    secondsShort:'s',
     roomStatusLabel:'Estado de sala',
     roomStatusPlaying:'En juego',
     roomWaitingReady:'Esperando jugadores',
@@ -1384,6 +1414,8 @@ const I18N={
     close:'閉じる',
     carouselPrev:'前へ',
     carouselNext:'次へ',
+    supportCoffee:'コーヒーで応援',
+    supportCoffeeQr:'コーヒーで応援 QR',
     roomEnterCodeHint:'コードを入力して参加。',
     roomCreateCallout:'ようこそ😀',
     webTooSmall:'ウィンドウが小さすぎます（現在 {{w}} x {{h}}）。少なくとも {{minW}} x {{minH}} に拡大してください。',
@@ -1555,6 +1587,7 @@ const I18N={
     roomJoin:'テーブル参加',
     roomEnter:'ロビーに入る',
     roomCode:'テーブルコード',
+    roomCodeExample:'ABC123',
     roomCopy:'コードをコピー',
     roomReady:'準備完了',
     roomNotReady:'未準備',
@@ -1603,6 +1636,7 @@ const I18N={
     roomActiveEmpty:'参加可能なテーブルはありません。',
     roomActiveHidden:'非表示',
     roomActiveRefresh:'更新',
+    secondsShort:'秒',
     roomStatusLabel:'ルーム状態',
     roomStatusPlaying:'プレイ中',
     roomWaitingReady:'参加者待ち',
@@ -1775,7 +1809,8 @@ const {
   isMobilePointer:(...args)=>isMobilePointer(...args),
   cardId:(...args)=>cardId(...args),
   backAssetFile:(...args)=>backAssetFile(...args),
-  getBackColor:()=>state.home.backColor
+  getBackColor:()=>state.home.backColor,
+  getCardBackAlt:()=>t('cardBack')
 });
 const GOOGLE_SESSION_KEY='hkbig2.google.session.v1';
 const ENV_PASSCODE='4Leaf';
@@ -3163,7 +3198,7 @@ function legalMiniCopy(){
           :ja
             ?'このゲームが気に入ったら、クリックまたはスキャンでコーヒー支援をお願いします。'
             :'Enjoying the game? Click or scan to support us with a coffee so we can keep improving it.';
-  const supportHtml=`<div class="bmac-cta"><div class="bmac-msg">${esc(supportText)}</div><div class="bmac-row"><a href="https://www.buymeacoffee.com/4leafx" target="_blank" rel="noopener noreferrer"><img class="bmac-button" src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee"></a><img class="bmac-qr" src="${withBase('bmac-qr.png')}" alt="Buy Me A Coffee QR"></div></div>`;
+  const supportHtml=`<div class="bmac-cta"><div class="bmac-msg">${esc(supportText)}</div><div class="bmac-row"><a href="https://www.buymeacoffee.com/4leafx" target="_blank" rel="noopener noreferrer"><img class="bmac-button" src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="${esc(t('supportCoffee'))}"></a><img class="bmac-qr" src="${withBase('bmac-qr.png')}" alt="${esc(t('supportCoffeeQr'))}"></div></div>`;
   const contactHtml=zh
     ?'如有查詢，請電郵至 <a href="mailto:4LeafxCS@gmail.com">4LeafxCS@gmail.com</a>。'
     :fr
@@ -3229,7 +3264,7 @@ function legalMiniCopy(){
   }
   function mainPageLegalMiniHtml(){
     const legal=legalMiniCopy();
-    return`<section class="legal-mini" id="legal-mini"><div class="legal-mini-links"><button type="button" class="legal-mini-link" data-legal="privacy">${legal.labels.privacy}</button><span class="legal-mini-sep">◦</span><button type="button" class="legal-mini-link" data-legal="about">${legal.labels.about}</button><span class="legal-mini-sep">◦</span><button type="button" class="legal-mini-link" data-legal="contact">${legal.labels.contact}</button><span class="legal-mini-sep">◦</span><button type="button" class="legal-mini-link" data-legal="terms">${legal.labels.terms}</button></div><div class="intro-modal legal-modal" id="legal-modal"><button class="intro-backdrop" id="legal-backdrop" aria-label="close"></button><section class="intro-sheet legal-sheet"><header class="intro-head"><div><h3 id="legal-modal-title"></h3></div><button id="legal-close" class="secondary">${legal.closeLabel}</button></header><div class="legal-modal-body" id="legal-modal-body"></div></section></div></section>`;
+    return`<section class="legal-mini" id="legal-mini"><div class="legal-mini-links"><button type="button" class="legal-mini-link" data-legal="privacy">${legal.labels.privacy}</button><span class="legal-mini-sep">◦</span><button type="button" class="legal-mini-link" data-legal="about">${legal.labels.about}</button><span class="legal-mini-sep">◦</span><button type="button" class="legal-mini-link" data-legal="contact">${legal.labels.contact}</button><span class="legal-mini-sep">◦</span><button type="button" class="legal-mini-link" data-legal="terms">${legal.labels.terms}</button></div><div class="intro-modal legal-modal" id="legal-modal"><button class="intro-backdrop" id="legal-backdrop" aria-label="${legal.closeLabel}"></button><section class="intro-sheet legal-sheet"><header class="intro-head"><div><h3 id="legal-modal-title"></h3></div><button id="legal-close" class="secondary">${legal.closeLabel}</button></header><div class="legal-modal-body" id="legal-modal-body"></div></section></div></section>`;
   }
 const introText=()=>{
   if(state.language==='en'){
@@ -7269,368 +7304,53 @@ function lastActionBySeat(h){
   return out;
 }
 const TABLE_PLAY_SCALE=1;
-
-function seatLastActionHtml(action,sizeMultiplier=1){
-  if(!action)return'';
-  if(action.type==='pass')return`<div class="seat-played seat-played-pass"><span class="seat-pass-label"><span class="seat-pass-icon" aria-hidden="true"></span><span class="seat-pass-text">${t('pass')}</span></span></div>`;
-  const ts=Number(action.ts)||0;
-  const list=action.cards??[];
-  const isFan=list.length===3||list.length===5;
-  const isFive=list.length===5;
-  const scale=Math.max(.1,Number(sizeMultiplier)||1);
-  const sizeStyle=`width:calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * ${scale}) !important;height:calc(var(--discard-card-h, calc(var(--card-h) * var(--hand-card-scale) * var(--card-scale))) * ${scale}) !important;`;
-  const cards=list.map((c,i)=>{
-    if(isFan){
-      const mid=(list.length-1)/2;
-      const offset=i-mid;
-      const rot=offset*8;
-      const lift=Math.abs(offset)*3.2;
-      return renderStaticCard(c,true,'discard-card',`${sizeStyle}transform:rotate(${rot.toFixed(2)}deg) translateY(${lift.toFixed(2)}px);`);
-    }
-    const rot=((fanNoise(`${action.seat}|${ts}|${cardId(c)}`,i,'played')*2)-1)*8.84;
-    return renderStaticCard(c,true,'discard-card',`${sizeStyle}transform:rotate(${rot.toFixed(2)}deg);`);
-  }).join('');
-  return`<div class="seat-played${isFan?' seat-played-fan':''}${isFive?' seat-played-five':''}">${cards}</div>`;
-}
-function centerLastMovesHtml(lastActions,selfSeat){
-  const slots=['north','west','east','south'];
-  return slots.map((cls)=>{
-    if(cls!=='south')return'';
-    const seat=(selfSeat+seatCls.indexOf(cls))%4;
-    const action=lastActions.get(seat);
-    if(!action)return'';
-    return`<div class="center-last center-last-${cls}">${seatLastActionHtml(action,TABLE_PLAY_SCALE)}</div>`;
-  }).join('');
-}
-function seatGenderBySeat(v,seat){
-  const fromParticipants=v?.participants?.find?.((p)=>p.seat===seat)?.gender;
-  if(fromParticipants==='female'||fromParticipants==='male')return fromParticipants;
-  const fromSolo=state?.solo?.players?.[seat]?.gender;
-  if(fromSolo==='female'||fromSolo==='male')return fromSolo;
-  return'male';
-}
-function currentMust3Call(v){
-  if(v?.gameOver)return null;
-  if(!must3CallState.until)return null;
-  const now=Date.now();
-  if(now<=must3CallState.until)return{seat:must3CallState.seat,text:must3CallState.text};
-  must3CallState.key='';
-  must3CallState.text='';
-  must3CallState.until=0;
-  must3CallState.startedAt=0;
-  must3CallState.nonce='';
-  return null;
-}
-function currentLastCardSeat(v){
-  const now=Date.now();
-  const history=v.history??[];
-  if(v.isFirstTrick&&history.length===0){
-    lastCardAnnouncedSeats.clear();
-    lastCardCallState.key='';
-    lastCardCallState.text='';
-    lastCardCallState.until=0;
-    lastCardCallState.startedAt=0;
-    lastCardCallState.nonce='';
-    lastCardCallState.historyLen=0;
-    lastCardProcessedHistoryLen=0;
-    return null;
-  }
-  if(lastCardCallState.historyLen>0&&history.length===lastCardCallState.historyLen&&lastCardCallState.text){
-    if(now<=lastCardCallState.until)return lastCardCallState.seat;
-    lastCardCallState.text='';
-    lastCardCallState.until=0;
-    lastCardCallState.startedAt=0;
-    lastCardCallState.nonce='';
-    lastCardCallState.historyLen=0;
-    return null;
-  }
-  if(v.gameOver)return null;
-  if(history.length<=lastCardProcessedHistoryLen)return null;
-  const latest=history[history.length-1];
-  lastCardProcessedHistoryLen=history.length;
-  if(!latest||latest.action!=='play')return null;
-  const target=v.participants.find((p)=>p.seat===latest.seat);
-  if(!target||target.count!==1)return null;
-  if(lastCardAnnouncedSeats.has(latest.seat))return null;
-  const key=`${latest.seat}-${latest.cards?.map(cardId).join(',')||''}-${v.history.length}`;
-  if(lastCardCallState.key===key&&now<lastCardCallState.until)return lastCardCallState.seat;
-  lastCardAnnouncedSeats.add(latest.seat);
-  lastCardCallState.key=key;
-  lastCardCallState.seat=latest.seat;
-  lastCardCallState.text=buildResponseCalloutText('last','',key);
-  lastCardCallState.until=now+1500;
-  lastCardCallState.startedAt=now;
-  lastCardCallState.nonce=newCalloutNonce();
-  lastCardCallState.historyLen=history.length;
-  scheduleCalloutExpiry(lastCardCallState.until);
-  lockTurnProgress(900);
-  clearCalloutStates('last');
-  playSound('last');
-  speakCallout(lastCardCallState.text||t('lastCardCall'),seatGenderBySeat(v,latest.seat),{clipKey:'last',seat:latest.seat});
-  return latest.seat;
-}
+const seatLastActionHtml=(action,sizeMultiplier=1)=>renderSeatLastAction(action,{
+  t,
+  renderStaticCard,
+  fanNoise,
+  cardId,
+  sizeMultiplier
+});
+const centerLastMovesHtml=(lastActions,selfSeat)=>renderCenterLastMoves(lastActions,selfSeat,{
+  seatCls,
+  renderSeatLastAction:(action,sizeMultiplier)=>seatLastActionHtml(action,sizeMultiplier),
+  tablePlayScale:TABLE_PLAY_SCALE
+});
+const revealHtml=()=>'';
+const resultScreenHtml=(v,arr)=>buildResultScreenHtml({
+  v,
+  arr,
+  state,
+  t,
+  esc,
+  roomIsHost,
+  roomResultExpired,
+  roomCountdownText,
+  uiStatus,
+  playerColorByViewClass,
+  calcPenaltyDetail,
+  renderStaticCard,
+  authPictureUrl,
+  authPictureUrlFrom,
+  avatarDataUri
+});
+const congratsOverlayHtml=(v,youWin)=>buildCongratsOverlayHtml({
+  v,
+  youWin,
+  state,
+  t,
+  esc,
+  roomIsHost,
+  roomResultExpired,
+  roomCountdownText,
+  uiStatus
+});
 function setRecommendHint(msg=''){
   state.recommendHint=msg;
   if(recommendHintTimer){clearTimeout(recommendHintTimer);recommendHintTimer=null;}
   if(msg){
     recommendHintTimer=window.setTimeout(()=>{recommendHintTimer=null;state.recommendHint='';render();},2200);
   }
-}
-function pickPlayCalloutVariant(lastPlay,hist,playIdx,isRoundLead){
-  if(isRoundLead)return 0;
-  const currentEval=evaluatePlay(Array.isArray(lastPlay?.cards)?lastPlay.cards:[]);
-  if(!currentEval?.valid)return 1;
-  let prevPlay=null;
-  for(let i=playIdx-1;i>=0;i-=1){
-    const e=hist[i];
-    if(e?.action==='play'&&Array.isArray(e.cards)&&e.cards.length){
-      prevPlay=e;
-      break;
-    }
-  }
-  if(!prevPlay)return 1;
-  const prevEval=evaluatePlay(prevPlay.cards);
-  if(!prevEval?.valid)return 1;
-  const samePattern=currentEval.count===prevEval.count&&currentEval.kind===prevEval.kind;
-  if(samePattern){
-    const topNow=Number(currentEval.power?.[currentEval.power.length-1]??0);
-    const topPrev=Number(prevEval.power?.[prevEval.power.length-1]??0);
-    const topGap=Math.abs(topNow-topPrev);
-    if(topGap<=1)return 3; // `${kind}，大你少少😏`
-    if(topGap>=4)return 4; // `${kind}，大過你😏`
-    return 1; // `跟！${kind}`
-  }
-  if(currentEval.count===5&&prevEval.count===5){
-    const nowKind=Number(FIVE_KIND_POWER[currentEval.kind]??0);
-    const prevKind=Number(FIVE_KIND_POWER[prevEval.kind]??0);
-    if(nowKind>prevKind)return 4; // stronger class overtake
-  }
-  return 2; // `${kind}，頂住。`
-}
-function currentPlayTypeCall(v){
-  if(v.gameOver)return'';
-  if(playTypeCallState.historyLen>0&&v.history.length>playTypeCallState.historyLen){
-    playTypeCallState.until=0;
-    playTypeCallState.startedAt=0;
-    playTypeCallState.nonce='';
-    playTypeCallState.historyLen=0;
-  }
-  const lastPlay=(v.history??[]).slice().reverse().find((e)=>e.action==='play'&&Array.isArray(e.cards)&&e.cards.length>=4);
-  if(!lastPlay)return null;
-  const hist=v.history??[];
-  const playIdx=hist.lastIndexOf(lastPlay);
-  const isRoundLead=(()=>{
-    if(playIdx<=0)return true;
-    let passStreak=0;
-    for(let i=playIdx-1;i>=0;i--){
-      const e=hist[i];
-      if(e?.action==='pass'){
-        passStreak+=1;
-        continue;
-      }
-      if(e?.action==='play')return passStreak>=3;
-    }
-    return true;
-  })();
-  const key=`${lastPlay.seat}-${lastPlay.kind}-${lastPlay.cards.map(cardId).join(',')}`;
-  const now=Date.now();
-  if(playTypeCallState.key!==key){
-    const playVariantIndex=pickPlayCalloutVariant(lastPlay,hist,playIdx,isRoundLead);
-    playTypeCallState.key=key;
-    playTypeCallState.seat=lastPlay.seat;
-    playTypeCallState.text=buildResponseCalloutText('play',lastPlay.kind,key,{isRoundLead,playVariantIndex});
-    playTypeCallState.until=now+1500;
-    playTypeCallState.startedAt=now;
-    playTypeCallState.nonce=newCalloutNonce();
-    playTypeCallState.historyLen=v.history.length;
-    scheduleCalloutExpiry(playTypeCallState.until);
-    lockTurnProgress(900);
-    clearCalloutStates('play');
-    speakCallout(playTypeCallState.text,seatGenderBySeat(v,lastPlay.seat),{clipKey:`kind-${String(lastPlay.kind||'').toLowerCase()}`,seat:lastPlay.seat});
-  }
-  if(playTypeCallState.historyLen>0&&v.history.length===playTypeCallState.historyLen){
-    if(now<=playTypeCallState.until)return{seat:playTypeCallState.seat,text:playTypeCallState.text};
-    playTypeCallState.until=0;
-    playTypeCallState.startedAt=0;
-    playTypeCallState.nonce='';
-    playTypeCallState.historyLen=0;
-    return null;
-  }
-  if(now>playTypeCallState.until)return null;
-  return{seat:playTypeCallState.seat,text:playTypeCallState.text};
-}
-function currentPassCall(v){
-  if(v.gameOver)return null;
-  const history=v.history??[];
-  if(!history.length){
-    passCallState.key='';
-    passCallState.until=0;
-    passCallState.startedAt=0;
-    passCallState.nonce='';
-    passCallState.historyLen=0;
-    return null;
-  }
-  if(passCallState.historyLen>0&&history.length>passCallState.historyLen){
-    passCallState.until=0;
-    passCallState.startedAt=0;
-    passCallState.nonce='';
-    passCallState.historyLen=0;
-  }
-  const latest=history[history.length-1];
-  if(!latest||latest.action!=='pass'){
-    if(passCallState.historyLen>0&&history.length===passCallState.historyLen){
-      const now=Date.now();
-      if(now<=passCallState.until)return{seat:passCallState.seat,text:passCallState.text};
-      passCallState.until=0;
-      passCallState.startedAt=0;
-      passCallState.nonce='';
-      passCallState.historyLen=0;
-      return null;
-    }
-    if(Date.now()>passCallState.until)return null;
-    return{seat:passCallState.seat,text:passCallState.text};
-  }
-  const key=`pass-${history.length}-${latest.seat}`;
-  const now=Date.now();
-  if(passCallState.key!==key){
-    passCallState.key=key;
-    passCallState.seat=latest.seat;
-    passCallState.text=buildResponseCalloutText('pass','',key);
-    passCallState.until=now+1400;
-    passCallState.startedAt=now;
-    passCallState.nonce=newCalloutNonce();
-    passCallState.historyLen=history.length;
-    scheduleCalloutExpiry(passCallState.until);
-    lockTurnProgress(850);
-    clearCalloutStates('pass');
-    speakCallout(passCallState.text,seatGenderBySeat(v,latest.seat),{clipKey:'pass',seat:latest.seat});
-  }
-  if(passCallState.historyLen>0&&history.length===passCallState.historyLen){
-    if(now<=passCallState.until)return{seat:passCallState.seat,text:passCallState.text};
-    passCallState.until=0;
-    passCallState.startedAt=0;
-    passCallState.nonce='';
-    passCallState.historyLen=0;
-    return null;
-  }
-  if(now>passCallState.until)return null;
-  return{seat:passCallState.seat,text:passCallState.text};
-}
-function revealHtml(){return'';}
-function resultScreenHtml(v,arr){
-  const isRoom=state.home.mode==='room';
-  const isHost=isRoom&&roomIsHost();
-  const roomExpired=isRoom&&roomResultExpired(state.room.data);
-  const roomCountdown=isRoom&&state.room.data?roomCountdownText(state.room.data):'';
-  const roomHumanCount=isRoom&&state.room.data
-    ?(Array.isArray(state.room.data.players)?state.room.data.players.filter((p)=>String(p.uid||'').startsWith('uid:')||String(p.uid||'').startsWith('guest:')).length:0)
-    :0;
-  const needsPlayers=isRoom&&roomHumanCount<2;
-  const canRoomAgain=isRoom&&!needsPlayers&&isHost&&!roomExpired;
-  const statusHint=uiStatus(v.status,v.statusMeta);
-  const footerHint=roomExpired
-    ?t('roomHostSneakAway')
-    :needsPlayers
-      ?t('roomNeedPlayers')
-      :(!canRoomAgain&&isRoom?t('roomWaitingHost'):'');
-  const topHint=footerHint&&statusHint===footerHint?'':statusHint;
-  const roomPictureBySeat=(()=>{
-    const list=isRoom&&state.room.data?Array.isArray(state.room.data.players)?state.room.data.players:[]:[];
-    const entries=list.map((p)=>[Number.isFinite(Number(p?.seat))?Number(p.seat):-1,String(p?.picture||'').trim()]);
-    return new Map(entries.filter((entry)=>entry[0]!==-1&&entry[1]));
-  })();
-  const hostSeat=(()=>{
-    if(!isRoom||!state.room.data)return null;
-    const hostId=String(state.room.data.hostId||'').trim();
-    if(!hostId)return null;
-    const players=Array.isArray(state.room.data.players)?state.room.data.players:[];
-    const host=players.find((p)=>String(p?.uid||'')===hostId);
-    const seat=Number(host?.seat);
-    return Number.isFinite(seat)?seat:null;
-  })();
-  const resultSnapshot=Array.isArray(state.room.lastResultPlayers)?state.room.lastResultPlayers:null;
-  const snapshotBySeat=resultSnapshot?new Map(resultSnapshot.map((p)=>[Number.isFinite(Number(p?.seat))?Number(p.seat):-1,p])):null;
-  const winner=arr.find((p)=>p.count===0)??arr[0];
-  const winnerLastPlay=(v.history??[]).slice().reverse().find((e)=>e.action==='play'&&e.seat===winner.seat&&Array.isArray(e.cards)&&e.cards.length);
-  const winnerLastDiscardCards=winnerLastPlay?.cards??[];
-  const selfSeatNum=Number.isFinite(Number(v.selfSeat))?Number(v.selfSeat):null;
-  const showConfetti=selfSeatNum!==null&&winner.seat===selfSeatNum;
-  const deductions=v.roundSummary?.deductions??arr.map((p)=>p.seat===winner.seat?0:calcPenaltyDetail(v.revealedHands?.[p.seat]??[]).deduction);
-  const winnerGain=Number(v.roundSummary?.winnerGain??deductions.reduce((sum,vv)=>sum+vv,0));
-  const detailBySeat=v.roundSummary?.details??arr.map((p)=>p.seat===winner.seat?{remain:0,base:0,multiplier:1,deduction:0,anyTwo:false,topTwo:false,chaoMultiplier:1,chaoKey:''}:calcPenaltyDetail(v.revealedHands?.[p.seat]??[]));
-  const rows=arr.map((p)=>{
-    const isWinner=p.seat===winner.seat;
-    const isSelf=p.seat===v.selfSeat;
-    const color=playerColorByViewClass(p.cls);
-    const isHostSeat=hostSeat!==null&&hostSeat===p.seat;
-    const hostBadgeHtml=isHostSeat?`<span class="lobby-seat-host-badge">🚩</span>`:'';
-    const snapshot=snapshotBySeat?snapshotBySeat.get(p.seat)||null:null;
-    const snapName=String(snapshot?.name||p.name||'');
-    const snapGender=String(snapshot?.gender||p.gender||'male')==='female'?'female':'male';
-    const snapPicture=String(snapshot?.picture||'').trim();
-    const remain=(v.revealedHands?.[p.seat]??[]);
-    const detail=detailBySeat[p.seat]??{remain:remain.length,base:0,multiplier:1,deduction:Number(deductions[p.seat])||0,anyTwo:false,topTwo:false,chaoMultiplier:1,chaoKey:''};
-    const delta=isWinner?winnerGain:-(Number(deductions[p.seat])||0);
-    const total=p.score??0;
-    const remainCards=remain.length?remain.map((c)=>renderStaticCard(c,true)).join(''):`<span class="hint">-</span>`;
-    const mulTags=[
-      detail.anyTwo?`<span class="result-score-chip boosted">${t('scoreAnyTwo')} x2</span>`:'',
-      detail.topTwo?`<span class="result-score-chip boosted">${t('scoreTopTwo')} x2</span>`:'',
-      detail.chaoMultiplier>1&&detail.chaoKey?`<span class="result-score-chip boosted">${t(detail.chaoKey)} x${detail.chaoMultiplier}</span>`:''
-    ].filter(Boolean).join('');
-    const detailLine=isWinner
-      ?`<div class="result-score-detail">${t('resultDetail')}: ${t('scoreGain')} +${winnerGain}</div>`
-      :`<div class="result-score-detail">${t('resultDetail')}: ${t('scoreBase')} ${detail.base} x ${detail.multiplier} · ${t('scoreDeduct')} ${detail.deduction}${mulTags?` · ${t('scorePenaltyBoost')}: ${mulTags}`:''}</div>`;
-    const selfPic=isSelf?authPictureUrl():'';
-    const fallbackPicture=snapPicture||roomPictureBySeat.get(p.seat)||String(p.picture||'').trim();
-    const avatarSrc=(selfPic||fallbackPicture)
-      ?authPictureUrlFrom(selfPic||fallbackPicture)
-      :avatarDataUri(snapName,color,snapGender,Boolean(p.isBot));
-    const botNameAttr=p.isBot?` data-bot-name="${esc(p.name)}"`:'';
-    const winnerLastDiscardHtml=isWinner
-      ?`<div class="result-card-block"><div class="result-block-title">${t('resultLastDiscard')}</div><div class="result-cards" aria-label="${t('resultLastDiscard')}">${winnerLastDiscardCards.length?winnerLastDiscardCards.map((c)=>renderStaticCard(c,true)).join(''):`<span class="hint">-</span>`}</div></div>`
-      :'';
-    const remainBlockHtml=!isWinner
-      ?`<div class="result-card-block"><div class="result-block-title">${t('resultRemain')}</div><div class="result-cards" aria-label="${t('resultRemain')}">${remainCards}</div></div>`
-      :'';
-    const rightColHtml=`<div class="result-side">${winnerLastDiscardHtml}${remainBlockHtml}</div>`;
-    return`<div class="result-row ${isWinner?'winner':''}" style="--winner-color:${color};">
-      <div class="result-main">
-        <div class="result-head"><span class="player-color-chip" style="--player-color:${color};"></span><span class="result-avatar-wrap" style="--avatar-seat-color:${color};"><img class="result-avatar" src="${avatarSrc}" alt="${esc(p.name)}"${botNameAttr}/>${hostBadgeHtml}</span><span class="result-player-name"><strong>${esc(p.name)}</strong>${isWinner?`<span class="result-winner-medal" aria-hidden="true">🏅</span>`:''}</span>${isWinner?`<span class="result-winner-tag">${t('resultWinner')}</span>`:''}</div>
-        <div class="result-meta">${t('resultDelta')}: ${delta>=0?`+${delta}`:`${delta}`} · ${t('score')}: ${total}</div>
-        ${detailLine}
-      </div>
-      ${rightColHtml}
-    </div>`;
-  }).join('');
-  return`<section class="result-screen">
-    ${showConfetti?`<canvas class="confetti-canvas result-confetti-canvas" data-confetti="result" aria-hidden="true"></canvas>`:''}
-    <div class="result-card">
-      <h2 class="title-with-icon"><span class="title-icon title-icon-result" aria-hidden="true"></span><span>${t('resultTitle')}</span></h2>
-      ${topHint?`<div class="hint">${esc(topHint)}</div>`:''}
-      ${isRoom?`<div class="room-expiry-row"><span>${t('roomCountdown')}</span><button type="button" class="room-expiry-reset-btn" data-room-expiry-reset="1"><strong data-room-countdown-value>${esc(roomCountdown)}</strong></button></div>`:''}
-      <div class="result-list">${rows}</div>
-      <div class="control-row">
-        <button id="result-home" class="secondary">${isRoom?t('roomLeave'):t('home')}</button>
-        ${(!isRoom||canRoomAgain)
-    ?`<button id="result-again" class="primary" ${canRoomAgain||!isRoom?'':'disabled'}>${t('again')}</button>`
-    :(!isRoom?'':
-      footerHint?``:`<span class="hint">${t('roomWaitingHost')}</span>`)}
-        ${footerHint?`<span class="hint">${footerHint}</span>`:''}
-      </div>
-    </div>
-  </section>`;
-}
-function congratsOverlayHtml(v,youWin){
-  if(!youWin)return'';
-  const isRoom=state.home.mode==='room';
-  const isHost=isRoom&&roomIsHost();
-  const roomExpired=isRoom&&roomResultExpired(state.room.data);
-  const roomCountdown=isRoom&&state.room.data?roomCountdownText(state.room.data):'';
-  const againHtml=(!isRoom||(isHost&&!roomExpired))
-    ?`<button id="congrats-again" class="primary">${t('again')}</button>`
-    :`<span class="hint">${roomExpired?t('roomHostSneakAway'):t('roomWaitingHost')}</span>`;
-  return`<div class="congrats-screen"><div class="congrats-card"><h3 class="title-with-icon"><span class="title-icon title-icon-congrats" aria-hidden="true"></span><span>${t('congrats')}</span></h3><div class="hint">${esc(uiStatus(v.status,v.statusMeta))}</div>${isRoom?`<div class="room-expiry-row"><span>${t('roomCountdown')}</span><button type="button" class="room-expiry-reset-btn" data-room-expiry-reset="1"><strong data-room-countdown-value>${esc(roomCountdown)}</strong></button></div>`:''}<div class="control-row"><button id="congrats-home" class="secondary">${t('home')}</button>${againHtml}</div></div></div>`;
 }
 
 function markComboActive(comboId,value){
@@ -7647,6 +7367,36 @@ function closeLangMenu(){
 function bindLangMenu(root,{reloadGoogle=false}={}){
   langMenuController.bindLangMenu(root,{reloadGoogle});
 }
+const {
+  currentMust3Call,
+  currentLastCardSeat,
+  currentPlayTypeCall,
+  currentPassCall
+}=createCalloutStateController({
+  getSoloPlayers:()=>state?.solo?.players,
+  stateRefs:{
+    playTypeCallState,
+    passCallState,
+    lastCardCallState,
+    must3CallState,
+    lastCardAnnouncedSeats,
+    lastCardProcessedHistoryLenRef:{
+      get:()=>lastCardProcessedHistoryLen,
+      set:(value)=>{lastCardProcessedHistoryLen=value;}
+    }
+  },
+  cardId,
+  evaluatePlay,
+  fiveKindPower:FIVE_KIND_POWER,
+  buildResponseCalloutText,
+  newCalloutNonce,
+  scheduleCalloutExpiry,
+  lockTurnProgress,
+  clearCalloutStates,
+  playSound,
+  speakCallout,
+  t
+});
 const bindGameEvents=createGameEventsBinder({
   state,
   app,
@@ -7702,10 +7452,10 @@ function renderBackCarouselItems(){
   return `${items}${items}${items}`;
 }
 function renderBackCarousel(comboId){
-  return `<div class="cardback-carousel" data-carousel="${comboId}"><button class="carousel-btn prev" type="button" data-carousel-dir="prev" aria-label="${state.language==='zh-HK'?'上一個':'Previous'}">‹</button><div class="option-combo cardback-combo cardback-track" id="${comboId}" data-carousel-track="1"><div class="cardback-rail">${renderBackCarouselItems()}</div></div><button class="carousel-btn next" type="button" data-carousel-dir="next" aria-label="${state.language==='zh-HK'?'下一個':'Next'}">›</button></div>`;
+  return `<div class="cardback-carousel" data-carousel="${comboId}"><button class="carousel-btn prev" type="button" data-carousel-dir="prev" aria-label="${t('carouselPrev')}">‹</button><div class="option-combo cardback-combo cardback-track" id="${comboId}" data-carousel-track="1"><div class="cardback-rail">${renderBackCarouselItems()}</div></div><button class="carousel-btn next" type="button" data-carousel-dir="next" aria-label="${t('carouselNext')}">›</button></div>`;
 }
-let roomTopMetaLayoutBound=false;
-let discardSizeObserver=null;
+const bindRoomTopMetaLayoutDom=createRoomTopMetaLayoutBinder();
+const discardSizeObserverDom=createDiscardSizeObserver();
 let homeCardbackZoomCleanup=null;
 function clearHomeCardbackZoom(){
   if(typeof homeCardbackZoomCleanup==='function'){
@@ -7726,13 +7476,13 @@ function showHomeCardbackZoom(previewEl,options={}){
   const ghost=document.createElement('img');
   ghost.className='cardback-zoom-ghost';
   ghost.src=src;
-  ghost.alt=previewEl.getAttribute('alt')||'back';
+  ghost.alt=previewEl.getAttribute('alt')||t('cardBack');
   ghost.decoding='async';
   const backdrop=document.createElement('div');
   backdrop.className='cardback-zoom-backdrop';
   const controls=document.createElement('div');
   controls.className='cardback-zoom-controls';
-  controls.innerHTML=`<button class="cardback-zoom-nav prev" type="button" aria-label="${state.language==='zh-HK'?'上一款':'Previous'}"><svg class="cardback-zoom-nav-icon" viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M14.7 5.3a1 1 0 0 1 0 1.4L9.4 12l5.3 5.3a1 1 0 1 1-1.4 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.4 0Z"/></svg></button><button class="cardback-zoom-nav next" type="button" aria-label="${state.language==='zh-HK'?'下一款':'Next'}"><svg class="cardback-zoom-nav-icon" viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M9.3 18.7a1 1 0 0 1 0-1.4l5.3-5.3-5.3-5.3a1 1 0 1 1 1.4-1.4l6 6a1 1 0 0 1 0 1.4l-6 6a1 1 0 0 1-1.4 0Z"/></svg></button>`;
+  controls.innerHTML=`<button class="cardback-zoom-nav prev" type="button" aria-label="${t('carouselPrev')}"><svg class="cardback-zoom-nav-icon" viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M14.7 5.3a1 1 0 0 1 0 1.4L9.4 12l5.3 5.3a1 1 0 1 1-1.4 1.4l-6-6a1 1 0 0 1 0-1.4l6-6a1 1 0 0 1 1.4 0Z"/></svg></button><button class="cardback-zoom-nav next" type="button" aria-label="${t('carouselNext')}"><svg class="cardback-zoom-nav-icon" viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M9.3 18.7a1 1 0 0 1 0-1.4l5.3-5.3-5.3-5.3a1 1 0 1 1 1.4-1.4l6 6a1 1 0 0 1 0 1.4l-6 6a1 1 0 0 1-1.4 0Z"/></svg></button>`;
   const zoomMultiplier=Math.max(1,Number(options.zoomMultiplier)||1);
   const desiredW=Math.round(rect.width*zoomMultiplier);
   const desiredH=Math.round(rect.height*zoomMultiplier);
@@ -7833,52 +7583,16 @@ function showHomeCardbackZoom(previewEl,options={}){
   },0);
   homeCardbackZoomCleanup=dismiss;
 }
-function positionRoomTopMeta(){
-  const meta=document.querySelector('.room-top-meta.room-top-meta-inline');
-  if(!meta)return;
-  const tableOverlay=meta.closest('.room-top-meta-table');
-  if(tableOverlay){
-    tableOverlay.classList.remove('room-top-meta-center','room-top-meta-panel');
-  }
-  meta.classList.remove('room-top-meta-center','room-top-meta-panel');
-  meta.classList.add('room-top-meta-inline');
-}
-function bindRoomTopMetaLayout(){
-  if(roomTopMetaLayoutBound)return;
-  roomTopMetaLayoutBound=true;
-  window.addEventListener('resize',positionRoomTopMeta);
-  window.addEventListener('orientationchange',positionRoomTopMeta);
-}
-function syncDiscardSizeFromHand(){
-  if(state.screen!=='game')return;
-  const handCard=document.querySelector('.action-strip .hand .hand-card');
-  if(!(handCard instanceof HTMLElement))return;
-  const rect=handCard.getBoundingClientRect();
-  if(!rect.width||!rect.height)return;
-  const root=document.documentElement;
-  const widthPx=`${rect.width.toFixed(2)}px`;
-  const heightPx=`${rect.height.toFixed(2)}px`;
-  root.style.setProperty('--discard-card-w',widthPx);
-  root.style.setProperty('--discard-card-h',heightPx);
-  document.querySelectorAll('.seat-played .card.mini, .center-last .card.mini').forEach((card)=>{
-    if(!(card instanceof HTMLElement))return;
-    card.style.setProperty('width',widthPx,'important');
-    card.style.setProperty('height',heightPx,'important');
-  });
-}
-function bindDiscardSizeObserver(){
-  if(discardSizeObserver)return;
-  if(!('ResizeObserver' in window))return;
-  discardSizeObserver=new ResizeObserver(()=>{syncDiscardSizeFromHand();});
-}
-function observeDiscardSize(){
-  bindDiscardSizeObserver();
+const positionRoomTopMeta=()=>positionRoomTopMetaDom();
+const bindRoomTopMetaLayout=()=>bindRoomTopMetaLayoutDom(positionRoomTopMeta);
+const syncDiscardSizeFromHand=()=>syncDiscardSizeFromHandDom({state});
+const observeDiscardSize=()=>{
   const hand=document.querySelector('.action-strip .hand');
   if(!(hand instanceof HTMLElement))return;
-  discardSizeObserver?.observe(hand);
+  discardSizeObserverDom.observe(hand,syncDiscardSizeFromHand);
   syncDiscardSizeFromHand();
   window.setTimeout(syncDiscardSizeFromHand,180);
-}
+};
 function handleGameTopbarClick(ev){
   if(state.screen!=='game')return;
   const t=ev.target;
@@ -8602,23 +8316,18 @@ function renderGame(){
   const roundWinsBySeat=Array.isArray(v.roundWins)&&v.roundWins.length===4
     ?v.roundWins.map((vv)=>Number(vv)||0)
     :[0,0,0,0];
-  const roundWinsChipHtml=(wins)=>`<span class="seat-round-wins" aria-label="Round wins"><span class="seat-round-wins-icon" aria-hidden="true">✦</span><span>${Number(wins)||0}</span></span>`;
+  const roundWinsChipHtml=(wins)=>`<span class="seat-round-wins" aria-label="${esc(t('roundWins'))}"><span class="seat-round-wins-icon" aria-hidden="true">✦</span><span>${Number(wins)||0}</span></span>`;
   const canSuggest=v.canControl;
   const showMust3Highlight=Boolean(v.canControl&&v.isFirstTrick&&!v.lastPlay&&has3d(v.hand)&&!has3d(selected));
   const self=arr.find((p)=>p.viewIndex===0);
   const youWin=Boolean(v.gameOver&&self&&self.count===0);
-  const roomTopMeta=(()=>{
-    if(v.mode!=='room'||!state.room.data)return'';
-    const baseRound=Number(state.room.data.roundCount||0);
-    const status=String(state.room.data.status||'');
-    const round=baseRound+(status==='playing'||status==='starting'?1:0);
-    const countdown=roomCountdownText(state.room.data);
-    return`<div class="room-top-meta room-top-meta-inline">
-      <span class="room-top-item"><span class="room-top-label">${t('roomRound')}</span><strong>${Number.isFinite(round)?round:'-'}</strong></span>
-      <span class="room-top-item"><span class="room-top-label">${t('roomCountdown')}</span><strong data-room-countdown-value>${esc(countdown)}</strong></span>
-    </div>`;
-  })();
-  const roomTopMetaTable=roomTopMeta?`<div class="room-top-meta-table">${roomTopMeta}</div>`:'';
+  const roomTopMetaTable=buildRoomMetaTableHtml({
+    v,
+    state,
+    t,
+    esc,
+    roomCountdownText
+  });
   const {
     emoteSeat,
     selfTableEmoteHtml,
@@ -8780,253 +8489,54 @@ function renderGame(){
     emotePanel,
     handHtml
   });
-  const gameTableHtml=renderGameTable({
+  app.innerHTML=buildGameShellMarkup({
+    v,
+    youWin,
+    state,
+    t,
     roomTopMetaTable,
     seatHtml,
-    mobileNamesHtml:'',
-    mobileDiscardHtml:'',
-    centerMovesHtml:centerMovesHtml(v),
-    centerLastMovesHtml:centerLastMovesHtml(lastActions,v.selfSeat),
-    showWinCelebrate:!v.gameOver&&youWin,
-    t
-  });
-  app.innerHTML=renderGameShell({
-    gameOver:v.gameOver,
-    showLog:state.showLog,
-    gameTopbarHtml,
-    gameTableHtml,
-    gameActionZoneHtml,
+    lastActions,
     selfTableEmoteHtml,
-    congratsOverlayHtml:v.gameOver?'':congratsOverlayHtml(v,youWin),
-    revealHtml:revealHtml(v,arr),
     sideZoneHtml,
-    resultScreenHtml:v.gameOver?resultScreenHtml(v,arr):'',
-    opponentProfileModalHtml:state.opponentProfileName?opponentProfileModalHtml(state.opponentProfileName):'',
-    scoreGuideModalHtml:state.showScoreGuide?scoreGuideModalHtml():'',
-    introPanelHtml:state.home.showIntro?introPanelHtml():'',
-    leaderboardModalHtml:state.home.showLeaderboard?leaderboardModalHtml():''
+    gameTopbarHtml,
+    gameActionZoneHtml,
+    renderGameTable,
+    renderGameShell,
+    centerMovesHtml,
+    centerLastMovesHtml,
+    congratsOverlayHtml,
+    revealHtml:(view)=>revealHtml(view,arr),
+    resultScreenHtml:(view)=>resultScreenHtml(view,arr),
+    opponentProfileModalHtml,
+    scoreGuideModalHtml,
+    introPanelHtml,
+    leaderboardModalHtml
   });
-  if(!v.gameOver&&youWin){
-    app.innerHTML=app.innerHTML.replace('<div class="win-celebrate"><div class="confetti-layer"></div>','<div class="win-celebrate"><canvas class="confetti-canvas" data-confetti="win" aria-hidden="true"></canvas>');
-  }
-  const appEl=document.getElementById('app');
-  if(appEl){
-    const logFabHost=portraitMode?(appEl.querySelector('.action-strip')||appEl):appEl;
-    let logFab=appEl.querySelector('#game-log-fab');
-    if(!logFab){
-      const btn=document.createElement('button');
-      btn.id='game-log-fab';
-      btn.type='button';
-      btn.className='game-log-fab';
-      btn.setAttribute('aria-label',t('log'));
-      btn.innerHTML=`<span class="title-icon title-icon-log" aria-hidden="true"></span><span class="game-log-fab-text">${t('log')}</span>`;
-      btn.setAttribute('data-ignore-click','0');
-      logFabHost.appendChild(btn);
-      logFab=btn;
-    }else if(logFab.parentElement!==logFabHost){
-      logFabHost.appendChild(logFab);
-    }
-    const existingSheet=appEl.querySelector('#log-sheet');
-    if(existingSheet)existingSheet.remove();
-    if(logSheetOpen){
-      appEl.insertAdjacentHTML('beforeend',logSheetHtml);
-    }
-    if(logFab instanceof HTMLElement){
-      if(portraitMode){
-        logFab.style.removeProperty('left');
-        logFab.style.removeProperty('top');
-        logFab.style.removeProperty('right');
-        logFab.style.removeProperty('bottom');
-      }else{
-      let x=state.logFab?.x;
-      let y=state.logFab?.y;
-      const pad=8;
-      const viewW=Math.max(0,window.innerWidth||0);
-      const viewH=Math.max(0,window.innerHeight||0);
-      const lastW=Number(state.logFab?.vw||0);
-      const lastH=Number(state.logFab?.vh||0);
-      if(Number.isFinite(x)&&Number.isFinite(y)&&lastW>0&&lastH>0&&(lastW!==viewW||lastH!==viewH)){
-        x=(x/lastW)*viewW;
-        y=(y/lastH)*viewH;
-      }
-      const fabW=Math.max(0,logFab.offsetWidth||0);
-      const fabH=Math.max(0,logFab.offsetHeight||0);
-      const maxX=Math.max(0,viewW-fabW-pad);
-      const maxY=Math.max(0,viewH-fabH-pad);
-      if(Number.isFinite(x)&&Number.isFinite(y)){
-        const nx=Math.max(pad,Math.min(x,maxX));
-        const ny=Math.max(pad,Math.min(y,maxY));
-        state.logFab.x=nx;
-        state.logFab.y=ny;
-        state.logFab.vw=viewW;
-        state.logFab.vh=viewH;
-        logFab.style.left=`${nx}px`;
-        logFab.style.top=`${ny}px`;
-        logFab.style.right='auto';
-        logFab.style.bottom='auto';
-      }else{
-        logFab.style.removeProperty('left');
-        logFab.style.removeProperty('top');
-        logFab.style.removeProperty('right');
-        logFab.style.removeProperty('bottom');
-      }
-      }
-    }
-  }
-  positionRoomTopMeta();
-  bindRoomTopMetaLayout();
-  observeDiscardSize();
-  document.body.setAttribute('data-web-too-small','0');
-  document.body.removeAttribute('data-web-too-small-msg');
-  document.getElementById('web-too-small-overlay')?.remove();
-  document.getElementById('tap-debug')?.remove();
-  if(document.body.dataset.tapDebugBound){
-    delete document.body.dataset.tapDebugBound;
-  }
-  document.getElementById('self-avatar-img')?.addEventListener('error',(e)=>{
-    const img=e?.target;
-    if(!(img instanceof HTMLImageElement))return;
-    const fallback=String(img.dataset.fallback??'').trim();
-    if(!fallback||img.src===fallback)return;
-    img.src=fallback;
-    img.classList.remove('player-avatar-google');
-  },{once:true});
-  syncConfettiCanvases();
-  bindGameEvents(v,arr);
-  requestAnimationFrame(()=>{
-    syncDiscardSizeFromHand();
-    syncHandStackMode();
-    retargetCalloutTails();
-    setTimeout(retargetCalloutTails,80);
+  runGamePostRender({
+    app,
+    state,
+    t,
+    v,
+    arr,
+    portraitMode,
+    logSheetOpen,
+    logSheetHtml,
+    bindGameEvents,
+    positionRoomTopMeta,
+    bindRoomTopMetaLayout,
+    observeDiscardSize,
+    syncConfettiCanvases,
+    syncDiscardSizeFromHand,
+    syncHandStackMode,
+    retargetCalloutTails,
+    maybeRunRoomAi
   });
-  if(v.mode==='room'&&!v.gameOver){
-    maybeRunRoomAi();
-  }
 }
-function retargetCalloutTails(){
-  const bubbles=[...document.querySelectorAll('.play-type-call, .last-card-call, .emote-callout')];
-  const vw=Math.max(0,window.innerWidth||0);
-  const vh=Math.max(0,window.innerHeight||0);
-  const isMobile=isMobilePointer();
-  const margin=isMobile?5:8;
-  for(const bubble of bubbles){
-    if(!(bubble instanceof HTMLElement))continue;
-    const tail=bubble.querySelector('.tail');
-    if(!(tail instanceof HTMLElement))continue;
-    const isSelfBubble=bubble.classList.contains('play-type-call-self')||bubble.classList.contains('last-card-call-self');
-    let avatar=null;
-    if(isSelfBubble){
-      avatar=document.querySelector('.player-avatar-wrap-self')||document.getElementById('self-avatar-img');
-    }else{
-      const seat=bubble.closest('.seat');
-      avatar=seat?.querySelector('.player-avatar-wrap-opponent, .player-avatar-opponent')??null;
-    }
-    if(!(avatar instanceof HTMLElement))continue;
-    const b=bubble.getBoundingClientRect();
-    const a=avatar.getBoundingClientRect();
-    const bx=b.left+b.width/2;
-    const by=b.top+b.height/2;
-    const ax=a.left+a.width/2;
-    const ay=a.top+a.height/2;
-    const dx=ax-bx;
-    const dy=ay-by;
-    let dir='south';
-    if(!isSelfBubble){
-      if(Math.abs(dx)>Math.abs(dy)){
-        dir=dx<0?'west':'east';
-      }else{
-        dir=dy<0?'north':'south';
-      }
-    }
-    tail.classList.remove('tail-north','tail-south','tail-east','tail-west');
-    tail.classList.add(`tail-${dir}`);
-    tail.style.removeProperty('--tail-anchor-x');
-    tail.style.removeProperty('--tail-anchor-y');
-    let sx=0;
-    let sy=0;
-    if(vw&&vh){
-      if(b.left<margin)sx=margin-b.left;
-      else if(b.right>vw-margin)sx=(vw-margin)-b.right;
-      if(b.top<margin)sy=margin-b.top;
-      else if(b.bottom>vh-margin)sy=(vh-margin)-b.bottom;
-    }
-    if(sx||sy){
-      bubble.style.setProperty('--callout-shift-x',`${sx.toFixed(1)}px`);
-      bubble.style.setProperty('--callout-shift-y',`${sy.toFixed(1)}px`);
-      bubble.style.removeProperty('--callout-box-shift-x');
-      bubble.style.removeProperty('--callout-box-shift-y');
-    }else{
-      bubble.style.removeProperty('--callout-shift-x');
-      bubble.style.removeProperty('--callout-shift-y');
-      bubble.style.removeProperty('--callout-box-shift-x');
-      bubble.style.removeProperty('--callout-box-shift-y');
-    }
-    const shiftedBubbleRect=bubble.getBoundingClientRect();
-    const anchorX=Math.max(10,Math.min(shiftedBubbleRect.width-10,ax-shiftedBubbleRect.left));
-    const anchorY=Math.max(10,Math.min(shiftedBubbleRect.height-10,ay-shiftedBubbleRect.top));
-    if(dir==='north'||dir==='south'){
-      if(isSelfBubble&&dir==='south'){
-        tail.style.setProperty('--tail-anchor-x','27px');
-      }else{
-        tail.style.setProperty('--tail-anchor-x',`${anchorX.toFixed(1)}px`);
-      }
-    }else{
-      tail.style.setProperty('--tail-anchor-y',`${anchorY.toFixed(1)}px`);
-    }
-  }
-}
-function syncHandStackMode(){
-  const hand=document.querySelector('.action-strip .hand');
-  if(!(hand instanceof HTMLElement))return;
-  const cards=[...hand.querySelectorAll('.hand-card')];
-  hand.classList.remove('hand-stacked');
-  hand.style.removeProperty('--hand-overlap-px');
-  hand.style.setProperty('overflow-x','hidden','important');
-  if(cards.length<2)return;
-  const first=cards[0];
-  const last=cards[cards.length-1];
-  if(!(first instanceof HTMLElement)||!(last instanceof HTMLElement))return;
-  const count=cards.length;
-  const cardW=first.getBoundingClientRect().width;
-  const hs=window.getComputedStyle(hand);
-  const gap=Number.parseFloat(hs.columnGap||hs.gap||'0')||0;
-  const available=hand.clientWidth||hand.getBoundingClientRect().width;
-  const natural=(cardW*count)+(gap*Math.max(0,count-1));
-  if(!(natural>available+0.5))return;
-
-  let overlap=(natural-available)/(count-1);
-  const maxOverlap=Math.max(0,(cardW+gap)-1);
-  overlap=Math.max(0,Math.min(overlap,maxOverlap));
-
-  // If fitting requires extreme overlap, fall back to horizontal scroll.
-  const comfortLimit=Math.max(0,cardW*0.82);
-  if(overlap>comfortLimit){
-    hand.style.setProperty('overflow-x','auto','important');
-    hand.style.setProperty('-webkit-overflow-scrolling','touch');
-    return;
-  }
-
-  hand.classList.add('hand-stacked');
-  hand.style.setProperty('--hand-overlap-px',`${overlap.toFixed(2)}px`);
-
-  // Measure actual rendered span and correct small browser rounding errors (both overflow and gap).
-  const handRect=hand.getBoundingClientRect();
-  const firstRect=first.getBoundingClientRect();
-  const lastRect=last.getBoundingClientRect();
-  const used=Math.max(0,lastRect.right-firstRect.left);
-  const delta=used-handRect.width;
-  if(Math.abs(delta)>0.75){
-    overlap+=delta/(count-1);
-    overlap=Math.max(0,Math.min(overlap,maxOverlap));
-    hand.style.setProperty('--hand-overlap-px',`${overlap.toFixed(2)}px`);
-  }
-  const overflowRight=last.getBoundingClientRect().right-handRect.right;
-  if(overflowRight>0.5){
-    overlap+=((overflowRight+0.5)/(count-1));
-    overlap=Math.max(0,Math.min(overlap,maxOverlap));
-    hand.style.setProperty('--hand-overlap-px',`${overlap.toFixed(2)}px`);
-  }
-}
+const retargetCalloutTails=()=>retargetCalloutTailsDom({
+  isMobilePointer
+});
+const syncHandStackMode=()=>syncHandStackModeDom();
 const confettiStates=new Map();
 const CONFETTI_COLORS=['#f39c12','#e74c3c','#9b59b6','#3498db','#2ecc71','#f1c40f','#ff7aa2','#66d1ff'];
 const CONFETTI_COUNT=160;

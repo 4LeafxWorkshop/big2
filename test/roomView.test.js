@@ -46,25 +46,33 @@ test('renderRoomJoinOverlay renders active rooms and join controls', ()=>{
     activeRooms:[{
       code:'ABCD',
       isPrivate:false,
-      roster:[{name:'Alice',gender:'female',picture:''}],
+      roster:[{name:'Alice',gender:'female',picture:''},{gender:'male',picture:''}],
       status:'lobby',
-      displayPlayers:1,
+      displayPlayers:2,
       maxPlayers:4
     }],
     activeRoomsLoading:false,
     hiddenCount:2,
     joinOpenCountdown:8,
     roomErrorHtml:'<div id="room-error"></div>',
-    t:(key)=>key,
+    t:(key)=>{
+      if(key==='secondsShort')return' sec';
+      if(key==='roomCodeExample')return'ROOM42';
+      if(key==='seatLabel')return'Seat {{n}}';
+      return key;
+    },
     esc:(value)=>String(value),
     isRoomPlayerHuman:()=>true,
     authPictureUrlFrom:(value)=>`pic:${value}`,
     avatarDataUri:(name)=>`avatar:${name}`
   });
   assert.match(html,/id="room-code-input"/);
+  assert.match(html,/placeholder="ROOM42"/);
   assert.match(html,/ABCD/);
+  assert.match(html,/title="Seat 2"/);
   assert.match(html,/room-active-refresh-countdown/);
   assert.match(html,/roomActiveRefresh/);
+  assert.match(html,/8 sec/);
   assert.match(html,/roomActiveHidden: 2/);
   assert.match(html,/room-error/);
 });

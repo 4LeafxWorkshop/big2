@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import {renderGameActionZone, renderGameLogSheet, renderGameShell, renderGameSideZone, renderGameTable, renderGameTopbar, renderOpponentLabel, renderOpponentSeat, renderOpponentSeats, renderOpponentStationFlow} from '../src/gameView.js';
+import {renderCenterLastMoves, renderGameActionZone, renderGameLogSheet, renderGameShell, renderGameSideZone, renderGameTable, renderGameTopbar, renderOpponentLabel, renderOpponentSeat, renderOpponentSeats, renderOpponentStationFlow, renderSeatLastAction} from '../src/gameView.js';
 
 test('renderGameTopbar includes the game controls', ()=>{
   const html=renderGameTopbar({
@@ -178,4 +178,35 @@ test('renderGameShell assembles the main sections and overlays', ()=>{
   assert.match(html,/id="topbar"/);
   assert.match(html,/id="side"/);
   assert.match(html,/id="lb"/);
+});
+
+test('renderSeatLastAction renders pass and fanned card layouts', ()=>{
+  const passHtml=renderSeatLastAction({type:'pass'},{
+    t:(key)=>key,
+    renderStaticCard:()=> '',
+    fanNoise:()=> 0.5,
+    cardId:(card)=>card.id
+  });
+  const fanHtml=renderSeatLastAction({type:'play',seat:1,ts:5,cards:[{id:'a'},{id:'b'},{id:'c'}]},{
+    t:(key)=>key,
+    renderStaticCard:(card,faceUp,cls,style)=>`<span data-style="${style}">${card.id}</span>`,
+    fanNoise:()=> 0.5,
+    cardId:(card)=>card.id,
+    sizeMultiplier:1
+  });
+  assert.match(passHtml,/seat-played-pass/);
+  assert.match(passHtml,/seat-pass-text/);
+  assert.match(fanHtml,/seat-played-fan/);
+  assert.match(fanHtml,/translateY/);
+});
+
+test('renderCenterLastMoves renders only the south center slot', ()=>{
+  const html=renderCenterLastMoves(new Map([[0,{type:'pass'}]]),0,{
+    seatCls:['south','west','north','east'],
+    renderSeatLastAction:(action,size)=>`<div data-size="${size}">${action.type}</div>`,
+    tablePlayScale:1
+  });
+  assert.match(html,/center-last-south/);
+  assert.match(html,/data-size="1"/);
+  assert.match(html,/>pass</);
 });

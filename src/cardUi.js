@@ -6,7 +6,8 @@ export function createCardUiHelpers(deps){
     isMobilePointer,
     cardId,
     backAssetFile,
-    getBackColor
+    getBackColor,
+    getCardBackAlt
   }=deps;
 
   const EMOTE_STICKERS=[
@@ -58,7 +59,8 @@ export function createCardUiHelpers(deps){
   function renderBackCards(count,seed=''){
     const shown=Math.max(0,Number(count)||0);
     const backFile=backAssetFile(getBackColor());
-    return Array.from({length:shown},(_,i)=>`<span class="card back mini closed-back" style="--i:${i};--n:${shown};--fan-jitter:${fanJitterDeg(seed,i).toFixed(3)}deg;--fan-gap:${fanGap(seed,i).toFixed(3)};--fan-lift:${fanLift(seed,i).toFixed(3)};"><img class="card-art" src="${withBase(`card-assets/${backFile}`)}" alt="back"/></span>`).join('');
+    const backAlt=String(getCardBackAlt?.()||'').trim()||'back';
+    return Array.from({length:shown},(_,i)=>`<span class="card back mini closed-back" style="--i:${i};--n:${shown};--fan-jitter:${fanJitterDeg(seed,i).toFixed(3)}deg;--fan-gap:${fanGap(seed,i).toFixed(3)};--fan-lift:${fanLift(seed,i).toFixed(3)};"><img class="card-art" src="${withBase(`card-assets/${backFile}`)}" alt="${backAlt}"/></span>`).join('');
   }
 
   function calloutJitterStyle(viewCls,key=''){

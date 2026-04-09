@@ -33,10 +33,12 @@ test('renderHandCard preserves card id, z-index, and draggable state', ()=>{
 test('renderBackCards uses the configured back color asset', ()=>{
   const helpers=createHelpers({
     getBackColor:()=>'blue',
-    backAssetFile:(color)=>`theme-${color}.png`
+    backAssetFile:(color)=>`theme-${color}.png`,
+    getCardBackAlt:()=>'Card Back'
   });
   const html=helpers.renderBackCards(2,'seed');
   assert.match(html,/theme-blue\.png/);
+  assert.match(html,/alt="Card Back"/);
   assert.match(html,/--n:2;/);
 });
 
