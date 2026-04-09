@@ -119,3 +119,60 @@ export function renderScoreGuideModal(params){
   const mulTableRows=`<tr><td><div class="score-guide-cards">${anyTwoCards}</div></td><td>x2</td><td>${colorizeSuitText(scoreGuideText.anyTwo)}</td></tr><tr><td><div class="score-guide-cards">${topTwoCard}</div></td><td>x2</td><td>${colorizeSuitText(scoreGuideText.topTwo)}</td></tr>`;
   return`<div class="intro-modal" id="score-guide-modal"><button class="intro-backdrop" id="score-guide-backdrop" aria-label="${scoreGuideText.close}"></button><section class="intro-sheet"><header class="intro-head"><div><h3 class="title-with-icon"><span class="title-icon title-icon-score" aria-hidden="true"></span><span>${t('scoreGuideTitle')}</span></h3><p class="score-guide-heading">${esc(scoreGuideText.headingDesc)}</p></div><button id="score-guide-close" class="secondary">${scoreGuideText.close}</button></header><div class="intro-grid"><article class="intro-block"><h4>${scoreGuideText.baseTitle}</h4><div class="score-guide-table-wrap"><table class="score-guide-table"><thead><tr><th>${esc(scoreGuideText.tableHeaders[0])}</th><th>${esc(scoreGuideText.tableHeaders[1])}</th><th>${esc(scoreGuideText.tableHeaders[2])}</th></tr></thead><tbody>${tableRows}</tbody></table></div></article><article class="intro-block"><h4>${scoreGuideText.mulTitle}</h4><div class="score-guide-table-wrap"><table class="score-guide-table"><thead><tr><th>${esc(scoreGuideText.mulTableHeaders[0])}</th><th>${esc(scoreGuideText.mulTableHeaders[1])}</th><th>${esc(scoreGuideText.mulTableHeaders[2])}</th></tr></thead><tbody>${mulTableRows}</tbody></table></div><div class="score-guide-table-wrap"><table class="score-guide-table"><thead><tr><th>${esc(scoreGuideText.chaoTableHeaders[0])}</th><th>${esc(scoreGuideText.chaoTableHeaders[1])}</th><th>${esc(scoreGuideText.chaoTableHeaders[2])}</th></tr></thead><tbody>${chaoTableRows}</tbody></table></div><p class="score-guide-stack">${esc(scoreGuideText.stack)}</p></article><article class="intro-block"><p class="score-guide-summary">${esc(scoreGuideText.summary)}</p></article></div></section></div>`;
 }
+
+export function renderOpponentProfileModal(params){
+  const {
+    name,
+    closeLabel,
+    genderClass,
+    genderIcon,
+    genderLabel,
+    avatarSrc,
+    zodiacLabel,
+    zodiacMark,
+    zodiacText,
+    dobLabel,
+    dob,
+    hobbiesLabel,
+    hobbyText,
+    mottoLabel,
+    mottoText,
+    profileLabel,
+    profileHtml,
+    esc
+  }=params;
+  return`<div class="intro-modal opponent-profile-modal" id="opponent-profile-modal">
+    <button class="intro-backdrop" id="opponent-profile-backdrop" aria-label="${esc(closeLabel)}"></button>
+    <section class="intro-sheet opponent-profile-sheet">
+      <header class="intro-head">
+        <div>
+          <h3 class="title-with-icon"><span class="title-icon-emoji" aria-hidden="true">👤</span><span>${esc(name)}</span><span class="opponent-gender-icon ${genderClass}" data-symbol="${genderIcon}" aria-label="${esc(genderLabel)}" title="${esc(genderLabel)}">${genderIcon}</span></h3>
+        </div>
+        <button id="opponent-profile-close" class="secondary">${closeLabel}</button>
+      </header>
+      <div class="opponent-profile-body">
+        <div class="opponent-profile-header">
+          <img class="opponent-profile-avatar" src="${avatarSrc}" alt="${esc(name)}"/>
+          <div class="opponent-profile-header-text">
+            <div class="opponent-profile-chips">
+              <span class="opponent-chip"><span class="opponent-chip-icon zodiac" aria-hidden="true"></span><span>${zodiacLabel} ${zodiacMark?`${zodiacMark} `:''}${esc(zodiacText)}</span></span>
+              <span class="opponent-chip"><span class="opponent-chip-icon dob" aria-hidden="true"></span><span>${dobLabel} ${esc(dob)}</span></span>
+              <span class="opponent-chip"><span class="opponent-chip-icon hobby" aria-hidden="true"></span><span>${hobbiesLabel} ${esc(hobbyText)}</span></span>
+            </div>
+            <div class="opponent-profile-motto">
+              <span class="opponent-chip-icon motto" aria-hidden="true"></span>
+              <div>
+                <div class="opponent-motto-label">${mottoLabel}</div>
+                <div class="opponent-motto-text">${esc(mottoText)}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="opponent-profile-details">
+          <div class="opponent-profile-summary"><strong>${profileLabel}</strong></div>
+          <div class="opponent-profile-paragraphs">${profileHtml}</div>
+        </div>
+      </div>
+    </section>
+  </div>`;
+}

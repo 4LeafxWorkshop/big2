@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import {renderConfigMarkup, renderHomeMarkup} from '../src/homeView.js';
+import {renderConfigMarkup, renderHomeMarkup, renderOpponentCard, renderOpponentsMarkup} from '../src/homeView.js';
 
 function render(overrides={}){
   return renderHomeMarkup({
@@ -76,4 +76,41 @@ test('renderConfigMarkup includes config controls and back carousel', ()=>{
   assert.match(html,/id="config-sound-combo"/);
   assert.match(html,/id="config-callout-display-combo"/);
   assert.match(html,/id="config-emote-display-combo"/);
+});
+
+test('renderOpponentCard includes avatar, profile labels, and motto', ()=>{
+  const html=renderOpponentCard({
+    link:'/avatar.png',
+    name:'Luna',
+    genderClass:'gender-female',
+    genderIcon:'♀',
+    genderLabel:'Female',
+    zodiacLabel:'Zodiac',
+    zodiacMark:'♍',
+    zodiacText:'Virgo',
+    dobLabel:'DOB',
+    dob:'1999-09-09',
+    hobbiesLabel:'Hobbies',
+    hobbyText:'Music, Travel',
+    mottoText:'Stay cool.',
+    profileLabel:'Profile',
+    profileHtml:'<p>Bio</p>',
+    esc:(value)=>String(value)
+  });
+  assert.match(html,/class="opponent-card"/);
+  assert.match(html,/\/avatar\.png/);
+  assert.match(html,/Stay cool\./);
+  assert.match(html,/<p>Bio<\/p>/);
+});
+
+test('renderOpponentsMarkup includes back control and card grid', ()=>{
+  const html=renderOpponentsMarkup({
+    heading:'Opponents',
+    homeLabel:'Home',
+    renderLangMenu:()=>'<div id="lang-menu"></div>',
+    cardsHtml:'<article class="opponent-card"></article>'
+  });
+  assert.match(html,/id="opponents-back"/);
+  assert.match(html,/class="opponent-grid"/);
+  assert.match(html,/id="lang-menu"/);
 });

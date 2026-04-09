@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import {renderGameActionZone, renderGameLogSheet, renderGameShell, renderGameSideZone, renderGameTable, renderGameTopbar, renderOpponentSeat, renderOpponentSeats} from '../src/gameView.js';
+import {renderGameActionZone, renderGameLogSheet, renderGameShell, renderGameSideZone, renderGameTable, renderGameTopbar, renderOpponentLabel, renderOpponentSeat, renderOpponentSeats, renderOpponentStationFlow} from '../src/gameView.js';
 
 test('renderGameTopbar includes the game controls', ()=>{
   const html=renderGameTopbar({
@@ -99,6 +99,62 @@ test('renderOpponentSeat and renderOpponentSeats wrap seat markup', ()=>{
   assert.match(html,/class="seat west active"/);
   assert.match(html,/data-seat-emote-active="1"/);
   assert.match(html,/id="flow"/);
+});
+
+test('renderOpponentLabel includes badge, callout, and optional motto', ()=>{
+  const html=renderOpponentLabel({
+    pColor:'#123456',
+    avatarSrc:'/avatar.png',
+    playerAvatarClass:'avatar-female',
+    playerName:'Luna',
+    botNameAttr:' data-bot-name="Luna"',
+    hostBadgeHtml:'<span id="host"></span>',
+    badgeHtml:'<span id="badge"></span>',
+    playerScore:5198,
+    roundWinsHtml:'<span id="wins"></span>',
+    namecardBtn:'<button id="namecard"></button>',
+    mottoText:'Stay cool',
+    mottoClass:'hk-power-motto motto-en',
+    hintText:'',
+    mottoTilt:'2deg',
+    calloutHtml:'<div id="callout"></div>',
+    emoteHtml:'<div id="emote"></div>',
+    peekActive:true,
+    opponentAttr:' data-opponent-name="Luna"',
+    esc:(value)=>String(value)
+  });
+  assert.match(html,/seat-name-fixed motto-peek/);
+  assert.match(html,/data-opponent-name="Luna"/);
+  assert.match(html,/id="namecard"/);
+  assert.match(html,/seat-motto-callout/);
+  assert.match(html,/id="callout"/);
+});
+
+test('renderOpponentStationFlow switches side stack markup based on seat mode', ()=>{
+  const sideHtml=renderOpponentStationFlow({
+    useFlowOpponentStation:true,
+    isSideSeat:true,
+    innerLabelHtml:'<div id="label"></div>',
+    fan:'<div id="fan"></div>',
+    fanClassName:'fan-west',
+    fanAnchorStyle:'justify-self:center;',
+    closedCountHtml:'<span id="count"></span>',
+    opponentOpenPlayHtml:'<div id="open"></div>'
+  });
+  const northHtml=renderOpponentStationFlow({
+    useFlowOpponentStation:true,
+    isSideSeat:false,
+    innerLabelHtml:'<div id="label"></div>',
+    fan:'<div id="fan"></div>',
+    fanClassName:'fan-north',
+    fanAnchorStyle:'',
+    closedCountHtml:'',
+    opponentOpenPlayHtml:''
+  });
+  assert.match(sideHtml,/side-station-stack/);
+  assert.match(sideHtml,/fan-west/);
+  assert.doesNotMatch(northHtml,/side-station-stack/);
+  assert.match(northHtml,/fan-north/);
 });
 
 test('renderGameShell assembles the main sections and overlays', ()=>{

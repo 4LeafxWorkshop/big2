@@ -7,6 +7,7 @@ import {
   renderIntroPanel,
   renderLeaderboardModal,
   renderLeaderboardPanel,
+  renderOpponentProfileModal,
   renderScoreGuideModal
 } from '../src/modalViews.js';
 
@@ -109,4 +110,32 @@ test('renderScoreGuideModal renders tables and special 2-card rows', ()=>{
   assert.match(html,/\/cards\/12-0\.png/);
   assert.match(html,/\/cards\/12-3\.png/);
   assert.match(html,/scoreGuideTitle/);
+});
+
+test('renderOpponentProfileModal renders avatar, chips, and translated close label', ()=>{
+  const html=renderOpponentProfileModal({
+    name:'Luna',
+    closeLabel:'Close',
+    genderClass:'gender-female',
+    genderIcon:'♀',
+    genderLabel:'Female',
+    avatarSrc:'/avatar.png',
+    zodiacLabel:'Zodiac',
+    zodiacMark:'♍',
+    zodiacText:'Virgo',
+    dobLabel:'DOB',
+    dob:'1999-09-09',
+    hobbiesLabel:'Hobbies',
+    hobbyText:'Music, Travel',
+    mottoLabel:'Motto',
+    mottoText:'Stay cool.',
+    profileLabel:'Profile',
+    profileHtml:'<p>Bio</p>',
+    esc:(value)=>String(value)
+  });
+  assert.match(html,/id="opponent-profile-modal"/);
+  assert.match(html,/\/avatar\.png/);
+  assert.match(html,/opponent-profile-motto/);
+  assert.match(html,/aria-label="Close"/);
+  assert.match(html,/<p>Bio<\/p>/);
 });

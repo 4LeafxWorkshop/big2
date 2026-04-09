@@ -86,6 +86,49 @@ export function renderOpponentSeat(params){
   return`<div class="seat ${cls} ${active?'active':''}"${seatAttrs} style="${shellStyle}">${outerLabelHtml}<div class="seat-pack seat-section" style="${sectionStyle}">${sideStationFlowHtml}</div></div>`;
 }
 
+export function renderOpponentLabel(params){
+  const {
+    pColor,
+    avatarSrc,
+    playerAvatarClass,
+    playerName,
+    botNameAttr,
+    hostBadgeHtml,
+    badgeHtml,
+    playerScore,
+    roundWinsHtml,
+    namecardBtn,
+    mottoText,
+    mottoClass,
+    hintText,
+    mottoTilt,
+    calloutHtml,
+    emoteHtml,
+    peekActive,
+    opponentAttr,
+    esc
+  }=params;
+  const labelName=`<div class="name"><span class="player-avatar-wrap player-avatar-wrap-opponent avatar-rim" style="--avatar-rim:${pColor};"><img class="player-avatar player-avatar-opponent ${playerAvatarClass}" style="--avatar-outline:${pColor};" src="${avatarSrc}" alt="${esc(playerName)}"${botNameAttr}/>${hostBadgeHtml}${badgeHtml}</span><span class="seat-identity"><span class="seat-name-text">${esc(playerName)}</span><span class="seat-subline"><span>${playerScore}</span>${roundWinsHtml}</span>${namecardBtn}${mottoText?`<span class="seat-motto-callout play-type-call" style="--player-color:${pColor};--motto-tilt:${mottoTilt};"><span class="hk-motto-box"><span class="${mottoClass}">${esc(mottoText)}</span>${hintText?`<span class="hk-chinese-sub">${esc(hintText)}</span>`:''}</span><span class="tail tail-north"></span></span>`:''}</span></div>`;
+  return`<div class="seat-name-fixed${peekActive?' motto-peek':''}"${opponentAttr}>${labelName}${calloutHtml}${emoteHtml}</div>`;
+}
+
+export function renderOpponentStationFlow(params){
+  const {
+    useFlowOpponentStation,
+    isSideSeat,
+    innerLabelHtml,
+    fan,
+    fanClassName,
+    fanAnchorStyle,
+    closedCountHtml,
+    opponentOpenPlayHtml
+  }=params;
+  if(useFlowOpponentStation&&isSideSeat){
+    return`<div class="side-station-stack">${innerLabelHtml}<div class="opponent-fan-wrap"><div class="opponent-fan ${fanClassName}" style="${fanAnchorStyle}">${fan}</div>${closedCountHtml}</div>${opponentOpenPlayHtml}</div>`;
+  }
+  return`${innerLabelHtml}<div class="opponent-fan-wrap"><div class="opponent-fan ${fanClassName}" style="${fanAnchorStyle}">${fan}</div>${closedCountHtml}</div>${opponentOpenPlayHtml}`;
+}
+
 export function renderOpponentSeats(seats){
   return seats.join('');
 }
