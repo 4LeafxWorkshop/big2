@@ -2101,31 +2101,23 @@ body[data-screen='home'] .home-wrap {
   color: var(--muted);
 }
 .opponent-gender-symbol {
-  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 22px;
   height: 22px;
   border-radius: 999px;
-  font-size: 0;
+  overflow: hidden;
+  font-size: .9rem;
   font-weight: 800;
-  line-height: 0;
+  line-height: 1;
   font-family: "Segoe UI Symbol","Noto Sans Symbols2","Apple Symbols",var(--ui-font);
   border: 1px solid rgba(255,255,255,.2);
   background: rgba(255,255,255,.08);
   box-shadow: 0 3px 10px rgba(0,0,0,.18);
 }
 .opponent-gender-symbol::before {
-  content: attr(data-symbol);
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  font-size: .9rem;
-  line-height: 1;
-  font-family: inherit;
-  color: inherit;
+  content: none;
 }
 .opponent-gender-symbol.gender-male {
   color: #7cc4ff;
@@ -3256,7 +3248,6 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   gap: 8px;
 }
 .opponent-gender-icon {
-  position: relative;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -3264,24 +3255,17 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   height: 22px;
   margin-left: 6px;
   border-radius: 999px;
-  font-size: 0;
+  overflow: hidden;
+  font-size: .86rem;
   font-weight: 800;
-  line-height: 0;
+  line-height: 1;
   font-family: "Segoe UI Symbol","Noto Sans Symbols2","Apple Symbols",var(--ui-font);
   border: 1px solid rgba(255,255,255,.2);
   background: rgba(255,255,255,.08);
   box-shadow: 0 3px 10px rgba(0,0,0,.18);
 }
 .opponent-gender-icon::before {
-  content: attr(data-symbol);
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  font-size: .86rem;
-  line-height: 1;
-  font-family: inherit;
-  color: inherit;
+  content: none;
 }
 .opponent-gender-icon.gender-male {
   color: #7cc4ff;
@@ -6021,10 +6005,9 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
   }
 }
 @media (max-width: 860px) {
-  .opponent-gender-symbol::before,
-  .opponent-gender-icon::before {
+  .opponent-gender-symbol,
+  .opponent-gender-icon {
     font-size: .8rem;
-    transform: translateY(-0.5px);
   }
 
   /* Mobile: opponent callouts should appear directly under the opponent avatar. */
