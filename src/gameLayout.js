@@ -43,19 +43,25 @@ export function retargetCalloutTails({
     if(!(tail instanceof HTMLElement))continue;
     const isSelfBubble=bubble.classList.contains('play-type-call-self')||bubble.classList.contains('last-card-call-self');
     let avatar=null;
+    let anchorTarget=null;
     if(isSelfBubble){
       avatar=doc.querySelector('.player-avatar-wrap-self')||doc.getElementById('self-avatar-img');
+      anchorTarget=avatar;
     }else{
       const seat=bubble.closest('.seat');
       avatar=seat?.querySelector('.player-avatar-wrap-opponent, .player-avatar-opponent')??null;
+      anchorTarget=
+        seat?.querySelector('.side-station-stack, .seat-pack')||
+        seat?.querySelector('.seat-name-fixed[data-opponent-name]')||
+        avatar;
     }
-    if(!(avatar instanceof HTMLElement))continue;
+    if(!(avatar instanceof HTMLElement)||!(anchorTarget instanceof HTMLElement))continue;
     bubble.style.removeProperty('--callout-shift-x');
     bubble.style.removeProperty('--callout-shift-y');
     bubble.style.removeProperty('--callout-box-shift-x');
     bubble.style.removeProperty('--callout-box-shift-y');
     const b=bubble.getBoundingClientRect();
-    const a=avatar.getBoundingClientRect();
+    const a=anchorTarget.getBoundingClientRect();
     const bx=b.left+b.width/2;
     const by=b.top+b.height/2;
     const ax=a.left+a.width/2;
