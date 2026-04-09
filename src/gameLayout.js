@@ -50,6 +50,10 @@ export function retargetCalloutTails({
       avatar=seat?.querySelector('.player-avatar-wrap-opponent, .player-avatar-opponent')??null;
     }
     if(!(avatar instanceof HTMLElement))continue;
+    bubble.style.removeProperty('--callout-shift-x');
+    bubble.style.removeProperty('--callout-shift-y');
+    bubble.style.removeProperty('--callout-box-shift-x');
+    bubble.style.removeProperty('--callout-box-shift-y');
     const b=bubble.getBoundingClientRect();
     const a=avatar.getBoundingClientRect();
     const bx=b.left+b.width/2;
@@ -83,25 +87,16 @@ export function retargetCalloutTails({
     bubble.style.removeProperty('bottom');
     bubble.style.removeProperty('z-index');
     bubble.style.removeProperty('--callout-fit-scale');
-    let {sx,sy}=overflowShiftFor(b);
-    if(sx||sy){
+    let sx=0;
+    let sy=0;
+    for(let i=0;i<4;i+=1){
+      const rect=bubble.getBoundingClientRect();
+      const extra=overflowShiftFor(rect);
+      if(!extra.sx&&!extra.sy)break;
+      sx+=extra.sx;
+      sy+=extra.sy;
       bubble.style.setProperty('--callout-shift-x',`${sx.toFixed(1)}px`);
       bubble.style.setProperty('--callout-shift-y',`${sy.toFixed(1)}px`);
-      bubble.style.removeProperty('--callout-box-shift-x');
-      bubble.style.removeProperty('--callout-box-shift-y');
-      const secondPass=bubble.getBoundingClientRect();
-      const extra=overflowShiftFor(secondPass);
-      if(extra.sx||extra.sy){
-        sx+=extra.sx;
-        sy+=extra.sy;
-        bubble.style.setProperty('--callout-shift-x',`${sx.toFixed(1)}px`);
-        bubble.style.setProperty('--callout-shift-y',`${sy.toFixed(1)}px`);
-      }
-    }else{
-      bubble.style.removeProperty('--callout-shift-x');
-      bubble.style.removeProperty('--callout-shift-y');
-      bubble.style.removeProperty('--callout-box-shift-x');
-      bubble.style.removeProperty('--callout-box-shift-y');
     }
     const shiftedBubbleRect=bubble.getBoundingClientRect();
     const anchorX=Math.max(10,Math.min(shiftedBubbleRect.width-10,ax-shiftedBubbleRect.left));
