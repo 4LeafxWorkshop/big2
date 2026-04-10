@@ -287,6 +287,7 @@ export function buildCalloutRenderState(params){
     const lastClass=isSelf?'last-card-call-self':'last-card-call-seat';
     const tailDir=isSelf?'south':viewCls==='north'?'north':viewCls==='east'?'east':viewCls==='west'?'west':'south';
     const textClass=String(activeCallout?.text??'').length>10?'hk-medium':'hk-text';
+    const renderCalloutText=(text)=>esc(String(text??'')).replace(/\n/g,'<br>');
     const shouldMergeEmote=Boolean(!isSelf&&emoteSticker&&emoteSeat===seat&&hasSeatCallout(seat));
     const emoteInlineHtml=shouldMergeEmote?`<span class="emote-icon">${emoteImageHtml}</span>`:'';
     const calloutClass=shouldMergeEmote?' callout-with-emote':'';
@@ -294,22 +295,22 @@ export function buildCalloutRenderState(params){
     if(!activeCallout||activeCallout.seat!==seat)return'';
     if(activeCallout.kind==='pass'){
       const jitter=calloutJitterStyle(viewCls,`pass|${seat}|${activeCallout.nonce}|${activeCallout.text}`);
-      return`<div class="play-type-call ${seatClass} pass-call${calloutClass}" style="--player-color:${color};${jitter}"><div class="callout-box"><div class="hk-inner">${emoteInlineHtml}<span class="${textClass}">${esc(activeCallout.text)}</span></div></div><div class="tail tail-${tailDir}"></div></div>`;
+      return`<div class="play-type-call ${seatClass} pass-call${calloutClass}" style="--player-color:${color};${jitter}"><div class="callout-box"><div class="hk-inner">${emoteInlineHtml}<span class="${textClass}">${renderCalloutText(activeCallout.text)}</span></div></div><div class="tail tail-${tailDir}"></div></div>`;
     }
     if(activeCallout.kind==='play'){
       const fresh=activeCallout.fresh?' play-type-call-fresh':'';
       const jitter=calloutJitterStyle(viewCls,`play|${seat}|${activeCallout.nonce}|${activeCallout.text}`);
-      return`<div class="play-type-call ${seatClass}${fresh}${calloutClass}" style="--player-color:${color};${jitter}"><div class="callout-box"><div class="hk-inner">${emoteInlineHtml}<span class="${textClass}">${esc(activeCallout.text)}</span></div></div><div class="tail tail-${tailDir}"></div></div>`;
+      return`<div class="play-type-call ${seatClass}${fresh}${calloutClass}" style="--player-color:${color};${jitter}"><div class="callout-box"><div class="hk-inner">${emoteInlineHtml}<span class="${textClass}">${renderCalloutText(activeCallout.text)}</span></div></div><div class="tail tail-${tailDir}"></div></div>`;
     }
     if(activeCallout.kind==='must3'){
       const fresh=activeCallout.fresh?' play-type-call-fresh':'';
       const jitter=calloutJitterStyle(viewCls,`must3|${seat}|${activeCallout.nonce}|${activeCallout.text}`);
-      return`<div class="play-type-call ${seatClass}${fresh}${calloutClass}" style="--player-color:${color};${jitter}"><div class="callout-box"><div class="hk-inner">${emoteInlineHtml}<span class="${textClass}">${esc(activeCallout.text)}</span></div></div><div class="tail tail-${tailDir}"></div></div>`;
+      return`<div class="play-type-call must3-call ${seatClass}${fresh}${calloutClass}" style="--player-color:${color};${jitter}"><div class="callout-box"><div class="hk-inner">${emoteInlineHtml}<span class="${textClass}">${renderCalloutText(activeCallout.text)}</span></div></div><div class="tail tail-${tailDir}"></div></div>`;
     }
     if(activeCallout.kind==='last'){
       const fresh=activeCallout.fresh?' last-card-call-fresh':'';
       const jitter=calloutJitterStyle(viewCls,`last|${seat}|${activeCallout.nonce}`);
-      return`<div class="last-card-call ${lastClass}${fresh}${calloutClass}" style="--player-color:${color};${jitter}"><div class="callout-box"><div class="hk-inner">${emoteInlineHtml}<span class="${textClass}">${esc(activeCallout.text)}</span></div></div><div class="tail tail-${tailDir}"></div></div>`;
+      return`<div class="last-card-call ${lastClass}${fresh}${calloutClass}" style="--player-color:${color};${jitter}"><div class="callout-box"><div class="hk-inner">${emoteInlineHtml}<span class="${textClass}">${renderCalloutText(activeCallout.text)}</span></div></div><div class="tail tail-${tailDir}"></div></div>`;
     }
     return'';
   };

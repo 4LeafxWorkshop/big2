@@ -1951,37 +1951,99 @@ function colorDistanceSq(a,b){
   const db=ra[2]-rb[2];
   return(dr*dr)+(dg*dg)+(db*db);
 }
+function rgbToHex(r,g,b){
+  const toHex=(value)=>Math.max(0,Math.min(255,Math.round(value))).toString(16).padStart(2,'0');
+  return`#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+function hslToHex(h,s,l){
+  const hue=((Number(h)||0)%360+360)%360;
+  const sat=Math.max(0,Math.min(100,Number(s)||0))/100;
+  const light=Math.max(0,Math.min(100,Number(l)||0))/100;
+  if(sat===0){
+    const gray=Math.round(light*255);
+    return rgbToHex(gray,gray,gray);
+  }
+  const c=(1-Math.abs(2*light-1))*sat;
+  const x=c*(1-Math.abs((hue/60)%2-1));
+  const m=light-(c/2);
+  let r1=0,g1=0,b1=0;
+  if(hue<60){r1=c;g1=x;}
+  else if(hue<120){r1=x;g1=c;}
+  else if(hue<180){g1=c;b1=x;}
+  else if(hue<240){g1=x;b1=c;}
+  else if(hue<300){r1=x;b1=c;}
+  else{r1=c;b1=x;}
+  return rgbToHex((r1+m)*255,(g1+m)*255,(b1+m)*255);
+}
+function relativeLuminance(hex){
+  const rgb=hexToRgb(hex);
+  if(rgb.length!==3)return 0;
+  const linear=rgb.map((channel)=>{
+    const value=channel/255;
+    return value<=0.03928?value/12.92:Math.pow((value+0.055)/1.055,2.4);
+  });
+  return(0.2126*linear[0])+(0.7152*linear[1])+(0.0722*linear[2]);
+}
+function contrastRatio(a,b){
+  const l1=relativeLuminance(a);
+  const l2=relativeLuminance(b);
+  const light=Math.max(l1,l2);
+  const dark=Math.min(l1,l2);
+  return(light+0.05)/(dark+0.05);
+}
+function randomNpcColor(){
+  const hue=Math.random()*360;
+  const saturation=68+Math.random()*22;
+  const lightness=56+Math.random()*16;
+  return hslToHex(hue,saturation,lightness);
+}
+function isReadableNpcColor(color){
+  const backgrounds=Object.values(THEMES).flatMap((theme)=>[theme['--bg-a'],theme['--table-a']]);
+  return backgrounds.every((bg)=>contrastRatio(color,bg)>=2.55);
+}
 function randomizeNpcColors(){
-  const pool=[...new Set(NPC_COLOR_POOL.filter((c)=>c!==PLAYER_COLORS.south))];
   const fallback=['#ff6b6b','#6bbcff','#a77bff'];
-  if(pool.length<3){
+  const candidates=[];
+  let attempts=0;
+  while(candidates.length<36&&attempts<360){
+    attempts+=1;
+    const color=randomNpcColor();
+    if(!isReadableNpcColor(color))continue;
+    if(colorDistanceSq(color,PLAYER_COLORS.south)<14000)continue;
+    if(candidates.some((entry)=>colorDistanceSq(entry,color)<7000))continue;
+    candidates.push(color);
+  }
+  if(candidates.length<3){
     PLAYER_COLORS.east=fallback[0];
     PLAYER_COLORS.north=fallback[1];
     PLAYER_COLORS.west=fallback[2];
     return;
   }
   let bestScore=-1;
-  const bestSets=[];
-  for(let i=0;i<pool.length-2;i++){
-    for(let j=i+1;j<pool.length-1;j++){
-      for(let k=j+1;k<pool.length;k++){
-        const c1=pool[i],c2=pool[j],c3=pool[k];
-        const d12=colorDistanceSq(c1,c2);
-        const d13=colorDistanceSq(c1,c3);
-        const d23=colorDistanceSq(c2,c3);
-        const minPairDist=Math.min(d12,d13,d23);
-        if(minPairDist>bestScore){
-          bestScore=minPairDist;
-          bestSets.length=0;
-          bestSets.push([c1,c2,c3]);
-        }else if(minPairDist===bestScore){
-          bestSets.push([c1,c2,c3]);
+  let chosen=null;
+  for(let i=0;i<candidates.length-2;i++){
+    for(let j=i+1;j<candidates.length-1;j++){
+      for(let k=j+1;k<candidates.length;k++){
+        const trio=[candidates[i],candidates[j],candidates[k]];
+        const distances=[
+          colorDistanceSq(trio[0],trio[1]),
+          colorDistanceSq(trio[0],trio[2]),
+          colorDistanceSq(trio[1],trio[2]),
+          colorDistanceSq(trio[0],PLAYER_COLORS.south),
+          colorDistanceSq(trio[1],PLAYER_COLORS.south),
+          colorDistanceSq(trio[2],PLAYER_COLORS.south)
+        ];
+        const minDistance=Math.min(...distances);
+        const totalDistance=distances.reduce((sum,value)=>sum+value,0);
+        const score=(minDistance*100)+totalDistance;
+        if(score>bestScore){
+          bestScore=score;
+          chosen=trio;
         }
       }
     }
   }
-  const chosen=bestSets.length?bestSets[Math.floor(Math.random()*bestSets.length)]:fallback;
-  const assigned=[...chosen];
+  const assigned=[...(chosen||fallback)];
   for(let i=assigned.length-1;i>0;i--){
     const j=Math.floor(Math.random()*(i+1));
     [assigned[i],assigned[j]]=[assigned[j],assigned[i]];
@@ -6980,7 +7042,7 @@ function triggerMust3LeadCallout(game,selfSeat=0){
   const opponents=game.players.map((p,i)=>({player:p,seat:i})).filter((x)=>!x.player?.isHuman&&x.seat!==seatIndex);
   if(!opponents.length)return;
   const pick=opponents[Math.floor(Math.random()*opponents.length)];
-  const text=t('must3');
+  const text=t('must3Call')||t('must3');
   const now=Date.now();
   must3CallState.key=`must3-${now}-${pick.seat}`;
   must3CallState.seat=pick.seat;

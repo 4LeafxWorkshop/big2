@@ -4417,6 +4417,29 @@ body[data-screen='game'] .table-center-stack {
 .play-type-call.pass-call {
   animation: calloutFloat var(--callout-float-dur, 2.9s) ease-in-out infinite !important;
 }
+.play-type-call.must3-call .callout-box {
+  width: max-content;
+  min-width: min(calc(280px * var(--callout-size, 1)), calc(100vw - 32px));
+  max-width: min(calc(760px * var(--callout-size, 1)), calc(100vw - 24px));
+}
+.play-type-call.must3-call .hk-inner {
+  white-space: normal;
+  text-align: center;
+  padding: calc(8px * var(--callout-size, 1)) calc(14px * var(--callout-size, 1));
+  inline-size: max-content;
+  min-inline-size: 100%;
+  max-inline-size: 100%;
+}
+.play-type-call.must3-call .hk-text,
+.play-type-call.must3-call .hk-medium {
+  display: block;
+  max-width: 100%;
+  white-space: normal;
+  text-wrap: balance;
+  overflow-wrap: normal;
+  word-break: normal;
+  line-height: 1.05;
+}
 .play-type-call .tail,
 .last-card-call .tail {
   position: absolute;
