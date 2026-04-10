@@ -10,7 +10,8 @@ import {
   positionRoomTopMeta as positionRoomTopMetaDom,
   retargetCalloutTails as retargetCalloutTailsDom,
   syncDiscardSizeFromHand as syncDiscardSizeFromHandDom,
-  syncHandStackMode as syncHandStackModeDom
+  syncHandStackMode as syncHandStackModeDom,
+  syncLandscapeGameHandSizing as syncLandscapeGameHandSizingDom
 } from './gameLayout.js';
 import {runGamePostRender} from './gamePostRender.js';
 import {createHomeEventsBinder} from './homeEvents.js';
@@ -6113,6 +6114,9 @@ function renderGoogleInline(){
   }
 }
 function isMobilePointer(){return window.matchMedia('(max-width: 860px), (pointer: coarse)').matches;}
+function isCoarsePointer(){
+  return window.matchMedia('(pointer: coarse) and (hover: none)').matches;
+}
 function isWebView(){
   const ua=String(navigator?.userAgent??'');
   return /\bwv\b/.test(ua)||/WebView/i.test(ua)||/(Android.*Version\/\d+\.\d+.*Chrome\/\d+\.\d+ Mobile)/i.test(ua);
@@ -7726,12 +7730,20 @@ function showHomeCardbackZoom(previewEl,options={}){
 const positionRoomTopMeta=()=>positionRoomTopMetaDom();
 const bindRoomTopMetaLayout=()=>bindRoomTopMetaLayoutDom(positionRoomTopMeta);
 const syncDiscardSizeFromHand=()=>syncDiscardSizeFromHandDom({state});
+const syncLandscapeGameHandSizing=()=>syncLandscapeGameHandSizingDom();
 const observeDiscardSize=()=>{
   const hand=document.querySelector('.action-strip .hand');
   if(!(hand instanceof HTMLElement))return;
-  discardSizeObserverDom.observe(hand,syncDiscardSizeFromHand);
+  discardSizeObserverDom.observe(hand,()=>{
+    syncLandscapeGameHandSizing();
+    syncDiscardSizeFromHand();
+  });
+  syncLandscapeGameHandSizing();
   syncDiscardSizeFromHand();
-  window.setTimeout(syncDiscardSizeFromHand,180);
+  window.setTimeout(()=>{
+    syncLandscapeGameHandSizing();
+    syncDiscardSizeFromHand();
+  },180);
 };
 function handleGameTopbarClick(ev){
   if(state.screen!=='game')return;
@@ -8668,6 +8680,7 @@ function renderGame(){
     bindRoomTopMetaLayout,
     observeDiscardSize,
     syncConfettiCanvases,
+    syncLandscapeGameHandSizing,
     syncDiscardSizeFromHand,
     syncHandStackMode,
     retargetCalloutTails,
@@ -8869,12 +8882,16 @@ function syncViewport(){
   const root=document.documentElement;
   const short=Math.min(window.innerWidth,window.innerHeight);
   const viewportH=Math.max(0,Math.round(window.visualViewport?.height||window.innerHeight||0));
-  const scale=Math.max(0.74,Math.min(1.1,short/520));
+  const coarse=isCoarsePointer();
+  const portrait=isPortraitMode();
+  const scale=coarse
+    ?Math.max(0.74,Math.min(1.1,short/520))
+    :1;
   root.style.setProperty('--card-scale',scale.toFixed(3));
   if(viewportH){
     root.style.setProperty('--app-vh',`${viewportH}px`);
   }
-  const orientation=isPortraitMode()?'portrait':'landscape';
+  const orientation=portrait?'portrait':'landscape';
   const orientationChanged=Boolean(lastOrientation)&&orientation!==lastOrientation;
   lastOrientation=orientation;
   document.body.setAttribute('data-orientation',orientation);
@@ -8895,6 +8912,7 @@ function syncViewport(){
     render();
   }
   requestAnimationFrame(syncDiscardSizeFromHand);
+  requestAnimationFrame(syncLandscapeGameHandSizing);
   requestAnimationFrame(syncHandStackMode);
 }
 
@@ -8911,9 +8929,11 @@ function scheduleViewportRecovery(delayMs=0){
       if(state.screen==='game'){
         render();
         window.requestAnimationFrame(syncDiscardSizeFromHand);
+        window.requestAnimationFrame(syncLandscapeGameHandSizing);
         window.requestAnimationFrame(syncHandStackMode);
         window.setTimeout(()=>{
           syncViewport();
+          syncLandscapeGameHandSizing();
           syncDiscardSizeFromHand();
           syncHandStackMode();
         },180);

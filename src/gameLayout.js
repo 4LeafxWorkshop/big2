@@ -175,6 +175,46 @@ export function syncHandStackMode({
   }
 }
 
+export function syncLandscapeGameHandSizing({
+  documentRef=()=>document,
+  windowRef=()=>window
+}={}){
+  const doc=documentRef();
+  const win=windowRef();
+  const body=doc.body;
+  const hand=doc.querySelector('.action-strip .hand');
+  if(!(body instanceof HTMLElement)||!(hand instanceof HTMLElement))return;
+  const cards=[...hand.querySelectorAll('.hand-card')].filter((card)=>card instanceof HTMLElement);
+  const coarse=win.matchMedia?.('(pointer: coarse) and (hover: none)')?.matches ?? false;
+  const landscape=(win.innerWidth||0)>(win.innerHeight||0);
+  const applyWebHandSize=
+    body.dataset.screen==='game'&&
+    body.dataset.ios!=='1'&&
+    !coarse&&
+    landscape;
+
+  if(!applyWebHandSize){
+    hand.style.removeProperty('--hand-card-scale');
+    hand.style.removeProperty('min-height');
+    cards.forEach((card)=>{
+      card.style.removeProperty('width');
+      card.style.removeProperty('height');
+    });
+    return;
+  }
+
+  const availableW=hand.clientWidth||Math.round(hand.getBoundingClientRect().width)||0;
+  const handCardW=Math.max(80,Math.min(96,availableW*0.085));
+  const handCardH=handCardW*1.392857;
+
+  hand.style.setProperty('--hand-card-scale','1.34');
+  hand.style.setProperty('min-height',`${(handCardH+34).toFixed(2)}px`,'important');
+  cards.forEach((card)=>{
+    card.style.setProperty('width',`${handCardW.toFixed(2)}px`,'important');
+    card.style.setProperty('height',`${handCardH.toFixed(2)}px`,'important');
+  });
+}
+
 export function positionRoomTopMeta({documentRef=()=>document}={}){
   const doc=documentRef();
   const meta=doc.querySelector('.room-top-meta.room-top-meta-inline');
@@ -206,18 +246,13 @@ export function syncDiscardSizeFromHand({
   const doc=documentRef();
   const handCard=doc.querySelector('.action-strip .hand .hand-card');
   if(!(handCard instanceof HTMLElement))return;
+  const root=doc.documentElement;
   const rect=handCard.getBoundingClientRect();
   if(!rect.width||!rect.height)return;
-  const root=doc.documentElement;
   const widthPx=`${rect.width.toFixed(2)}px`;
   const heightPx=`${rect.height.toFixed(2)}px`;
   root.style.setProperty('--discard-card-w',widthPx);
   root.style.setProperty('--discard-card-h',heightPx);
-  doc.querySelectorAll('.seat-played .card.mini, .center-last .card.mini').forEach((card)=>{
-    if(!(card instanceof HTMLElement))return;
-    card.style.setProperty('width',widthPx,'important');
-    card.style.setProperty('height',heightPx,'important');
-  });
 }
 
 export function createDiscardSizeObserver({

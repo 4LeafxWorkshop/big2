@@ -13,6 +13,7 @@ export function runGamePostRender(params){
     bindRoomTopMetaLayout,
     observeDiscardSize,
     syncConfettiCanvases,
+    syncLandscapeGameHandSizing,
     syncDiscardSizeFromHand,
     syncHandStackMode,
     retargetCalloutTails,
@@ -103,6 +104,7 @@ export function runGamePostRender(params){
   syncConfettiCanvases();
   bindGameEvents(v,arr);
   requestAnimationFrame(()=>{
+    syncLandscapeGameHandSizing();
     syncDiscardSizeFromHand();
     syncHandStackMode();
     retargetCalloutTails();
