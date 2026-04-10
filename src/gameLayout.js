@@ -5,7 +5,7 @@ export function retargetCalloutTails({
 }={}){
   const doc=documentRef();
   const win=windowRef();
-  const bubbles=[...doc.querySelectorAll('.play-type-call, .last-card-call, .emote-callout')];
+  const bubbles=[...doc.querySelectorAll('.play-type-call:not(.seat-motto-callout), .last-card-call, .emote-callout')];
   const visualViewport=win.visualViewport||null;
   const viewportLeft=Math.max(0,Number(visualViewport?.offsetLeft)||0);
   const viewportTop=Math.max(0,Number(visualViewport?.offsetTop)||0);
@@ -225,6 +225,48 @@ export function positionRoomTopMeta({documentRef=()=>document}={}){
   }
   meta.classList.remove('room-top-meta-center','room-top-meta-panel');
   meta.classList.add('room-top-meta-inline');
+}
+
+export function positionLandscapeSideStations({
+  documentRef=()=>document,
+  windowRef=()=>window
+}={}){
+  const doc=documentRef();
+  const win=windowRef();
+  const body=doc.body;
+  const stacks=[...doc.querySelectorAll('.seat.west .side-station-stack, .seat.east .side-station-stack')];
+  if(!stacks.length)return;
+  const landscape=(win.innerWidth||0)>(win.innerHeight||0);
+  const desktop=(win.innerWidth||0)>=861;
+  const active=body?.dataset?.screen==='game'&&landscape&&desktop;
+  if(!active){
+    stacks.forEach((stack)=>{
+      if(!(stack instanceof HTMLElement))return;
+      stack.style.removeProperty('left');
+      stack.style.removeProperty('right');
+      stack.style.removeProperty('transform');
+    });
+    return;
+  }
+  const table=doc.querySelector('.table');
+  if(!(table instanceof HTMLElement))return;
+  const tableRect=table.getBoundingClientRect();
+  if(!(tableRect.width>0&&tableRect.height>0))return;
+  const centerX=tableRect.left+(tableRect.width/2);
+  for(const cls of ['west','east']){
+    const seat=doc.querySelector(`.seat.${cls}`);
+    if(!(seat instanceof HTMLElement))continue;
+    const stack=seat.querySelector('.side-station-stack');
+    if(!(stack instanceof HTMLElement))continue;
+    const seatRect=seat.getBoundingClientRect();
+    if(!(seatRect.width>0))continue;
+    const edgeX=cls==='west'?tableRect.left:tableRect.right;
+    const targetX=(edgeX+centerX)/2;
+    const leftPx=targetX-seatRect.left;
+    stack.style.setProperty('left',`${leftPx.toFixed(2)}px`,'important');
+    stack.style.setProperty('right','auto','important');
+    stack.style.setProperty('transform','translateX(-50%)','important');
+  }
 }
 
 export function createRoomTopMetaLayoutBinder({windowRef=()=>window}={}){

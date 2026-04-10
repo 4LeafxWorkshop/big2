@@ -7,6 +7,7 @@ import {createGameEventsBinder} from './gameEvents.js';
 import {
   createDiscardSizeObserver,
   createRoomTopMetaLayoutBinder,
+  positionLandscapeSideStations as positionLandscapeSideStationsDom,
   positionRoomTopMeta as positionRoomTopMetaDom,
   retargetCalloutTails as retargetCalloutTailsDom,
   syncDiscardSizeFromHand as syncDiscardSizeFromHandDom,
@@ -7727,7 +7728,10 @@ function showHomeCardbackZoom(previewEl,options={}){
   },0);
   homeCardbackZoomCleanup=dismiss;
 }
-const positionRoomTopMeta=()=>positionRoomTopMetaDom();
+const positionRoomTopMeta=()=>{
+  positionRoomTopMetaDom();
+  positionLandscapeSideStationsDom();
+};
 const bindRoomTopMetaLayout=()=>bindRoomTopMetaLayoutDom(positionRoomTopMeta);
 const syncDiscardSizeFromHand=()=>syncDiscardSizeFromHandDom({state});
 const syncLandscapeGameHandSizing=()=>syncLandscapeGameHandSizingDom();

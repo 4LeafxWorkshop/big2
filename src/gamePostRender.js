@@ -104,11 +104,15 @@ export function runGamePostRender(params){
   syncConfettiCanvases();
   bindGameEvents(v,arr);
   requestAnimationFrame(()=>{
+    positionRoomTopMeta();
     syncLandscapeGameHandSizing();
     syncDiscardSizeFromHand();
     syncHandStackMode();
     retargetCalloutTails();
-    setTimeout(retargetCalloutTails,80);
+    setTimeout(()=>{
+      positionRoomTopMeta();
+      retargetCalloutTails();
+    },80);
   });
   if(v.mode==='room'&&!v.gameOver){
     maybeRunRoomAi();

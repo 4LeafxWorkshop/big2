@@ -145,9 +145,10 @@ export function buildOpponentSeatsHtml(params){
       :'';
     const opponentLastAction=lastActions.get(player.seat);
     const openAnchorStyle=isSideSeat?'':'justify-self:center !important;';
-    const opponentOpenPlayHtml=opponentLastAction
-      ?`<div class="seat-open-play" style="${openAnchorStyle}"><div class="opponent-open-scale">${seatLastActionHtml(opponentLastAction,TABLE_PLAY_SCALE)}</div></div>`
+    const openPlayContent=opponentLastAction
+      ?seatLastActionHtml(opponentLastAction,TABLE_PLAY_SCALE)
       :'';
+    const opponentOpenPlayHtml=`<div class="seat-open-play" style="${openAnchorStyle}"><div class="opponent-open-scale">${openPlayContent}</div></div>`;
     const closedCountHtml=!v.gameOver&&player.count>0?`<span class="closed-count-pill">x${player.count}</span>`:'';
     const avatarSrc=player.picture?authPictureUrlFrom(player.picture):avatarDataUri(player.name,playerColor,player.gender,player.isBot);
     const botNameAttr=player.isBot?` data-bot-name="${esc(player.name)}"`:'';

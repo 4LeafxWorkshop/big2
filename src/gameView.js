@@ -84,6 +84,7 @@ export function renderSeatLastAction(action,{
   if(action.type==='pass')return`<div class="seat-played seat-played-pass"><span class="seat-pass-label"><span class="seat-pass-icon" aria-hidden="true"></span><span class="seat-pass-text">${t('pass')}</span></span></div>`;
   const ts=Number(action.ts)||0;
   const list=action.cards??[];
+  const isPair=list.length===2;
   const isFan=list.length===3||list.length===5;
   const isFive=list.length===5;
   const scale=Math.max(0.1,Number(sizeMultiplier)||1);
@@ -99,7 +100,7 @@ export function renderSeatLastAction(action,{
     const rot=((fanNoise(`${action.seat}|${ts}|${cardId(card)}`,index,'played')*2)-1)*8.84;
     return renderStaticCard(card,true,'discard-card',`${sizeStyle}transform:rotate(${rot.toFixed(2)}deg);`);
   }).join('');
-  return`<div class="seat-played${isFan?' seat-played-fan':''}${isFive?' seat-played-five':''}">${cards}</div>`;
+  return`<div class="seat-played${isPair?' seat-played-pair':''}${isFan?' seat-played-fan':''}${isFive?' seat-played-five':''}">${cards}</div>`;
 }
 
 export function renderCenterLastMoves(lastActions,selfSeat,{
@@ -153,7 +154,7 @@ export function renderOpponentLabel(params){
     opponentAttr,
     esc
   }=params;
-  const labelName=`<div class="name"><span class="player-avatar-wrap player-avatar-wrap-opponent avatar-rim" style="--avatar-rim:${pColor};"><img class="player-avatar player-avatar-opponent ${playerAvatarClass}" style="--avatar-outline:${pColor};" src="${avatarSrc}" alt="${esc(playerName)}"${botNameAttr}/>${hostBadgeHtml}${badgeHtml}</span><span class="seat-identity"><span class="seat-name-text">${esc(playerName)}</span><span class="seat-subline"><span>${playerScore}</span>${roundWinsHtml}</span>${namecardBtn}${mottoText?`<span class="seat-motto-callout play-type-call play-type-call-seat" style="--player-color:${pColor};--motto-tilt:${mottoTilt};"><div class="callout-box"><div class="hk-inner"><span class="${mottoClass}">${esc(mottoText)}</span>${hintText?`<span class="hk-chinese-sub">${esc(hintText)}</span>`:''}</div></div><span class="tail tail-${mottoTailDir}"></span></span>`:''}</span></div>`;
+  const labelName=`<div class="name"><span class="player-avatar-wrap player-avatar-wrap-opponent avatar-rim" style="--avatar-rim:${pColor};"><img class="player-avatar player-avatar-opponent ${playerAvatarClass}" style="--avatar-outline:${pColor};" src="${avatarSrc}" alt="${esc(playerName)}"${botNameAttr}/>${hostBadgeHtml}${badgeHtml}</span><span class="seat-identity"><span class="seat-name-text">${esc(playerName)}</span><span class="seat-subline"><span>${playerScore}</span>${roundWinsHtml}</span>${namecardBtn}${mottoText?`<span class="seat-motto-callout" style="--player-color:${pColor};--motto-tilt:${mottoTilt};"><div class="callout-box"><div class="hk-inner"><span class="${mottoClass}">${esc(mottoText)}</span>${hintText?`<span class="hk-chinese-sub">${esc(hintText)}</span>`:''}</div></div><span class="tail tail-${mottoTailDir}"></span></span>`:''}</span></div>`;
   return`<div class="seat-name-fixed${peekActive?' motto-peek':''}"${opponentAttr}>${labelName}${calloutHtml}${emoteHtml}</div>`;
 }
 
