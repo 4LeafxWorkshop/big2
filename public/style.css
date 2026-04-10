@@ -8005,12 +8005,8 @@ body[data-screen='game'] .seat-namecard:focus-visible {
 }
 body[data-screen='game'] .seat-motto-callout {
   position: absolute;
-  left: calc(-1 * (15px + var(--game-seat-badge-gap)));
-  top: calc(100% + 8px);
-  transform: translateX(-50%) translateY(-6px) scale(1);
   opacity: 0;
   pointer-events: none;
-  animation: calloutFloat var(--callout-float-dur, 2.6s) ease-in-out infinite;
   z-index: 1800;
   --callout-size: .5;
   --callout-tilt: 0deg;
@@ -8020,76 +8016,41 @@ body[data-screen='game'] .seat-motto-callout {
 }
 body[data-screen='game'] .seat-motto-callout.play-type-call {
   padding: 0;
-  border: 0;
-  background: transparent;
-  filter: none;
 }
-:root {
-  --hk-red: #000000;
-  --hk-yellow: #a7b0bb;
-  --hk-black: #14213d;
+body[data-screen='game'] .seat-motto-callout .callout-box {
+  max-width: 280px;
 }
-body[data-screen='game'] .seat-motto-callout .hk-motto-box {
-  background: color-mix(in srgb, var(--player-color, #84a9db) 78%, #0b111b 22%);
-  padding: 6px 8px;
+body[data-screen='game'] .seat-motto-callout .hk-inner {
+  white-space: normal;
   text-align: center;
-  border: 2px solid color-mix(in srgb, var(--player-color, #84a9db) 70%, #ffffff 30%);
-  border-radius: 18px;
-  position: relative;
-  display: inline-block;
-  max-width: 220px;
-  transform: none;
-  box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,.25),
-    0 2px 8px rgba(0,0,0,.22);
-}
-body[data-screen='game'] .seat-motto-callout .hk-motto-box::before,
-body[data-screen='game'] .seat-motto-callout .hk-motto-box::after {
-  display: none;
-}
-body[data-screen='game'] .seat-motto-callout .hk-motto-box::after {
-  content: '';
-  position: absolute;
-  top: -8px;
-  left: 22px;
-  width: 16px;
-  height: 10px;
-  border-radius: 12px 8px 10px 14px;
-  transform: rotate(-12deg);
-  background: color-mix(in srgb, var(--player-color, #84a9db) 76%, #f4f6f8 24%);
-  border: 1px solid rgba(0,0,0,.45);
-  box-shadow: 0 2px 6px rgba(0,0,0,.2);
-}
-body[data-screen='game'] .seat-motto-callout .hk-motto-box::before {
-  content: '';
-  position: absolute;
-  top: -14px;
-  left: 10px;
-  width: 11px;
-  height: 7px;
-  border-radius: 10px 6px 8px 12px;
-  transform: rotate(14deg);
-  background: color-mix(in srgb, var(--player-color, #84a9db) 76%, #f4f6f8 24%);
-  border: 1px solid rgba(0,0,0,.45);
-  box-shadow: 0 2px 6px rgba(0,0,0,.2);
+  max-width: 100%;
+  border: 1px dashed rgba(255, 255, 255, 0.42);
+  border-radius: calc(18px * var(--callout-size, 1)) calc(12px * var(--callout-size, 1)) calc(20px * var(--callout-size, 1)) calc(12px * var(--callout-size, 1));
+  text-shadow: 0 1px 2px rgba(0,0,0,.35);
+  overflow: visible;
 }
 body[data-screen='game'] .seat-motto-callout .hk-power-motto {
-  font-family: 'Impact', 'Arial Black', sans-serif;
-  font-size: .92rem;
+  font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", sans-serif;
+  font-size: calc(1.72rem * var(--callout-size, 1));
   color: #fff;
   margin: 0;
   text-transform: none;
-  font-style: italic;
-  letter-spacing: 0px;
-  white-space: nowrap;
-  display: block;
+  font-style: normal;
+  font-weight: 800;
+  letter-spacing: .01em;
+  white-space: normal;
+  display: -webkit-box;
+  line-height: 1.15;
+  text-wrap: balance;
+  overflow-wrap: anywhere;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 body[data-screen='game'] .seat-motto-callout .hk-power-motto.motto-en {
-  font-family: 'Bebas Neue', 'Oswald', 'Arial Black', sans-serif;
-  letter-spacing: .2px;
-  font-size: .84rem;
+  font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", sans-serif;
+  letter-spacing: .01em;
+  font-size: calc(1.58rem * var(--callout-size, 1));
 }
 body[data-screen='game'] .seat-motto-callout .hk-chinese-sub {
   display: block;
@@ -8097,38 +8058,15 @@ body[data-screen='game'] .seat-motto-callout .hk-chinese-sub {
   color: #ff9f1a;
   font-weight: 900;
   margin-top: 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
   transform: scaleY(1.12);
-}
-body[data-screen='game'] .seat-motto-callout .tail {
-  top: -18px;
-  left: 50%;
-  transform: translateX(-50%);
-  border-top-color: transparent !important;
-  border-left-color: transparent !important;
-  border-right-color: transparent !important;
-  border-bottom-color: transparent !important;
-}
-body[data-screen='game'] .seat-motto-callout .tail::after {
-  top: auto;
-  right: auto;
-  bottom: -14px;
-  left: -10px;
-  border-top-color: transparent !important;
-  border-left-color: transparent !important;
-  border-right-color: transparent !important;
-  border-bottom-color: var(--bubble-fill) !important;
 }
 body[data-screen='game'] .seat-name-fixed:hover .seat-motto-callout,
 body[data-screen='game'] .seat-name-fixed:focus-within .seat-motto-callout {
   opacity: 1;
-  transform: translateX(-50%) translateY(0) scale(1);
 }
 body[data-screen='game'] .seat-name-fixed.motto-peek .seat-motto-callout {
   opacity: 1;
-  transform: translateX(-50%) translateY(0) scale(1);
 }
 body[data-screen='game'] .result-avatar-wrap {
   width: 30px;
@@ -11109,18 +11047,31 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-se
 }
 
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .play-type-call-seat .callout-box,
-body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-seat .callout-box {
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-seat .callout-box,
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout .callout-box {
   max-inline-size: none !important;
 }
 
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .play-type-call-seat .hk-inner,
-body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-seat .hk-inner {
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-seat .hk-inner,
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout .hk-inner {
   white-space: nowrap !important;
   overflow-wrap: normal !important;
   text-wrap: nowrap !important;
   overflow: visible !important;
   text-overflow: clip !important;
   max-inline-size: none !important;
+}
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout .hk-power-motto {
+  white-space: nowrap !important;
+  overflow-wrap: normal !important;
+  text-wrap: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: clip !important;
+  line-height: 1 !important;
+  display: -webkit-box !important;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 
 @media (max-width: 860px) {
@@ -11596,7 +11547,8 @@ body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .emote
 
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .play-type-call-seat .tail,
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-seat .tail,
-body[data-screen='game'] .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat .tail {
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat .tail,
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout .tail {
   top: auto !important;
   bottom: calc(-20px * var(--callout-size, 1)) !important;
   left: 50% !important;
@@ -11608,7 +11560,8 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .emote-callout.pla
 
 body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .play-type-call-seat .tail,
 body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .last-card-call-seat .tail,
-body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat .tail {
+body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat .tail,
+body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .seat-motto-callout .tail {
   top: 50% !important;
   bottom: auto !important;
   left: calc(-20px * var(--callout-size, 1)) !important;
@@ -11620,7 +11573,8 @@ body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .emote
 
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .play-type-call-seat .tail::after,
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-seat .tail::after,
-body[data-screen='game'] .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat .tail::after {
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat .tail::after,
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout .tail::after {
   top: calc(-14px * var(--callout-size, 1)) !important;
   bottom: auto !important;
   left: calc(-10px * var(--callout-size, 1)) !important;
@@ -11631,7 +11585,8 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .emote-callout.pla
 
 body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .play-type-call-seat .tail::after,
 body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .last-card-call-seat .tail::after,
-body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat .tail::after {
+body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat .tail::after,
+body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .seat-motto-callout .tail::after {
   top: calc(-10px * var(--callout-size, 1)) !important;
   bottom: auto !important;
   left: calc(-6px * var(--callout-size, 1)) !important;
@@ -11639,6 +11594,45 @@ body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .emote
   border-color: transparent !important;
   border-top-color: transparent !important;
   border-right-color: var(--bubble-fill) !important;
+}
+
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout {
+  top: calc(100% + 10px) !important;
+  bottom: auto !important;
+  left: 50% !important;
+  right: auto !important;
+  --callout-base-x: -50%;
+  --callout-base-y: 0px;
+}
+
+body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .seat-motto-callout {
+  top: calc(100% + 10px) !important;
+  bottom: auto !important;
+  left: 50% !important;
+  right: auto !important;
+  --callout-base-x: -50%;
+  --callout-base-y: 0px;
+}
+
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout .tail,
+body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .seat-motto-callout .tail {
+  top: calc(-20px * var(--callout-size, 1)) !important;
+  bottom: auto !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+  border-color: transparent !important;
+  border-bottom-color: var(--bubble-border) !important;
+}
+
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout .tail::after,
+body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .seat-motto-callout .tail::after {
+  bottom: calc(-14px * var(--callout-size, 1)) !important;
+  top: auto !important;
+  left: calc(-10px * var(--callout-size, 1)) !important;
+  right: auto !important;
+  border-color: transparent !important;
+  border-bottom-color: var(--bubble-fill) !important;
 }
 
 body[data-screen='game'] .history-detail-row .history-cards {

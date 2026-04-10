@@ -159,6 +159,7 @@ export function buildOpponentSeatsHtml(params){
     const mottoClass=state.language==='en'?'hk-power-motto motto-en':'hk-power-motto';
     const seed=hashTextSeed(`${opponentName}|motto`);
     const mottoTilt=`${(seed%11)-5}deg`;
+    const mottoTailDir='north';
     const roundWinsHtml=roundWinsChipHtml(roundWinsBySeat[player.seat]??0);
     const namecardBtn=player.isBot?`<button type="button" class="seat-namecard" data-opponent-name="${esc(opponentName)}" aria-label="${esc(t('profile'))}">🪪</button>`:'';
     const calloutHtml=seatCalloutHtml(player.seat,player.cls,playerColor,false);
@@ -179,6 +180,7 @@ export function buildOpponentSeatsHtml(params){
       mottoClass,
       hintText,
       mottoTilt,
+      mottoTailDir,
       calloutHtml,
       emoteHtml,
       peekActive,

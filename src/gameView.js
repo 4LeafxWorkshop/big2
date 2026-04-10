@@ -146,13 +146,14 @@ export function renderOpponentLabel(params){
     mottoClass,
     hintText,
     mottoTilt,
+    mottoTailDir,
     calloutHtml,
     emoteHtml,
     peekActive,
     opponentAttr,
     esc
   }=params;
-  const labelName=`<div class="name"><span class="player-avatar-wrap player-avatar-wrap-opponent avatar-rim" style="--avatar-rim:${pColor};"><img class="player-avatar player-avatar-opponent ${playerAvatarClass}" style="--avatar-outline:${pColor};" src="${avatarSrc}" alt="${esc(playerName)}"${botNameAttr}/>${hostBadgeHtml}${badgeHtml}</span><span class="seat-identity"><span class="seat-name-text">${esc(playerName)}</span><span class="seat-subline"><span>${playerScore}</span>${roundWinsHtml}</span>${namecardBtn}${mottoText?`<span class="seat-motto-callout play-type-call" style="--player-color:${pColor};--motto-tilt:${mottoTilt};"><span class="hk-motto-box"><span class="${mottoClass}">${esc(mottoText)}</span>${hintText?`<span class="hk-chinese-sub">${esc(hintText)}</span>`:''}</span><span class="tail tail-north"></span></span>`:''}</span></div>`;
+  const labelName=`<div class="name"><span class="player-avatar-wrap player-avatar-wrap-opponent avatar-rim" style="--avatar-rim:${pColor};"><img class="player-avatar player-avatar-opponent ${playerAvatarClass}" style="--avatar-outline:${pColor};" src="${avatarSrc}" alt="${esc(playerName)}"${botNameAttr}/>${hostBadgeHtml}${badgeHtml}</span><span class="seat-identity"><span class="seat-name-text">${esc(playerName)}</span><span class="seat-subline"><span>${playerScore}</span>${roundWinsHtml}</span>${namecardBtn}${mottoText?`<span class="seat-motto-callout play-type-call play-type-call-seat" style="--player-color:${pColor};--motto-tilt:${mottoTilt};"><div class="callout-box"><div class="hk-inner"><span class="${mottoClass}">${esc(mottoText)}</span>${hintText?`<span class="hk-chinese-sub">${esc(hintText)}</span>`:''}</div></div><span class="tail tail-${mottoTailDir}"></span></span>`:''}</span></div>`;
   return`<div class="seat-name-fixed${peekActive?' motto-peek':''}"${opponentAttr}>${labelName}${calloutHtml}${emoteHtml}</div>`;
 }
 
