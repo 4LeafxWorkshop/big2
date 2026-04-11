@@ -721,19 +721,21 @@ body[data-screen='home'] .home-wrap {
   padding: 0;
   border: 0;
   background: transparent;
+  box-shadow: none;
   font-size: .84rem;
   font-weight: 700;
   color: rgba(244, 230, 196, .9);
 }
 .royal-head-actions #home-lang-toggle {
   padding: 1px 7px;
-  border: 1px solid rgba(242, 220, 168, .45);
+  border: 0;
   border-radius: 7px;
-  background: rgba(10, 30, 43, .44);
+  background: transparent;
   font-size: .72rem;
 }
 .royal-head-actions button:hover {
   transform: none;
+  box-shadow: none;
   color: #ffe7b1;
 }
 .royal-title-wrap {
@@ -2787,6 +2789,7 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
 .legal-mini-link {
   background: transparent;
   border: 0;
+  box-shadow: none;
   margin: 0;
   padding: 0;
   min-height: 0;
@@ -2800,6 +2803,8 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
 .legal-mini-link:hover,
 .legal-mini-link.active {
   color: #ffd166;
+  box-shadow: none;
+  transform: none;
 }
 .legal-mini-sep {
   font-size: .64rem;
@@ -2827,9 +2832,9 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   color: #ffd166;
 }
 .royal-home-wrap .legal-mini {
-  margin-top: 4px;
-  padding-top: 10px;
-  border-top: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
 }
 .royal-home-wrap .legal-mini-links {
   gap: 6px;
@@ -2852,7 +2857,7 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   line-height: 1.4;
   color: rgba(241, 228, 200, .9);
   background: rgba(10, 30, 44, .32);
-  border: 1px solid rgba(239, 206, 134, .22);
+  border: 0;
   border-radius: 10px;
   padding: 8px 9px;
 }
@@ -3871,7 +3876,7 @@ body[data-screen='game'] .topbar-right .control-row button {
 body[data-screen='game'] .topbar {
   position: sticky;
   top: 0;
-  z-index: 9999;
+  z-index: 1;
   pointer-events: auto;
   isolation: isolate;
   background: transparent !important;
@@ -4444,7 +4449,7 @@ body[data-screen='game'] .table-center-stack {
 .play-type-call,
 .last-card-call {
   --bubble-border: #4a4a4a;
-  --bubble-fill: color-mix(in srgb, var(--player-color, #84a9db) 76%, #f4f6f8 24%);
+  --bubble-fill: var(--player-color, #84a9db);
   position: absolute;
   z-index: 14000;
   display: inline-block;
@@ -4454,7 +4459,7 @@ body[data-screen='game'] .table-center-stack {
 }
 .emote-callout {
   --bubble-border: #4a4a4a;
-  --bubble-fill: color-mix(in srgb, var(--player-color, #84a9db) 76%, #f4f6f8 24%);
+  --bubble-fill: var(--player-color, #84a9db);
   --callout-size: 1.15;
   position: absolute;
   z-index: 14000;
@@ -7012,11 +7017,11 @@ body[data-screen='game'] .intro-modal {
   }
   .royal-home-body .more-settings-toggle {
     grid-column: 1 / -1;
-    order: 1;
+    order: -1;
   }
   .royal-home-body .more-settings-panel {
     grid-column: 1 / -1;
-    order: 2;
+    order: -1;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 8px;
   }
@@ -8033,7 +8038,7 @@ body[data-screen='game'] .seat-namecard:focus-visible {
 }
 body[data-screen='game'] .seat-motto-callout {
   --bubble-border: #4a4a4a;
-  --bubble-fill: color-mix(in srgb, var(--player-color, #84a9db) 76%, #f4f6f8 24%);
+  --bubble-fill: var(--player-color, #84a9db);
   position: absolute;
   display: inline-block;
   opacity: 0;
@@ -11518,12 +11523,10 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] :is(.play-type-cal
 }
 
 body[data-screen='game'] :is(.north, .west, .east) > .seat-name-fixed {
-  background: transparent !important;
   box-shadow: none !important;
 }
 
 body[data-screen='game'] :is(.seat.north, .seat.west, .seat.east) > .seat-name-fixed {
-  background: transparent !important;
   border: 0 !important;
   box-shadow: none !important;
 }
