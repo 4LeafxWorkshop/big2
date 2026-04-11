@@ -8143,6 +8143,10 @@ body[data-screen='game'] .seat-name-fixed:focus-within .seat-motto-callout {
   opacity: 1;
   pointer-events: auto;
 }
+body[data-screen='game'] .action-strip .seat-name-fixed.player-tag:hover .seat-motto-callout {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
 body[data-screen='game'] .seat-name-fixed.motto-peek .seat-motto-callout {
   opacity: 1;
   pointer-events: auto;

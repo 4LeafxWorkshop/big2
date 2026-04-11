@@ -7375,11 +7375,22 @@ function buildView(){
   };
 }
 
+function gameLogLocale(){
+  const localeMap={
+    'zh-HK':'zh-HK',
+    en:'en-US',
+    fr:'fr-FR',
+    de:'de-DE',
+    es:'es-ES',
+    ja:'ja-JP'
+  };
+  return localeMap[state.language]??'en-US';
+}
 function formatGameLogDateTime(ts){
   const n=Number(ts)||0;
   if(!n)return'';
   try{
-    const locale=state.language==='en'?'en-US':state.language==='ja'?'ja-JP':'zh-HK';
+    const locale=gameLogLocale();
     const d=new Date(n);
     const time=d.toLocaleTimeString(locale,{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
     return time;
@@ -7391,7 +7402,7 @@ function formatSystemLogDateTime(ts){
   const n=Number(ts)||0;
   if(!n)return'';
   try{
-    const locale=state.language==='en'?'en-US':state.language==='ja'?'ja-JP':'zh-HK';
+    const locale=gameLogLocale();
     const d=new Date(n);
     const time=d.toLocaleTimeString(locale,{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
     return time;
@@ -7403,13 +7414,22 @@ function gameLogCardText(cards){
   return(cards??[]).map((c)=>`${SUITS[c.suit]?.symbol??''}${RANKS[c.rank]??''}`).join('');
 }
 function gameLogDetailText(e){
-  const zh=state.language==='zh-HK';
-  if(e.action==='pass')return zh?'本回合選擇過牌。':'Passed this turn.';
+  const lang=state.language;
+  const textByLang={
+    'zh-HK':{pass:'本回合選擇過牌。',played:'出牌：',card:'張'},
+    en:{pass:'Passed this turn.',played:'Played:',card:'cards'},
+    fr:{pass:'A passé ce tour.',played:'Joué:',card:'cartes'},
+    de:{pass:'Zug gepasst.',played:'Gespielt:',card:'Karten'},
+    es:{pass:'Pasó este turno.',played:'Jugó:',card:'cartas'},
+    ja:{pass:'このターンはパスしました。',played:'出しました：',card:'枚'}
+  };
+  const copy=textByLang[lang]??textByLang.en;
+  if(e.action==='pass')return copy.pass;
   const cards=e.cards??[];
   const kind=kindLabel(e.kind);
   const cardText=gameLogCardText(cards);
-  if(zh)return`出牌：${kind}(${cards.length}張)${cardText?`(${cardText})`:''}`;
-  return`Played: ${kind} (${cards.length} cards)${cardText?` (${cardText})`:''}`;
+  if(lang==='zh-HK')return`${copy.played}${kind}(${cards.length}${copy.card})${cardText?`(${cardText})`:''}`;
+  return`${copy.played} ${kind} (${cards.length} ${copy.card})${cardText?` (${cardText})`:''}`;
 }
 function historyHtml(h,self,systemLog=[]){
   const items=[];
