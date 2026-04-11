@@ -4709,13 +4709,6 @@ async function queryActiveRoomsFromDb(roomDb,instanceId){
       hiddenRooms+=1;
       continue;
     }
-    const recentHumans=activePlayers.filter((p)=>isRoomPlayerHuman(p)&&Number(p.lastSeen)>0&&(now-Number(p.lastSeen)<=ROOM_OFFLINE_MS));
-    if((status!=='playing'&&!recentHumans.length)||(status==='playing'&&!recentHumans.length)){
-      void roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(doc.id).delete().catch(()=>{});
-      void deleteRoomDirectory(doc.id);
-      hiddenRooms+=1;
-      continue;
-    }
     if(status==='finished'&&humans.length>=Number(data.maxPlayers||4)){
       hiddenRooms+=1;
       continue;
@@ -5166,7 +5159,6 @@ function applyTimeoutStrikeToRoomState(players,game,seat,now=Date.now()){
 function resetTimeoutStrikeForSeat(players,seat){
   return roomTimeoutController.resetTimeoutStrikeForSeat(players,seat);
 }
-const ROOM_PRESENCE_PING_MS=5000;
 async function pruneRoomIfNeeded(){
   const roomDb=currentRoomDb();
   if(!state.room.id||!roomDb)return;
@@ -5217,13 +5209,8 @@ async function touchRoomPresence(force=false){
 }
 function startRoomPresencePing(){
   if(roomPresenceTimer||!state.room.id||!currentRoomDb())return;
+  roomPresenceTimer=1;
   if(String(state.room.data?.status||'')!=='finished')void touchRoomPresence(true);
-  roomPresenceTimer=window.setInterval(async()=>{
-    if(!state.room.id||!currentRoomDb()){clearInterval(roomPresenceTimer);roomPresenceTimer=null;return;}
-    if(String(state.room.data?.status||'')==='finished')return;
-    await touchRoomPresence(false);
-    await pruneRoomIfNeeded();
-  },ROOM_PRESENCE_PING_MS);
 }
 function currentAuthUserUid(){
   return String(firebaseAuth?.currentUser?.uid??'').trim();
@@ -8977,6 +8964,7 @@ function scheduleViewportRecovery(delayMs=0){
 window.addEventListener('resize',syncViewport);
 window.addEventListener('orientationchange',syncViewport);
 window.addEventListener('focus',()=>{
+  if(state.home.mode==='room'&&state.room.id)void touchRoomPresence(true);
   if(state.screen==='game')scheduleViewportRecovery(30);
 });
 window.addEventListener('pageshow',()=>{
