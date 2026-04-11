@@ -148,7 +148,7 @@ export function renderOpponentProfileModal(params){
     <section class="intro-sheet opponent-profile-sheet">
       <header class="intro-head">
         <div>
-          <h3 class="title-with-icon"><span class="title-icon-emoji" aria-hidden="true">👤</span><span>${esc(name)}</span><span class="opponent-gender-icon ${genderClass}" data-symbol="${genderIcon}" aria-label="${esc(genderLabel)}" title="${esc(genderLabel)}">${genderIcon}</span></h3>
+          <h3 class="title-with-icon"><span class="title-icon-emoji" aria-hidden="true">👤</span><span>${esc(name)}</span><span class="opponent-gender-icon ${genderClass}" aria-label="${esc(genderLabel)}" title="${esc(genderLabel)}">${genderClass==='gender-female'?`<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><circle cx="10.5" cy="9.8" r="4.1"/><path d="M10.5 13.9v4.8M8.3 16.5h4.4"/></svg>`:`<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><circle cx="9.5" cy="14.5" r="4.2"/><path d="M13 11l5-5"/><path d="M14.6 6H18v3.4"/></svg>`}</span></h3>
         </div>
         <button id="opponent-profile-close" class="secondary">${closeLabel}</button>
       </header>
@@ -162,7 +162,12 @@ export function renderOpponentProfileModal(params){
               <span class="opponent-chip"><span class="opponent-chip-icon hobby" aria-hidden="true"></span><span>${hobbiesLabel} ${esc(hobbyText)}</span></span>
             </div>
             <div class="opponent-profile-motto">
-              <span class="opponent-chip-icon motto" aria-hidden="true"></span>
+              <span class="opponent-chip-icon motto" aria-hidden="true">
+                <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                  <path d="M6.5 5.5h11A3.5 3.5 0 0 1 21 9v4a3.5 3.5 0 0 1-3.5 3.5H9.4l-3.8 3.2V16H6.5A3.5 3.5 0 0 1 3 13V9a3.5 3.5 0 0 1 3.5-3.5Z"/>
+                  <path d="M8 10h8M8 13h5"/>
+                </svg>
+              </span>
               <div>
                 <div class="opponent-motto-label">${mottoLabel}</div>
                 <div class="opponent-motto-text">${esc(mottoText)}</div>

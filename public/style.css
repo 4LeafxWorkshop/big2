@@ -2114,16 +2114,19 @@ body[data-screen='home'] .home-wrap {
   height: 22px;
   border-radius: 999px;
   overflow: hidden;
-  font-size: .9rem;
-  font-weight: 800;
-  line-height: 1;
-  font-family: "Segoe UI Symbol","Noto Sans Symbols2","Apple Symbols",var(--ui-font);
   border: 1px solid rgba(255,255,255,.2);
   background: rgba(255,255,255,.08);
   box-shadow: 0 3px 10px rgba(0,0,0,.18);
 }
-.opponent-gender-symbol::before {
-  content: none;
+.opponent-gender-symbol svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.15;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .opponent-gender-symbol.gender-male {
   color: #7cc4ff;
@@ -3262,16 +3265,19 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   margin-left: 6px;
   border-radius: 999px;
   overflow: hidden;
-  font-size: .86rem;
-  font-weight: 800;
-  line-height: 1;
-  font-family: "Segoe UI Symbol","Noto Sans Symbols2","Apple Symbols",var(--ui-font);
   border: 1px solid rgba(255,255,255,.2);
   background: rgba(255,255,255,.08);
   box-shadow: 0 3px 10px rgba(0,0,0,.18);
 }
-.opponent-gender-icon::before {
-  content: none;
+.opponent-gender-icon svg {
+  display: block;
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.15;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .opponent-gender-icon.gender-male {
   color: #7cc4ff;
@@ -3318,7 +3324,23 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2376e39c' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 3l2.2 4.5 5 .7-3.6 3.4.9 5-4.5-2.4-4.5 2.4.9-5L4.8 8.2l5-.7L12 3Z'/%3E%3C/svg%3E");
 }
 .opponent-chip-icon.motto {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ff9f9f' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 6h16M4 12h12M4 18h8'/%3E%3C/svg%3E");
+  color: #ff9fcf;
+  background: transparent;
+  background-image: none;
+  padding: 0;
+  box-sizing: border-box;
+}
+.opponent-chip-icon.motto svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  left: -2px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.15;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .opponent-profile-motto {
   display: grid;
@@ -6102,7 +6124,7 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
   }
   body[data-screen='game'] .seat-motto-callout {
     left: 50% !important;
-    transform: translate(-50%, -6px) scale(1) !important;
+    transform: translate(calc(-50% + 40px), -6px) scale(1) !important;
   }
   body[data-screen='game'][data-orientation='portrait'] .game-shell {
     --callout-scale: 1;
@@ -7997,7 +8019,7 @@ body[data-screen='game'] .seat-motto-callout .callout-box {
   transform: translate3d(var(--callout-box-shift-x, 0px), var(--callout-box-shift-y, 0px), 0);
   display: inline-block;
   width: max-content;
-  max-width: 120px;
+  max-width: 150px;
 }
 body[data-screen='game'] .seat-motto-callout .hk-inner {
   padding: calc(12px * var(--callout-size, 1)) calc(20px * var(--callout-size, 1));
@@ -10990,7 +11012,7 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-se
   max-inline-size: none !important;
 }
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout .callout-box {
-  max-inline-size: 120px !important;
+  max-inline-size: 150px !important;
 }
 
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .play-type-call-seat .hk-inner,
@@ -11504,7 +11526,7 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
   bottom: auto !important;
   left: 50% !important;
   right: auto !important;
-  --callout-base-x: -50%;
+  --callout-base-x: calc(-50% + 40px);
   --callout-base-y: 0px;
 }
 
@@ -11513,7 +11535,7 @@ body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .seat-
   bottom: auto !important;
   left: 50% !important;
   right: auto !important;
-  --callout-base-x: -50%;
+  --callout-base-x: calc(-50% + 40px);
   --callout-base-y: 0px;
 }
 
@@ -11521,7 +11543,7 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
 body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .seat-motto-callout .tail {
   top: calc(-18px * var(--callout-size, 1)) !important;
   bottom: auto !important;
-  left: 50% !important;
+  left: calc(50% - 40px) !important;
   right: auto !important;
   transform: translateX(-50%) !important;
   border-color: transparent !important;
