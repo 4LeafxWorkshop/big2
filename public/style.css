@@ -10334,6 +10334,22 @@ body[data-screen='game'] .seat.east,
 body[data-screen='game'] .seat.north {
   position: relative !important;
 }
+body[data-screen='game'] .seat.west:hover,
+body[data-screen='game'] .seat.east:hover,
+body[data-screen='game'] .seat.west:focus-within,
+body[data-screen='game'] .seat.east:focus-within,
+body[data-screen='game'] .seat.west .side-station-stack:hover,
+body[data-screen='game'] .seat.east .side-station-stack:hover {
+  z-index: 18 !important;
+}
+body[data-screen='game'] .seat.west:hover .seat-section,
+body[data-screen='game'] .seat.east:hover .seat-section,
+body[data-screen='game'] .seat.west:focus-within .seat-section,
+body[data-screen='game'] .seat.east:focus-within .seat-section,
+body[data-screen='game'] .seat.west .side-station-stack:hover .seat-section,
+body[data-screen='game'] .seat.east .side-station-stack:hover .seat-section {
+  overflow: visible !important;
+}
 body[data-screen='game'] .seat.north > .seat-name-fixed {
   top: 6px !important;
   left: 50% !important;
