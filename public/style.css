@@ -7997,7 +7997,7 @@ body[data-screen='game'] .seat-motto-callout .callout-box {
   transform: translate3d(var(--callout-box-shift-x, 0px), var(--callout-box-shift-y, 0px), 0);
   display: inline-block;
   width: max-content;
-  max-width: 250px;
+  max-width: 120px;
 }
 body[data-screen='game'] .seat-motto-callout .hk-inner {
   padding: calc(12px * var(--callout-size, 1)) calc(20px * var(--callout-size, 1));
@@ -10990,7 +10990,7 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-se
   max-inline-size: none !important;
 }
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout .callout-box {
-  max-inline-size: 250px !important;
+  max-inline-size: 120px !important;
 }
 
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .play-type-call-seat .hk-inner,
