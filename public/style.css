@@ -1911,13 +1911,6 @@ body[data-screen='home'] .home-wrap {
 .room-active-refresh-label {
   font-weight: 700;
 }
-.room-active-refresh-countdown {
-  margin-left: 6px;
-  font-size: .72rem;
-  color: #d3e6ff;
-  opacity: .85;
-  font-variant-numeric: tabular-nums;
-}
 .room-active-hint {
   font-size: .7rem;
   color: var(--muted);

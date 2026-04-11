@@ -8254,7 +8254,6 @@ function renderHome(){
     activeRooms,
     activeRoomsLoading:Boolean(activeRoomsState?.loading),
     hiddenCount,
-    joinOpenCountdown:state.room.joinOpenCountdown,
     roomErrorHtml,
     t,
     esc,

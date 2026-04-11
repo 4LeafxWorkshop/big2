@@ -176,7 +176,6 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       }
       state.room.joinOpen=true;
       state.room.error='';
-      state.room.joinOpenCountdown=15;
       render();
       void loadActiveRooms();
     });
@@ -188,7 +187,6 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
     });
     doc.getElementById('room-join-cancel')?.addEventListener('click',()=>{
       state.room.joinOpen=false;
-      state.room.joinOpenCountdown=0;
       state.room.error='';
       render();
     });
@@ -197,10 +195,6 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       await joinRoomByCode(code);
     });
     doc.getElementById('room-active-refresh')?.addEventListener('click',async()=>{
-      if(state.room.joinOpen){
-        state.room.joinOpenCountdown=15;
-        render();
-      }
       await loadActiveRooms();
     });
     doc.querySelectorAll('.room-active-card').forEach((card)=>card.addEventListener('click',()=>{
@@ -225,9 +219,6 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       await joinRoomByCode(code);
     });
 
-    if(joinOpen){
-      state.room.joinOpenCountdown=0;
-    }
     doc.getElementById('room-copy')?.addEventListener('click',async()=>{
       try{await navigator.clipboard?.writeText?.(String(state.room.code||''));}catch{}
     });
