@@ -11483,19 +11483,6 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
   border-top-color: var(--bubble-border) !important;
 }
 
-body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .play-type-call-seat .tail,
-body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .last-card-call-seat .tail,
-body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat .tail,
-body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .seat-motto-callout .tail {
-  top: 50% !important;
-  bottom: auto !important;
-  left: calc(-20px * var(--callout-size, 1)) !important;
-  right: auto !important;
-  transform: translateY(-50%) !important;
-  border-color: transparent !important;
-  border-right-color: var(--bubble-border) !important;
-}
-
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .play-type-call-seat .tail::after,
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-seat .tail::after,
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat .tail::after,
@@ -11508,19 +11495,6 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
   border-top-color: var(--bubble-fill) !important;
 }
 
-body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .play-type-call-seat .tail::after,
-body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .last-card-call-seat .tail::after,
-body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat .tail::after,
-body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .seat-motto-callout .tail::after {
-  top: calc(-10px * var(--callout-size, 1)) !important;
-  bottom: auto !important;
-  left: calc(-6px * var(--callout-size, 1)) !important;
-  right: auto !important;
-  border-color: transparent !important;
-  border-top-color: transparent !important;
-  border-right-color: var(--bubble-fill) !important;
-}
-
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout {
   top: calc(100% + 6px) !important;
   bottom: auto !important;
@@ -11530,17 +11504,8 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
   --callout-base-y: 0px;
 }
 
-body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .seat-motto-callout {
-  top: calc(100% + 6px) !important;
-  bottom: auto !important;
-  left: 50% !important;
-  right: auto !important;
-  --callout-base-x: calc(-50% + 40px);
-  --callout-base-y: 0px;
-}
-
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout .tail,
-body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .seat-motto-callout .tail {
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout .tail {
   top: calc(-18px * var(--callout-size, 1)) !important;
   bottom: auto !important;
   left: calc(50% - 40px) !important;
@@ -11551,7 +11516,7 @@ body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .seat-
 }
 
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout .tail::after,
-body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .seat-motto-callout .tail::after {
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout .tail::after {
   bottom: calc(-12px * var(--callout-size, 1)) !important;
   top: auto !important;
   left: calc(-10px * var(--callout-size, 1)) !important;
