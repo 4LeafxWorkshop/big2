@@ -51,9 +51,10 @@ export function retargetCalloutTails({
       const seat=bubble.closest('.seat');
       avatar=seat?.querySelector('.player-avatar-wrap-opponent, .player-avatar-opponent')??null;
       anchorTarget=
-        seat?.querySelector('.side-station-stack, .seat-pack')||
+        avatar||
         seat?.querySelector('.seat-name-fixed[data-opponent-name]')||
-        avatar;
+        seat?.querySelector('.side-station-stack, .seat-pack')||
+        null;
     }
     if(!(avatar instanceof HTMLElement)||!(anchorTarget instanceof HTMLElement))continue;
     bubble.style.removeProperty('--callout-shift-x');
@@ -71,10 +72,12 @@ export function retargetCalloutTails({
     let dir='south';
     if(!isSelfBubble){
       const seat=bubble.closest('.seat');
-      if(seat?.classList.contains('west')||seat?.classList.contains('east')){
-        dir='south';
+      if(bubble.classList.contains('seat-motto-callout')){
+        dir='north';
       }else if(seat?.classList.contains('north')){
-        dir='west';
+        dir='north';
+      }else if(seat?.classList.contains('west')||seat?.classList.contains('east')){
+        dir='south';
       }else if(Math.abs(dx)>Math.abs(dy)){
         dir=dx<0?'west':'east';
       }else{
