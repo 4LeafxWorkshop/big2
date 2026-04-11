@@ -2107,6 +2107,8 @@ const isIOSDevice=()=>{
 const runtimeProfileStore={players:{}};
 let aiTimer=null;
 let roomPresenceTimer=null;
+const ROOM_PRESENCE_TOUCH_MIN_MS=5000;
+let lastRoomPresenceTouch={roomId:'',at:0};
 let emoteTimer=null;
 const BOT_EMOTE_COOLDOWN_MS=5000;
 const botEmoteCooldownBySeat=new Map();
@@ -4448,6 +4450,11 @@ function isRoomPresenceOnlyUpdate(prev,next){
   if(Boolean(prev.isPrivate)!==Boolean(next.isPrivate))return false;
   if(Number(prev.maxPlayers||0)!==Number(next.maxPlayers||0))return false;
   if(Number(prev.roundCount||0)!==Number(next.roundCount||0))return false;
+  const prevEmote=prev?.game?.emote??null;
+  const nextEmote=next?.game?.emote??null;
+  if(String(prevEmote?.id||'')!==String(nextEmote?.id||''))return false;
+  if(Number(prevEmote?.ts||0)!==Number(nextEmote?.ts||0))return false;
+  if(String(prevEmote?.by||'')!==String(nextEmote?.by||''))return false;
   const prevPlayers=Array.isArray(prev.players)?prev.players:[];
   const nextPlayers=Array.isArray(next.players)?next.players:[];
   if(prevPlayers.length!==nextPlayers.length)return false;
@@ -4627,7 +4634,7 @@ async function gateGuestRoomAccess(targetRoomId=''){
 }
 async function queryActiveRoomsFromDb(roomDb,instanceId){
   const statusFilters=['lobby','starting','playing','finished'];
-  const roomFetchLimit=20;
+  const roomFetchLimit=8;
   const currentPlayerId=String(baseRoomPlayerId()||'').trim();
   const currentRoomId=String(state.room.id||'').trim();
   let snap=null;
@@ -5230,7 +5237,14 @@ async function pruneRoomIfNeeded(){
   }catch{}
 }
 async function touchRoomPresence(force=false){
+  const roomId=String(state.room.id||'').trim();
+  const now=Date.now();
+  const lastRoomId=String(lastRoomPresenceTouch.roomId||'').trim();
+  const lastAt=Number(lastRoomPresenceTouch.at)||0;
+  const sameRoom=roomId&&lastRoomId===roomId;
+  if(sameRoom&&lastAt>0&&(now-lastAt)<ROOM_PRESENCE_TOUCH_MIN_MS)return;
   await roomMutationsController.touchRoomPresence(force);
+  lastRoomPresenceTouch={roomId,at:now};
 }
 function startRoomPresencePing(){
   if(roomPresenceTimer||!state.room.id||!currentRoomDb())return;
@@ -5429,25 +5443,10 @@ async function roomSubmitEmote(id,tsOverride=null,byOverride=''){
   const now=Number.isFinite(Number(tsOverride))?Number(tsOverride):Date.now();
   try{
     const ref=roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(state.room.id);
-    await roomDb.runTransaction(async(tx)=>{
-      const snap=await tx.get(ref);
-      if(!snap.exists)throw new Error('room missing');
-      const data=snap.data()||{};
-        if(String(data.status)!=='playing')return;
-        if(!data.game)return;
-        const updated=cloneRoomGame(data.game)||data.game;
-        const by=String(byOverride||currentRoomPlayerId()||'');
-        updated.emote={id:match.id,ts:Math.trunc(now),by};
-        const updates={
-          game:updated,
-          updatedAt:now,
-          gameVersion:Number(data.gameVersion||0)+1
-        };
-        const actorUid=currentRoomPlayerId();
-        const bumped=bumpRoomPlayerLastSeen(Array.isArray(data.players)?data.players:[],actorUid,now);
-        if(bumped.changed)updates.players=bumped.players;
-        tx.update(ref,updates);
-      });
+    const by=String(byOverride||currentRoomPlayerId()||'');
+    await ref.update({
+      'game.emote':{id:match.id,ts:Math.trunc(now),by}
+    });
   }catch{}
 }
 async function roomSubmitPlay(cards,seatOverride=null){
