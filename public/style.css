@@ -11479,11 +11479,6 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .emote-callout.pla
   --callout-base-y: 0px;
 }
 
-body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .play-type-call-seat,
-body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .last-card-call-seat,
-body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat {
-}
-
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .play-type-call-seat .tail,
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-seat .tail,
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat .tail {
