@@ -4131,7 +4131,7 @@ body[data-screen='game'] .table-center-stack {
   margin-left: calc(var(--card-w) * -0.64);
 }
 .seat-played.seat-played-fan .card.mini + .card.mini {
-  margin-left: calc(var(--card-w) * -0.98) !important;
+  margin-left: calc(var(--card-w) * -0.84) !important;
 }
 .seat-played.seat-played-fan .card.mini {
   transform-origin: 50% 50%;
@@ -8017,7 +8017,8 @@ body[data-screen='game'] .seat-motto-callout .callout-box {
   filter: drop-shadow(4px 4px 0 rgba(0, 0, 0, 0.12));
   transform: translate3d(var(--callout-box-shift-x, 0px), var(--callout-box-shift-y, 0px), 0);
   display: inline-block;
-  max-width: 280px;
+  width: max-content;
+  max-width: 250px;
 }
 body[data-screen='game'] .seat-motto-callout .hk-inner {
   padding: calc(12px * var(--callout-size, 1)) calc(20px * var(--callout-size, 1));
@@ -8036,13 +8037,12 @@ body[data-screen='game'] .seat-motto-callout .hk-power-motto {
   font-weight: 800;
   letter-spacing: .01em;
   white-space: normal;
-  display: -webkit-box;
   line-height: 1.15;
-  text-wrap: balance;
-  overflow-wrap: anywhere;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  text-wrap: wrap;
+  overflow-wrap: break-word;
+  word-break: normal;
+  display: block;
+  overflow: visible;
 }
 body[data-screen='game'] .seat-motto-callout .hk-power-motto.motto-en {
   font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", sans-serif;
@@ -8459,7 +8459,7 @@ body[data-screen='game'] .center-last-north .seat-played.seat-played-fan .card.m
 body[data-screen='game'] .center-last-west .seat-played.seat-played-fan .card.mini + .card.mini,
 body[data-screen='game'] .center-last-east .seat-played.seat-played-fan .card.mini + .card.mini,
 body[data-screen='game'] .center-last-south .seat-played.seat-played-fan .card.mini + .card.mini {
-  margin-left: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * -0.76) !important;
+  margin-left: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * -0.84) !important;
 }
 @media (max-width: 860px) {
   body[data-screen='game'] .seat-played.seat-played-fan .card.mini + .card.mini,
@@ -8468,7 +8468,7 @@ body[data-screen='game'] .center-last-south .seat-played.seat-played-fan .card.m
   body[data-screen='game'] .center-last-west .seat-played.seat-played-fan .card.mini + .card.mini,
   body[data-screen='game'] .center-last-east .seat-played.seat-played-fan .card.mini + .card.mini,
   body[data-screen='game'] .center-last-south .seat-played.seat-played-fan .card.mini + .card.mini {
-    margin-left: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * -0.98) !important;
+    margin-left: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * -0.84) !important;
   }
 }
 
@@ -10087,7 +10087,7 @@ body[data-screen='game'] .center-last-south .seat-played .card.mini {
   body[data-screen='game'] .center-last-west .seat-played.seat-played-fan .card.mini + .card.mini,
   body[data-screen='game'] .center-last-east .seat-played.seat-played-fan .card.mini + .card.mini,
   body[data-screen='game'] .center-last-south .seat-played.seat-played-fan .card.mini + .card.mini {
-    margin-left: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * -1.3) !important;
+    margin-left: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * -0.84) !important;
   }
 }
 
@@ -10109,11 +10109,11 @@ body[data-screen='game'] .center-last-south .seat-played .card.mini {
   }
   body[data-screen='game'][data-orientation='portrait'] .center-last-south .seat-played.seat-played-fan .card.mini + .card.mini,
   body[data-screen='game'][data-orientation='portrait'] .center-last .seat-played.seat-played-fan .card.mini + .card.mini {
-    margin-left: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * -0.76) !important;
+    margin-left: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * -0.84) !important;
   }
   body[data-screen='game'][data-orientation='portrait'] .center-last-south .seat-played.seat-played-five .card.mini + .card.mini,
   body[data-screen='game'][data-orientation='portrait'] .center-last .seat-played.seat-played-five .card.mini + .card.mini {
-    margin-left: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * -0.76) !important;
+    margin-left: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * -0.84) !important;
   }
   body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-open-play .seat-played.seat-played-fan .card.mini + .card.mini,
   body[data-screen='game'][data-orientation='portrait'] .seat.west .seat-open-play .seat-played.seat-played-fan .card.mini + .card.mini,
@@ -10121,7 +10121,7 @@ body[data-screen='game'] .center-last-south .seat-played .card.mini {
   body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-open-play .seat-played.seat-played-five .card.mini + .card.mini,
   body[data-screen='game'][data-orientation='portrait'] .seat.west .seat-open-play .seat-played.seat-played-five .card.mini + .card.mini,
   body[data-screen='game'][data-orientation='portrait'] .seat.east .seat-open-play .seat-played.seat-played-five .card.mini + .card.mini {
-    margin-left: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * -0.76) !important;
+    margin-left: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * -0.84) !important;
   }
 }
 
@@ -10708,7 +10708,7 @@ body[data-screen='game'] .seat.east {
   body[data-screen='game'] .seat.north .seat-open-play .seat-played.seat-played-fan .card.mini + .card.mini,
   body[data-screen='game'] .seat.west .seat-open-play .seat-played.seat-played-fan .card.mini + .card.mini,
   body[data-screen='game'] .seat.east .seat-open-play .seat-played.seat-played-fan .card.mini + .card.mini {
-    margin-left: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * -1.96) !important;
+    margin-left: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * -0.84) !important;
   }
   body[data-screen='game'] .seat.north .play-type-call-seat,
   body[data-screen='game'] .seat.north .last-card-call-seat,
@@ -11125,8 +11125,7 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
 }
 
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .play-type-call-seat .hk-inner,
-body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-seat .hk-inner,
-body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout .hk-inner {
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-seat .hk-inner {
   white-space: nowrap !important;
   overflow-wrap: normal !important;
   text-wrap: nowrap !important;
@@ -11134,16 +11133,24 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
   text-overflow: clip !important;
   max-inline-size: none !important;
 }
-body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout .hk-power-motto {
-  white-space: nowrap !important;
-  overflow-wrap: normal !important;
-  text-wrap: nowrap !important;
-  overflow: hidden !important;
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout .hk-inner {
+  white-space: normal !important;
+  overflow-wrap: break-word !important;
+  word-break: normal !important;
+  text-wrap: balance !important;
+  overflow: visible !important;
   text-overflow: clip !important;
-  line-height: 1 !important;
-  display: -webkit-box !important;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
+  max-inline-size: none !important;
+}
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout .hk-power-motto {
+  white-space: normal !important;
+  overflow-wrap: break-word !important;
+  word-break: normal !important;
+  text-wrap: wrap !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  line-height: 1.15 !important;
+  display: block !important;
 }
 
 @media (max-width: 860px) {

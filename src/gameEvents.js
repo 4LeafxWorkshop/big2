@@ -358,13 +358,16 @@ function bindOpponentProfileInteractions({
       ev.preventDefault();
       ev.stopPropagation();
       const directProfile=Boolean(ev.target?.closest?.('.seat-namecard'));
-      if(isMobilePointer()&&!directProfile){
+      const canPeekMotto=Boolean(el.querySelector('.seat-motto-callout'));
+      if(!directProfile&&canPeekMotto){
         if(state.mottoPeekName!==name){
           state.mottoPeekName=name;
           render();
           return;
         }
         state.mottoPeekName='';
+        render();
+        return;
       }
       state.opponentProfileName=name;
       render();
