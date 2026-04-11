@@ -1034,13 +1034,14 @@ body[data-screen='home'] .home-wrap {
   gap: 2px;
   border-radius: 10px;
 }
-.royal-home-body #callout-display-combo {
+.royal-home-body #display-mode-combo {
   background: rgba(10, 30, 42, .42);
   border: 1px solid rgba(236, 204, 134, .42);
   box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
   padding: 3px;
   gap: 2px;
   border-radius: 10px;
+  flex-wrap: nowrap;
 }
 .royal-home-body #sound-combo .sound-toggle-btn {
   min-height: 32px;
@@ -1050,31 +1051,23 @@ body[data-screen='home'] .home-wrap {
   border-radius: 7px;
   width: auto;
 }
-.royal-home-body #callout-display-combo .toggle-btn {
+.royal-home-body #display-mode-combo .toggle-btn {
   min-height: 32px;
-  padding: 3px 9px;
+  padding: 3px 7px;
   border: 1px solid transparent;
   background: transparent;
   border-radius: 7px;
-}
-.royal-home-body #emote-display-combo .toggle-btn,
-.royal-home-body #config-emote-display-combo .toggle-btn {
-  min-height: 32px;
-  padding: 3px 9px;
-  border: 1px solid transparent;
-  background: transparent;
-  border-radius: 7px;
+  flex: 1 1 0;
+  min-width: 0;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.05;
 }
 .royal-home-body #sound-combo .sound-toggle-btn.active {
   border-color: rgba(247, 222, 167, .72);
   background: linear-gradient(130deg, rgba(245, 210, 142, .26), rgba(191, 138, 63, .28));
 }
-.royal-home-body #callout-display-combo .toggle-btn.active {
-  border-color: rgba(247, 222, 167, .72);
-  background: linear-gradient(130deg, rgba(245, 210, 142, .26), rgba(191, 138, 63, .28));
-}
-.royal-home-body #emote-display-combo .toggle-btn.active,
-.royal-home-body #config-emote-display-combo .toggle-btn.active {
+.royal-home-body #display-mode-combo .toggle-btn.active {
   border-color: rgba(247, 222, 167, .72);
   background: linear-gradient(130deg, rgba(245, 210, 142, .26), rgba(191, 138, 63, .28));
 }
@@ -6750,13 +6743,6 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
   .royal-home-body .home-form-right {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
-  .royal-home-body .home-form-right .field-callout {
-    grid-column: 1;
-  }
-  .royal-home-body .home-form-right .field-emote {
-    grid-column: 2;
-    margin-left: 0;
-  }
   .royal-home-body .home-start-row {
     flex-wrap: nowrap;
     justify-content: center;
@@ -6931,13 +6917,12 @@ body[data-screen='game'] .intro-modal {
     grid-column: 1 / -1;
     order: -3;
   }
-  .royal-home-body .home-form-right .field-ai,
-  .royal-home-body .home-form-right .field-callout {
+  .royal-home-body .home-form-right .field-ai {
     grid-column: 1;
   }
   .royal-home-body .home-form-right .field-sound,
   .royal-home-body .home-form-right .field-voice,
-  .royal-home-body .home-form-right .field-emote {
+  .royal-home-body .home-form-right .field-display-mode {
     grid-column: 2;
     margin-left: 0;
   }
@@ -6955,9 +6940,10 @@ body[data-screen='game'] .intro-modal {
     min-width: 26px;
     padding: 2px 5px;
   }
-  .royal-home-body #emote-display-combo .toggle-btn {
-    min-width: 32px;
-    padding: 2px 6px;
+  .royal-home-body #display-mode-combo .toggle-btn {
+    min-width: 0;
+    padding: 2px 4px;
+    white-space: normal;
   }
   .royal-home-body .home-form-right .field-cardback {
     order: -2;
@@ -6993,20 +6979,6 @@ body[data-screen='game'] .intro-modal {
   min-width: 28px;
   padding: 2px 6px;
 }
-.royal-home-body .home-form-right .field-callout > span,
-.royal-home-body .home-form-right .field-emote > span {
-  display: block;
-  margin-bottom: 4px;
-  line-height: 1.2;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.royal-home-body .home-form-right .field-callout .combo-btn,
-.royal-home-body .home-form-right .field-emote .combo-btn {
-  min-width: 38px;
-  justify-content: center;
-}
   body[data-screen='game'] {
     --center-discard-scale: 1.18;
   }
@@ -7023,14 +6995,16 @@ body[data-screen='game'] .intro-modal {
     --emote-rude-h: clamp(118px, 22vmin, 170px);
   }
   .royal-home-body #sound-combo,
-  .royal-home-body #voice-combo {
+  .royal-home-body #voice-combo,
+  .royal-home-body #display-mode-combo {
     width: 100%;
     min-width: 0;
     overflow: hidden;
     box-sizing: border-box;
   }
   .royal-home-body #sound-combo .sound-toggle-btn,
-  .royal-home-body #voice-combo .sound-toggle-btn {
+  .royal-home-body #voice-combo .sound-toggle-btn,
+  .royal-home-body #display-mode-combo .toggle-btn {
     flex: 1 1 0;
     min-width: 0;
     padding: 2px 4px;
@@ -7799,14 +7773,10 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .name {
   align-items: center !important;
   min-height: 34px;
   padding: 3px 8px !important;
-  border-radius: 6px !important;
-  border: 1px solid rgba(178, 212, 194, .52) !important;
-  background:
-    linear-gradient(180deg, rgba(9, 26, 30, .94), rgba(8, 20, 25, .82)),
-    linear-gradient(130deg, rgba(255,255,255,.06), rgba(255,255,255,.01)) !important;
-  box-shadow:
-    inset 0 0 0 1px rgba(39, 74, 64, .75),
-    0 2px 7px rgba(0,0,0,.22) !important;
+  border-radius: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-round-wins {
   color: var(--game-round-wins-text);
@@ -10708,7 +10678,6 @@ body[data-screen='game'] .seat.north.active .seat-section {
     margin: 0 auto !important;
     z-index: 13000 !important;
     isolation: isolate;
-    background: transparent !important;
     border: 0 !important;
     box-shadow: none !important;
     padding: 0 !important;
@@ -10836,7 +10805,6 @@ body[data-screen='game'] .seat.north.active .seat-section {
   body[data-screen='game'][data-orientation='portrait'] .seat.east .seat-pack > .seat-name-fixed,
   body[data-screen='game'][data-orientation='portrait'] .seat.west .seat-pack > .seat-name-fixed .name,
   body[data-screen='game'][data-orientation='portrait'] .seat.east .seat-pack > .seat-name-fixed .name {
-    background: transparent !important;
     border: 0 !important;
     box-shadow: none !important;
   }
@@ -10989,7 +10957,6 @@ body[data-screen='game'] .seat.north.active .seat-section {
   body[data-screen='game'][data-orientation='portrait'] .seat.east .side-station-stack > .seat-name-fixed .name,
   body[data-screen='game'][data-orientation='portrait'] .seat.west .side-station-stack > .seat-name-fixed .seat-identity,
   body[data-screen='game'][data-orientation='portrait'] .seat.east .side-station-stack > .seat-name-fixed .seat-identity {
-    background: transparent !important;
     border: 0 !important;
     box-shadow: none !important;
   }
@@ -11132,8 +11099,7 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
     width: min(var(--opponent-open-row-w), 100%) !important;
     max-width: 100% !important;
     min-width: 0 !important;
-    overflow-x: clip !important;
-    overflow-y: visible !important;
+    overflow: visible !important;
   }
   body[data-screen='game'][data-orientation='portrait'] .seat.west .seat-open-play .seat-played,
   body[data-screen='game'][data-orientation='portrait'] .seat.east .seat-open-play .seat-played {
@@ -11141,8 +11107,7 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
     max-width: 100% !important;
     justify-self: center !important;
     margin: 0 auto !important;
-    overflow-x: clip !important;
-    overflow-y: visible !important;
+    overflow: visible !important;
   }
 }
 
@@ -11231,8 +11196,7 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
     justify-items: center !important;
     justify-self: center !important;
     margin: 0 !important;
-    overflow-x: clip !important;
-    overflow-y: visible !important;
+    overflow: visible !important;
   }
   body[data-screen='game'][data-orientation='landscape'] .seat.west .seat-open-play .seat-played,
   body[data-screen='game'][data-orientation='landscape'] .seat.east .seat-open-play .seat-played {
@@ -11241,8 +11205,7 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
     justify-self: center !important;
     margin: 0 auto !important;
     transform: none !important;
-    overflow-x: clip !important;
-    overflow-y: visible !important;
+    overflow: visible !important;
   }
   body[data-screen='game'][data-orientation='landscape'] .seat.west .opponent-fan,
   body[data-screen='game'][data-orientation='landscape'] .seat.east .opponent-fan {
@@ -11496,6 +11459,11 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] :is(.play-type-cal
   right: auto !important;
   border-color: transparent !important;
   border-top-color: var(--bubble-fill) !important;
+}
+
+body[data-screen='game'] :is(.north, .west, .east) > .seat-name-fixed {
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 body[data-screen='game'][data-orientation='landscape'] .action-strip,
