@@ -5673,6 +5673,10 @@ function identityLookupIds(identity){
   }
   const uid=String(state.home.google?.uid??'').trim();
   if(uid)out.push(`uid:${uid}`);
+  if(!identity?.isBot){
+    const safe=String(identity?.name??'').trim().slice(0,32);
+    if(safe)out.push(`name:${safe.toLowerCase()}`);
+  }
   const seen=new Set();
   return out.filter((x)=>{if(seen.has(x))return false;seen.add(x);return true;});
 }
@@ -5686,7 +5690,13 @@ function ensureLeaderboardEntry(store,identity){
   const key=String(identity?.id??(email?`account:${email}`:`name:${safe.toLowerCase()}`)).trim().slice(0,180);
   if(!key)return null;
   if(!store.players[key]){
-    store.players[key]={id:key,name:safe,email,gender,picture,settings:isBot?{}:collectMainSettings(),games:0,wins:0,totalScore:5000,updatedAt:Date.now()};
+    const fallbackKey=identityLookupIds(identity).find((id)=>id!==key&&store.players[id]);
+    if(fallbackKey){
+      store.players[key]={...store.players[fallbackKey],id:key};
+      if(fallbackKey!==key)delete store.players[fallbackKey];
+    }else{
+      store.players[key]={id:key,name:safe,email,gender,picture,settings:isBot?{}:collectMainSettings(),games:0,wins:0,totalScore:5000,updatedAt:Date.now()};
+    }
   }
   if(safe)store.players[key].name=safe;
   if(email)store.players[key].email=email;
