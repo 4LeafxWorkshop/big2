@@ -8205,7 +8205,7 @@ function renderHome(){
   const roomButtonsHtml=roomLobbyBtnCore
     ?(signedIn
       ?roomLobbyBtnCore
-      :`<span class="locked-btn" data-lock="${esc(loginHint)}">${roomLobbyBtnCore}<span class="lock-badge" aria-hidden="true">🔒</span><span class="locked-tip">${esc(loginHint)}</span></span>`)
+      :`<span class="locked-btn">${roomLobbyBtnCore}<span class="locked-tip">${esc(loginHint)}</span></span>`)
     :'';
   const roomSeats=[0,1,2,3].map((seat)=>{
     const seatLabel=t('seatLabel').replace('{{n}}',String(seat+1));
@@ -8279,7 +8279,7 @@ function renderHome(){
   const soloBtnCore=`<button id="solo-start" class="primary royal-start-btn" ${signedIn?'':'disabled'}>${t('solo')}</button>`;
   const soloBtnHtml=signedIn
     ?soloBtnCore
-    :`<span class="locked-btn" data-lock="${esc(loginHint)}">${soloBtnCore}<span class="lock-badge" aria-hidden="true">🔒</span><span class="locked-tip">${esc(loginHint)}</span></span>`;
+    :`<span class="locked-btn">${soloBtnCore}<span class="locked-tip">${esc(loginHint)}</span></span>`;
   app.innerHTML=renderHomeMarkup({
     intro,
     allowOpponents,

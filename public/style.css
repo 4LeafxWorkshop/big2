@@ -1236,14 +1236,6 @@ body[data-screen='home'] .home-wrap {
   display: inline-flex;
   align-items: center;
 }
-.locked-btn .lock-badge {
-  position: absolute;
-  right: 8px;
-  top: 6px;
-  font-size: .7rem;
-  opacity: .85;
-  pointer-events: none;
-}
 .locked-btn .locked-tip {
   position: absolute;
   top: calc(100% + 6px);
