@@ -5,7 +5,7 @@ export function retargetCalloutTails({
 }={}){
   const doc=documentRef();
   const win=windowRef();
-  const bubbles=[...doc.querySelectorAll('.play-type-call:not(.seat-motto-callout), .last-card-call, .emote-callout')];
+  const bubbles=[...doc.querySelectorAll('.play-type-call:not(.seat-motto-callout), .last-card-call, .emote-callout, .seat-motto-callout')];
   const visualViewport=win.visualViewport||null;
   const viewportLeft=Math.max(0,Number(visualViewport?.offsetLeft)||0);
   const viewportTop=Math.max(0,Number(visualViewport?.offsetTop)||0);

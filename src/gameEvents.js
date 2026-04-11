@@ -92,7 +92,6 @@ function bindCardInteractions({
   playSound,
   render,
   reorderCurrent,
-  cardId,
   dragPopupController,
   mobileTapState
 }){
@@ -326,7 +325,6 @@ function bindOpponentProfileInteractions({
   app,
   state,
   render,
-  isMobilePointer,
   tapState
 }){
   document.getElementById('opponent-profile-close')?.addEventListener('click',()=>{state.opponentProfileName='';render();});
@@ -798,7 +796,6 @@ export function createGameEventsBinder({
       playSound,
       render,
       reorderCurrent,
-      cardId,
       dragPopupController,
       mobileTapState:{get lastTapAt(){return mobileTapAt;},set lastTapAt(value){mobileTapAt=value;}}
     });
@@ -819,7 +816,6 @@ export function createGameEventsBinder({
       app,
       state,
       render,
-      isMobilePointer,
       tapState:{
         get lastNamecardTapAt(){return lastNamecardTapAt;},
         set lastNamecardTapAt(value){lastNamecardTapAt=value;}

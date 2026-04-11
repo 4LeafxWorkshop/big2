@@ -201,6 +201,7 @@ body[data-screen='game'] #app {
   height: 100dvh;
   max-height: 100dvh;
   padding-bottom: 0 !important;
+  margin-top: 0 !important;
 }
 body[data-screen='game'][data-ios='1'] #app {
   padding-bottom: 0 !important;
@@ -3733,6 +3734,11 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
 }
 .topbar h2 { font-size: clamp(.95rem, 2.4vw, 1.25rem); }
 .topbar-right { display: grid; gap: 8px; justify-items: end; }
+.topbar-right {
+  width: auto !important;
+  min-width: 0 !important;
+  justify-items: end !important;
+}
 .topbar-right .control-row button {
   display: inline-flex;
   align-items: center;
@@ -5248,7 +5254,16 @@ body[data-screen='game'] .table-center-stack {
   top: auto;
   bottom: 10px;
   transform: translateX(-50%);
-  width: clamp(110px, 22vw, 200px);
+  --emote-base-w: clamp(110px, 22vw, 200px);
+  --emote-throw-w: clamp(150px, 30vw, 260px);
+  --emote-smash-w: clamp(160px, 32vw, 280px);
+  --emote-cheers-w: clamp(170px, 34vw, 300px);
+  --emote-love-w: clamp(150px, 28vw, 240px);
+  --emote-crack-w: clamp(140px, 26vw, 240px);
+  --emote-sleep-w: clamp(130px, 24vw, 220px);
+  --emote-rude-w: clamp(230px, 40vw, 340px);
+  --emote-rude-h: clamp(150px, 26vw, 220px);
+  width: var(--emote-base-w);
   height: auto;
   pointer-events: none;
   animation: emoteWobbleBottom 1.2s ease-in-out infinite;
@@ -5278,11 +5293,11 @@ body[data-screen='game'] .self-table-emote {
 .table-emote.emote-cool,
 .self-table-emote.emote-cool { animation: emoteWobbleBottom 1.2s ease-in-out infinite; }
 .table-emote.emote-throw,
-.self-table-emote.emote-throw { animation: emoteThrow 1.3s ease-out forwards; width: clamp(150px, 30vw, 260px); }
+.self-table-emote.emote-throw { animation: emoteThrow 1.3s ease-out forwards; width: var(--emote-throw-w); }
 .table-emote.emote-rude,
 .self-table-emote.emote-rude {
-  width: clamp(230px, 40vw, 340px);
-  height: clamp(150px, 26vw, 220px);
+  width: var(--emote-rude-w);
+  height: var(--emote-rude-h);
   top: auto;
   bottom: 54px;
   left: 50%;
@@ -5326,7 +5341,7 @@ body[data-screen='game'] .self-table-emote.emote-rude {
 .table-emote.emote-rage,
 .self-table-emote.emote-rage { animation: emoteRage 1.2s ease-in-out infinite; }
 .table-emote.emote-smash,
-.self-table-emote.emote-smash { animation: emoteSmash 1.2s ease-in-out infinite; width: clamp(160px, 32vw, 280px); }
+.self-table-emote.emote-smash { animation: emoteSmash 1.2s ease-in-out infinite; width: var(--emote-smash-w); }
 .table-emote.emote-fire,
 .self-table-emote.emote-fire { animation: emoteFire 1.2s ease-in-out infinite; }
 .table-emote.emote-think,
@@ -5334,19 +5349,23 @@ body[data-screen='game'] .self-table-emote.emote-rude {
 .table-emote.emote-cry,
 .self-table-emote.emote-cry { animation: emoteCry 1.6s ease-in-out infinite; }
 .table-emote.emote-cheers,
-.self-table-emote.emote-cheers { animation: emoteBounce 1.2s ease-in-out infinite; width: clamp(170px, 34vw, 300px); }
+.self-table-emote.emote-cheers { animation: emoteBounce 1.2s ease-in-out infinite; width: var(--emote-cheers-w); }
 .table-emote.emote-thumbs,
 .self-table-emote.emote-thumbs { animation: emotePop 1.1s ease-in-out infinite; }
 .table-emote.emote-crack,
-.self-table-emote.emote-crack { animation: emoteCrackPunch 1.1s ease-out forwards; width: clamp(140px, 26vw, 240px); }
+.self-table-emote.emote-crack { animation: emoteCrackPunch 1.1s ease-out forwards; width: var(--emote-crack-w); }
 .table-emote.emote-sleep,
-.self-table-emote.emote-sleep { animation: emoteFloatSleep 1.8s ease-in-out infinite; width: clamp(130px, 24vw, 220px); opacity: 0.95; bottom: 1px; }
+.self-table-emote.emote-sleep { animation: emoteFloatSleep 1.8s ease-in-out infinite; width: var(--emote-sleep-w); opacity: 0.95; bottom: 1px; }
 .table-emote.emote-love,
-.self-table-emote.emote-love { animation: emoteHeart 1.1s ease-in-out infinite; width: clamp(150px, 28vw, 240px); }
+.self-table-emote.emote-love { animation: emoteHeart 1.1s ease-in-out infinite; width: var(--emote-love-w); }
 .table-emote.emote-champagne,
-.self-table-emote.emote-champagne { animation: emoteChampagne 1.1s ease-in-out infinite; width: clamp(170px, 34vw, 300px); }
+.self-table-emote.emote-champagne,
 .table-emote.emote-shock,
-.self-table-emote.emote-shock { animation: emoteShockFlash 0.7s ease-in-out infinite; width: clamp(170px, 34vw, 300px); }
+.self-table-emote.emote-shock { width: var(--emote-cheers-w); }
+.table-emote.emote-champagne,
+.self-table-emote.emote-champagne { animation: emoteChampagne 1.1s ease-in-out infinite; }
+.table-emote.emote-shock,
+.self-table-emote.emote-shock { animation: emoteShockFlash 0.7s ease-in-out infinite; }
   @keyframes emoteThrow {
     0% { transform: translate(-140%, -30%) rotate(-18deg) scale(0.9); opacity: 0; }
     45% { transform: translate(-50%, -55%) rotate(7deg) scale(1.03); opacity: 1; }
@@ -6172,7 +6191,6 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
   }
   #app { padding: 7px; }
   body[data-screen='game'] #app { padding: max(6px, env(safe-area-inset-top)) 7px 0 !important; }
-  body[data-screen='game'] #app { margin-top: 0 !important; }
   body[data-screen='game'] .game-shell,
   body[data-screen='game'] .main-zone,
   body[data-screen='game'] .topbar {
@@ -6626,7 +6644,6 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
 @media (max-width: 600px) {
   #app { padding: 5px; }
   body[data-screen='game'] #app { padding: max(6px, env(safe-area-inset-top)) 5px 0 !important; }
-  body[data-screen='game'] #app { margin-top: 0 !important; }
   body[data-screen='game'] .game-shell,
   body[data-screen='game'] .main-zone,
   body[data-screen='game'] .topbar {
@@ -6798,10 +6815,6 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
   body[data-screen='game'] .side-zone .log-side-card {
     min-height: 0 !important;
   }
-  body[data-screen='game'] .history-list {
-    max-height: 100% !important;
-    overflow-y: auto !important;
-  }
   body[data-screen='game'] .topbar {
     padding: 6px 8px !important;
     gap: 5px !important;
@@ -6890,12 +6903,6 @@ body[data-screen='game'] .intro-modal {
   .royal-home-body .home-form-right .field-callout {
     grid-column: 1;
   }
-  .royal-home-body .field-ai-left {
-    display: none;
-  }
-  .royal-home-body .field-ai-right {
-    display: grid;
-  }
   .royal-home-body .home-form-right .field-sound,
   .royal-home-body .home-form-right .field-voice,
   .royal-home-body .home-form-right .field-emote {
@@ -6978,38 +6985,15 @@ body[data-screen='game'] .intro-modal {
   }
   body[data-screen='game'] .table-emote,
   body[data-screen='game'] .self-table-emote {
-    width: clamp(120px, 24vmin, 190px);
-  }
-  body[data-screen='game'] .table-emote.emote-throw,
-  body[data-screen='game'] .self-table-emote.emote-throw {
-    width: clamp(145px, 28vmin, 220px);
-  }
-  body[data-screen='game'] .table-emote.emote-smash,
-  body[data-screen='game'] .self-table-emote.emote-smash {
-    width: clamp(150px, 29vmin, 230px);
-  }
-  body[data-screen='game'] .table-emote.emote-cheers,
-  body[data-screen='game'] .self-table-emote.emote-cheers,
-  body[data-screen='game'] .table-emote.emote-champagne,
-  body[data-screen='game'] .self-table-emote.emote-champagne,
-  body[data-screen='game'] .table-emote.emote-shock,
-  body[data-screen='game'] .self-table-emote.emote-shock {
-    width: clamp(150px, 30vmin, 230px);
-  }
-  body[data-screen='game'] .table-emote.emote-love,
-  body[data-screen='game'] .self-table-emote.emote-love,
-  body[data-screen='game'] .table-emote.emote-crack,
-  body[data-screen='game'] .self-table-emote.emote-crack {
-    width: clamp(135px, 26vmin, 205px);
-  }
-  body[data-screen='game'] .table-emote.emote-sleep,
-  body[data-screen='game'] .self-table-emote.emote-sleep {
-    width: clamp(125px, 24vmin, 195px);
-  }
-  body[data-screen='game'] .table-emote.emote-rude,
-  body[data-screen='game'] .self-table-emote.emote-rude {
-    width: clamp(180px, 34vmin, 260px);
-    height: clamp(118px, 22vmin, 170px);
+    --emote-base-w: clamp(120px, 24vmin, 190px);
+    --emote-throw-w: clamp(145px, 28vmin, 220px);
+    --emote-smash-w: clamp(150px, 29vmin, 230px);
+    --emote-cheers-w: clamp(150px, 30vmin, 230px);
+    --emote-love-w: clamp(135px, 26vmin, 205px);
+    --emote-crack-w: clamp(135px, 26vmin, 205px);
+    --emote-sleep-w: clamp(125px, 24vmin, 195px);
+    --emote-rude-w: clamp(180px, 34vmin, 260px);
+    --emote-rude-h: clamp(118px, 22vmin, 170px);
   }
   .royal-home-body #sound-combo,
   .royal-home-body #voice-combo {
@@ -8018,7 +8002,7 @@ body[data-screen='game'] .seat-motto-callout .callout-box {
   transform: translate3d(var(--callout-box-shift-x, 0px), var(--callout-box-shift-y, 0px), 0);
   display: inline-block;
   width: max-content;
-  max-width: 250px;
+  max-width: 280px;
 }
 body[data-screen='game'] .seat-motto-callout .hk-inner {
   padding: calc(12px * var(--callout-size, 1)) calc(20px * var(--callout-size, 1));
@@ -8029,7 +8013,7 @@ body[data-screen='game'] .seat-motto-callout .hk-inner {
 }
 body[data-screen='game'] .seat-motto-callout .hk-power-motto {
   font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", sans-serif;
-  font-size: calc(1.72rem * var(--callout-size, 1));
+  font-size: calc(1.9rem * var(--callout-size, 1));
   color: #fff;
   margin: 0;
   text-transform: none;
@@ -8047,7 +8031,7 @@ body[data-screen='game'] .seat-motto-callout .hk-power-motto {
 body[data-screen='game'] .seat-motto-callout .hk-power-motto.motto-en {
   font-family: "Microsoft JhengHei", "PingFang TC", "Noto Sans TC", sans-serif;
   letter-spacing: .01em;
-  font-size: calc(1.58rem * var(--callout-size, 1));
+  font-size: calc(1.74rem * var(--callout-size, 1));
 }
 body[data-screen='game'] .seat-motto-callout .hk-chinese-sub {
   display: block;
@@ -8868,11 +8852,6 @@ body[data-screen='game'] .action-strip {
     flex: 1 1 auto !important;
     max-width: none !important;
   }
-  body[data-screen='game'] .topbar-right {
-    width: auto !important;
-    min-width: 0 !important;
-    justify-items: end !important;
-  }
   body[data-screen='game'] .topbar-right .control-row {
     display: flex !important;
     flex-wrap: nowrap !important;
@@ -9209,11 +9188,6 @@ body[data-screen='game'] .action-strip {
     flex: 1 1 auto !important;
     max-width: none !important;
   }
-  body[data-screen='game'] .topbar-right {
-    width: auto !important;
-    min-width: 0 !important;
-    justify-items: end !important;
-  }
   body[data-screen='game'] .topbar-right .control-row {
     display: flex !important;
     flex-wrap: nowrap !important;
@@ -9248,11 +9222,6 @@ body[data-screen='game'] .action-strip {
   body[data-screen='game'] .topbar > div:first-child {
     flex: 1 1 auto !important;
     max-width: none !important;
-  }
-  body[data-screen='game'] .topbar-right {
-    width: auto !important;
-    min-width: 0 !important;
-    justify-items: end !important;
   }
   body[data-screen='game'] .topbar-right .control-row {
     display: flex !important;
@@ -9435,29 +9404,17 @@ body[data-screen='game'][data-log-open='0'] .side-zone.log-collapsed .log-toggle
     margin: 0 !important;
     z-index: 20 !important;
   }
-  body[data-screen='game'] .topbar-right .lang-menu {
-    z-index: 12020 !important;
-  }
-  body[data-screen='game'] .topbar-right .lang-menu-pop {
-    left: 50% !important;
-    right: auto !important;
-    transform: translateX(-50%) !important;
-    min-width: max(140px, 100%) !important;
-    max-width: min(240px, calc(100vw - 32px)) !important;
-  }
 }
 
-@media (min-width: 861px) and (max-width: 1200px) {
-  body[data-screen='game'] .topbar-right .lang-menu {
-    z-index: 12020 !important;
-  }
-  body[data-screen='game'] .topbar-right .lang-menu-pop {
-    left: 50% !important;
-    right: auto !important;
-    transform: translateX(-50%) !important;
-    min-width: max(140px, 100%) !important;
-    max-width: min(240px, calc(100vw - 32px)) !important;
-  }
+body[data-screen='game'] .topbar-right .lang-menu {
+  z-index: 12020 !important;
+}
+body[data-screen='game'] .topbar-right .lang-menu-pop {
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%) !important;
+  min-width: max(140px, 100%) !important;
+  max-width: min(240px, calc(100vw - 32px)) !important;
 }
 body[data-screen='game'] .side-zone.log-collapsed .log-side-card.collapsed,
 body[data-screen='game'][data-log-open='0'] .side-zone.log-collapsed .log-side-card.collapsed {
@@ -9474,10 +9431,6 @@ body[data-screen='game'][data-log-open='0'] .side-zone.log-collapsed .log-side-c
     align-items: flex-start;
     gap: 3px;
     flex-wrap: nowrap;
-  }
-  .history-detail-row .history-detail {
-    flex: 0 0 auto;
-    width: 100%;
   }
   .history-detail-row .history-cards {
     flex: 0 0 auto;
@@ -9748,11 +9701,7 @@ body[data-screen='game'][data-log-open='0'] .side-zone.log-collapsed .log-side-c
 }
 
 /* Desktop/web guard: block gameplay when viewport is too small. */
-body[data-screen='game'][data-web-too-small='1'] .game-shell {
-  pointer-events: auto !important;
-  user-select: auto !important;
-  filter: none;
-}
+body[data-screen='game'][data-web-too-small='1'] .game-shell,
 body[data-screen='game'][data-web-too-small='1'][data-webview='1'] .game-shell {
   pointer-events: auto !important;
   user-select: auto !important;
@@ -9786,9 +9735,6 @@ body[data-screen='game'] .topbar-right .control-row::-webkit-scrollbar {
     scrollbar-width: none !important;
     scroll-padding-inline: 10px !important;
   }
-  body[data-screen='game'] .topbar-right .control-row::-webkit-scrollbar {
-    height: 0 !important;
-  }
   body[data-screen='game'] .topbar-right .lang-menu {
     flex: 0 0 auto !important;
     align-self: center !important;
@@ -9813,10 +9759,7 @@ body[data-screen='game'] .topbar-right .control-row::-webkit-scrollbar {
     padding: 6px 5px 6px 6px !important;
   }
 }
-body[data-screen='game'][data-web-too-small='1'] #app::after {
-  content: '';
-  display: none;
-}
+body[data-screen='game'][data-web-too-small='1'] #app::after,
 body[data-screen='game'][data-web-too-small='1'][data-webview='1'] #app::after {
   content: '';
   display: none;
@@ -9840,38 +9783,15 @@ body[data-screen='game'][data-web-too-small='1'][data-webview='1'] #app::after {
 @media (orientation: landscape) {
   body[data-screen='game'] .table-emote,
   body[data-screen='game'] .self-table-emote {
-    width: clamp(108px, 16vw, 156px);
-  }
-  body[data-screen='game'] .table-emote.emote-throw,
-  body[data-screen='game'] .self-table-emote.emote-throw {
-    width: clamp(124px, 18vw, 176px);
-  }
-  body[data-screen='game'] .table-emote.emote-smash,
-  body[data-screen='game'] .self-table-emote.emote-smash {
-    width: clamp(128px, 19vw, 184px);
-  }
-  body[data-screen='game'] .table-emote.emote-cheers,
-  body[data-screen='game'] .self-table-emote.emote-cheers,
-  body[data-screen='game'] .table-emote.emote-champagne,
-  body[data-screen='game'] .self-table-emote.emote-champagne,
-  body[data-screen='game'] .table-emote.emote-shock,
-  body[data-screen='game'] .self-table-emote.emote-shock {
-    width: clamp(128px, 19vw, 184px);
-  }
-  body[data-screen='game'] .table-emote.emote-love,
-  body[data-screen='game'] .self-table-emote.emote-love,
-  body[data-screen='game'] .table-emote.emote-crack,
-  body[data-screen='game'] .self-table-emote.emote-crack {
-    width: clamp(116px, 17vw, 164px);
-  }
-  body[data-screen='game'] .table-emote.emote-sleep,
-  body[data-screen='game'] .self-table-emote.emote-sleep {
-    width: clamp(110px, 16vw, 156px);
-  }
-  body[data-screen='game'] .table-emote.emote-rude,
-  body[data-screen='game'] .self-table-emote.emote-rude {
-    width: clamp(150px, 21vw, 210px);
-    height: clamp(98px, 14vw, 138px);
+    --emote-base-w: clamp(108px, 16vw, 156px);
+    --emote-throw-w: clamp(124px, 18vw, 176px);
+    --emote-smash-w: clamp(128px, 19vw, 184px);
+    --emote-cheers-w: clamp(128px, 19vw, 184px);
+    --emote-love-w: clamp(116px, 17vw, 164px);
+    --emote-crack-w: clamp(116px, 17vw, 164px);
+    --emote-sleep-w: clamp(110px, 16vw, 156px);
+    --emote-rude-w: clamp(150px, 21vw, 210px);
+    --emote-rude-h: clamp(98px, 14vw, 138px);
   }
   body[data-screen='game'] .seat.west .play-type-call-seat,
   body[data-screen='game'] .seat.west .last-card-call-seat {
@@ -9959,12 +9879,6 @@ body[data-screen='game'] .seat.east.active .seat-section {
     inset 0 0 0 1px color-mix(in srgb, var(--player-color, #ffd166) 44%, transparent),
     inset 0 0 14px color-mix(in srgb, var(--player-color, #ffd166) 26%, transparent) !important;
 }
-
-body[data-screen='game'] .seat.west.active::before,
-body[data-screen='game'] .seat.east.active::before {
-  content: none !important;
-}
-
 
 @keyframes emoteChampagne {
   0% { transform: translate(-50%, -50%) rotate(-6deg) scale(0.96); }
@@ -11166,6 +11080,7 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
   overflow: visible !important;
   text-overflow: clip !important;
   line-height: 1.15 !important;
+  font-size: calc(1.9rem * var(--callout-size, 1)) !important;
   display: block !important;
 }
 
@@ -11469,9 +11384,6 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
     overflow: visible !important;
     padding-bottom: 0 !important;
   }
-  body[data-screen='game'][data-ios='1'] .action-strip {
-    padding-bottom: 0 !important;
-  }
   body[data-screen='game'][data-ios='1'] .action-strip .hand {
     min-height: calc(var(--card-h) * 1.14 + 18px) !important;
     padding-bottom: 2px !important;
@@ -11567,23 +11479,11 @@ body[data-screen='game'][data-orientation='portrait'] .seat.east .seat-open-play
 }
 
 body[data-screen='game'] .seat-name-fixed[data-opponent-name],
-body[data-screen='game'] .seat-name-fixed[data-opponent-name] .play-type-call-seat,
-body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-seat,
-body[data-screen='game'] .seat-name-fixed[data-opponent-name] .emote-callout.play-type-call-seat,
-body[data-screen='game'] .action-strip .play-type-call-self,
-body[data-screen='game'] .action-strip .last-card-call-self,
-body[data-screen='game'] .action-strip .emote-callout {
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] :is(.play-type-call-seat, .last-card-call-seat, .emote-callout.play-type-call-seat),
+body[data-screen='game'] .action-strip :is(.play-type-call-self, .last-card-call-self, .emote-callout) {
   z-index: 14000 !important;
 }
-body[data-screen='game'] .seat.north .opponent-fan-wrap,
-body[data-screen='game'] .seat.west .opponent-fan-wrap,
-body[data-screen='game'] .seat.east .opponent-fan-wrap,
-body[data-screen='game'] .seat.north .opponent-fan,
-body[data-screen='game'] .seat.west .opponent-fan,
-body[data-screen='game'] .seat.east .opponent-fan,
-body[data-screen='game'] .seat.north .seat-open-play,
-body[data-screen='game'] .seat.west .seat-open-play,
-body[data-screen='game'] .seat.east .seat-open-play {
+body[data-screen='game'] :is(.seat.north, .seat.west, .seat.east) :is(.opponent-fan-wrap, .opponent-fan, .seat-open-play) {
   z-index: 1 !important;
 }
 
@@ -11741,29 +11641,15 @@ body[data-screen='game'][data-ios='1'] .action-strip .hand .hand-card {
 
 @media (max-width: 860px) {
   body[data-screen='game'] .self-table-emote {
-    width: clamp(140px, 28vw, 210px) !important;
-  }
-  body[data-screen='game'] .self-table-emote.emote-throw {
-    width: clamp(165px, 34vw, 250px) !important;
-  }
-  body[data-screen='game'] .self-table-emote.emote-smash {
-    width: clamp(170px, 35vw, 260px) !important;
-  }
-  body[data-screen='game'] .self-table-emote.emote-cheers,
-  body[data-screen='game'] .self-table-emote.emote-champagne,
-  body[data-screen='game'] .self-table-emote.emote-shock {
-    width: clamp(175px, 36vw, 265px) !important;
-  }
-  body[data-screen='game'] .self-table-emote.emote-love,
-  body[data-screen='game'] .self-table-emote.emote-crack {
-    width: clamp(155px, 31vw, 225px) !important;
-  }
-  body[data-screen='game'] .self-table-emote.emote-sleep {
-    width: clamp(145px, 29vw, 215px) !important;
-  }
-  body[data-screen='game'] .self-table-emote.emote-rude {
-    width: clamp(210px, 42vw, 300px) !important;
-    height: clamp(138px, 27vw, 190px) !important;
+    --emote-base-w: clamp(140px, 28vw, 210px);
+    --emote-throw-w: clamp(165px, 34vw, 250px);
+    --emote-smash-w: clamp(170px, 35vw, 260px);
+    --emote-cheers-w: clamp(175px, 36vw, 265px);
+    --emote-love-w: clamp(155px, 31vw, 225px);
+    --emote-crack-w: clamp(155px, 31vw, 225px);
+    --emote-sleep-w: clamp(145px, 29vw, 215px);
+    --emote-rude-w: clamp(210px, 42vw, 300px);
+    --emote-rude-h: clamp(138px, 27vw, 190px);
   }
 }
 
