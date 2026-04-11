@@ -7333,7 +7333,7 @@ body[data-screen='game'] .result-card > * {
 .result-side {
   display: grid;
   gap: 4px;
-  justify-items: start;
+  justify-items: end;
   align-content: start;
   min-width: max-content;
 }
@@ -7408,6 +7408,7 @@ body[data-screen='game'] .result-card > * {
   background: rgba(255,255,255,.035);
   width: fit-content;
   max-width: none;
+  justify-items: end;
 }
 .result-block-title {
   font-size: .75rem;
@@ -7415,6 +7416,7 @@ body[data-screen='game'] .result-card > * {
   color: #d9ebff;
   letter-spacing: .01em;
   white-space: nowrap;
+  text-align: right;
 }
 .result-score-chip {
   display: inline-flex;
@@ -7440,7 +7442,7 @@ body[data-screen='game'] .result-card > * {
   display: flex;
   gap: 0;
   flex-wrap: nowrap;
-  justify-content: flex-start;
+  justify-content: flex-end;
   align-items: flex-start;
   overflow-x: auto;
   min-width: 0;
@@ -7454,6 +7456,7 @@ body[data-screen='game'] .result-card > * {
   .result-side {
     width: auto;
     justify-items: end;
+    justify-self: end;
   }
   .result-card-block {
     max-width: 100%;
