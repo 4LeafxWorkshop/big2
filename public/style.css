@@ -11661,7 +11661,7 @@ body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .seat-
 }
 
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout {
-  top: calc(100% + 10px) !important;
+  top: calc(100% + 6px) !important;
   bottom: auto !important;
   left: 50% !important;
   right: auto !important;
@@ -11670,7 +11670,7 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
 }
 
 body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .seat-motto-callout {
-  top: calc(100% + 10px) !important;
+  top: calc(100% + 6px) !important;
   bottom: auto !important;
   left: 50% !important;
   right: auto !important;
@@ -11680,7 +11680,7 @@ body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .seat-
 
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout .tail,
 body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .seat-motto-callout .tail {
-  top: calc(-20px * var(--callout-size, 1)) !important;
+  top: calc(-18px * var(--callout-size, 1)) !important;
   bottom: auto !important;
   left: 50% !important;
   right: auto !important;
@@ -11691,7 +11691,7 @@ body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .seat-
 
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout .tail::after,
 body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .seat-motto-callout .tail::after {
-  bottom: calc(-14px * var(--callout-size, 1)) !important;
+  bottom: calc(-12px * var(--callout-size, 1)) !important;
   top: auto !important;
   left: calc(-10px * var(--callout-size, 1)) !important;
   right: auto !important;
@@ -11704,16 +11704,6 @@ body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .seat-
   body[data-screen='game'] .seat.east .side-station-stack > .seat-name-fixed[data-opponent-name] {
     z-index: 14010 !important;
     pointer-events: auto !important;
-  }
-  body[data-screen='game'] .seat.west .seat-name-fixed[data-opponent-name] .seat-motto-callout {
-    left: 0 !important;
-    right: auto !important;
-    --callout-base-x: 0px;
-  }
-  body[data-screen='game'] .seat.east .seat-name-fixed[data-opponent-name] .seat-motto-callout {
-    left: auto !important;
-    right: 0 !important;
-    --callout-base-x: 0px;
   }
 }
 
