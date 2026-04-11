@@ -80,7 +80,7 @@ $ErrorActionPreference='Stop'; $repo=(Resolve-Path .).Path; $out=Join-Path $repo
 - `line-last-2`: `淨翻一張`
 - `line-last-3`: `埋門一腳`
 - `line-last-4`: `準備找素`
-- `line-last-5`: `最後一張罅喂` (preview/support file)
+- `line-last-5`: `最後一張罅` (preview/support file)
 - `line-last-6`: `Last Card!`
 - `line-play-tail-2`: `跟`
 - `line-play-tail-3`: `頂住`
