@@ -208,7 +208,7 @@ export function syncLandscapeGameHandSizing({
   const handCardH=handCardW*1.392857;
 
   hand.style.setProperty('--hand-card-scale','1.34');
-  hand.style.setProperty('min-height',`${(handCardH+34).toFixed(2)}px`,'important');
+  hand.style.setProperty('min-height',`${(handCardH+18).toFixed(2)}px`,'important');
   cards.forEach((card)=>{
     card.style.setProperty('width',`${handCardW.toFixed(2)}px`,'important');
     card.style.setProperty('height',`${handCardH.toFixed(2)}px`,'important');

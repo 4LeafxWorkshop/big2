@@ -4455,16 +4455,16 @@ body[data-screen='game'] .table-center-stack {
   animation: calloutFloat var(--callout-float-dur, 2.9s) ease-in-out infinite !important;
 }
 .play-type-call.must3-call .callout-box {
-  width: max-content;
-  min-width: min(calc(280px * var(--callout-size, 1)), calc(100vw - 32px));
-  max-width: min(calc(760px * var(--callout-size, 1)), calc(100vw - 24px));
+  width: min(calc(200px * var(--callout-size, 1)), calc(100vw - 24px));
+  min-width: 0;
+  max-width: min(calc(200px * var(--callout-size, 1)), calc(100vw - 24px));
 }
 .play-type-call.must3-call .hk-inner {
   white-space: normal;
   text-align: center;
   padding: calc(8px * var(--callout-size, 1)) calc(14px * var(--callout-size, 1));
-  inline-size: max-content;
-  min-inline-size: 100%;
+  inline-size: 100%;
+  min-inline-size: 0;
   max-inline-size: 100%;
 }
 .play-type-call.must3-call .hk-text,
@@ -4472,8 +4472,8 @@ body[data-screen='game'] .table-center-stack {
   display: block;
   max-width: 100%;
   white-space: normal;
-  text-wrap: balance;
-  overflow-wrap: normal;
+  text-wrap: wrap;
+  overflow-wrap: break-word;
   word-break: normal;
   line-height: 1.05;
 }
@@ -5099,7 +5099,7 @@ body[data-screen='game'] .table-center-stack {
     radial-gradient(circle at 50% 0%, rgba(255, 212, 128, .08), transparent 52%),
     linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,0)),
     var(--panel-2);
-  padding: 0 8px 4px;
+  padding: 6px 8px 8px;
   display: grid;
   gap: 4px;
   min-height: 0;
@@ -5152,7 +5152,7 @@ body[data-screen='game'] .table-center-stack {
   flex-wrap: wrap;
   row-gap: 6px;
   overflow: visible;
-  padding-top: 6px;
+  padding-top: 0;
   position: relative;
   z-index: 6;
 }
@@ -5178,11 +5178,11 @@ body[data-screen='game'] .table-center-stack {
 .action-strip .hand {
   gap: 3px;
   grid-area: hand;
-  padding-top: 8px;
-  padding-bottom: 6px;
+  padding-top: 0;
+  padding-bottom: 0;
   padding-left: 0;
   padding-right: 0;
-  min-height: calc(var(--card-h) * 1.14 + 24px);
+  min-height: calc(var(--card-h) * 1.14 + 12px);
   transform: none;
   scroll-padding-left: 0;
   scroll-padding-right: 0;
@@ -11560,6 +11560,11 @@ body[data-screen='game'] .seat.north .seat-name-fixed[data-opponent-name] .seat-
   border-bottom-color: var(--bubble-fill) !important;
 }
 
+body[data-screen='game'][data-orientation='landscape'] .action-strip,
+body[data-screen='game'][data-orientation='portrait'] .action-strip {
+  padding-bottom: 8px !important;
+}
+
 @media (min-width: 861px) and (orientation: landscape) {
   body[data-screen='game'] .seat.west .side-station-stack > .seat-name-fixed[data-opponent-name],
   body[data-screen='game'] .seat.east .side-station-stack > .seat-name-fixed[data-opponent-name] {
@@ -11575,29 +11580,6 @@ body[data-screen='game'] .history-detail-row .history-cards {
 }
 body[data-log-sheet='1'] .history-detail-row .history-cards {
   height: auto !important;
-}
-
-/* Lift the south hand slightly so there is visible breathing room underneath. */
-@media (max-width: 860px) {
-  body[data-screen='game'] .action-strip {
-    padding-bottom: 10px !important;
-  }
-  body[data-screen='game'] .action-strip .hand {
-    min-height: calc(var(--card-h) * 1.02 + 18px) !important;
-    padding-bottom: 6px !important;
-    transform: translateY(-4px) !important;
-  }
-  body[data-screen='game'] .action-strip .hand .hand-card {
-    margin-bottom: 4px !important;
-  }
-}
-body[data-screen='game'][data-ios='1'] .action-strip .hand {
-  min-height: calc(var(--card-h) * 1.14 + 24px) !important;
-  padding-bottom: 6px !important;
-  transform: translateY(-4px) !important;
-}
-body[data-screen='game'][data-ios='1'] .action-strip .hand .hand-card {
-  margin-bottom: 4px !important;
 }
 
 @media (max-width: 860px) {

@@ -275,7 +275,6 @@ const I18N = {
     revealSub: '有人勝出，所有玩家餘牌如下：',
     drag: '可拖曳手牌重新排序',
     must3: '階磚♦️3出先。',
-    must3Call: '階磚要♦️3出先。',
     beat: '你所選牌未能大過上手。',
     cantPass: '話事中不可過牌。',
     retake: '重新話事。',
@@ -532,7 +531,6 @@ const I18N = {
     revealSub: 'Winner decided. Remaining cards are revealed:',
     drag: 'Drag cards to resequence your hand',
     must3: 'First turn must include ♦️Diamond 3.',
-    must3Call: 'First turn must include ♦️Diamond 3.',
     beat: 'Your selection does not beat last play.',
     cantPass: 'Cannot pass while holding lead.',
     retake: 'regains lead.',
@@ -789,7 +787,6 @@ const I18N = {
     revealSub: 'Vainqueur décidé. Cartes restantes révélées :',
     drag: 'Glissez pour réordonner votre main',
     must3: 'Le premier tour doit contenir le ♦️3.',
-    must3Call: 'Le premier tour doit\ncontenir le ♦️3.',
     beat: 'Votre sélection ne bat pas la dernière main.',
     cantPass: 'Impossible de passer quand vous êtes en tête.',
     retake: 'reprend la main.',
@@ -1049,7 +1046,6 @@ const I18N = {
     revealSub: 'Sieger festgelegt. Restkarten werden gezeigt:',
     drag: 'Karten ziehen, um die Hand zu sortieren',
     must3: 'Erster Zug muss ♦️3 enthalten.',
-    must3Call: 'Im ersten Zug muss\n♦️3 enthalten sein.',
     beat: 'Deine Auswahl schlägt den letzten Zug nicht.',
     cantPass: 'Als Vorhand kann man nicht passen.',
     retake: 'übernimmt den Stich.',
@@ -1309,7 +1305,6 @@ const I18N = {
     revealSub: 'Ganador decidido. Cartas restantes:',
     drag: 'Arrastra para ordenar tu mano',
     must3: 'El primer turno debe incluir ♦️3.',
-    must3Call: 'El primer turno debe\nincluir♦️3.',
     beat: 'Tu selección no supera la última jugada.',
     cantPass: 'No puedes pasar si tienes la mano.',
     retake: 'retoma la mano.',
@@ -1569,7 +1564,6 @@ const I18N = {
     revealSub: '勝者決定。残りのカードを公開:',
     drag: 'ドラッグして手札の順を変更',
     must3: '最初の手番は♦️3を含める必要があります。',
-    must3Call: '最初の手番は♦️3\nを含める必要があります。',
     beat: '選択したカードは前の出し札に勝てません。',
     cantPass: '親のときはパスできません。',
     retake: 'が親になります。',
@@ -7083,7 +7077,7 @@ function triggerMust3LeadCallout(game,selfSeat=0){
   const opponents=game.players.map((p,i)=>({player:p,seat:i})).filter((x)=>!x.player?.isHuman&&x.seat!==seatIndex);
   if(!opponents.length)return;
   const pick=opponents[Math.floor(Math.random()*opponents.length)];
-  const text=t('must3Call')||t('must3');
+  const text=t('must3');
   const now=Date.now();
   must3CallState.key=`must3-${now}-${pick.seat}`;
   must3CallState.seat=pick.seat;
