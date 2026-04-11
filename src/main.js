@@ -4628,6 +4628,8 @@ async function gateGuestRoomAccess(targetRoomId=''){
 async function queryActiveRoomsFromDb(roomDb,instanceId){
   const statusFilters=['lobby','starting','playing','finished'];
   const roomFetchLimit=20;
+  const currentPlayerId=String(baseRoomPlayerId()||'').trim();
+  const currentRoomId=String(state.room.id||'').trim();
   let snap=null;
   try{
     snap=await roomDb.collection(FIRESTORE_ROOMS_COLLECTION)
@@ -4664,7 +4666,18 @@ async function queryActiveRoomsFromDb(roomDb,instanceId){
       hiddenRooms+=1;
       continue;
     }
-    const players=Array.isArray(data.players)?data.players:[];
+    let players=Array.isArray(data.players)?[...data.players]:[];
+    const selfListed=currentPlayerId&&players.some((p)=>String(p?.uid||'')===currentPlayerId);
+    const staleSelfListed=selfListed&&(!currentRoomId||currentRoomId!==String(doc.id||''));
+    if(staleSelfListed){
+      await dropSelfFromRoom({
+        id:doc.id,
+        ref:doc.ref,
+        data(){return data;},
+        instanceId
+      },currentPlayerId);
+      players=players.filter((p)=>String(p?.uid||'')!==currentPlayerId);
+    }
     const updatedAt=Number(data.updatedAt)||0;
     if(updatedAt>0){
       const staleAge=now-updatedAt;
@@ -5453,7 +5466,9 @@ async function roomSubmitPlay(cards,seatOverride=null){
       if(data.status!=='playing'||!data.game)throw new Error('room not playing');
       let game=data.game;
       if(Number(game.currentSeat)!==seat)throw new Error('not your turn');
-      const selfSeat=roomSeatForPlayer(data,currentRoomPlayerId());
+      const selfUid=currentRoomPlayerId();
+      const selfSeat=roomSeatForPlayer(data,selfUid);
+      const isHostActor=String(data.hostId??'')===String(selfUid);
       let target=game.players?.[seat];
       const timeout=getRoomTurnTimeoutWithGrace(data);
       const startedAt=Number(game.turnStartedAt)||0;
@@ -5470,7 +5485,7 @@ async function roomSubmitPlay(cards,seatOverride=null){
         const reset=resetTimeoutStrikeForSeat(nextPlayers,seat);
         if(reset.changed)nextPlayers=reset.players;
       }
-      const canAct=(selfSeat===seat)||(target&&!target.isHuman)||(timedOut&&target?.isHuman);
+      const canAct=(selfSeat===seat)||((target&&!target.isHuman)&&isHostActor)||(timedOut&&target?.isHuman);
       if(!canAct)throw new Error('not allowed');
         const result=applyPlayToGame(game,seat,cards,now);
         if(!result.ok)throw new Error(result.reason||'invalid');
@@ -5524,7 +5539,9 @@ async function roomSubmitPass(seatOverride=null){
       if(data.status!=='playing'||!data.game)throw new Error('room not playing');
       let game=data.game;
       if(Number(game.currentSeat)!==seat)throw new Error('not your turn');
-      const selfSeat=roomSeatForPlayer(data,currentRoomPlayerId());
+      const selfUid=currentRoomPlayerId();
+      const selfSeat=roomSeatForPlayer(data,selfUid);
+      const isHostActor=String(data.hostId??'')===String(selfUid);
       let target=game.players?.[seat];
       const timeout=getRoomTurnTimeoutWithGrace(data);
       const startedAt=Number(game.turnStartedAt)||0;
@@ -5541,7 +5558,7 @@ async function roomSubmitPass(seatOverride=null){
         const reset=resetTimeoutStrikeForSeat(nextPlayers,seat);
         if(reset.changed)nextPlayers=reset.players;
       }
-        const canAct=(selfSeat===seat)||(target&&!target.isHuman)||(timedOut&&target?.isHuman);
+        const canAct=(selfSeat===seat)||((target&&!target.isHuman)&&isHostActor)||(timedOut&&target?.isHuman);
         if(!canAct)throw new Error('not allowed');
         const result=applyPassToGame(game,seat,now);
         if(!result.ok)throw new Error(result.reason||'invalid');
@@ -5583,6 +5600,7 @@ function maybeRunRoomAi(){
   const g=state.room.data.game;
   const current=g?.players?.[g?.currentSeat];
   if(!g||g.gameOver||!current)return;
+  if(!current.isHuman&&!roomIsHost())return;
   if(current.isHuman){
     const timeout=getRoomTurnTimeoutWithGrace(state.room.data);
     const startedAt=Number(g.turnStartedAt)||0;
@@ -5610,6 +5628,7 @@ function maybeRunRoomAi(){
   aiTimer=window.setTimeout(async()=>{
     const live=state.room.data?.game;
     if(!live||live.gameOver)return;
+    if(!roomIsHost())return;
     const actor=live.players?.[live.currentSeat];
     if(!actor||actor.isHuman)return;
     const ch=chooseAiPlay(actor.hand,live,live.aiDifficulty);

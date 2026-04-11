@@ -146,8 +146,17 @@ Game end:
 ## Presence, Prune, and Host Migration
 
 Presence:
-- `startRoomPresencePing()` updates `lastSeen` every 5s.
+- Live room state is synced through Firestore `onSnapshot` subscriptions; the client does not continuously poll room state.
+- `subscribeRoom()` calls `startRoomPresencePing()` after receiving a room snapshot.
+- `startRoomPresencePing()` currently acts as a one-time bootstrap and immediately calls `touchRoomPresence(true)`; it does not start a repeating 5s timer.
+- `touchRoomPresence()` updates the local player's `lastSeen` and the room `updatedAt` in a Firestore transaction.
+- Additional forced presence touches happen when the app/window regains focus and when the document becomes visible again.
 - Offline indicator triggers when `lastSeen` is older than 15s (playing only).
+
+Active room list refresh:
+- The active room list is loaded on demand via `loadActiveRooms()`.
+- It refreshes when the join-room overlay opens and when the user presses the refresh button.
+- The current implementation does not continuously poll the active room list in the background.
 
 Prune:
 - Lobby/starting: players inactive for 5 minutes are pruned.
