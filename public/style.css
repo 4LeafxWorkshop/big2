@@ -3663,6 +3663,9 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   font-weight: 700;
   color: var(--muted);
 }
+#google-name-inline .auth-status-warning {
+  color: #f59e0b;
+}
 #google-name-inline .auth-provider-badge {
   width: 30px;
   height: 30px;
@@ -3712,6 +3715,13 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   justify-content: center;
   background: #1a73e8;
   border-color: #1a73e8;
+  color: #fff;
+}
+#google-name-inline .auth-btn-retry {
+  width: 140px;
+  justify-content: center;
+  background: #dc2626;
+  border-color: #dc2626;
   color: #fff;
 }
 #google-name-inline .auth-btn-google {
@@ -6977,10 +6987,10 @@ body[data-screen='game'] .intro-modal {
     padding: 2px;
     gap: 2px;
   }
-  .royal-home-body .home-form-right .field-sound .sound-toggle-btn {
-    min-width: 28px;
-    padding: 2px 6px;
-  }
+.royal-home-body .home-form-right .field-sound .sound-toggle-btn {
+  min-width: 28px;
+  padding: 2px 6px;
+}
 .royal-home-body .home-form-right .field-callout > span,
 .royal-home-body .home-form-right .field-emote > span {
   display: block;

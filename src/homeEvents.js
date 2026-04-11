@@ -102,7 +102,7 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
     });
     doc.getElementById('name-input')?.addEventListener('input',(e)=>{
       state.home.name=e.target.value;
-      if(signedInWithEmail()){
+      if(signedInWithEmail()&&!state.home.google?.profileMissing){
         void syncLeaderboardProfile(currentLeaderboardIdentity());
       }
     });
@@ -113,7 +113,7 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       state.home.gender=value;
       markComboActive('gender-combo',state.home.avatarChoice);
       saveGoogleSession();
-      if(signedInWithEmail()){
+      if(signedInWithEmail()&&!state.home.google?.profileMissing){
         void syncLeaderboardProfile(currentLeaderboardIdentity());
       }
     }));

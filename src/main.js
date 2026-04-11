@@ -336,6 +336,8 @@ const I18N = {
     motto: '座右銘',
     lbHeadingDesc: '根據分數變動、勝場與勝率等表現指標即時更新排名。',
     lbRefresh: '更新排行榜',
+    profileMissing: '找不到個人資料，請重新登入以回復分數。',
+    signInAgain: '重新登入',
     lbSort: '排序',
     lbPeriod: '期間',
     lbNoData: '未有排行資料',
@@ -593,6 +595,8 @@ const I18N = {
     lbHeadingDesc:
       'Live ranking updates based on score delta, wins, and win rate.',
     lbRefresh: 'Refresh Leaderboard',
+    profileMissing: 'Profile not found. Sign in again to restore your score.',
+    signInAgain: 'Sign in again',
     lbSort: 'Sort',
     lbPeriod: 'Period',
     lbNoData: 'No leaderboard data yet',
@@ -1863,7 +1867,7 @@ const CALLOUT_RESPONSE_TEXT = {
   },
 };
 const app=document.getElementById('app');
-const state={language:'zh-HK',screen:'home',screenBeforeConfig:'home',showRules:false,showLog:false,showLogSheet:false,logTouched:false,showScoreGuide:false,opponentProfileName:'',mottoPeekName:'',selected:new Set(),drag:{id:null,moved:false},playAnimKey:'',autoPassKey:'',score:5000,suggestCost:0,recommendation:null,recommendHint:'',logFab:{x:null,y:null},home:{mode:'solo',name:'玩家',gender:'male',avatarChoice:'male',aiDifficulty:'normal',backColor:'red',theme:'ocean',showIntro:false,showLeaderboard:false,google:{signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',gender:''},leaderboard:{rows:[],sort:'totalDelta',period:'all',limit:20},activeRooms:{rows:[],loading:false,loadedAt:0,error:''}},room:{id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:false,error:'',started:false,unsub:null,selfSeat:-1,recordedGameKey:'',lastMoveKey:'',playerId:'',pendingStart:false,lastResultPlayers:null},sessionId:'',solo:{players:[],botNames:[],totals:[5000,5000,5000,5000],currentSeat:0,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',history:[],aiDifficulty:'normal',lastCardBreach:null},emote:{open:false,active:null}};
+const state={language:'zh-HK',screen:'home',screenBeforeConfig:'home',showRules:false,showLog:false,showLogSheet:false,logTouched:false,showScoreGuide:false,opponentProfileName:'',mottoPeekName:'',selected:new Set(),drag:{id:null,moved:false},playAnimKey:'',autoPassKey:'',score:5000,suggestCost:0,recommendation:null,recommendHint:'',logFab:{x:null,y:null},home:{mode:'solo',name:'玩家',gender:'male',avatarChoice:'male',aiDifficulty:'normal',backColor:'red',theme:'ocean',showIntro:false,showLeaderboard:false,google:{signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',gender:'',profileMissing:false},leaderboard:{rows:[],sort:'totalDelta',period:'all',limit:20},activeRooms:{rows:[],loading:false,loadedAt:0,error:''}},room:{id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:false,error:'',started:false,unsub:null,selfSeat:-1,recordedGameKey:'',lastMoveKey:'',playerId:'',pendingStart:false,lastResultPlayers:null},sessionId:'',solo:{players:[],botNames:[],totals:[5000,5000,5000,5000],currentSeat:0,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',history:[],aiDifficulty:'normal',lastCardBreach:null},emote:{open:false,active:null}};
 const {
   EMOTE_STICKERS,
   cardImagePath,
@@ -3924,12 +3928,16 @@ async function hydrateProfileFromCloudByIdentity(identity){
         }catch{}
       }
     }
-    if(!data)return false;
+    if(!data){
+      if(identity?.email||identity?.id)state.home.google.profileMissing=true;
+      return false;
+    }
     const d=data;
     const restoredName=String(d.name??'').trim().slice(0,18);
     const restoredScore=scoreFromStoredTotal(d.totalScore);
     const restoredGender=String(d.gender??state.home.gender??'male')==='female'?'female':'male';
     const restoredPicture=String(d.picture??'').trim();
+    state.home.google.profileMissing=false;
     applyMainSettings(d.settings);
     const store=loadLeaderboardStore();
     const entry=ensureLeaderboardEntry(store,identity);
@@ -4253,12 +4261,14 @@ function authProviderPrefix(){
   return normalizeAuthProvider(state.home.google?.provider);
 }
 function signedInForPlay(){
+  if(state.home.google?.profileMissing)return false;
   const authUser=firebaseAuth?.currentUser;
   if(authUser?.uid)return true;
   const g=state.home.google??{};
   return Boolean(g.signedIn&&(String(g.email??'').trim()||String(g.uid??'').trim()||String(g.sub??'').trim()));
 }
 function signedInWithEmail(){return Boolean(state.home.google.signedIn&&state.home.google.email);}
+function canSyncLeaderboardProfile(){return signedInWithEmail()&&!state.home.google?.profileMissing;}
 function currentAuthUid(){return String(firebaseAuth?.currentUser?.uid??'').trim();}
 const LOCAL_ROOM_KEY='big2.currentRoomId';
 function baseRoomPlayerId(){
@@ -5708,6 +5718,7 @@ function ensureLeaderboardEntry(store,identity){
   return store.players[key];
 }
 async function recordLeaderboardRound(identity,delta,won){
+  if(!isBotIdentity(identity)&&state.home.google?.profileMissing)return;
   const store=loadLeaderboardStore();
   const entry=ensureLeaderboardEntry(store,identity);
   if(!entry)return;
@@ -5736,6 +5747,7 @@ async function recordLeaderboardRound(identity,delta,won){
   }
 }
 async function syncLeaderboardProfile(identity){
+  if(!isBotIdentity(identity)&&state.home.google?.profileMissing)return false;
   const store=loadLeaderboardStore();
   const entry=ensureLeaderboardEntry(store,identity);
   if(!entry)return false;
@@ -6013,13 +6025,15 @@ async function handleCredentialResponse(response){
   const gRaw=String(p.gender??p.sex??'').trim().toLowerCase();
   const googleGender=(gRaw==='female'||gRaw==='male')?gRaw:'';
   const signedIn=Boolean(email||String(p.sub??'').trim());
-  state.home.google={signedIn,provider:'google',name:String(p.name??'').slice(0,18),email,uid:String(p.sub??'').slice(0,128),sub:String(p.sub??'').slice(0,64),token,picture:pic,gender:googleGender};
+  state.home.google={signedIn,provider:'google',name:String(p.name??'').slice(0,18),email,uid:String(p.sub??'').slice(0,128),sub:String(p.sub??'').slice(0,64),token,picture:pic,gender:googleGender,profileMissing:false};
   if(signedIn){
-    await hydrateProfileFromCloudByIdentity(currentLeaderboardIdentity());
+    const hydrated=await hydrateProfileFromCloudByIdentity(currentLeaderboardIdentity());
     if(state.home.google.name)state.home.name=state.home.google.name;
     if(googleGender)state.home.gender=googleGender;
     saveGoogleSession();
-    await syncLeaderboardProfile(currentLeaderboardIdentity());
+    if(hydrated){
+      await syncLeaderboardProfile(currentLeaderboardIdentity());
+    }
     if(state.home.showLeaderboard)refreshLeaderboard(true);
     void loadActiveRoomPointer();
   }
@@ -6062,7 +6076,7 @@ function ensureGoogleIdentityInitialized(){
   }
 }
 function signOutCurrentProvider(){
-  state.home.google={signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',gender:''};
+  state.home.google={signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',gender:'',profileMissing:false};
   clearGoogleSession();
   try{window.google?.accounts?.id?.disableAutoSelect?.();}catch{}
   try{firebaseAuth?.signOut?.();}catch{}
@@ -6097,7 +6111,11 @@ function renderGoogleInline(){
     nameRow?.classList.add('signed-in-auth');
     const current=authProviderPrefix();
     const label='Google';
-    slot.innerHTML=`<span class="auth-provider-badge auth-provider-${current}" role="img" aria-label="${label}" title="${label}">${authProviderBadgeHtml(current)}</span><button id="google-signout" class="auth-btn auth-btn-signout">${t('signOut')}</button>`;
+    const profileMissing=Boolean(state.home.google?.profileMissing);
+    const status=profileMissing?`<span class="auth-status auth-status-warning">${t('profileMissing')}</span>`:'';
+    const actionLabel=profileMissing?t('signInAgain'):t('signOut');
+    const actionClass=profileMissing?'auth-btn-retry':'auth-btn-signout';
+    slot.innerHTML=`<span class="auth-provider-badge auth-provider-${current}" role="img" aria-label="${label}" title="${label}">${authProviderBadgeHtml(current)}</span>${status}<button id="google-signout" class="auth-btn ${actionClass}">${actionLabel}</button>`;
     document.getElementById('google-signout')?.addEventListener('click',()=>{signOutCurrentProvider();render();});
     return;
   }
