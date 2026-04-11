@@ -5137,13 +5137,19 @@ function roomLifecycleTimeLeftMs(roomData,now=Date.now()){
   if(!(expiresAt>0))return 0;
   return Math.max(0,expiresAt-now);
 }
+function formatCountdownMs(ms){
+  const totalSeconds=Math.max(0,Math.ceil(ms/1000));
+  const minutes=Math.floor(totalSeconds/60);
+  const seconds=String(totalSeconds%60).padStart(2,'0');
+  return `${minutes}:${seconds}`;
+}
 function roomLifecycleExpired(roomData,now=Date.now()){
   const expiresAt=getRoomLifecycleExpiresAt(roomData);
   return Boolean(expiresAt>0&&now>=expiresAt);
 }
 function roomLifecycleCountdownText(roomData,now=Date.now()){
   const remaining=roomLifecycleTimeLeftMs(roomData,now);
-  return`${Math.ceil(remaining/1000)}s`;
+  return formatCountdownMs(remaining);
 }
 function roomResultExpired(roomData,now=Date.now()){
   const expiresAt=getRoomResultExpiresAt(roomData);
@@ -7440,7 +7446,7 @@ function roomCountdownText(roomData){
   if(!startedAt)return'-';
   const timeout=getRoomTurnTimeout(roomData);
   const remain=Math.max(0,timeout-(Date.now()-startedAt));
-  return`${Math.ceil(remain/1000)}s`;
+  return formatCountdownMs(remain);
 }
 function addRoomSystemLog(game,text){
   if(!game||!text)return;
@@ -8221,7 +8227,7 @@ function renderHome(){
     const isBot=useGameRoster?(!entry.isHuman):(!roomEntry?false:!isRoomPlayerHuman(roomEntry));
     const avatarColor=isBot?playerColorByViewClass(seatCls[seat]||'south'):'#7aaed8';
     const avatarSrc=entryPicture?authPictureUrlFrom(entryPicture):avatarDataUri(entryName,avatarColor,entryGender,isBot);
-    const isHost=String(entry.uid)===String(derivedHostId)||entry.isHost===true||String(roomEntry?.uid||'')===String(derivedHostId);
+    const isHost=String(entry.uid)===String(derivedHostId);
     const lastSeen=Number(roomEntry?.lastSeen)||0;
     const offline=roomData?.status==='playing'&&lastSeen>0&&(Date.now()-lastSeen>ROOM_OFFLINE_MS);
     const hostBadge=isHost?`<span class="lobby-seat-host-badge">🚩</span>`:'';
