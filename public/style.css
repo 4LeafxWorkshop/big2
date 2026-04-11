@@ -7778,6 +7778,38 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .name {
   background: transparent !important;
   box-shadow: none !important;
 }
+
+body[data-screen='game'] :is(
+  .seat.north > .seat-name-fixed,
+  .seat.west > .seat-name-fixed,
+  .seat.east > .seat-name-fixed,
+  .seat.north .seat-pack > .seat-name-fixed,
+  .seat.west .side-station-stack > .seat-name-fixed,
+  .seat.east .side-station-stack > .seat-name-fixed
+) {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+
+body[data-screen='game'] :is(
+  .seat.north > .seat-name-fixed .name,
+  .seat.west > .seat-name-fixed .name,
+  .seat.east > .seat-name-fixed .name,
+  .seat.north .seat-pack > .seat-name-fixed .name,
+  .seat.west .side-station-stack > .seat-name-fixed .name,
+  .seat.east .side-station-stack > .seat-name-fixed .name,
+  .seat.north > .seat-name-fixed .seat-identity,
+  .seat.west > .seat-name-fixed .seat-identity,
+  .seat.east > .seat-name-fixed .seat-identity,
+  .seat.north .seat-pack > .seat-name-fixed .seat-identity,
+  .seat.west .side-station-stack > .seat-name-fixed .seat-identity,
+  .seat.east .side-station-stack > .seat-name-fixed .seat-identity
+) {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-round-wins {
   color: var(--game-round-wins-text);
   font-size: .64rem;
@@ -10391,7 +10423,7 @@ body[data-screen='game'] .seat.east {
   }
   body[data-screen='game'] .seat.west .seat-open-play .seat-played .card.mini + .card.mini,
   body[data-screen='game'] .seat.east .seat-open-play .seat-played .card.mini + .card.mini {
-    margin-left: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * -0.42) !important;
+    margin-left: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * -0.64) !important;
   }
 }
 
@@ -11463,6 +11495,12 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] :is(.play-type-cal
 
 body[data-screen='game'] :is(.north, .west, .east) > .seat-name-fixed {
   background: transparent !important;
+  box-shadow: none !important;
+}
+
+body[data-screen='game'] :is(.seat.north, .seat.west, .seat.east) > .seat-name-fixed {
+  background: transparent !important;
+  border: 0 !important;
   box-shadow: none !important;
 }
 
