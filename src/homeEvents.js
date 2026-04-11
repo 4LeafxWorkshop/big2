@@ -117,15 +117,35 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
         void syncLeaderboardProfile(currentLeaderboardIdentity());
       }
     }));
-    doc.querySelectorAll('#difficulty-combo-left .combo-btn, #difficulty-combo-right .combo-btn').forEach((btn)=>btn.addEventListener('click',()=>{
-      const value=btn.getAttribute('data-value');
-      if(!value)return;
+    const valueFromIndex=(index)=>{
+      if(index<=0)return'easy';
+      if(index>=2)return'hard';
+      return'normal';
+    };
+    const syncDifficultySlider=(value)=>{
+      const index=difficultyIndex(value);
       state.home.aiDifficulty=value;
-      markComboActive('difficulty-combo-left',value);
-      markComboActive('difficulty-combo-right',value);
-      doc.getElementById('difficulty-combo-left')?.style.setProperty('--difficulty-index',`${difficultyIndex(value)}`);
-      doc.getElementById('difficulty-combo-right')?.style.setProperty('--difficulty-index',`${difficultyIndex(value)}`);
+      doc.getElementById('difficulty-slider-left')?.style.setProperty('--difficulty-index',`${index}`);
+      doc.getElementById('difficulty-slider-right')?.style.setProperty('--difficulty-index',`${index}`);
+      const left=doc.querySelector('#difficulty-slider-left .difficulty-slider');
+      const right=doc.querySelector('#difficulty-slider-right .difficulty-slider');
+      if(left&&typeof left==='object'&&'value' in left)left.value=String(index);
+      if(right&&typeof right==='object'&&'value' in right)right.value=String(index);
+    };
+    doc.querySelectorAll('#difficulty-slider-left .difficulty-slider, #difficulty-slider-right .difficulty-slider').forEach((slider)=>slider.addEventListener('input',()=>{
+      const value=valueFromIndex(Number(slider.value));
+      syncDifficultySlider(value);
     }));
+    const toggleMoreSettings=()=>{
+      state.home.showMoreSettings=!state.home.showMoreSettings;
+      render();
+    };
+    doc.getElementById('home-more-settings-toggle')?.addEventListener('click',toggleMoreSettings);
+    doc.getElementById('home-more-settings-toggle')?.addEventListener('keydown',(e)=>{
+      if(e.key!=='Enter'&&e.key!==' ')return;
+      e.preventDefault();
+      toggleMoreSettings();
+    });
     doc.querySelectorAll('.back-combo-home .combo-btn').forEach((btn)=>btn.addEventListener('click',()=>{
       const value=btn.getAttribute('data-value');
       if(!value||!backOptions.some((option)=>option.value===value))return;
@@ -135,9 +155,9 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
     }));
     bindBackCarousel('back-combo-left');
     bindBackCarousel('back-combo-right');
-    bindSoundToggle('sound-combo');
-    bindCalloutDisplayToggle('callout-display-combo');
-    bindEmoteDisplayToggle('emote-display-combo');
+    bindSoundToggle('sound-slider');
+    bindCalloutDisplayToggle('callout-display-slider');
+    bindEmoteDisplayToggle('emote-display-slider');
 
     const handleSoloStart=async()=>{
       if(!signedInForPlay())return;

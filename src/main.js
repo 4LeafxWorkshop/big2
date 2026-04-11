@@ -231,6 +231,7 @@ const I18N = {
     calloutDisplayOn: '開',
     calloutDisplayOff: '關',
     emoteDisplay: '表情顯示',
+    moreSettings: '更多設定',
     voiceAuto: '自動',
     voiceOff: '關',
     voicePack: '語音風格',
@@ -489,6 +490,7 @@ const I18N = {
     calloutDisplayOn: 'On',
     calloutDisplayOff: 'Off',
     emoteDisplay: 'Emote Display',
+    moreSettings: 'More settings',
     voiceAuto: 'Auto',
     voiceOff: 'Off',
     voicePack: 'Voice Style',
@@ -747,6 +749,7 @@ const I18N = {
     calloutDisplayOn: 'Oui',
     calloutDisplayOff: 'Non',
     emoteDisplay: 'Affichage des émoticônes',
+    moreSettings: 'Plus de réglages',
     voiceAuto: 'Auto',
     voiceOff: 'Non',
     voicePack: 'Style de voix',
@@ -1006,6 +1009,7 @@ const I18N = {
     calloutDisplayOn: 'An',
     calloutDisplayOff: 'Aus',
     emoteDisplay: 'Emotes anzeigen',
+    moreSettings: 'Mehr Einstellungen',
     voiceAuto: 'Auto',
     voiceOff: 'Aus',
     voicePack: 'Stimmstil',
@@ -1265,6 +1269,7 @@ const I18N = {
     calloutDisplayOn: 'Sí',
     calloutDisplayOff: 'No',
     emoteDisplay: 'Mostrar emoticonos',
+    moreSettings: 'Más ajustes',
     voiceAuto: 'Auto',
     voiceOff: 'No',
     voicePack: 'Estilo de voz',
@@ -1524,6 +1529,7 @@ const I18N = {
     calloutDisplayOn: 'オン',
     calloutDisplayOff: 'オフ',
     emoteDisplay: 'エモート表示',
+    moreSettings: 'その他の設定',
     voiceAuto: '自動',
     voiceOff: 'オフ',
     voicePack: 'ボイススタイル',
@@ -1867,7 +1873,7 @@ const CALLOUT_RESPONSE_TEXT = {
   },
 };
 const app=document.getElementById('app');
-const state={language:'zh-HK',screen:'home',screenBeforeConfig:'home',showRules:false,showLog:false,showLogSheet:false,logTouched:false,showScoreGuide:false,opponentProfileName:'',mottoPeekName:'',selected:new Set(),drag:{id:null,moved:false},playAnimKey:'',autoPassKey:'',score:5000,suggestCost:0,recommendation:null,recommendHint:'',logFab:{x:null,y:null},home:{mode:'solo',name:'玩家',gender:'male',avatarChoice:'male',aiDifficulty:'normal',backColor:'red',theme:'ocean',showIntro:false,showLeaderboard:false,google:{signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',gender:'',profileMissing:false},leaderboard:{rows:[],sort:'totalDelta',period:'all',limit:20},activeRooms:{rows:[],loading:false,loadedAt:0,error:''}},room:{id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:false,error:'',started:false,unsub:null,selfSeat:-1,recordedGameKey:'',lastMoveKey:'',playerId:'',pendingStart:false,lastResultPlayers:null},sessionId:'',solo:{players:[],botNames:[],totals:[5000,5000,5000,5000],currentSeat:0,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',history:[],aiDifficulty:'normal',lastCardBreach:null},emote:{open:false,active:null}};
+const state={language:'zh-HK',screen:'home',screenBeforeConfig:'home',showRules:false,showLog:false,showLogSheet:false,logTouched:false,showScoreGuide:false,opponentProfileName:'',mottoPeekName:'',selected:new Set(),drag:{id:null,moved:false},playAnimKey:'',autoPassKey:'',score:5000,suggestCost:0,recommendation:null,recommendHint:'',logFab:{x:null,y:null},home:{mode:'solo',name:'玩家',gender:'male',avatarChoice:'male',aiDifficulty:'normal',backColor:'red',theme:'ocean',showIntro:false,showLeaderboard:false,showMoreSettings:false,google:{signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',gender:'',profileMissing:false},leaderboard:{rows:[],sort:'totalDelta',period:'all',limit:20},activeRooms:{rows:[],loading:false,loadedAt:0,error:''}},room:{id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:false,error:'',started:false,unsub:null,selfSeat:-1,recordedGameKey:'',lastMoveKey:'',playerId:'',pendingStart:false,lastResultPlayers:null},sessionId:'',solo:{players:[],botNames:[],totals:[5000,5000,5000,5000],currentSeat:0,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',history:[],aiDifficulty:'normal',lastCardBreach:null},emote:{open:false,active:null}};
 const {
   EMOTE_STICKERS,
   cardImagePath,
@@ -7789,23 +7795,27 @@ function setSoundEnabled(on){
   sound.enabled=false;
   try{sound.ctx?.suspend?.();}catch{}
 }
-function bindSoundToggle(comboId){
-  document.querySelectorAll(`#${comboId} .combo-btn`).forEach((btn)=>btn.addEventListener('click',()=>{
-    const v=String(btn.getAttribute('data-value')??'');
-    if(v!=='on'&&v!=='off')return;
-    setSoundEnabled(v==='on');
-    calloutVoiceMode=v==='on'?'auto':'off';
-    markComboActive(comboId,v);
+function bindSoundToggle(sliderId){
+  const slider=document.querySelector(`#${sliderId} .setting-slider`);
+  if(!slider||typeof slider!=='object'||!('value' in slider))return;
+  const sync=()=>{
+    const enabled=Number(slider.value)>=1;
+    setSoundEnabled(enabled);
+    calloutVoiceMode=enabled?'auto':'off';
+    slider.parentElement?.style.setProperty('--setting-index',enabled?'1':'0');
     document.querySelectorAll('.runtime-diagnostic-inline').forEach((el)=>{el.textContent=runtimeDiagnosticsText();});
-  }));
+  };
+  slider.addEventListener('input',sync);
 }
-function bindCalloutDisplayToggle(comboId){
-  document.querySelectorAll(`#${comboId} .combo-btn`).forEach((btn)=>btn.addEventListener('click',()=>{
-    const v=String(btn.getAttribute('data-value')??'');
-    if(v!=='on'&&v!=='off')return;
-    calloutDisplayEnabled=v==='on';
-    markComboActive(comboId,v);
-  }));
+function bindCalloutDisplayToggle(sliderId){
+  const slider=document.querySelector(`#${sliderId} .setting-slider`);
+  if(!slider||typeof slider!=='object'||!('value' in slider))return;
+  const sync=()=>{
+    const enabled=Number(slider.value)>=1;
+    calloutDisplayEnabled=enabled;
+    slider.parentElement?.style.setProperty('--setting-index',enabled?'1':'0');
+  };
+  slider.addEventListener('input',sync);
 }
 function bindBackCarousel(comboId){
   const viewport=document.getElementById(comboId);
@@ -8131,23 +8141,28 @@ function bindBackCarousel(comboId){
     updateSelectionFromOffset(state.home.backColor,true);
   });
 }
-function bindEmoteDisplayToggle(comboId){
-  document.querySelectorAll(`#${comboId} .combo-btn`).forEach((btn)=>btn.addEventListener('click',()=>{
-    const v=String(btn.getAttribute('data-value')??'');
-    if(v!=='on'&&v!=='off')return;
-    emoteDisplayEnabled=v==='on';
-    markComboActive(comboId,v);
-  }));
+function bindEmoteDisplayToggle(sliderId){
+  const slider=document.querySelector(`#${sliderId} .setting-slider`);
+  if(!slider||typeof slider!=='object'||!('value' in slider))return;
+  const sync=()=>{
+    const enabled=Number(slider.value)>=1;
+    emoteDisplayEnabled=enabled;
+    slider.parentElement?.style.setProperty('--setting-index',enabled?'1':'0');
+  };
+  slider.addEventListener('input',sync);
 }
 function difficultyIndex(value){
   if(value==='easy')return 0;
   if(value==='hard')return 2;
   return 1;
 }
+function difficultySliderHtml(id,value,t){
+  const diffIndex=difficultyIndex(value);
+  return `<div class="difficulty-slider-wrap" id="${id}" style="--difficulty-index:${diffIndex};"><input class="difficulty-slider" type="range" min="0" max="2" step="1" value="${diffIndex}" aria-label="${t('ai')}"><div class="difficulty-slider-labels" aria-hidden="true"><span>${t('easy')}</span><span>${t('normal')}</span><span>${t('hard')}</span></div></div>`;
+}
 function renderHome(){
   const intro=introText();
   const signedIn=signedInForPlay();
-  const diffIndex=difficultyIndex(state.home.aiDifficulty);
   const inRoom=Boolean(state.room.id);
   const joinOpen=Boolean(state.room.joinOpen);
   if(!joinOpen&&state.room.lobbyRefreshTimer){
@@ -8182,8 +8197,8 @@ function renderHome(){
   const homeAvatarSrc=selfAvatarDataUri(state.home.name,'#7aaed8',state.home.gender);
   const cardBackLeft=`<label class="field field-cardback field-cardback-left"><span>${t('cardBack')}</span>${renderBackCarousel('back-combo-left')}</label>`;
   const cardBackRight=`<label class="field field-cardback field-cardback-right"><span>${t('cardBack')}</span>${renderBackCarousel('back-combo-right')}</label>`;
-  const aiFieldLeft=`<label class="field field-ai field-ai-left"><span>${t('ai')}</span><div class="option-combo toggle-combo difficulty-combo" id="difficulty-combo-left" style="--difficulty-index:${diffIndex};"><div class="difficulty-pill" aria-hidden="true"></div><button class="combo-btn toggle-btn ${state.home.aiDifficulty==='easy'?'active':''}" data-value="easy">${t('easy')}</button><button class="combo-btn toggle-btn ${state.home.aiDifficulty==='normal'?'active':''}" data-value="normal">${t('normal')}</button><button class="combo-btn toggle-btn ${state.home.aiDifficulty==='hard'?'active':''}" data-value="hard">${t('hard')}</button></div></label>`;
-  const aiFieldRight=`<label class="field field-ai field-ai-right"><span>${t('ai')}</span><div class="option-combo toggle-combo difficulty-combo" id="difficulty-combo-right" style="--difficulty-index:${diffIndex};"><div class="difficulty-pill" aria-hidden="true"></div><button class="combo-btn toggle-btn ${state.home.aiDifficulty==='easy'?'active':''}" data-value="easy">${t('easy')}</button><button class="combo-btn toggle-btn ${state.home.aiDifficulty==='normal'?'active':''}" data-value="normal">${t('normal')}</button><button class="combo-btn toggle-btn ${state.home.aiDifficulty==='hard'?'active':''}" data-value="hard">${t('hard')}</button></div></label>`;
+  const aiFieldLeft=`<label class="field field-ai field-ai-left"><span>${t('ai')}</span>${difficultySliderHtml('difficulty-slider-left',state.home.aiDifficulty,t)}</label>`;
+  const aiFieldRight=`<label class="field field-ai field-ai-right"><span>${t('ai')}</span>${difficultySliderHtml('difficulty-slider-right',state.home.aiDifficulty,t)}</label>`;
   const roomErrorHtml=state.room.error?`<div class="hint room-error">${esc(state.room.error)}</div>`:'';
   const loginHint=t('loginToStart');
   const roomLobbyBtnCore=inRoom?'':`<button id="room-lobby-open" class="secondary royal-room-btn" ${signedIn?'':'disabled'}>${t('roomEnter')}</button>`;
@@ -8280,6 +8295,7 @@ function renderHome(){
     soundEnabled:Boolean(sound.enabled),
     calloutDisplayEnabled:Boolean(calloutDisplayEnabled),
     emoteDisplayEnabled:Boolean(emoteDisplayEnabled),
+    moreSettingsOpen:Boolean(state.home.showMoreSettings),
     cardBackRight,
     soloBtnHtml,
     roomButtonsHtml,

@@ -3,9 +3,10 @@ import assert from 'node:assert/strict';
 
 import {createConfigEventsBinder} from '../src/configEvents.js';
 
-function makeElement({attrs={}}={}){
+function makeElement({attrs={},value=''}={}){
   const listeners=new Map();
   return {
+    value,
     style:{
       values:{},
       setProperty(name,val){
@@ -21,6 +22,8 @@ function makeElement({attrs={}}={}){
       const bucket=listeners.get(type)??[];
       for(const handler of bucket){
         await handler({
+          currentTarget:this,
+          target:this,
           preventDefault(){},
           stopPropagation(){},
           ...event
@@ -37,6 +40,10 @@ function makeDocument({byId={},bySelector={}}={}){
   return {
     getElementById(id){
       return byId[id]??null;
+    },
+    querySelector(selector){
+      const list=bySelector[selector]??[];
+      return list[0]??null;
     },
     querySelectorAll(selector){
       return bySelector[selector]??[];
@@ -80,7 +87,7 @@ test('config binder returns to previous screen', async()=>{
 });
 
 test('config binder updates difficulty and toggle bindings', async()=>{
-  const difficultyButton=makeElement({attrs:{'data-value':'hard'}});
+  const difficultySlider=makeElement({value:'2'});
   const combo=makeElement();
   const marks=[];
   const backCarouselCalls=[];
@@ -89,8 +96,8 @@ test('config binder updates difficulty and toggle bindings', async()=>{
   const emoteCalls=[];
   const {state}=bindWith({
     document:makeDocument({
-      byId:{'config-difficulty-combo':combo},
-      bySelector:{'#config-difficulty-combo .combo-btn':[difficultyButton]}
+      byId:{'config-difficulty-slider':combo},
+      bySelector:{'#config-difficulty-slider .difficulty-slider':[difficultySlider]}
     }),
     difficultyIndex:(value)=>value==='hard'?2:0,
     markComboActive:(id,value)=>{marks.push([id,value]);},
@@ -99,14 +106,14 @@ test('config binder updates difficulty and toggle bindings', async()=>{
     bindCalloutDisplayToggle:(id)=>{calloutCalls.push(id);},
     bindEmoteDisplayToggle:(id)=>{emoteCalls.push(id);}
   });
-  await difficultyButton.dispatch('click');
+  await difficultySlider.dispatch('input');
   assert.equal(state.home.aiDifficulty,'hard');
   assert.equal(combo.style.values['--difficulty-index'],'2');
-  assert.deepEqual(marks,[['config-difficulty-combo','hard']]);
+  assert.deepEqual(marks,[]);
   assert.deepEqual(backCarouselCalls,['config-back-combo']);
-  assert.deepEqual(soundCalls,['config-sound-combo']);
-  assert.deepEqual(calloutCalls,['config-callout-display-combo']);
-  assert.deepEqual(emoteCalls,['config-emote-display-combo']);
+  assert.deepEqual(soundCalls,['config-sound-slider']);
+  assert.deepEqual(calloutCalls,['config-callout-display-slider']);
+  assert.deepEqual(emoteCalls,['config-emote-display-slider']);
 });
 
 test('config binder updates card back selection when option is valid', async()=>{

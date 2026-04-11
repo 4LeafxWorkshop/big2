@@ -25,6 +25,8 @@ function makeElement({attrs={},value=''}={}){
       const bucket=listeners.get(type)??[];
       for(const handler of bucket){
         await handler({
+          currentTarget:this,
+          target:this,
           preventDefault(){},
           stopPropagation(){},
           ...event
@@ -59,6 +61,10 @@ function makeDocument({byId={},bySelector={}}={}){
   return {
     getElementById(id){
       return byId[id]??null;
+    },
+    querySelector(selector){
+      const list=bySelector[selector]??[];
+      return list[0]??null;
     },
     querySelectorAll(selector){
       return bySelector[selector]??[];
@@ -253,8 +259,21 @@ test('home binder updates gender and saves session', async()=>{
   assert.deepEqual(comboMarks,[['gender-combo','female']]);
 });
 
+test('home binder toggles more settings panel', async()=>{
+  const moreSettings=makeElement();
+  let renderCount=0;
+  const {state}=bindWith({
+    document:makeDocument({byId:{'home-more-settings-toggle':moreSettings}}),
+    render:()=>{renderCount+=1;}
+  });
+  await moreSettings.dispatch('click');
+  assert.equal(state.home.showMoreSettings,true);
+  assert.equal(renderCount,1);
+});
+
 test('home binder updates difficulty styles and binds toggles', async()=>{
-  const difficultyButton=makeElement({attrs:{'data-value':'hard'}});
+  const difficultySliderLeft=makeElement({value:'2'});
+  const difficultySliderRight=makeElement({value:'2'});
   const difficultyLeft=makeElement();
   const difficultyRight=makeElement();
   const backLeftCalls=[];
@@ -265,11 +284,11 @@ test('home binder updates difficulty styles and binds toggles', async()=>{
   const {state}=bindWith({
     document:makeDocument({
       byId:{
-        'difficulty-combo-left':difficultyLeft,
-        'difficulty-combo-right':difficultyRight
+        'difficulty-slider-left':difficultyLeft,
+        'difficulty-slider-right':difficultyRight
       },
       bySelector:{
-        '#difficulty-combo-left .combo-btn, #difficulty-combo-right .combo-btn':[difficultyButton]
+        '#difficulty-slider-left .difficulty-slider, #difficulty-slider-right .difficulty-slider':[difficultySliderLeft,difficultySliderRight]
       }
     }),
     bindBackCarousel:(id)=>{backLeftCalls.push(id);},
@@ -279,13 +298,13 @@ test('home binder updates difficulty styles and binds toggles', async()=>{
     difficultyIndex:(value)=>value==='hard'?2:0,
     markComboActive:(id,value)=>{comboMarks.push([id,value]);}
   });
-  await difficultyButton.dispatch('click');
+  await difficultySliderLeft.dispatch('input');
   assert.equal(state.home.aiDifficulty,'hard');
   assert.equal(difficultyLeft.style.values['--difficulty-index'],'2');
   assert.equal(difficultyRight.style.values['--difficulty-index'],'2');
-  assert.deepEqual(comboMarks,[['difficulty-combo-left','hard'],['difficulty-combo-right','hard']]);
+  assert.deepEqual(comboMarks,[]);
   assert.deepEqual(backLeftCalls,['back-combo-left','back-combo-right']);
-  assert.deepEqual(soundCalls,['sound-combo']);
-  assert.deepEqual(calloutCalls,['callout-display-combo']);
-  assert.deepEqual(emoteCalls,['emote-display-combo']);
+  assert.deepEqual(soundCalls,['sound-slider']);
+  assert.deepEqual(calloutCalls,['callout-display-slider']);
+  assert.deepEqual(emoteCalls,['emote-display-slider']);
 });

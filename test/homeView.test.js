@@ -41,6 +41,11 @@ test('renderHomeMarkup includes the main home controls and optional overlays', (
   assert.match(html,/id="home-lb-toggle"/);
   assert.match(html,/id="solo-start"/);
   assert.match(html,/id="room-create"/);
+  assert.match(html,/id="home-more-settings-toggle"/);
+  assert.match(html,/id="home-more-settings-panel"/);
+  assert.match(html,/id="callout-display-slider"/);
+  assert.match(html,/id="emote-display-slider"/);
+  assert.match(html,/id="sound-slider"/);
   assert.match(html,/id="intro-panel"/);
   assert.match(html,/id="score-guide"/);
   assert.doesNotMatch(html,/id="lb-panel"/);
@@ -71,11 +76,11 @@ test('renderConfigMarkup includes config controls and back carousel', ()=>{
   });
 
   assert.match(html,/id="config-back"/);
-  assert.match(html,/id="config-difficulty-combo"/);
+  assert.match(html,/id="config-difficulty-slider"/);
   assert.match(html,/id="config-back-combo"/);
-  assert.match(html,/id="config-sound-combo"/);
-  assert.match(html,/id="config-callout-display-combo"/);
-  assert.match(html,/id="config-emote-display-combo"/);
+  assert.match(html,/id="config-sound-slider"/);
+  assert.match(html,/id="config-callout-display-slider"/);
+  assert.match(html,/id="config-emote-display-slider"/);
 });
 
 test('renderOpponentCard includes avatar, profile labels, and motto', ()=>{
