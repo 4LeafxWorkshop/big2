@@ -934,7 +934,7 @@ body[data-screen='home'] .home-wrap {
   border-radius: 10px;
   border: 0;
   background: rgba(10, 30, 42, .42);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
+  box-shadow: none;
   --difficulty-index: 1;
 }
 .royal-home-body .difficulty-slider {
@@ -942,7 +942,10 @@ body[data-screen='home'] .home-wrap {
   margin: 0;
   appearance: none;
   background: transparent;
+  border: 0;
   height: 28px;
+  outline: 0;
+  box-shadow: none;
 }
 .royal-home-body .difficulty-slider:focus {
   outline: none;
@@ -955,13 +958,11 @@ body[data-screen='home'] .home-wrap {
     rgba(245, 210, 142, .84) calc(var(--difficulty-index, 1) * 50%),
     rgba(255,255,255,.12) calc(var(--difficulty-index, 1) * 50%),
     rgba(255,255,255,.12) 100%);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
 }
 .royal-home-body .difficulty-slider::-moz-range-track {
   height: 6px;
   border-radius: 999px;
   background: rgba(255,255,255,.12);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
 }
 .royal-home-body .difficulty-slider::-moz-range-progress {
   height: 6px;
@@ -1001,7 +1002,7 @@ body[data-screen='home'] .home-wrap {
   border-radius: 10px;
   border: 0;
   background: rgba(10, 30, 42, .42);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.04);
+  box-shadow: none;
   --setting-index: 0;
 }
 .royal-home-body .setting-slider {
@@ -1009,7 +1010,10 @@ body[data-screen='home'] .home-wrap {
   margin: 0;
   appearance: none;
   background: transparent;
+  border: 0;
   height: 28px;
+  outline: 0;
+  box-shadow: none;
 }
 .royal-home-body .setting-slider:focus {
   outline: none;
@@ -1022,13 +1026,11 @@ body[data-screen='home'] .home-wrap {
     rgba(245, 210, 142, .84) calc(var(--setting-index, 0) * 100%),
     rgba(255,255,255,.12) calc(var(--setting-index, 0) * 100%),
     rgba(255,255,255,.12) 100%);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
 }
 .royal-home-body .setting-slider::-moz-range-track {
   height: 6px;
   border-radius: 999px;
   background: rgba(255,255,255,.12);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
 }
 .royal-home-body .setting-slider::-moz-range-progress {
   height: 6px;
@@ -7015,13 +7017,13 @@ body[data-screen='game'] .intro-modal {
   .royal-home-body .home-form-right .field-ai {
     grid-column: 1;
   }
-  .royal-home-body .more-settings-toggle {
+  .royal-home-body .home-form-right .home-section-title.more-settings-toggle {
     grid-column: 1 / -1;
-    order: -1;
+    order: 1;
   }
-  .royal-home-body .more-settings-panel {
+  .royal-home-body .home-form-right .more-settings-panel {
     grid-column: 1 / -1;
-    order: -1;
+    order: 1;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 8px;
   }
@@ -7029,7 +7031,7 @@ body[data-screen='game'] .intro-modal {
     min-width: 0;
   }
   .royal-home-body .home-form-right .field-cardback {
-    order: -2;
+    order: -1;
     grid-column: 1 / -1;
   }
   .royal-home-body .field-cardback-left {
@@ -7803,22 +7805,6 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .name {
   min-height: 34px;
   padding: 3px 8px !important;
   border-radius: 0 !important;
-  border: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
-}
-
-body[data-screen='game'] :is(
-  .seat.north > .seat-name-fixed,
-  .seat.west > .seat-name-fixed,
-  .seat.east > .seat-name-fixed,
-  .seat.north .seat-pack > .seat-name-fixed,
-  .seat.west .side-station-stack > .seat-name-fixed,
-  .seat.east .side-station-stack > .seat-name-fixed
-) {
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
 }
 
 body[data-screen='game'] :is(
@@ -11520,10 +11506,6 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] :is(.play-type-cal
   right: auto !important;
   border-color: transparent !important;
   border-top-color: var(--bubble-fill) !important;
-}
-
-body[data-screen='game'] :is(.north, .west, .east) > .seat-name-fixed {
-  box-shadow: none !important;
 }
 
 body[data-screen='game'] :is(.seat.north, .seat.west, .seat.east) > .seat-name-fixed {
