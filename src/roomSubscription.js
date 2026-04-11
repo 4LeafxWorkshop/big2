@@ -263,7 +263,16 @@ export function createRoomSubscriptionController(deps){
     if(!uid){
       try{
         const local=String(localStorage.getItem(deps.LOCAL_ROOM_KEY)||'').trim();
-        if(local&&!state.room.id)void connectToRoom(local,'');
+        if(local&&!state.room.id){
+          const resolved=await resolveRoomDocByDirectory(local,'');
+          const playerId=deps.baseRoomPlayerId();
+          const players=Array.isArray(resolved?.doc?.data?.()?.players)?resolved.doc.data().players:[];
+          if(resolved&&players.some((p)=>String(p?.uid||'')===String(playerId))){
+            void connectToRoom(local,'');
+          }else{
+            try{localStorage.removeItem(deps.LOCAL_ROOM_KEY);}catch{}
+          }
+        }
       }catch{}
       return;
     }
@@ -277,7 +286,14 @@ export function createRoomSubscriptionController(deps){
       const data=snap.data()??{};
       const roomId=String(data.currentRoomId??'').trim();
       if(!roomId)return;
-      void connectToRoom(roomId,'');
+      const resolved=await resolveRoomDocByDirectory(roomId,'');
+      const playerId=deps.baseRoomPlayerId();
+      const players=Array.isArray(resolved?.doc?.data?.()?.players)?resolved.doc.data().players:[];
+      if(resolved&&players.some((p)=>String(p?.uid||'')===String(playerId))){
+        void connectToRoom(roomId,'');
+      }else{
+        await ref.set({currentRoomId:'',updatedAt:Date.now()},{merge:true});
+      }
     }catch{}
   }
 

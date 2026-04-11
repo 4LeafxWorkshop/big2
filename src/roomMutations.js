@@ -1,4 +1,26 @@
 export function createRoomMutationsController(deps){
+  async function collectRestartExcludedPlayerIds(roomId,players){
+    const firebaseDb=deps.getFirebaseDb?.();
+    const roomIdText=String(roomId||'').trim();
+    if(!firebaseDb||!roomIdText||!Array.isArray(players)||!players.length)return new Set();
+    const checks=players.map(async(player)=>{
+      const uid=String(player?.uid||'').trim();
+      if(!uid.startsWith('uid:'))return'';
+      const authUid=uid.slice(4).trim();
+      if(!authUid)return'';
+      try{
+        const snap=await firebaseDb.collection(deps.FIRESTORE_USERS_COLLECTION).doc(authUid).get();
+        const data=snap.data()??{};
+        const currentRoomId=String(data.currentRoomId??'').trim();
+        return currentRoomId&&currentRoomId!==roomIdText?uid:'';
+      }catch{
+        return'';
+      }
+    });
+    const resolved=await Promise.all(checks);
+    return new Set(resolved.filter(Boolean));
+  }
+
   async function setRoomPrivacy(isPrivate){
     const state=deps.getState();
     const roomDb=deps.currentRoomDb();
@@ -105,6 +127,7 @@ export function createRoomMutationsController(deps){
     if(!state.room.id||!roomDb)return;
     const uid=deps.currentRoomPlayerId();
     try{
+      const excludedPlayerIds=await collectRestartExcludedPlayerIds(state.room.id,Array.isArray(state.room.data?.players)?state.room.data.players:[]);
       const ref=roomDb.collection(deps.FIRESTORE_ROOMS_COLLECTION).doc(state.room.id);
       await roomDb.runTransaction(async(tx)=>{
         const snap=await tx.get(ref);
@@ -112,14 +135,34 @@ export function createRoomMutationsController(deps){
         const data=snap.data()??{};
         if(String(data.hostId)!==uid)throw new Error('not host');
         if(deps.roomResultExpired(data))throw new Error('room expired');
-        const players=Array.isArray(data.players)?data.players:[];
+        let players=Array.isArray(data.players)?data.players:[];
+        if(excludedPlayerIds.size){
+          players=players.filter((p)=>!excludedPlayerIds.has(String(p?.uid||'')));
+        }
         const humanPlayers=players.filter((p)=>String(p.uid||'').startsWith('uid:')||String(p.uid||'').startsWith('guest:'));
         if(humanPlayers.length<2)throw new Error('need players');
         const now=Date.now();
-        const game=deps.buildRoomGameState(data);
+        let hostId=String(data.hostId||'').trim();
+        let hostName=String(data.hostName||'').trim();
+        if(hostId&&!players.some((p)=>String(p?.uid||'')===hostId)){
+          hostId=String(humanPlayers[0]?.uid??players[0]?.uid??'');
+          hostName=String(humanPlayers[0]?.name??players[0]?.name??'');
+        }
+        const roomDataForRestart=players===data.players?data:{...data,players,hostId,hostName};
+        const game=deps.buildRoomGameState(roomDataForRestart);
         const bumped=deps.bumpRoomPlayerLastSeen(players,uid,now);
-        const nextPlayers=bumped.changed?bumped.players:data.players;
-        tx.update(ref,{status:'playing',game,updatedAt:now,gameVersion:Number(data.gameVersion||0)+1,expiresAt:now+(24*60*60*1000),players:nextPlayers});
+        const nextPlayers=bumped.changed?bumped.players:players;
+        tx.update(ref,{
+          status:'playing',
+          game,
+          updatedAt:now,
+          gameVersion:Number(data.gameVersion||0)+1,
+          expiresAt:now+(24*60*60*1000),
+          players:nextPlayers,
+          playerIds:deps.roomPlayerIds(nextPlayers),
+          hostId,
+          hostName
+        });
       });
     }catch(err){
       console.error('restart room failed',err);

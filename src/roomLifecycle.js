@@ -44,6 +44,7 @@ export function createRoomLifecycleController(deps){
     const roomDb=deps.currentRoomDb();
     let refreshLobbyAfterLeave=false;
     if(roomId){
+      await deps.updateActiveRoomPointer('');
       resetRoomState();
       state.screen='home';
       state.selected.clear();

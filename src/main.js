@@ -4324,6 +4324,7 @@ function abandonRoomLocally(msg='',openLobby=true){
 }
 const roomMutationsController=createRoomMutationsController({
   FIRESTORE_ROOMS_COLLECTION,
+  FIRESTORE_USERS_COLLECTION,
   ROOM_RESULT_IDLE_MS,
   authPictureUrl,
   buildRoomGameState,
@@ -4333,6 +4334,7 @@ const roomMutationsController=createRoomMutationsController({
   currentHumanScoreValue,
   currentRoomDb,
   currentRoomPlayerId,
+  getFirebaseDb:()=>firebaseDb,
   getState:()=>state,
   nextRoomIdleExpiry,
   normalizeRoomTotals,
@@ -4559,6 +4561,18 @@ async function ensureSingleRoomMembership(targetRoomId=''){
   if(!existing)return{ok:true};
   const existingId=String(existing.id||'');
   if(targetRoomId&&existingId===String(targetRoomId))return{ok:true,already:true,roomId:existingId,instanceId:String(existing.instanceId||'')};
+  const authUid=currentAuthUserUid();
+  if(authUid){
+    try{
+      const userSnap=await firebaseDb.collection(FIRESTORE_USERS_COLLECTION).doc(authUid).get();
+      const userData=userSnap.data()??{};
+      const pointerRoomId=String(userData.currentRoomId??'').trim();
+      if(pointerRoomId!==existingId){
+        await dropSelfFromRoom(existing,playerId);
+        return{ok:true,cleared:true};
+      }
+    }catch{}
+  }
   const data=existing.data()??{};
   const status=String(data.status||'');
   const players=Array.isArray(data.players)?data.players:[];
@@ -4991,27 +5005,42 @@ async function joinRoomByCode(codeRaw){
       const data=snap.data()??{};
       if(data.status!=='lobby'&&data.status!=='starting'&&data.status!=='finished')throw new Error('room closed');
       const now=Date.now();
-      const players=Array.isArray(data.players)?[...data.players]:[];
-      const already=players.find((p)=>String(p.uid)===uid);
-      const prevCount=players.length;
+      let players=Array.isArray(data.players)?[...data.players]:[];
       const name=String(state.home.name||'Player').slice(0,32);
       const gender=state.home.gender==='female'?'female':'male';
       const picture=authPictureUrl();
+      const matchesSelfIdentity=(entry)=>{
+        if(!entry||!isRoomPlayerHuman(entry))return false;
+        const entryUid=String(entry.uid||'').trim();
+        if(entryUid===uid)return true;
+        const entryName=String(entry.name||'').trim();
+        const entryGender=String(entry.gender||'male')==='female'?'female':'male';
+        const entryPicture=String(entry.picture||'').trim();
+        if(entryName!==name||entryGender!==gender)return false;
+        if(picture&&entryPicture&&entryPicture!==picture)return false;
+        if(uid.startsWith('uid:')){
+          return status==='lobby'||status==='starting'||status==='finished';
+        }
+        return entryUid.startsWith('guest:')&&(status==='lobby'||status==='starting');
+      };
+      const matchingIndexes=players.reduce((out,p,idx)=>{
+        if(matchesSelfIdentity(p))out.push(idx);
+        return out;
+      },[]);
+      if(matchingIndexes.length>1){
+        const exactIdx=matchingIndexes.find((idx)=>String(players[idx]?.uid||'')===uid);
+        const keepIdx=Number.isInteger(exactIdx)?exactIdx:matchingIndexes
+          .slice()
+          .sort((a,b)=>(Number(players[b]?.lastSeen||0)-Number(players[a]?.lastSeen||0)))[0];
+        players=players.filter((_,idx)=>!matchingIndexes.includes(idx)||idx===keepIdx);
+      }
+      let already=players.find((p)=>String(p.uid)===uid)||null;
+      const prevCount=players.length;
       let hostId=String(data.hostId||'').trim();
       let hostName=String(data.hostName||'').trim();
       let tookOver=false;
-      if(!already && uid.startsWith('guest:') && (data.status==='lobby'||data.status==='starting')){
-        const candidates=players.filter((p)=>{
-          if(!isRoomPlayerHuman(p))return false;
-          if(!String(p.uid||'').startsWith('guest:'))return false;
-          if(String(p.name||'').trim()!==name)return false;
-          const pg=String(p.gender||'male')==='female'?'female':'male';
-          if(pg!==gender)return false;
-          const pp=String(p.picture||'').trim();
-          if(pp&&picture&&pp!==picture)return false;
-          if(!isRoomPlayerActive(p,data.status,now))return false;
-          return true;
-        });
+      if(!already && (data.status==='lobby'||data.status==='starting'||data.status==='finished')){
+        const candidates=players.filter((p)=>matchesSelfIdentity(p)&&isRoomPlayerActive(p,data.status,now));
         if(candidates.length===1){
           const idx=players.findIndex((p)=>p===candidates[0]);
           if(idx>=0){
@@ -5022,6 +5051,7 @@ async function joinRoomByCode(codeRaw){
               hostName=name;
             }
             tookOver=true;
+            already=players[idx];
           }
         }
       }
