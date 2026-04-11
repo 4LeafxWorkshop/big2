@@ -203,6 +203,11 @@ body[data-screen='game'] #app {
   padding-bottom: 0 !important;
   margin-top: 0 !important;
 }
+body[data-screen='game'] .game-shell,
+body[data-screen='game'] .main-zone,
+body[data-screen='game'] .topbar {
+  margin-top: 0 !important;
+}
 body[data-screen='game'][data-ios='1'] #app {
   padding-bottom: 0 !important;
 }
@@ -3732,6 +3737,10 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   gap: 9px;
   align-items: center;
 }
+.topbar > div:first-child {
+  flex: 1 1 auto !important;
+  max-width: none !important;
+}
 .topbar h2 { font-size: clamp(.95rem, 2.4vw, 1.25rem); }
 .topbar-right { display: grid; gap: 8px; justify-items: end; }
 .topbar-right {
@@ -6095,7 +6104,6 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
     left: 50% !important;
     transform: translate(-50%, -6px) scale(1) !important;
   }
-
   body[data-screen='game'][data-orientation='portrait'] .game-shell {
     --callout-scale: 1;
   }
@@ -6191,11 +6199,6 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
   }
   #app { padding: 7px; }
   body[data-screen='game'] #app { padding: max(6px, env(safe-area-inset-top)) 7px 0 !important; }
-  body[data-screen='game'] .game-shell,
-  body[data-screen='game'] .main-zone,
-  body[data-screen='game'] .topbar {
-    margin-top: 0 !important;
-  }
   body[data-screen='home'] #app { padding: 0 7px 7px !important; }
   #app {
     height: auto;
@@ -6644,11 +6647,6 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
 @media (max-width: 600px) {
   #app { padding: 5px; }
   body[data-screen='game'] #app { padding: max(6px, env(safe-area-inset-top)) 5px 0 !important; }
-  body[data-screen='game'] .game-shell,
-  body[data-screen='game'] .main-zone,
-  body[data-screen='game'] .topbar {
-    margin-top: 0 !important;
-  }
   body[data-screen='home'] #app { padding: 0 5px max(14px, env(safe-area-inset-bottom)) !important; }
   body[data-screen='home'] .royal-home-wrap {
     margin-top: 0 !important;
@@ -6975,11 +6973,6 @@ body[data-screen='game'] .intro-modal {
   min-width: 38px;
   justify-content: center;
 }
-  body[data-screen='game'] .north > .seat-name-fixed,
-  body[data-screen='game'] .east > .seat-name-fixed,
-  body[data-screen='game'] .west > .seat-name-fixed {
-    top: -12px !important;
-  }
   body[data-screen='game'] {
     --center-discard-scale: 1.18;
   }
@@ -7687,9 +7680,11 @@ body[data-screen='game'] .west > .seat-name-fixed {
   border: 0 !important;
   box-shadow: none !important;
 }
-body[data-screen='game'] .action-strip .player-tag {
+body[data-screen='game'] .action-strip .seat-name-fixed.player-tag {
   border: 0 !important;
   background: transparent !important;
+  background-color: transparent !important;
+  background-image: none !important;
   box-shadow: none !important;
 }
 body[data-screen='game'] .north > .seat-name-fixed .seat-name-text,
@@ -8002,7 +7997,7 @@ body[data-screen='game'] .seat-motto-callout .callout-box {
   transform: translate3d(var(--callout-box-shift-x, 0px), var(--callout-box-shift-y, 0px), 0);
   display: inline-block;
   width: max-content;
-  max-width: 280px;
+  max-width: 250px;
 }
 body[data-screen='game'] .seat-motto-callout .hk-inner {
   padding: calc(12px * var(--callout-size, 1)) calc(20px * var(--callout-size, 1));
@@ -8331,12 +8326,6 @@ body[data-screen='game'] .action-strip .player-tag .seat-count-tag {
   color: #f3fff8 !important;
   font-size: .73rem !important;
   font-weight: 800;
-}
-/* South name panel matches N/E/W visual style without changing its dimensions. */
-body[data-screen='game'] .action-strip .player-tag {
-  border: 0 !important;
-  background: transparent !important;
-  box-shadow: none !important;
 }
 /* Seat name text uses each seat color. */
 body[data-screen='game'] .seat-name-fixed .seat-name-text,
@@ -8848,10 +8837,6 @@ body[data-screen='game'] .action-strip {
     justify-content: space-between !important;
     gap: 6px !important;
   }
-  body[data-screen='game'] .topbar > div:first-child {
-    flex: 1 1 auto !important;
-    max-width: none !important;
-  }
   body[data-screen='game'] .topbar-right .control-row {
     display: flex !important;
     flex-wrap: nowrap !important;
@@ -9184,10 +9169,6 @@ body[data-screen='game'] .action-strip {
     justify-content: space-between !important;
     gap: 8px !important;
   }
-  body[data-screen='game'] .topbar > div:first-child {
-    flex: 1 1 auto !important;
-    max-width: none !important;
-  }
   body[data-screen='game'] .topbar-right .control-row {
     display: flex !important;
     flex-wrap: nowrap !important;
@@ -9219,10 +9200,6 @@ body[data-screen='game'] .action-strip {
     justify-content: space-between !important;
     gap: 8px !important;
   }
-  body[data-screen='game'] .topbar > div:first-child {
-    flex: 1 1 auto !important;
-    max-width: none !important;
-  }
   body[data-screen='game'] .topbar-right .control-row {
     display: flex !important;
     flex-wrap: nowrap !important;
@@ -9243,10 +9220,6 @@ body[data-screen='game'] .action-strip {
 @media (min-width: 861px) and (orientation: portrait) {
   body[data-screen='game'] .action-zone {
     overflow: visible !important;
-  }
-  body[data-screen='game'] .action-strip {
-    position: relative !important;
-    padding-top: 8px !important;
   }
   body[data-screen='game'] .action-strip .control-row {
     position: relative !important;
@@ -9361,10 +9334,6 @@ body[data-screen='game'][data-log-open='0'] .side-zone.log-collapsed .log-toggle
     gap: 6px !important;
     padding: 8px 10px !important;
   }
-  body[data-screen='game'] .topbar > div:first-child {
-    flex: 1 1 auto !important;
-    max-width: none !important;
-  }
   body[data-screen='game'] .topbar-right {
     width: 100% !important;
     min-width: 0 !important;
@@ -9389,10 +9358,6 @@ body[data-screen='game'][data-log-open='0'] .side-zone.log-collapsed .log-toggle
     white-space: nowrap !important;
     min-height: 30px !important;
     padding: 4px 8px !important;
-  }
-  body[data-screen='game'] .action-strip {
-    position: relative !important;
-    padding-top: 8px !important;
   }
   body[data-screen='game'] .action-strip .player-tag {
     position: absolute !important;
@@ -9954,12 +9919,6 @@ body[data-screen='game'] .center-last-south .seat-played .card.mini {
   width: var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) !important;
   height: var(--discard-card-h, calc(var(--card-h) * var(--hand-card-scale) * var(--card-scale))) !important;
 }
-body[data-screen='game'] .center-last .seat-played .card.mini,
-body[data-screen='game'] .center-last-west .seat-played .card.mini,
-body[data-screen='game'] .center-last-east .seat-played .card.mini {
-  width: var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) !important;
-  height: var(--discard-card-h, calc(var(--card-h) * var(--hand-card-scale) * var(--card-scale))) !important;
-}
 body[data-screen='game'] .seat-played .card.face.mini .card-art,
 body[data-screen='game'] .center-last .seat-played .card.face.mini .card-art,
 body[data-screen='game'] .seat-last .card.face.mini .card-art {
@@ -9983,28 +9942,6 @@ body[data-screen='game'] .center-last-south .seat-played .card.discard-card.mini
   width: var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) !important;
   height: var(--discard-card-h, calc(var(--card-h) * var(--hand-card-scale) * var(--card-scale))) !important;
 }
-/* Discarded cards: match south hand size on all views (no gradient/extra scaling). */
-body[data-screen='game'] .seat-played .card.mini,
-body[data-screen='game'] .seat-last .card.mini,
-body[data-screen='game'] .center-last .seat-played .card.mini,
-body[data-screen='game'] .center-last-north .seat-played .card.mini,
-body[data-screen='game'] .center-last-west .seat-played .card.mini,
-body[data-screen='game'] .center-last-east .seat-played .card.mini,
-body[data-screen='game'] .center-last-south .seat-played .card.mini {
-  width: var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) !important;
-  height: var(--discard-card-h, calc(var(--card-h) * var(--hand-card-scale) * var(--card-scale))) !important;
-}
-@media (max-width: 860px) {
-  body[data-screen='game'] .seat-played.seat-played-fan .card.mini + .card.mini,
-  body[data-screen='game'] .center-last .seat-played.seat-played-fan .card.mini + .card.mini,
-  body[data-screen='game'] .center-last-north .seat-played.seat-played-fan .card.mini + .card.mini,
-  body[data-screen='game'] .center-last-west .seat-played.seat-played-fan .card.mini + .card.mini,
-  body[data-screen='game'] .center-last-east .seat-played.seat-played-fan .card.mini + .card.mini,
-  body[data-screen='game'] .center-last-south .seat-played.seat-played-fan .card.mini + .card.mini {
-    margin-left: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * -0.84) !important;
-  }
-}
-
 @media (max-width: 860px) and (orientation: portrait) {
   body[data-screen='game'][data-orientation='portrait'] .north .seat-played .card.mini,
   body[data-screen='game'][data-orientation='portrait'] .west .seat-played .card.mini,
@@ -11049,9 +10986,11 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-se
 }
 
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .play-type-call-seat .callout-box,
-body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-seat .callout-box,
-body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout .callout-box {
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .last-card-call-seat .callout-box {
   max-inline-size: none !important;
+}
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout .callout-box {
+  max-inline-size: 250px !important;
 }
 
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .play-type-call-seat .hk-inner,
