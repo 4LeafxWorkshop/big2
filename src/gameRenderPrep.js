@@ -519,7 +519,7 @@ export function buildResultScreenHtml(params){
       :avatarDataUri(snapName,color,snapGender,Boolean(p.isBot));
     const botNameAttr=p.isBot?` data-bot-name="${esc(p.name)}"`:'';
     const confidentialStampHtml=(isRoom&&!p.isBot&&!snapshot)
-      ?`<span class="result-confidential-stamp" aria-hidden="true">CONFIDENTIAL</span>`
+      ?`<span class="result-confidential-stamp" aria-hidden="true">${esc(t('confidential'))}</span>`
       :'';
     const winnerLastDiscardHtml=isWinner
       ?`<div class="result-card-block"><div class="result-block-title">${t('resultLastDiscard')}</div><div class="result-cards" aria-label="${t('resultLastDiscard')}">${winnerLastDiscardCards.length?winnerLastDiscardCards.map((c)=>renderStaticCard(c,true)).join(''):`<span class="hint">-</span>`}</div></div>`

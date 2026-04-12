@@ -48,6 +48,7 @@ test('renderIntroPanel includes sample cards and close controls', ()=>{
     colorizeSuitText:(value)=>value,
     esc:(value)=>String(value),
     withBase:(value)=>`base:${value}`,
+    appTitle:'Big Two',
     renderStaticCard:()=>'<div class="card"></div>',
     introHandSamples:[{name:'Single',desc:'One card',cards:[{rank:0,suit:0}]}]
   });
@@ -56,6 +57,7 @@ test('renderIntroPanel includes sample cards and close controls', ()=>{
   assert.match(html,/class="card"/);
   assert.match(html,/class="intro-home-icon"/);
   assert.match(html,/src="base:icons\/icon-192\.png"/);
+  assert.match(html,/Big Two/);
 });
 
 test('renderLeaderboardPanel renders rows and controls', ()=>{

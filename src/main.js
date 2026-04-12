@@ -3838,6 +3838,7 @@ function introPanelHtml(){
     colorizeSuitText,
     esc,
     withBase,
+    appTitle:t('title'),
     renderStaticCard,
     introHandSamples:introHandSamples()
   });
