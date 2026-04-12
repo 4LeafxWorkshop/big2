@@ -18,7 +18,7 @@ This document describes how the Big Two bots and the in-game recommendation syst
   - `fourofkind`: keep the smallest non-`2` kicker if possible
   - `fullhouse`: keep the smallest non-`2` pair if possible
 - Straight comparison for equal ranks uses the suit of the highest card in the straight (Hong Kong rule).
-- Flush comparison uses suit priority first (Hong Kong rule), then ranks.
+- Flush comparison uses rank priority first, then suit as the final tiebreaker.
 - 5-card type ordering uses `FIVE_KIND_POWER`:
   - `straight < flush < fullhouse < fourofkind < straightflush`
 
@@ -31,7 +31,7 @@ This document describes how the Big Two bots and the in-game recommendation syst
   - If straights tie by ranks, compare the highest card’s suit.
   - Invalid wraps like `J-Q-K-A-2`, `Q-K-A-2-3`, `K-A-2-3-4`.
 - Flush rules:
-  - Compare suit first, then ranks (Hong Kong priority).
+  - Compare the highest rank first, then the second, third, fourth, and fifth; only if all ranks match, compare suit last.
 
 ## Difficulty Levels
 

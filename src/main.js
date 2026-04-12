@@ -262,7 +262,7 @@ const I18N = {
       '三張牌(三張牌要同一點數)',
       '五張牌組合',
       '蛇（Straight）：5張點數各差1點的連續牌，牌組以A-2-3-4-5為最大，3-4-5-6-7最小。若是數字相同的蛇，則比較蛇最點數最大那張的花色大小。蛇的任何組合中不能出現J-Q-K-A-2、Q-K-A-2-3和K-A-3-4-5。',
-      '花（Flush）：任何5隻牌同花但數字不連續的。以5隻中點數最大的作等級比較，若最大的點數一樣，則繼以第2大的點數比較，如此類推，最後以花色來計算等級。例如黑桃2-4-5-6-8是大於紅心A-K-Q-10-8。',
+      '花（Flush）：任何5隻牌同花但數字不連續的。先比較5張牌中最大的點數，若一樣就依次比較第2、第3、第4、第5大的點數；若所有點數完全相同，最後才比花色。例如黑桃2-4-5-6-8是大於紅心A-K-Q-10-8。',
       '俘虜（Full House）：一對點數相同的牌和3張點數相同的牌所組成的5張牌。以三條排大小。',
       '四條（Four of a Kind）：4張點數全部相同外加任一單張的5張牌，以同點數的牌面大小計算等級。',
       '同花順（Royal Flush）：相同花色的「蛇」。最大的同花順為黑桃A-2-3-4-5。',
@@ -522,7 +522,7 @@ const I18N = {
       'Triple (three cards must be the same rank)',
       'Five-card hands',
       'Straight: five consecutive ranks. A-2-3-4-5 is the highest, 3-4-5-6-7 is the lowest. If two straights have the same ranks, compare the suit of the highest card. Straights cannot be J-Q-K-A-2, Q-K-A-2-3, or K-A-3-4-5.',
-      'Flush: any five cards of the same suit that are not consecutive. Compare by the highest rank, then the second highest, and so on; finally compare suit if still tied. Example: ♠️2-4-5-6-8 beats ♥️A-K-Q-10-8.',
+      'Flush: any five cards of the same suit that are not consecutive. Compare the highest rank first, then the second, third, fourth, and fifth; only if all ranks match, compare suit last. Example: ♠️2-4-5-6-8 beats ♥️A-K-Q-10-8.',
       'Full House: a pair plus three of a kind. Compare by the triple rank.',
       'Four of a Kind: four cards of the same rank plus any single. Compare by the four-card rank.',
       'Straight Flush (Royal Flush): a straight in the same suit. The highest straight flush is ♠️A-2-3-4-5.',
@@ -785,7 +785,7 @@ const I18N = {
       'Couleur : cinq cartes de même couleur non consécutives. Comparer par la plus haute carte, puis la suivante, etc. Enfin la couleur si encore égalité. Ex. ♠️2‑4‑5‑6‑8 bat ♥️A‑K‑Q‑10‑8.',
       'Full : une paire + un brelan. Comparer par le brelan.',
       'Carré : quatre cartes du même rang + une carte. Comparer par le rang du carré.',
-      'Quinte flush : suite de même couleur. La plus haute est ♠️A‑2‑3‑4‑5.',
+      'Quinte flush : suite de même couleur. On compare d’abord la plus haute carte, puis la 2e, la 3e, la 4e et la 5e; la couleur ne départage qu’en dernier recours.',
       'Ordre : Suite < Couleur < Full < Carré < Quinte flush.',
     ],
     wait: 'En attente...',
@@ -1043,7 +1043,7 @@ const I18N = {
       'Drilling (drei Karten gleichen Rangs)',
       'Fünf‑Karten‑Hände',
       'Straße: fünf aufeinanderfolgende Ränge. A‑2‑3‑4‑5 ist die höchste, 3‑4‑5‑6‑7 die niedrigste. Bei Gleichstand zählt die Farbe der höchsten Karte. Verbotene Straßen: J‑Q‑K‑A‑2, Q‑K‑A‑2‑3, K‑A‑3‑4‑5.',
-      'Farbe: fünf Karten derselben Farbe ohne Folge. Vergleich nach höchster Karte, dann nächsthöchste usw., zuletzt nach Farbe. Beispiel: ♠️2‑4‑5‑6‑8 schlägt ♥️A‑K‑Q‑10‑8.',
+        'Farbe: fünf Karten derselben Farbe ohne Folge. Zuerst wird die höchste Karte verglichen, dann die zweite, dritte, vierte und fünfte; die Farbe entscheidet nur als letzter Tiebreaker. Beispiel: ♠️2‑4‑5‑6‑8 schlägt ♥️A‑K‑Q‑10‑8.',
       'Full House: Paar + Drilling. Vergleich nach Drilling.',
       'Vierling: vier Karten gleichen Rangs + eine Karte. Vergleich nach dem Vierlings‑Rang.',
       'Straight Flush: Straße in derselben Farbe. Höchste Straight Flush ist ♠️A‑2‑3‑4‑5.',
@@ -1304,7 +1304,7 @@ const I18N = {
       'Trío (tres cartas del mismo rango)',
       'Manos de cinco cartas',
       'Escalera: cinco rangos consecutivos. A‑2‑3‑4‑5 es la más alta, 3‑4‑5‑6‑7 la más baja. En empate, compara el palo de la carta más alta. Escaleras prohibidas: J‑Q‑K‑A‑2, Q‑K‑A‑2‑3, K‑A‑3‑4‑5.',
-      'Color: cinco cartas del mismo palo no consecutivas. Se compara la carta más alta, luego la siguiente, etc.; finalmente el palo si persiste el empate. Ej.: ♠️2‑4‑5‑6‑8 vence a ♥️A‑K‑Q‑10‑8.',
+      'Color: cinco cartas del mismo palo no consecutivas. Primero se compara la carta más alta, luego la segunda, la tercera, la cuarta y la quinta; solo si todo coincide, el palo decide al final. Ej.: ♠️2‑4‑5‑6‑8 vence a ♥️A‑K‑Q‑10‑8.',
       'Full: pareja + trío. Se compara el trío.',
       'Póker: cuatro cartas del mismo rango + una. Se compara el rango del póker.',
       'Escalera de color: escalera del mismo palo. La más alta es ♠️A‑2‑3‑4‑5.',
@@ -1565,7 +1565,7 @@ const I18N = {
       'トリプル（同じランク3枚）',
       '5枚役',
       'ストレート：5枚の連番。A-2-3-4-5 が最強、3-4-5-6-7 が最弱。同じランクのストレートは最高位カードのスートで比較します。J-Q-K-A-2、Q-K-A-2-3、K-A-3-4-5 のストレートは不可。',
-      'フラッシュ：同じスートの5枚で連番ではないもの。最も高いランクから順に比較し、それでも同じならスートで比較します。例：♠️2-4-5-6-8 は ♥️A-K-Q-10-8 に勝ちます。',
+      'フラッシュ：同じスートの5枚で連番ではないもの。まず最も高いランク、次に2番目、3番目、4番目、5番目を順に比較し、すべて同じときだけ最後にスートで比べます。例：♠️2-4-5-6-8 は ♥️A-K-Q-10-8 に勝ちます。',
       'フルハウス：ペア＋トリプル。トリプルのランクで比較します。',
       'フォーカード：同じランク4枚＋任意1枚。4枚のランクで比較します。',
       'ストレートフラッシュ：同じスートのストレート。最強は ♠️A-2-3-4-5。',
@@ -3472,7 +3472,7 @@ const introText=()=>{
       ],
       guideHomeNotes:'If you do not see the option, make sure you are using Safari/Chrome rather than an in-app browser.',
       howTitle:'Hand Types',
-      howBody:'To follow, card count must match the active play. For 5-card contests, compare hand category first, then compare the relevant high cards and suits under game rules.',
+      howBody:'To follow, card count must match the active play. For 5-card contests, compare the highest rank first, then the next ranks in order, and only use suit as the final tiebreaker.',
       howList:[]
     };
   }
@@ -3529,7 +3529,7 @@ const introText=()=>{
       ],
       guideHomeNotes:'Si l’option n’apparaît pas, utilisez Safari/Chrome plutôt qu’un navigateur intégré.',
       howTitle:'Types de mains',
-      howBody:'Pour suivre, le nombre de cartes doit correspondre. En 5 cartes, comparez d’abord la catégorie, puis les cartes hautes et la couleur.',
+      howBody:'Pour suivre, le nombre de cartes doit correspondre. En 5 cartes, comparez d’abord la plus haute carte, puis les suivantes dans l’ordre, et ne départagez par la couleur qu’en dernier.',
       howList:[]
     };
   }
@@ -3586,7 +3586,7 @@ const introText=()=>{
       ],
       guideHomeNotes:'Falls die Option fehlt, nutze Safari/Chrome statt In‑App‑Browser.',
       howTitle:'Handtypen',
-      howBody:'Beim Nachspielen muss die Kartenanzahl passen. Bei 5 Karten zuerst die Kategorie, dann hohe Karten und Farben vergleichen.',
+      howBody:'Beim Nachspielen muss die Kartenanzahl passen. Bei 5 Karten zuerst die höchste Karte, dann die weiteren Karten der Reihe nach vergleichen und die Farbe nur als letzten Tiebreaker nutzen.',
       howList:[]
     };
   }
@@ -3643,7 +3643,7 @@ const introText=()=>{
       ],
       guideHomeNotes:'Si no aparece la opción, usa Safari/Chrome en lugar de un navegador integrado.',
       howTitle:'Tipos de manos',
-      howBody:'Para responder, la cantidad de cartas debe coincidir. En 5 cartas, compara primero la categoría y luego las cartas altas y palos.',
+      howBody:'Para responder, la cantidad de cartas debe coincidir. En 5 cartas, compara primero la carta más alta, luego las siguientes en orden y usa el palo solo como desempate final.',
       howList:[]
     };
   }
@@ -3700,7 +3700,7 @@ const introText=()=>{
       ],
       guideHomeNotes:'表示されない場合は、アプリ内ブラウザではなくSafari/Chromeを使用してください。',
       howTitle:'役の種類',
-      howBody:'後出しは同じ枚数で合わせる必要があります。5枚勝負では、まず役の種類を比べ、次に高い札とスートで比較します。',
+      howBody:'後出しは同じ枚数で合わせる必要があります。5枚勝負では、まず一番高い札、次に続く札を順に比べ、最後の同点判定でだけスートを使います。',
       howList:[]
     };
   }
@@ -3756,7 +3756,7 @@ const introText=()=>{
       ],
       guideHomeNotes:'如看不到相關選項，請確認不是在其他 App 的內置瀏覽器內開啟。',
       howTitle:'牌型',
-      howBody:'跟牌時必須符合相同張數。若為五張牌對比，先比較牌型等級，再按規則比較相關主牌點數與花色。',
+      howBody:'跟牌時必須符合相同張數。若為五張牌對比，先比較最高點數，再依次比較第2、第3、第4、第5大的點數；只有所有點數都相同時，最後才比花色。',
       howList:[]
     };
 };
@@ -6323,7 +6323,7 @@ function evaluatePlay(cards){
   if(straight&&flush)return{valid:true,count,kind:'straightflush',power:[FIVE_KIND_POWER.straightflush,straight.high,straightHighSuit],sorted};
   if(g[0][1]===4)return{valid:true,count,kind:'fourofkind',power:[FIVE_KIND_POWER.fourofkind,g[0][0]],sorted};
   if(g[0][1]===3&&g[1][1]===2)return{valid:true,count,kind:'fullhouse',power:[FIVE_KIND_POWER.fullhouse,g[0][0]],sorted};
-  if(flush){const d=[...ranks].sort((a,b)=>b-a);const flushSuit=sorted[0].suit;return{valid:true,count,kind:'flush',power:[FIVE_KIND_POWER.flush,flushSuit,...d],sorted};}
+  if(flush){const d=[...ranks].sort((a,b)=>b-a);const flushSuit=sorted[0].suit;return{valid:true,count,kind:'flush',power:[FIVE_KIND_POWER.flush,...d,flushSuit],sorted};}
   if(straight)return{valid:true,count,kind:'straight',power:[FIVE_KIND_POWER.straight,straight.high,straightHighSuit],sorted};
   return{valid:false,reason:t('five')};
 }
@@ -6548,7 +6548,7 @@ function recommendPlayScore(play,ctx){
     if(play.eval.count===1&&isLowestSingle(play.cards[0]))score+=2;
     if(play.cards.some((c)=>c.rank===12))score+=blitz?12:-18;
     if(hasControlCheck(hand)&&play.cards.some((c)=>c.rank===12)&&(play.eval.count===1||play.eval.count===2))score+=10;
-    if(play.eval.kind==='flush'&&(play.eval.power?.[1]??-1)===3)score+=12;
+    if(play.eval.kind==='flush'&&(play.eval.power?.[play.eval.power.length-1]??-1)===3)score+=12;
     if(threat){
       if(maxRank>=11)score+=8;
       else if(maxRank>=9)score+=4;
@@ -6597,7 +6597,7 @@ function recommendPlayScore(play,ctx){
     const hasWheelCard=play.cards.some((c)=>c.rank===12||c.rank===11);
     if(hasWheelCard)score-=25;
   }
-  if(play.eval.kind==='flush'&&(play.eval.power?.[1]??-1)===3)score+=15;
+  if(play.eval.kind==='flush'&&(play.eval.power?.[play.eval.power.length-1]??-1)===3)score+=15;
   if(play.eval.count<5&&preStraights>0&&postStraights<preStraights&&endLen>0&&oppMin!==1){
     score-=22;
   }
