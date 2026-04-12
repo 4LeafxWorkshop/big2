@@ -3936,22 +3936,23 @@ async function hydrateProfileFromCloudByIdentity(identity){
     if(!ids.length)return false;
     let data=null;
     let foundId='';
+    let readFailed=false;
     for(const id of ids){
       if(firebaseDb){
         try{
           const s=await firebaseDb.collection(FIRESTORE_LB_COLLECTION).doc(id).get();
           if(s.exists){data=s.data()??{};foundId=id;break;}
-        }catch{}
+        }catch{readFailed=true;}
       }
       if(!data){
         try{
           const d=await readProfileDocByRest(id);
           if(d){data=d;foundId=id;break;}
-        }catch{}
+        }catch{readFailed=true;}
       }
     }
     if(!data){
-      if(identity?.email||identity?.id){
+      if(!readFailed&&(identity?.email||identity?.id)){
         const store=loadLeaderboardStore();
         const entry=ensureLeaderboardEntry(store,identity);
         if(entry){
@@ -5740,33 +5741,19 @@ function currentLeaderboardIdentity(){
   const gender=state.home.gender==='female'?'female':'male';
   if(g.signedIn&&g.email){
     const email=String(g.email).toLowerCase();
-    return{id:`account:${email}`,name:String(state.home.name||g.name||'Player').slice(0,32),email,gender};
+    return{id:email,name:String(state.home.name||g.name||'Player').slice(0,32),email,gender};
   }
   const fallback=String(state.home.name??'').trim().slice(0,32)||'Player';
-  return{id:`name:${fallback.toLowerCase()}`,name:fallback,email:'',gender};
+  return{id:fallback.toLowerCase(),name:fallback,email:'',gender};
 }
 function botLeaderboardIdentity(name,gender){
   const safe=String(name??'Bot').trim().slice(0,32)||'Bot';
   const g=String(gender??'male')==='female'?'female':'male';
-  return{id:`bot:${safe.toLowerCase()}`,name:safe,email:'',gender:g,isBot:true,picture:'',settings:{}};
+  return{id:safe.toLowerCase(),name:safe,email:'',gender:g,isBot:true,picture:'',settings:{}};
 }
 function identityLookupIds(identity){
-  const out=[];
-  const id=String(identity?.id??'').trim();
-  if(id)out.push(id);
-  const email=String(identity?.email??'').trim().toLowerCase();
-  if(email){
-    out.push(`account:${email}`);
-    out.push(`google:${email}`);
-  }
-  const uid=String(state.home.google?.uid??'').trim();
-  if(uid)out.push(`uid:${uid}`);
-  if(!identity?.isBot){
-    const safe=String(identity?.name??'').trim().slice(0,32);
-    if(safe)out.push(`name:${safe.toLowerCase()}`);
-  }
-  const seen=new Set();
-  return out.filter((x)=>{if(seen.has(x))return false;seen.add(x);return true;});
+  const id=String(identity?.id??'').trim().toLowerCase();
+  return id?[id]:[];
 }
 function ensureLeaderboardEntry(store,identity){
   const safe=String(identity?.name??identity??'').trim().slice(0,32);
@@ -5775,16 +5762,12 @@ function ensureLeaderboardEntry(store,identity){
   const gender=String(identity?.gender??state.home.gender??'male')==='female'?'female':'male';
   const isBot=isBotIdentity(identity);
   const picture=isBot?'':String(identity?.picture??state.home.google?.picture??'').trim();
-  const key=String(identity?.id??(email?`account:${email}`:`name:${safe.toLowerCase()}`)).trim().slice(0,180);
+  const key=isBot
+    ?safe.toLowerCase()
+    :String(identity?.id??email??safe.toLowerCase()).trim().slice(0,180);
   if(!key)return null;
   if(!store.players[key]){
-    const fallbackKey=identityLookupIds(identity).find((id)=>id!==key&&store.players[id]);
-    if(fallbackKey){
-      store.players[key]={...store.players[fallbackKey],id:key};
-      if(fallbackKey!==key)delete store.players[fallbackKey];
-    }else{
-      store.players[key]={id:key,name:safe,email,gender,picture,settings:isBot?{}:collectMainSettings(),games:0,wins:0,totalScore:5000,updatedAt:Date.now()};
-    }
+    store.players[key]={id:key,name:safe,email,gender,picture,settings:isBot?{}:collectMainSettings(),games:0,wins:0,totalScore:5000,updatedAt:Date.now()};
   }
   if(safe)store.players[key].name=safe;
   if(email)store.players[key].email=email;
@@ -5858,7 +5841,7 @@ function computeLeaderboardRowsFromStore(store,period,sort,limit){
   Object.values(store.players).forEach((entry)=>{
     const name=String(entry.name??'').trim();
     const email=String(entry.email??'').trim().toLowerCase();
-    const key=email?`account:${email}`:`name:${name.toLowerCase()}`;
+    const key=email||name.toLowerCase();
     if(!key)return;
     const current=merged[key];
     if(!current||Number(entry.updatedAt||0)>=Number(current.updatedAt||0)){
