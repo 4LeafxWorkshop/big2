@@ -489,9 +489,9 @@ export function buildResultScreenHtml(params){
     const total=p.score??0;
     const remainCards=remain.length?remain.map((c)=>renderStaticCard(c,true)).join(''):`<span class="hint">-</span>`;
     const mulTags=[
-      detail.anyTwo?`<span class="result-score-chip boosted">${t('scoreAnyTwo')} x2</span>`:'',
-      detail.topTwo?`<span class="result-score-chip boosted">${t('scoreTopTwo')} x2</span>`:'',
-      detail.chaoMultiplier>1&&detail.chaoKey?`<span class="result-score-chip boosted">${t(detail.chaoKey)} x${detail.chaoMultiplier}</span>`:''
+      detail.anyTwo?`<span class="result-score-chip penalty">${t('scoreAnyTwo')} x2</span>`:'',
+      detail.topTwo?`<span class="result-score-chip penalty">${t('scoreTopTwo')} x2</span>`:'',
+      detail.chaoMultiplier>1&&detail.chaoKey?`<span class="result-score-chip penalty">${t(detail.chaoKey)} x${detail.chaoMultiplier}</span>`:''
     ].filter(Boolean).join('');
     const detailLine=isWinner
       ?`<div class="result-score-detail">${t('resultDetail')}: ${t('scoreGain')} +${winnerGain}</div>`
@@ -502,6 +502,9 @@ export function buildResultScreenHtml(params){
       ?authPictureUrlFrom(selfPic||fallbackPicture)
       :avatarDataUri(snapName,color,snapGender,Boolean(p.isBot));
     const botNameAttr=p.isBot?` data-bot-name="${esc(p.name)}"`:'';
+    const confidentialStampHtml=(!p.isBot&&isRoom)
+      ?`<span class="result-confidential-stamp" aria-hidden="true">CONFIDENTIAL</span>`
+      :'';
     const winnerLastDiscardHtml=isWinner
       ?`<div class="result-card-block"><div class="result-block-title">${t('resultLastDiscard')}</div><div class="result-cards" aria-label="${t('resultLastDiscard')}">${winnerLastDiscardCards.length?winnerLastDiscardCards.map((c)=>renderStaticCard(c,true)).join(''):`<span class="hint">-</span>`}</div></div>`
       :'';
@@ -511,6 +514,7 @@ export function buildResultScreenHtml(params){
     const rightColHtml=`<div class="result-side">${winnerLastDiscardHtml}${remainBlockHtml}</div>`;
     return`<div class="result-row ${isWinner?'winner':''}" style="--winner-color:${color};">
       <div class="result-main">
+        ${confidentialStampHtml}
         <div class="result-head"><span class="player-color-chip" style="--player-color:${color};"></span><span class="result-avatar-wrap" style="--avatar-seat-color:${color};"><img class="result-avatar" src="${avatarSrc}" alt="${esc(p.name)}"${botNameAttr}/>${hostBadgeHtml}</span><span class="result-player-name"><strong>${esc(p.name)}</strong>${isWinner?`<span class="result-winner-medal" aria-hidden="true">🏅</span>`:''}</span>${isWinner?`<span class="result-winner-tag">${t('resultWinner')}</span>`:''}</div>
         <div class="result-meta">${t('resultDelta')}: ${delta>=0?`+${delta}`:`${delta}`} · ${t('score')}: ${total}</div>
         ${detailLine}

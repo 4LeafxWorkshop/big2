@@ -259,7 +259,8 @@ test('buildResultScreenHtml renders winner row and room footer state', ()=>{
   assert.match(html,/result-confetti-canvas/);
   assert.match(html,/resultWinner/);
   assert.match(html,/scoreGain \+8/);
-  assert.match(html,/scoreAnyTwo/);
+  assert.match(html,/result-score-chip penalty/);
+  assert.match(html,/result-confidential-stamp/);
   assert.match(html,/roomCountdown/);
   assert.match(html,/id="result-again"/);
 });

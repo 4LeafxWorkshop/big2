@@ -7329,6 +7329,7 @@ body[data-screen='game'] .result-card > * {
   display: grid;
   gap: 3px;
   min-width: 0;
+  position: relative;
 }
 .result-side {
   display: grid;
@@ -7435,6 +7436,34 @@ body[data-screen='game'] .result-card > * {
   color: #ffe8a3;
   box-shadow: 0 0 0 1px rgba(255, 209, 102, .2), 0 0 10px rgba(255, 209, 102, .2);
   font-weight: 800;
+}
+.result-score-chip.penalty {
+  border-color: rgba(255, 110, 110, .68);
+  background: linear-gradient(180deg, rgba(255, 93, 93, .28), rgba(182, 38, 38, .16));
+  color: #ffd1d1;
+  box-shadow: 0 0 0 1px rgba(255, 93, 93, .18), 0 0 10px rgba(255, 93, 93, .16);
+  font-weight: 800;
+}
+.result-confidential-stamp {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%) rotate(-10deg);
+  z-index: 2;
+  pointer-events: none;
+  padding: 7px 18px;
+  border-radius: 8px;
+  border: 3px solid rgba(255, 120, 96, .9);
+  background: rgba(70, 18, 18, .72);
+  color: rgba(255, 176, 158, .92);
+  font-size: 1.04rem;
+  font-weight: 900;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 0 rgba(0,0,0,.6);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 197, 188, .2),
+    0 8px 18px rgba(0, 0, 0, .3);
+  mix-blend-mode: screen;
 }
 .result-cards {
   --guide-card-w: clamp(36px, 5.7vw, 58px);
