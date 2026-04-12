@@ -208,7 +208,7 @@ test('buildGameShellMarkup assembles overlays and swaps win confetti canvas', ()
     sideZoneHtml:'<aside id="side"></aside>',
     gameTopbarHtml:'<header id="topbar"></header>',
     gameActionZoneHtml:'<section id="action"></section>',
-    renderGameTable:({showWinCelebrate})=>`<section id="table">${showWinCelebrate?'<div class="win-celebrate"><div class="confetti-layer"></div></div>':''}</section>`,
+    renderGameTable:({showWinCelebrate,turnCompassHtml})=>`<section id="table">${turnCompassHtml??''}${showWinCelebrate?'<div class="win-celebrate"><div class="confetti-layer"></div></div>':''}</section>`,
     renderGameShell:({gameTableHtml,opponentProfileModalHtml,scoreGuideModalHtml,introPanelHtml,leaderboardModalHtml,revealHtml,resultScreenHtml})=>`${gameTableHtml}${opponentProfileModalHtml}${scoreGuideModalHtml}${introPanelHtml}${leaderboardModalHtml}${revealHtml}${resultScreenHtml}`,
     centerMovesHtml:()=>'<div id="center"></div>',
     centerLastMovesHtml:()=>'<div id="last"></div>',
@@ -221,6 +221,7 @@ test('buildGameShellMarkup assembles overlays and swaps win confetti canvas', ()
     leaderboardModalHtml:()=>'<div id="leaderboard"></div>'
   });
   assert.match(html,/confetti-canvas/);
+  assert.match(html,/table-turn-compass/);
   assert.match(html,/id="profile">Bot A/);
   assert.match(html,/id="score-guide"/);
   assert.match(html,/id="intro"/);
@@ -240,9 +241,9 @@ test('buildResultScreenHtml renders winner row and room footer state', ()=>{
     },
     arr:[
       {seat:0,count:0,cls:'south',name:'You',score:5008,isBot:false,picture:''},
-      {seat:1,count:1,cls:'west',name:'Bot A',score:4992,isBot:true,picture:''}
+      {seat:1,count:1,cls:'west',name:'Bot A',score:4992,isBot:false,picture:'seat-1.png'}
     ],
-    state:{home:{mode:'room'},room:{data:{hostId:'uid:self',roundCount:2,status:'finished',players:[{uid:'uid:self',seat:0,picture:''},{uid:'guest:friend',seat:1,picture:''}]},lastResultPlayers:null}},
+    state:{home:{mode:'room'},room:{data:{hostId:'uid:self',roundCount:2,status:'finished',players:[{uid:'uid:self',seat:0,picture:''},{uid:'guest:friend',seat:1,picture:'seat-1.png'}]},lastResultPlayers:null}},
     t:(key)=>key,
     esc:(value)=>String(value),
     roomIsHost:()=>true,
@@ -261,6 +262,7 @@ test('buildResultScreenHtml renders winner row and room footer state', ()=>{
   assert.match(html,/scoreGain \+8/);
   assert.match(html,/result-score-chip penalty/);
   assert.match(html,/result-confidential-stamp/);
+  assert.match(html,/pic:seat-1\.png/);
   assert.match(html,/roomCountdown/);
   assert.match(html,/id="result-again"/);
 });

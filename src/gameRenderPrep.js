@@ -1,3 +1,18 @@
+const TURN_SEAT_CLS=['south','east','north','west'];
+
+function getTurnCompassSeatCls(v){
+  const seat=Number.isFinite(Number(v?.currentSeat))?Number(v.currentSeat):0;
+  const selfSeat=Number.isFinite(Number(v?.selfSeat))?Number(v.selfSeat):0;
+  const idx=((seat-selfSeat)%4+4)%4;
+  return TURN_SEAT_CLS[idx]||'south';
+}
+
+function buildTurnCompassHtml(v,t){
+  if(v?.gameOver)return'';
+  const activeSeatCls=getTurnCompassSeatCls(v);
+  return`<div class="table-turn-compass" data-active-seat="${activeSeatCls}" aria-label="${t('turn')}"><span class="table-turn-compass-ring"><span class="table-turn-pointer"></span></span></div>`;
+}
+
 export function buildSelfRenderState(params){
   const {
     self,
@@ -390,6 +405,7 @@ export function buildGameShellMarkup(params){
     mobileDiscardHtml:'',
     centerMovesHtml:centerMovesHtml(v),
     centerLastMovesHtml:centerLastMovesHtml(lastActions,v.selfSeat),
+    turnCompassHtml:buildTurnCompassHtml(v,t),
     showWinCelebrate:!v.gameOver&&youWin,
     t
   });
@@ -502,7 +518,7 @@ export function buildResultScreenHtml(params){
       ?authPictureUrlFrom(selfPic||fallbackPicture)
       :avatarDataUri(snapName,color,snapGender,Boolean(p.isBot));
     const botNameAttr=p.isBot?` data-bot-name="${esc(p.name)}"`:'';
-    const confidentialStampHtml=(!p.isBot&&isRoom)
+    const confidentialStampHtml=(isRoom&&!p.isBot&&!snapshot)
       ?`<span class="result-confidential-stamp" aria-hidden="true">CONFIDENTIAL</span>`
       :'';
     const winnerLastDiscardHtml=isWinner

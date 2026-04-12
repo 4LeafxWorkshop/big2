@@ -67,10 +67,11 @@ export function renderGameTable(params){
     mobileDiscardHtml,
     centerMovesHtml,
     centerLastMovesHtml,
+    turnCompassHtml,
     showWinCelebrate,
     t
   }=params;
-  return`<section class="table">${roomTopMetaTable}${seatHtml}<div class="table-center-stack">${mobileNamesHtml}${mobileDiscardHtml}${centerMovesHtml}${centerLastMovesHtml}</div>${showWinCelebrate?`<div class="win-celebrate"><div class="confetti-layer"></div><div class="win-banner">${t('congrats')}</div></div>`:''}</section>`;
+  return`<section class="table">${roomTopMetaTable}${seatHtml}<div class="table-center-stack">${mobileNamesHtml}${mobileDiscardHtml}${centerMovesHtml}${centerLastMovesHtml}</div>${turnCompassHtml??''}${showWinCelebrate?`<div class="win-celebrate"><div class="confetti-layer"></div><div class="win-banner">${t('congrats')}</div></div>`:''}</section>`;
 }
 
 export function renderSeatLastAction(action,{

@@ -269,6 +269,7 @@ const I18N = {
       '以上組合大小依次為：蛇 < 花 < 俘虜 < 四條 < 同花順',
     ],
     wait: '等待出牌...',
+    turn: '輪到',
     free: '而家無上手，話事可任意出牌。',
     last: '上手',
     recentCard: '最近出牌',
@@ -528,6 +529,7 @@ const I18N = {
       'Hand order: Straight < Flush < Full House < Four of a Kind < Straight Flush.',
     ],
     wait: 'Waiting...',
+    turn: 'Turn',
     free: 'No active hand. Lead may play any valid set.',
     last: 'Last',
     recentCard: 'Recent Card',
@@ -787,6 +789,7 @@ const I18N = {
       'Ordre : Suite < Couleur < Full < Carré < Quinte flush.',
     ],
     wait: 'En attente...',
+    turn: 'Tour',
     free: 'Pas de main active. Le joueur en tête peut jouer n’importe quel set valide.',
     last: 'Dernier',
     recentCard: 'Dernière carte',
@@ -1047,6 +1050,7 @@ const I18N = {
       'Reihenfolge: Straße < Farbe < Full House < Vierling < Straight Flush.',
     ],
     wait: 'Warten...',
+    turn: 'Zug',
     free: 'Kein aktives Stich. Vorhand darf beliebig legen.',
     last: 'Letzte',
     recentCard: 'Letzte Karte',
@@ -1307,6 +1311,7 @@ const I18N = {
       'Orden: Escalera < Color < Full < Póker < Escalera de color.',
     ],
     wait: 'Esperando...',
+    turn: 'Turno',
     free: 'Sin mano activa. El líder puede jugar cualquier set válido.',
     last: 'Último',
     recentCard: 'Carta reciente',
@@ -1567,6 +1572,7 @@ const I18N = {
       '役の強さ：ストレート < フラッシュ < フルハウス < フォーカード < ストレートフラッシュ。',
     ],
     wait: '待機中...',
+    turn: 'ターン',
     free: '現在上がりがないため、親は任意の役を出せます。',
     last: '直前',
     recentCard: '直前のカード',
@@ -8504,6 +8510,12 @@ function renderOpponents(){
 }
 function opponentProfileModalHtml(name){
   const profile=OPPONENT_PROFILE_BY_NAME[name]??{dob:'-',hobbies:{},profile:{},zodiac:{},motto:{}};
+  const roomPlayers=Array.isArray(state.room.data?.players)?state.room.data.players:[];
+  const lastResultPlayers=Array.isArray(state.room.lastResultPlayers)?state.room.lastResultPlayers:[];
+  const roomSeatProfile=roomPlayers.find((p)=>String(p?.name||p?.displayName||'')===String(name))
+    ||lastResultPlayers.find((p)=>String(p?.name||p?.displayName||'')===String(name))
+    ||null;
+  const hasProfileCard=Boolean(OPPONENT_PROFILE_BY_NAME[name]);
   const hobbies=profileFieldValue(profile,'hobbies',[]);
   const hobbyText=formatHobbyList(hobbies);
   const profileText=profileFieldValue(profile,'profile','-');
@@ -8512,11 +8524,18 @@ function opponentProfileModalHtml(name){
   const zodiacText=PROFILE_ZODIAC_TRANSLATIONS[state.language]?.[zodiacTextRaw]??zodiacTextRaw;
   const zodiacMark=zodiacSymbol(zodiacText);
   const mottoText=profileFieldValue(profile,'motto','-');
-  const gender=botGenderByName(name);
+  const gender=String(roomSeatProfile?.gender||profile?.gender||botGenderByName(name))==='female'?'female':'male';
   const genderLabel=gender==='female'?t('female'):t('male');
   const genderIcon=gender==='female'?'♀':'♂';
   const genderClass=gender==='female'?'gender-female':'gender-male';
-  const avatarSrc=avatarDataUri(name,'#7aaed8',gender,true);
+  const seatPicture=String(roomSeatProfile?.picture||'').trim();
+  const avatarSrc=seatPicture
+    ?authPictureUrlFrom(seatPicture)
+    :avatarDataUri(name,'#7aaed8',gender,!roomSeatProfile);
+  const avatarWrapClass=!hasProfileCard&&Boolean(roomSeatProfile)?'opponent-profile-confidential':'';
+  const avatarStampHtml=!hasProfileCard&&Boolean(roomSeatProfile)
+    ?'<span class="result-confidential-stamp opponent-profile-confidential-stamp" aria-hidden="true">CONFIDENTIAL</span>'
+    :'';
   const closeLabel=t('close');
   return renderOpponentProfileModal({
     name,
@@ -8524,7 +8543,9 @@ function opponentProfileModalHtml(name){
     genderClass,
     genderIcon,
     genderLabel,
+    avatarWrapClass,
     avatarSrc,
+    avatarStampHtml,
     zodiacLabel:t('zodiac'),
     zodiacMark,
     zodiacText,

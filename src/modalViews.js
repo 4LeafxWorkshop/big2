@@ -129,7 +129,9 @@ export function renderOpponentProfileModal(params){
     genderClass,
     genderIcon,
     genderLabel,
+    avatarWrapClass,
     avatarSrc,
+    avatarStampHtml,
     zodiacLabel,
     zodiacMark,
     zodiacText,
@@ -154,7 +156,10 @@ export function renderOpponentProfileModal(params){
       </header>
       <div class="opponent-profile-body">
         <div class="opponent-profile-header">
-          <img class="opponent-profile-avatar" src="${avatarSrc}" alt="${esc(name)}"/>
+          <div class="opponent-profile-avatar-wrap${avatarWrapClass?` ${avatarWrapClass}`:''}">
+            <img class="opponent-profile-avatar" src="${avatarSrc}" alt="${esc(name)}"/>
+            ${avatarStampHtml??''}
+          </div>
           <div class="opponent-profile-header-text">
             <div class="opponent-profile-chips">
               <span class="opponent-chip"><span class="opponent-chip-icon zodiac" aria-hidden="true"></span><span>${zodiacLabel} ${zodiacMark?`${zodiacMark} `:''}${esc(zodiacText)}</span></span>
