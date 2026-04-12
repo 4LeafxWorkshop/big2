@@ -11679,10 +11679,18 @@ body[data-log-sheet='1'] .history-detail-row .history-cards {
   }
 }
 
-@media (max-width: 860px) and (orientation: portrait) {
+@media (max-width: 860px) {
   body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-open-play .seat-played.seat-played-pair .card.mini + .card.mini,
   body[data-screen='game'][data-orientation='portrait'] .seat.west .seat-open-play .seat-played.seat-played-pair .card.mini + .card.mini,
-  body[data-screen='game'][data-orientation='portrait'] .seat.east .seat-open-play .seat-played.seat-played-pair .card.mini + .card.mini {
-    margin-left: calc(var(--card-w) * -0.84) !important;
+  body[data-screen='game'][data-orientation='portrait'] .seat.east .seat-open-play .seat-played.seat-played-pair .card.mini + .card.mini,
+  body[data-screen='game'][data-orientation='landscape'] .seat.north .seat-open-play .seat-played.seat-played-pair .card.mini + .card.mini,
+  body[data-screen='game'][data-orientation='landscape'] .seat.west .seat-open-play .seat-played.seat-played-pair .card.mini + .card.mini,
+  body[data-screen='game'][data-orientation='landscape'] .seat.east .seat-open-play .seat-played.seat-played-pair .card.mini + .card.mini,
+  body[data-screen='game'] .center-last .seat-played.seat-played-pair .card.mini + .card.mini,
+  body[data-screen='game'] .center-last-north .seat-played.seat-played-pair .card.mini + .card.mini,
+  body[data-screen='game'] .center-last-west .seat-played.seat-played-pair .card.mini + .card.mini,
+  body[data-screen='game'] .center-last-east .seat-played.seat-played-pair .card.mini + .card.mini,
+  body[data-screen='game'] .center-last-south .seat-played.seat-played-pair .card.mini + .card.mini {
+    margin-left: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * -0.9) !important;
   }
 }
