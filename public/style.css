@@ -3339,15 +3339,20 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   inset: 50% auto auto 50%;
   transform: translate(-50%, -50%) rotate(-10deg);
   z-index: 6;
-  padding: 24px 58px;
+  width: 82%;
+  box-sizing: border-box;
+  padding: 2.2% 4.5%;
   border-radius: 7px;
   border: 5px solid rgba(203, 35, 35, .95);
   background: rgba(158, 24, 24, .9);
   color: rgba(255, 232, 232, .98);
-  font-size: 2.4rem;
+  font-size: 240%;
   font-weight: 900;
   letter-spacing: .05em;
   text-transform: uppercase;
+  text-align: center;
+  white-space: nowrap;
+  line-height: 1;
   text-shadow: 0 1px 0 rgba(0,0,0,.6);
   box-shadow:
     inset 0 0 0 1px rgba(255, 220, 220, .14),
