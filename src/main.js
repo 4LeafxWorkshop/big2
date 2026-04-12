@@ -3951,7 +3951,24 @@ async function hydrateProfileFromCloudByIdentity(identity){
       }
     }
     if(!data){
-      if(identity?.email||identity?.id)state.home.google.profileMissing=true;
+      if(identity?.email||identity?.id){
+        const store=loadLeaderboardStore();
+        const entry=ensureLeaderboardEntry(store,identity);
+        if(entry){
+          const name=String(state.home.google?.name||identity?.name||entry.name||'Player').trim().slice(0,18);
+          const email=String(identity?.email??entry.email??'').trim().toLowerCase().slice(0,120);
+          entry.name=name||entry.name;
+          entry.email=email||entry.email;
+          entry.gender=state.home.gender==='female'?'female':'male';
+          entry.picture=String(state.home.google?.picture??entry.picture??'').trim();
+          entry.settings=collectMainSettings();
+          entry.totalScore=scoreFromStoredTotal(entry.totalScore);
+          entry.updatedAt=Date.now();
+          saveLeaderboardStore(store);
+        }
+        state.home.google.profileMissing=false;
+        return true;
+      }
       return false;
     }
     const d=data;
