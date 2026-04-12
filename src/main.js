@@ -336,6 +336,7 @@ const I18N = {
     profile: '簡介',
     zodiac: '星座',
     motto: '座右銘',
+    confidential: '機密',
     lbHeadingDesc: '根據分數變動、勝場與勝率等表現指標即時更新排名。',
     lbRefresh: '更新排行榜',
     profileMissing: '找不到個人資料，請重新登入以回復分數。',
@@ -596,6 +597,7 @@ const I18N = {
     profile: 'Profile',
     zodiac: 'Zodiac',
     motto: 'Motto',
+    confidential: 'CONFIDENTIAL',
     lbHeadingDesc:
       'Live ranking updates based on score delta, wins, and win rate.',
     lbRefresh: 'Refresh Leaderboard',
@@ -856,6 +858,7 @@ const I18N = {
     profile: 'Profil',
     zodiac: 'Zodiaque',
     motto: 'Devise',
+    confidential: 'CONFIDENTIEL',
     lbHeadingDesc:
       'Classement mis à jour selon l’écart de score, les victoires et le taux de victoire.',
     lbRefresh: 'Actualiser',
@@ -1117,6 +1120,7 @@ const I18N = {
     profile: 'Profil',
     zodiac: 'Sternzeichen',
     motto: 'Motto',
+    confidential: 'VERTRAULICH',
     lbHeadingDesc:
       'Live‑Ranking basierend auf Punktedifferenz, Siegen und Siegquote.',
     lbRefresh: 'Rangliste aktualisieren',
@@ -1378,6 +1382,7 @@ const I18N = {
     profile: 'Perfil',
     zodiac: 'Zodiaco',
     motto: 'Lema',
+    confidential: 'CONFIDENCIAL',
     lbHeadingDesc:
       'Ranking en vivo basado en delta de puntos, victorias y tasa de victoria.',
     lbRefresh: 'Actualizar ranking',
@@ -1639,6 +1644,7 @@ const I18N = {
     profile: 'プロフィール',
     zodiac: '星座',
     motto: 'モットー',
+    confidential: '機密',
     lbHeadingDesc: 'スコア差、勝利数、勝率に基づきランキングを更新します。',
     lbRefresh: 'ランキング更新',
     lbSort: '並び替え',
@@ -8533,7 +8539,7 @@ function opponentProfileModalHtml(name){
     ?authPictureUrlFrom(seatPicture)
     :avatarDataUri(name,'#7aaed8',gender,!roomSeatProfile);
   const avatarStampHtml=!hasProfileCard&&Boolean(roomSeatProfile)
-    ?'<span class="result-confidential-stamp opponent-profile-confidential-stamp" aria-hidden="true">CONFIDENTIAL</span>'
+    ?`<span class="result-confidential-stamp opponent-profile-confidential-stamp" aria-hidden="true">${esc(t('confidential'))}</span>`
     :'';
   const closeLabel=t('close');
   return renderOpponentProfileModal({
