@@ -1,3 +1,6 @@
+import {renderGenderIconSvg} from './genderIcon.js';
+import {resolveAvatarSrc} from './avatarProfile.js';
+
 export function formatLeaderboardDateTime(ts,language){
   const n=Number(ts)||0;
   if(!n)return'-';
@@ -15,6 +18,11 @@ export function formatLeaderboardDateTime(ts,language){
 
 export function formatLeaderboardPct(n){
   return `${Math.round((Number(n)||0)*100)}%`;
+}
+
+export function renderConfidentialStamp({text,esc,classes=''}) {
+  const className=['result-confidential-stamp',classes].filter(Boolean).join(' ');
+  return `<span class="${className}" aria-hidden="true">${esc(text)}</span>`;
 }
 
 export function renderIntroPanel(params){
@@ -89,7 +97,15 @@ export function renderLeaderboardPanel(params){
     const medalClass=rank===1?'gold':rank===2?'silver':rank===3?'bronze':'';
     const avatarClass=`lb-avatar ${rank===1?'gold':rank===2?'silver':rank===3?'bronze':''}`.trim();
     const isBotRow=String(r.id??'').startsWith('bot:');
-    const avatarSrc=r.picture?authPictureUrlFrom(r.picture):avatarDataUri(r.name,'#7aaed8',r.gender??'male',isBotRow);
+    const avatarSrc=resolveAvatarSrc({
+      picture:r.picture,
+      name:r.name,
+      color:'#7aaed8',
+      gender:r.gender??'male',
+      isBot:isBotRow,
+      authPictureUrlFrom,
+      avatarDataUri
+    });
     const botNameAttr=isBotRow?` data-bot-name="${esc(r.name)}"`:'';
     return`<div class="lb-row"><div class="lb-rank">${medal?`<span class="lb-badge ${medalClass}" aria-hidden="true">${medal}</span>`:`#${r.rank??'-'}`}</div><div class="lb-main"><div class="lb-name-line"><div class="lb-name-pack"><span class="${avatarClass}"><img src="${avatarSrc}" alt="${esc(r.name)}"${botNameAttr}/></span><div class="lb-name">${esc(r.name)}</div></div><div class="lb-stat">${r.totalScore}</div></div><div class="lb-subline"><span>${t('score')}: ${r.totalScore} · ${t('lbWins')}: ${r.wins} · ${r.games} ${t('games')} · ${t('lbWR')} ${formatLeaderboardPct(r.winRate)}</span><span>${t('lbUpdated')}: ${formatLeaderboardDateTime(r.updatedAt,language)}</span></div></div></div>`;
   }).join(''):`<div class="hint">${t('lbNoData')}</div>`;
@@ -128,7 +144,6 @@ export function renderOpponentProfileModal(params){
     name,
     closeLabel,
     genderClass,
-    genderIcon,
     genderLabel,
     avatarSrc,
     avatarStampHtml,
@@ -150,7 +165,7 @@ export function renderOpponentProfileModal(params){
     <section class="intro-sheet opponent-profile-sheet">
       <header class="intro-head">
         <div>
-          <h3 class="title-with-icon"><span class="title-icon-emoji" aria-hidden="true">👤</span><span>${esc(name)}</span><span class="opponent-gender-icon ${genderClass}" aria-label="${esc(genderLabel)}" title="${esc(genderLabel)}">${genderClass==='gender-female'?`<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><circle cx="10.5" cy="9.8" r="4.1"/><path d="M10.5 13.9v4.8M8.3 16.5h4.4"/></svg>`:`<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><circle cx="9.5" cy="14.5" r="4.2"/><path d="M13 11l5-5"/><path d="M14.6 6H18v3.4"/></svg>`}</span></h3>
+          <h3 class="title-with-icon"><span class="title-icon-emoji" aria-hidden="true">👤</span><span>${esc(name)}</span><span class="opponent-gender-icon ${genderClass}" aria-label="${esc(genderLabel)}" title="${esc(genderLabel)}">${renderGenderIconSvg(genderClass)}</span></h3>
         </div>
         <button id="opponent-profile-close" class="secondary">${closeLabel}</button>
       </header>

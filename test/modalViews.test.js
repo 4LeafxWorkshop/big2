@@ -122,7 +122,6 @@ test('renderOpponentProfileModal renders avatar, chips, and translated close lab
     name:'Luna',
     closeLabel:'Close',
     genderClass:'gender-female',
-    genderIcon:'♀',
     genderLabel:'Female',
     avatarSrc:'/avatar.png',
     avatarStampHtml:'<span class="result-confidential-stamp opponent-profile-confidential-stamp">CONFIDENTIAL</span>',

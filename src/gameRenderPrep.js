@@ -1,3 +1,6 @@
+import {renderConfidentialStamp} from './modalViews.js';
+import {resolveAvatarSrc} from './avatarProfile.js';
+
 const TURN_SEAT_CLS=['south','east','north','west'];
 
 function getTurnCompassSeatCls(v){
@@ -165,7 +168,15 @@ export function buildOpponentSeatsHtml(params){
       :'';
     const opponentOpenPlayHtml=`<div class="seat-open-play" style="${openAnchorStyle}"><div class="opponent-open-scale">${openPlayContent}</div></div>`;
     const closedCountHtml=!v.gameOver&&player.count>0?`<span class="closed-count-pill">x${player.count}</span>`:'';
-    const avatarSrc=player.picture?authPictureUrlFrom(player.picture):avatarDataUri(player.name,playerColor,player.gender,player.isBot);
+    const avatarSrc=resolveAvatarSrc({
+      picture:player.picture,
+      name:player.name,
+      color:playerColor,
+      gender:player.gender,
+      isBot:player.isBot,
+      authPictureUrlFrom,
+      avatarDataUri
+    });
     const botNameAttr=player.isBot?` data-bot-name="${esc(player.name)}"`:'';
     const opponentName=player.rawName||player.name;
     const opponentAttr=` data-opponent-name="${esc(opponentName)}"`;
@@ -514,12 +525,18 @@ export function buildResultScreenHtml(params){
       :`<div class="result-score-detail">${t('resultDetail')}: ${t('scoreBase')} ${detail.base} x ${detail.multiplier} · ${t('scoreDeduct')} ${detail.deduction}${mulTags?` · ${t('scorePenaltyBoost')}: ${mulTags}`:''}</div>`;
     const selfPic=isSelf?authPictureUrl():'';
     const fallbackPicture=snapPicture||roomPictureBySeat.get(p.seat)||String(p.picture||'').trim();
-    const avatarSrc=(selfPic||fallbackPicture)
-      ?authPictureUrlFrom(selfPic||fallbackPicture)
-      :avatarDataUri(snapName,color,snapGender,Boolean(p.isBot));
+    const avatarSrc=resolveAvatarSrc({
+      picture:selfPic||fallbackPicture,
+      name:snapName,
+      color,
+      gender:snapGender,
+      isBot:Boolean(p.isBot),
+      authPictureUrlFrom,
+      avatarDataUri
+    });
     const botNameAttr=p.isBot?` data-bot-name="${esc(p.name)}"`:'';
     const confidentialStampHtml=(isRoom&&!p.isBot&&!snapshot)
-      ?`<span class="result-confidential-stamp" aria-hidden="true">${esc(t('confidential'))}</span>`
+      ?renderConfidentialStamp({text:t('confidential'),esc})
       :'';
     const winnerLastDiscardHtml=isWinner
       ?`<div class="result-card-block"><div class="result-block-title">${t('resultLastDiscard')}</div><div class="result-cards" aria-label="${t('resultLastDiscard')}">${winnerLastDiscardCards.length?winnerLastDiscardCards.map((c)=>renderStaticCard(c,true)).join(''):`<span class="hint">-</span>`}</div></div>`

@@ -1,3 +1,5 @@
+import {renderGenderIconSvg} from './genderIcon.js';
+
 function binarySliderHtml({id,value,onLabel,offLabel,ariaLabel}){
   const index=value?1:0;
   return `<div class="setting-slider-wrap" id="${id}" style="--setting-index:${index};"><input class="setting-slider" type="range" min="0" max="1" step="1" value="${index}" aria-label="${ariaLabel}"><div class="setting-slider-labels" aria-hidden="true"><span>${offLabel}</span><span>${onLabel}</span></div></div>`;
@@ -54,7 +56,6 @@ export function renderOpponentCard(params){
     link,
     name,
     genderClass,
-    genderIcon,
     genderLabel,
     zodiacLabel,
     zodiacMark,
@@ -73,7 +74,7 @@ export function renderOpponentCard(params){
       <img class="opponent-avatar" src="${link}" alt="${esc(name)}"/>
       <div class="opponent-meta">
         <div class="opponent-name">${esc(name)}</div>
-        <div class="opponent-sub"><span class="opponent-gender-symbol ${genderClass}" aria-label="${esc(genderLabel)}" title="${esc(genderLabel)}">${genderClass==='gender-female'?`<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><circle cx="10.5" cy="9.8" r="4.1"/><path d="M10.5 13.9v4.8M8.3 16.5h4.4"/></svg>`:`<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><circle cx="9.5" cy="14.5" r="4.2"/><path d="M13 11l5-5"/><path d="M14.6 6H18v3.4"/></svg>`}</span></div>
+        <div class="opponent-sub"><span class="opponent-gender-symbol ${genderClass}" aria-label="${esc(genderLabel)}" title="${esc(genderLabel)}">${renderGenderIconSvg(genderClass)}</span></div>
       </div>
     </div>
     <div class="opponent-info-row">

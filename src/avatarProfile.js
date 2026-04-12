@@ -1,3 +1,18 @@
+export function resolveAvatarSrc({
+  picture,
+  name,
+  color,
+  gender='male',
+  isBot=false,
+  authPictureUrlFrom,
+  avatarDataUri
+}){
+  const pic=String(picture??'').trim();
+  return pic
+    ?authPictureUrlFrom(pic)
+    :avatarDataUri(name,color,gender,isBot);
+}
+
 export function createAvatarProfileHelpers(deps){
   const {
     withBase,

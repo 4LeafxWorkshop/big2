@@ -20,8 +20,9 @@ import {renderConfigMarkup, renderHomeMarkup, renderOpponentCard, renderOpponent
 import {createLangMenuController} from './langMenu.js';
 import {renderCenterLastMoves, renderGameActionZone, renderGameLogSheet, renderGameShell, renderGameSideZone, renderGameTable, renderGameTopbar, renderOpponentLabel, renderOpponentSeat, renderOpponentSeats, renderOpponentStationFlow, renderSeatLastAction} from './gameView.js';
 import {buildCalloutRenderState, buildCongratsOverlayHtml, buildGameAuxRenderState, buildGameShellMarkup, buildOpponentSeatsHtml, buildResultScreenHtml, buildRoomMetaTableHtml, buildSelfRenderState} from './gameRenderPrep.js';
-import {renderIntroPanel, renderLeaderboardModal, renderLeaderboardPanel, renderOpponentProfileModal, renderScoreGuideModal} from './modalViews.js';
-import {createOpponentProfileHelpers} from './opponentProfile.js';
+import {renderConfidentialStamp, renderIntroPanel, renderLeaderboardModal, renderLeaderboardPanel, renderOpponentProfileModal, renderScoreGuideModal} from './modalViews.js';
+import {resolveAvatarSrc} from './avatarProfile.js';
+import {createOpponentProfileHelpers, resolveOpponentProfileModalState, resolveRoomSeatProfile} from './opponentProfile.js';
 import {createOpponentsEventsBinder} from './opponentsEvents.js';
 import {createProfileSettingsHelpers} from './profileSettings.js';
 import {renderRoomJoinOverlay, renderRoomLobbyOverlay} from './roomView.js';
@@ -8296,23 +8297,23 @@ function renderHome(){
     :'';
   const roomSeats=[0,1,2,3].map((seat)=>{
     const seatLabel=t('seatLabel').replace('{{n}}',String(seat+1));
-    const roomEntry=roomSeatMap.get(seat)||null;
-    const gameEntry=gameSeatMap?gameSeatMap.get(seat)||null:null;
-    const entry=useGameRoster?(gameEntry||roomEntry):roomEntry;
-    if(!entry){
+    const seatData=resolveLobbySeatDisplayData({
+      seat,
+      roomSeatMap,
+      gameSeatMap,
+      roomStatus,
+      useGameRoster,
+      derivedHostId,
+      state,
+      playerColorByViewClass,
+      authPictureUrlFrom,
+      avatarDataUri
+    });
+    if(!seatData){
       return`<div class="lobby-seat empty"><div class="lobby-seat-avatar empty">+</div><div class="lobby-seat-name">${t('roomSeatOpen')}</div><div class="lobby-seat-label">${seatLabel}</div></div>`;
     }
-    const entryName=String(entry.name||'');
-    const entryGender=String(entry.gender||(useGameRoster?null:roomEntry?.gender)||'male')==='female'?'female':'male';
-    const entryPicture=String(useGameRoster?entry.picture:(entry.picture||roomEntry?.picture)||'').trim();
-    const isBot=useGameRoster?(!entry.isHuman):(!roomEntry?false:!isRoomPlayerHuman(roomEntry));
-    const avatarColor=isBot?playerColorByViewClass(seatCls[seat]||'south'):'#7aaed8';
-    const avatarSrc=entryPicture?authPictureUrlFrom(entryPicture):avatarDataUri(entryName,avatarColor,entryGender,isBot);
-    const isHost=String(entry.uid)===String(derivedHostId);
-    const lastSeen=Number(roomEntry?.lastSeen)||0;
-    const offline=roomData?.status==='playing'&&lastSeen>0&&(Date.now()-lastSeen>ROOM_OFFLINE_MS);
+    const {entryName,avatarSrc,isHost,offline,displayName}=seatData;
     const hostBadge=isHost?`<span class="lobby-seat-host-badge">🚩</span>`:'';
-    const displayName=(roomStatus==='finished'?'':entryName);
     const nameHtml=`<div class="lobby-seat-name">${displayName?esc(displayName):'&nbsp;'}</div>`;
     return`<div class="lobby-seat ${isHost?'host':''} ${offline?'offline':''}">
       <span class="lobby-seat-avatar-wrap"><img class="lobby-seat-avatar" src="${avatarSrc}" alt="${esc(entryName)}"/>${hostBadge}</span>
@@ -8463,6 +8464,37 @@ function renderConfig(){
     bindEmoteDisplayToggle
   });
 }
+function resolveLobbySeatDisplayData({seat,roomSeatMap,gameSeatMap,roomStatus,useGameRoster,derivedHostId,state,playerColorByViewClass,authPictureUrlFrom,avatarDataUri}){
+  const roomEntry=roomSeatMap.get(seat)||null;
+  const gameEntry=gameSeatMap?gameSeatMap.get(seat)||null:null;
+  const entry=useGameRoster?(gameEntry||roomEntry):roomEntry;
+  if(!entry)return null;
+  const resolvedSeat=useGameRoster?entry:resolveRoomSeatProfile({name:entry.name,state});
+  const entryName=String(entry.name||'');
+  const entryGender=String(entry.gender||(useGameRoster?null:roomEntry?.gender)||resolvedSeat?.gender||'male')==='female'?'female':'male';
+  const entryPicture=String(useGameRoster?entry.picture:(entry.picture||resolvedSeat?.picture)||'').trim();
+  const isBot=useGameRoster?(!entry.isHuman):(!roomEntry?false:!isRoomPlayerHuman(roomEntry));
+  const avatarColor=isBot?playerColorByViewClass(seatCls[seat]||'south'):'#7aaed8';
+  const avatarSrc=resolveAvatarSrc({
+    picture:entryPicture,
+    name:entryName,
+    color:avatarColor,
+    gender:entryGender,
+    isBot,
+    authPictureUrlFrom,
+    avatarDataUri
+  });
+  const isHost=String(entry.uid)===String(derivedHostId);
+  const lastSeen=Number(roomEntry?.lastSeen)||0;
+  const offline=roomStatus==='playing'&&lastSeen>0&&(Date.now()-lastSeen>ROOM_OFFLINE_MS);
+  return{
+    entryName,
+    avatarSrc,
+    isHost,
+    offline,
+    displayName:roomStatus==='finished'?'':entryName
+  };
+}
 function renderOpponents(){
   const seen=new Set();
   const bots=BOT_PROFILE_POOL.filter((b)=>{
@@ -8471,7 +8503,15 @@ function renderOpponents(){
     return true;
   });
   const cards=bots.map((b)=>{
-    const link=avatarDataUri(b.name,'#7aaed8',b.gender,true);
+    const link=resolveAvatarSrc({
+      picture:'',
+      name:b.name,
+      color:'#7aaed8',
+      gender:b.gender,
+      isBot:true,
+      authPictureUrlFrom,
+      avatarDataUri
+    });
     const profile=OPPONENT_PROFILE_BY_NAME[b.name]??{dob:'-',hobbies:{},profile:{}};
     const hobbies=profileFieldValue(profile,'hobbies',[]);
     const hobbyText=formatHobbyList(hobbies);
@@ -8481,14 +8521,12 @@ function renderOpponents(){
     const zodiacText=PROFILE_ZODIAC_TRANSLATIONS[state.language]?.[zodiacTextRaw]??zodiacTextRaw;
     const zodiacMark=zodiacSymbol(zodiacText);
     const mottoText=profileFieldValue(profile,'motto','-');
-    const genderLabel=b.gender==='female'?t('female'):t('male');
-    const genderIcon=b.gender==='female'?'♀':'♂';
+  const genderLabel=b.gender==='female'?t('female'):t('male');
     const genderClass=b.gender==='female'?'gender-female':'gender-male';
     return renderOpponentCard({
       link,
       name:b.name,
       genderClass,
-      genderIcon,
       genderLabel,
       zodiacLabel:t('zodiac'),
       zodiacMark,
@@ -8516,13 +8554,20 @@ function renderOpponents(){
   bindLangMenu(document.querySelector('.topbar-right'),{reloadGoogle:!state.home.google?.signedIn});
 }
 function opponentProfileModalHtml(name){
-  const profile=OPPONENT_PROFILE_BY_NAME[name]??{dob:'-',hobbies:{},profile:{},zodiac:{},motto:{}};
-  const roomPlayers=Array.isArray(state.room.data?.players)?state.room.data.players:[];
-  const lastResultPlayers=Array.isArray(state.room.lastResultPlayers)?state.room.lastResultPlayers:[];
-  const roomSeatProfile=roomPlayers.find((p)=>String(p?.name||p?.displayName||'')===String(name))
-    ||lastResultPlayers.find((p)=>String(p?.name||p?.displayName||'')===String(name))
-    ||null;
-  const hasProfileCard=Boolean(OPPONENT_PROFILE_BY_NAME[name]);
+  const {
+    profile,
+    roomSeatProfile,
+    hasProfileCard,
+    gender,
+    avatarSrc
+  }=resolveOpponentProfileModalState({
+    name,
+    state,
+    opponentProfiles:OPPONENT_PROFILE_BY_NAME,
+    botGenderByName,
+    authPictureUrlFrom,
+    avatarDataUri
+  });
   const hobbies=profileFieldValue(profile,'hobbies',[]);
   const hobbyText=formatHobbyList(hobbies);
   const profileText=profileFieldValue(profile,'profile','-');
@@ -8531,23 +8576,16 @@ function opponentProfileModalHtml(name){
   const zodiacText=PROFILE_ZODIAC_TRANSLATIONS[state.language]?.[zodiacTextRaw]??zodiacTextRaw;
   const zodiacMark=zodiacSymbol(zodiacText);
   const mottoText=profileFieldValue(profile,'motto','-');
-  const gender=String(roomSeatProfile?.gender||profile?.gender||botGenderByName(name))==='female'?'female':'male';
   const genderLabel=gender==='female'?t('female'):t('male');
-  const genderIcon=gender==='female'?'♀':'♂';
   const genderClass=gender==='female'?'gender-female':'gender-male';
-  const seatPicture=String(roomSeatProfile?.picture||'').trim();
-  const avatarSrc=seatPicture
-    ?authPictureUrlFrom(seatPicture)
-    :avatarDataUri(name,'#7aaed8',gender,!roomSeatProfile);
   const avatarStampHtml=!hasProfileCard&&Boolean(roomSeatProfile)
-    ?`<span class="result-confidential-stamp opponent-profile-confidential-stamp" aria-hidden="true">${esc(t('confidential'))}</span>`
+    ?renderConfidentialStamp({text:t('confidential'),esc,classes:'opponent-profile-confidential-stamp'})
     :'';
   const closeLabel=t('close');
   return renderOpponentProfileModal({
     name,
     closeLabel,
     genderClass,
-    genderIcon,
     genderLabel,
     avatarSrc,
     avatarStampHtml,

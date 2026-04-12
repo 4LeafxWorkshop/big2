@@ -88,7 +88,6 @@ test('renderOpponentCard includes avatar, profile labels, and motto', ()=>{
     link:'/avatar.png',
     name:'Luna',
     genderClass:'gender-female',
-    genderIcon:'♀',
     genderLabel:'Female',
     zodiacLabel:'Zodiac',
     zodiacMark:'♍',
