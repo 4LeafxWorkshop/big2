@@ -129,7 +129,6 @@ export function renderOpponentProfileModal(params){
     genderClass,
     genderIcon,
     genderLabel,
-    avatarWrapClass,
     avatarSrc,
     avatarStampHtml,
     zodiacLabel,
@@ -154,11 +153,11 @@ export function renderOpponentProfileModal(params){
         </div>
         <button id="opponent-profile-close" class="secondary">${closeLabel}</button>
       </header>
+      ${avatarStampHtml??''}
       <div class="opponent-profile-body">
         <div class="opponent-profile-header">
-          <div class="opponent-profile-avatar-wrap${avatarWrapClass?` ${avatarWrapClass}`:''}">
+          <div class="opponent-profile-avatar-wrap">
             <img class="opponent-profile-avatar" src="${avatarSrc}" alt="${esc(name)}"/>
-            ${avatarStampHtml??''}
           </div>
           <div class="opponent-profile-header-text">
             <div class="opponent-profile-chips">

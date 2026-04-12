@@ -8532,7 +8532,6 @@ function opponentProfileModalHtml(name){
   const avatarSrc=seatPicture
     ?authPictureUrlFrom(seatPicture)
     :avatarDataUri(name,'#7aaed8',gender,!roomSeatProfile);
-  const avatarWrapClass=!hasProfileCard&&Boolean(roomSeatProfile)?'opponent-profile-confidential':'';
   const avatarStampHtml=!hasProfileCard&&Boolean(roomSeatProfile)
     ?'<span class="result-confidential-stamp opponent-profile-confidential-stamp" aria-hidden="true">CONFIDENTIAL</span>'
     :'';
@@ -8543,7 +8542,6 @@ function opponentProfileModalHtml(name){
     genderClass,
     genderIcon,
     genderLabel,
-    avatarWrapClass,
     avatarSrc,
     avatarStampHtml,
     zodiacLabel:t('zodiac'),

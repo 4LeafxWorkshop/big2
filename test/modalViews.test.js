@@ -122,7 +122,6 @@ test('renderOpponentProfileModal renders avatar, chips, and translated close lab
     genderClass:'gender-female',
     genderIcon:'♀',
     genderLabel:'Female',
-    avatarWrapClass:'opponent-profile-confidential',
     avatarSrc:'/avatar.png',
     avatarStampHtml:'<span class="result-confidential-stamp opponent-profile-confidential-stamp">CONFIDENTIAL</span>',
     zodiacLabel:'Zodiac',
@@ -140,7 +139,6 @@ test('renderOpponentProfileModal renders avatar, chips, and translated close lab
   });
   assert.match(html,/id="opponent-profile-modal"/);
   assert.match(html,/\/avatar\.png/);
-  assert.match(html,/opponent-profile-avatar-wrap/);
   assert.match(html,/opponent-profile-confidential-stamp/);
   assert.match(html,/opponent-profile-motto/);
   assert.match(html,/aria-label="Close"/);
