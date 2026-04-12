@@ -21,6 +21,9 @@ This document describes how the Big Two bots and the in-game recommendation syst
 - Flush comparison uses rank priority first, then suit as the final tiebreaker.
 - 5-card type ordering uses `FIVE_KIND_POWER`:
   - `straight < flush < fullhouse < fourofkind < straightflush`
+- Current flush encoding in `evaluatePlay` is `[FIVE_KIND_POWER.flush, highestRank, secondRank, thirdRank, fourthRank, fifthRank, suit]`.
+  - `canBeat()` compares the full `power` array lexicographically.
+  - `recommendPlayScore()` reads the flush suit from the last `power` element, so keep those paths in sync if the encoding changes.
 
 ## Hong Kong Style Rules (Encoded)
 - Highest single: `2` (with `♠️2` as the top single).
