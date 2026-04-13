@@ -22,12 +22,17 @@ import {renderCenterLastMoves, renderGameActionZone, renderGameLogSheet, renderG
 import {buildCalloutRenderState, buildCongratsOverlayHtml, buildGameAuxRenderState, buildGameShellMarkup, buildOpponentSeatsHtml, buildResultScreenHtml, buildRoomMetaTableHtml, buildSelfRenderState} from './gameRenderPrep.js';
 import {renderConfidentialStamp, renderIntroPanel, renderLeaderboardModal, renderLeaderboardPanel, renderOpponentProfileModal, renderScoreGuideModal} from './modalViews.js';
 import {resolveAvatarSrc} from './avatarProfile.js';
+import {createGoogleIdentityController} from './googleIdentity.js';
+import {createGoogleProfileHelpers} from './googleProfile.js';
+import {createGoogleSessionHelpers} from './googleSession.js';
 import {createOpponentProfileHelpers, resolveOpponentProfileModalState, resolveRoomSeatProfile} from './opponentProfile.js';
 import {createOpponentsEventsBinder} from './opponentsEvents.js';
 import {createProfileSettingsHelpers} from './profileSettings.js';
 import {renderRoomJoinOverlay, renderRoomLobbyOverlay} from './roomView.js';
 import {createRoomLifecycleController} from './roomLifecycle.js';
 import {createRoomGameRuntimeController} from './roomGameRuntime.js';
+import {createRoomExpiryHelpers} from './roomExpiry.js';
+import {createRoomIdentityHelpers} from './roomIdentity.js';
 import {createRoomMutationsController} from './roomMutations.js';
 import {createRoomRosterSyncController} from './roomRosterSync.js';
 import {createRoomSubscriptionController} from './roomSubscription.js';
@@ -381,7 +386,7 @@ const I18N = {
       '所有玩家起始 5000 分。',
       '有人出清手牌即勝出該局。',
       '基本計分：輸家按剩餘張數扣分：1-9 張 x1、10-12 張 x2、13 張 x3。',
-      '加乘罰則：持有任意 2 再 x2；持有 ♠️2（頂大）再 x2，可疊乘。',
+      '加乘罰則：持有任何 2 再 x2；持有 ♠️2（頂大）再 x2，可疊乘。',
       '最後一張規則：若上家冇頂大而令下家出清，上家需兼負其餘兩家輸分。',
       '所有輸家扣分總和加到贏家。',
     ],
@@ -2172,9 +2177,6 @@ function resetCalloutPlaybackState(){
   calloutAudioController.resetPlaybackState();
 }
 let lastCardProcessedHistoryLen=0;
-let googleInlineRetryTimer=null;
-let googleIdentityInitialized=false;
-let googleScriptReloading=false;
 let firebaseAuth=null;
 let firebaseDb=null;
 const firebaseRoomApps=new Map();
@@ -3890,6 +3892,17 @@ function saveLeaderboardStore(store){
   if(!store||typeof store!=='object')return;
   runtimeProfileStore.players=store.players&&typeof store.players==='object'?store.players:{};
 }
+const LOCAL_ROOM_KEY='big2.currentRoomId';
+// Keep room identity helpers early: profile/settings wiring reads currentRoomPlayerId during init.
+const roomIdentityHelpers=createRoomIdentityHelpers({
+  getState:()=>state,
+  getFirebaseAuth:()=>firebaseAuth
+});
+const {
+  baseRoomPlayerId,
+  currentAuthUserUid,
+  currentRoomPlayerId
+}=roomIdentityHelpers;
 const {
   clampScoreValue,
   scoreFromStoredTotal,
@@ -3999,8 +4012,14 @@ async function hydrateProfileFromCloudByIdentity(identity){
     const restoredScore=scoreFromStoredTotal(d.totalScore);
     const restoredGender=String(d.gender??state.home.gender??'male')==='female'?'female':'male';
     const restoredPicture=String(d.picture??'').trim();
-    state.home.google.profileMissing=false;
-    applyMainSettings(d.settings);
+    applyRestoredGoogleProfile({
+      name:restoredName,
+      gender:restoredGender,
+      picture:restoredPicture,
+      totalScore:restoredScore,
+      settings:d.settings,
+      updateScore:true
+    });
     const store=loadLeaderboardStore();
     const entry=ensureLeaderboardEntry(store,identity);
     if(entry){
@@ -4012,19 +4031,6 @@ async function hydrateProfileFromCloudByIdentity(identity){
       entry.wins=Number(d.wins)||Number(entry.wins)||0;
       entry.updatedAt=Number(d.updatedAt)||Date.now();
       saveLeaderboardStore(store);
-    }
-    if(restoredName){
-      state.home.name=restoredName;
-    }
-    state.home.gender=restoredGender;
-    if(restoredPicture&&state.home.google?.signedIn){
-      state.home.google.picture=restoredPicture;
-      preloadGooglePicture();
-    }
-    const inGame=state.screen==='game'&&Array.isArray(state.solo.players)&&state.solo.players.length>0&&!state.solo.gameOver;
-    if(!inGame){
-      state.score=restoredScore;
-      state.solo.totals=[restoredScore,5000,5000,5000];
     }
     const preferredId=String(currentLeaderboardIdentity().id??'');
     if(preferredId&&foundId&&preferredId!==foundId){
@@ -4290,31 +4296,18 @@ function buildProfilePayload(identity,entry,updatedAt){
     updatedAt:Number(updatedAt)||Date.now()
   };
 }
-function loadGoogleSession(){
-  try{
-    const raw=localStorage.getItem(GOOGLE_SESSION_KEY);
-    const parsed=raw?JSON.parse(raw):null;
-    const email=String(parsed?.email??'').trim().toLowerCase().slice(0,120);
-    if(!email)return;
-    state.home.google={...state.home.google,signedIn:true,provider:'google',email};
-    if(initFirebaseIfReady()){
-      void hydrateProfileFromCloudByIdentity(currentLeaderboardIdentity()).then(()=>{if(state.home.showLeaderboard)refreshLeaderboard(true);render();});
-    }
-  }catch{}
-}
-function saveGoogleSession(){
-  try{
-    const email=String(state.home.google.email??'').trim().toLowerCase().slice(0,120);
-    if(!email){
-      localStorage.removeItem(GOOGLE_SESSION_KEY);
-      return;
-    }
-    localStorage.setItem(GOOGLE_SESSION_KEY,JSON.stringify({email}));
-  }catch{}
-}
-function clearGoogleSession(){
-  try{localStorage.removeItem(GOOGLE_SESSION_KEY);}catch{}
-}
+const googleProfileHelpers=createGoogleProfileHelpers({
+  getState:()=>state,
+  loadLeaderboardStore,
+  scoreFromStoredTotal,
+  applyMainSettings,
+  preloadGooglePicture
+});
+const {
+  applyCachedGoogleProfileFromStore,
+  applyRestoredGoogleProfile,
+  mergeBrowserGoogleProfile
+}=googleProfileHelpers;
 function signedInForPlay(){
   if(state.home.google?.profileMissing)return false;
   const authUser=firebaseAuth?.currentUser;
@@ -4322,22 +4315,61 @@ function signedInForPlay(){
   const g=state.home.google??{};
   return Boolean(g.signedIn&&(String(g.email??'').trim()||String(g.uid??'').trim()||String(g.sub??'').trim()));
 }
-function signedInWithEmail(){return Boolean(state.home.google.signedIn&&state.home.google.email);}
-const LOCAL_ROOM_KEY='big2.currentRoomId';
-function baseRoomPlayerId(){
-  const uid=String(firebaseAuth?.currentUser?.uid??'').trim();
-  if(uid)return `uid:${uid}`;
-  if(!state.sessionId){
-    const rand=(()=>{try{return crypto.randomUUID();}catch{return Math.random().toString(36).slice(2,10);}})();
-    state.sessionId=`guest:${rand}`;
-  }
-  return state.sessionId;
-}
-function currentRoomPlayerId(){
-  const pinned=String(state.room?.playerId??'').trim();
-  if(pinned)return pinned;
-  return baseRoomPlayerId();
-}
+const googleSessionHelpers=createGoogleSessionHelpers({
+  getState:()=>state,
+  getWindow:()=>window,
+  getStorage:()=>localStorage,
+  sessionKey:GOOGLE_SESSION_KEY,
+  getFirebaseAuth:()=>firebaseAuth,
+  mergeBrowserGoogleProfile,
+  applyCachedGoogleProfileFromStore,
+  preloadGooglePicture,
+  initFirebaseIfReady,
+  hydrateProfileFromCloudByIdentity,
+  currentLeaderboardIdentity,
+  syncLeaderboardProfile,
+  loadActiveRoomPointer,
+  refreshLeaderboard,
+  render
+});
+const {
+  clearGoogleSession,
+  handleCredentialResponse,
+  loadGoogleSession,
+  saveGoogleSession,
+  signedInWithEmail
+}=googleSessionHelpers;
+const googleIdentityController=createGoogleIdentityController({
+  getState:()=>state,
+  getWindow:()=>window,
+  getDocument:()=>document,
+  getFirebaseAuth:()=>firebaseAuth,
+  getT:()=>t,
+  getRender:()=>render,
+  signedInWithEmail,
+  clearGoogleSession,
+  handleCredentialResponse,
+  authProviderBadgeHtml
+});
+const {
+  onGoogleScriptLoaded,
+  reloadGoogleScriptForLocale,
+  renderGoogleInline
+}=googleIdentityController;
+const roomExpiryHelpers=createRoomExpiryHelpers({
+  DEFAULT_TURN_TIMEOUT_MS,
+  ROOM_IDLE_KILL_MS,
+  ROOM_RESULT_IDLE_MS,
+  ROOM_TIMEOUT_GRACE_MS
+});
+const {
+  getRoomLifecycleExpiresAt,
+  getRoomTurnTimeoutWithGrace,
+  nextRoomIdleExpiry,
+  roomCountdownText,
+  roomLifecycleExpired,
+  roomResultExpired
+}=roomExpiryHelpers;
 const roomLifecycleController=createRoomLifecycleController({
   FIRESTORE_ROOMS_COLLECTION,
   addRoomSystemLog,
@@ -4416,8 +4448,8 @@ const roomSubscriptionController=createRoomSubscriptionController({
   primaryFirebaseInstanceId,
   readRoomDirectory,
   render,
-  roomLifecycleExpired,
   roomPlayerIds,
+  roomLifecycleExpired,
   roomResultExpired,
   roomSelfSeat,
   selectRoomHostCandidate,
@@ -4694,7 +4726,7 @@ async function gateGuestRoomAccess(targetRoomId=''){
 async function queryActiveRoomsFromDb(roomDb,instanceId){
   const statusFilters=['lobby','starting','playing','finished'];
   const roomFetchLimit=8;
-  const currentPlayerId=String(baseRoomPlayerId()||'').trim();
+  const currentPlayerId=currentRoomPlayerId();
   const currentRoomId=String(state.room.id||'').trim();
   let snap=null;
   try{
@@ -5194,62 +5226,6 @@ function roomSeatForPlayer(roomData,playerId){
 function roomSelfSeat(roomData){
   return roomSeatForPlayer(roomData,currentRoomPlayerId());
 }
-function nextRoomIdleExpiry(now=Date.now()){
-  return now+ROOM_IDLE_KILL_MS;
-}
-function getRoomTurnTimeout(roomData){
-  const v=Number(roomData?.settings?.turnTimeout);
-  if(Number.isFinite(v)&&v>=5000&&v<=60000)return Math.trunc(v);
-  return DEFAULT_TURN_TIMEOUT_MS;
-}
-function getRoomTurnTimeoutWithGrace(roomData){
-  return getRoomTurnTimeout(roomData)+ROOM_TIMEOUT_GRACE_MS;
-}
-function getRoomResultExpiresAt(roomData){
-  const status=String(roomData?.status??'');
-  if(status!=='finished')return 0;
-  const direct=Number(roomData?.resultExpiresAt||roomData?.game?.resultExpiresAt||0);
-  if(Number.isFinite(direct)&&direct>0)return direct;
-  const fallback=Number(roomData?.updatedAt||0);
-  return fallback>0?(fallback+ROOM_RESULT_IDLE_MS):0;
-}
-function getRoomWaitingExpiresAt(roomData){
-  const status=String(roomData?.status??'');
-  if(status!=='lobby'&&status!=='starting')return 0;
-  const direct=Number(roomData?.expiresAt||0);
-  if(Number.isFinite(direct)&&direct>0)return direct;
-  const fallback=Number(roomData?.updatedAt||roomData?.createdAt||0);
-  return fallback>0?(fallback+ROOM_IDLE_KILL_MS):0;
-}
-function getRoomLifecycleExpiresAt(roomData){
-  const status=String(roomData?.status??'');
-  if(status==='finished')return getRoomResultExpiresAt(roomData);
-  if(status==='lobby'||status==='starting')return getRoomWaitingExpiresAt(roomData);
-  return 0;
-}
-function roomLifecycleTimeLeftMs(roomData,now=Date.now()){
-  const expiresAt=getRoomLifecycleExpiresAt(roomData);
-  if(!(expiresAt>0))return 0;
-  return Math.max(0,expiresAt-now);
-}
-function formatCountdownMs(ms){
-  const totalSeconds=Math.max(0,Math.ceil(ms/1000));
-  const minutes=Math.floor(totalSeconds/60);
-  const seconds=String(totalSeconds%60).padStart(2,'0');
-  return `${minutes}:${seconds}`;
-}
-function roomLifecycleExpired(roomData,now=Date.now()){
-  const expiresAt=getRoomLifecycleExpiresAt(roomData);
-  return Boolean(expiresAt>0&&now>=expiresAt);
-}
-function roomLifecycleCountdownText(roomData,now=Date.now()){
-  const remaining=roomLifecycleTimeLeftMs(roomData,now);
-  return formatCountdownMs(remaining);
-}
-function roomResultExpired(roomData,now=Date.now()){
-  const expiresAt=getRoomResultExpiresAt(roomData);
-  return Boolean(expiresAt>0&&now>=expiresAt);
-}
 async function resetRoomExpiryTo60s(){
   await roomMutationsController.resetRoomExpiryTo60s();
 }
@@ -5280,9 +5256,6 @@ function startRoomPresencePing(){
   if(roomPresenceTimer||!state.room.id||!currentRoomDb())return;
   roomPresenceTimer=1;
   if(String(state.room.data?.status||'')!=='finished')void touchRoomPresence(true);
-}
-function currentAuthUserUid(){
-  return String(firebaseAuth?.currentUser?.uid??'').trim();
 }
 async function updateActiveRoomPointer(roomId){
   const uid=currentAuthUserUid();
@@ -5696,7 +5669,8 @@ function syncRoomCountdownTicker(){
       });
     }
     if((liveStatus==='finished'||liveStatus==='lobby'||liveStatus==='starting')&&liveRoom){
-      const expired=roomLifecycleExpired(liveRoom);
+      const now=Date.now();
+      const expired=Boolean(getRoomLifecycleExpiresAt(liveRoom)>0&&now>=getRoomLifecycleExpiresAt(liveRoom));
       if(expired!==roomResultExpiryReached){
         roomResultExpiryReached=expired;
         render();
@@ -6029,97 +6003,12 @@ function scoreGuideModalHtml(){
 function speakCallout(text,gender='male',meta={}){
   calloutAudioController.speakCallout(text,gender,meta);
 }
-function parseJwtPayload(token){try{const p=String(token??'').split('.')[1];if(!p)return null;const b=p.replace(/-/g,'+').replace(/_/g,'/');const json=decodeURIComponent(atob(b).split('').map((c)=>`%${c.charCodeAt(0).toString(16).padStart(2,'0')}`).join(''));return JSON.parse(json);}catch{return null;}}
-async function handleCredentialResponse(response){
-  const token=String(response?.credential??'').trim();
-  if(!token)return;
-  const p=parseJwtPayload(token)??{};
-  initFirebaseIfReady();
-  try{
-    const fb=window.firebase;
-    if(fb?.auth&&firebaseAuth){
-      const cred=fb.auth.GoogleAuthProvider.credential(token);
-      const res=await firebaseAuth.signInWithCredential(cred);
-      const user=res?.user;
-      if(user?.uid){
-        state.home.google.uid=String(user.uid).slice(0,128);
-        state.home.google.sub=String(user.uid).slice(0,64);
-      }
-    }
-  }catch(err){
-    console.warn('firebase auth credential sign-in failed',err);
-  }
-  const email=String(p.email??'').trim().toLowerCase().slice(0,120);
-  const pic=String(p.picture??'').trim();
-  const gRaw=String(p.gender??p.sex??'').trim().toLowerCase();
-  const googleGender=(gRaw==='female'||gRaw==='male')?gRaw:'';
-  const signedIn=Boolean(email||String(p.sub??'').trim());
-  state.home.google={signedIn,provider:'google',name:String(p.name??'').slice(0,18),email,uid:String(p.sub??'').slice(0,128),sub:String(p.sub??'').slice(0,64),token,picture:pic,pictureLoaded:false,gender:googleGender,profileMissing:false};
-  if(signedIn){
-    preloadGooglePicture();
-    const hydrated=await hydrateProfileFromCloudByIdentity(currentLeaderboardIdentity());
-    if(state.home.google.name)state.home.name=state.home.google.name;
-    if(googleGender)state.home.gender=googleGender;
-    saveGoogleSession();
-    if(hydrated){
-      await syncLeaderboardProfile(currentLeaderboardIdentity());
-    }
-    if(state.home.showLeaderboard)refreshLeaderboard(true);
-    void loadActiveRoomPointer();
-  }
-  render();
-}
-function clearGoogleInlineRetry(){if(googleInlineRetryTimer){clearTimeout(googleInlineRetryTimer);googleInlineRetryTimer=null;}}
-function updateGoogleLocale(){
-  const lang=state.language==='en'?'en':'zh_HK';
-  const host=document.getElementById('g_id_onload');
-  if(host)host.setAttribute('data-locale',lang);
-}
-function reloadGoogleScriptForLocale(){
-  if(googleScriptReloading)return;
-  googleScriptReloading=true;
-  googleIdentityInitialized=false;
-  updateGoogleLocale();
-  try{window.google?.accounts?.id?.cancel?.();}catch{}
-  const existing=document.querySelector('script[src*="accounts.google.com/gsi/client"]');
-  if(existing)existing.remove();
-  const lang=state.language==='en'?'en':'zh-HK';
-  const script=document.createElement('script');
-  script.src=`https://accounts.google.com/gsi/client?hl=${lang}`;
-  script.async=true;
-  script.onload=()=>{googleScriptReloading=false;renderGoogleInline();};
-  script.onerror=()=>{googleScriptReloading=false;};
-  document.head.appendChild(script);
-}
-function ensureGoogleIdentityInitialized(){
-  if(googleIdentityInitialized)return true;
-  const idApi=window.google?.accounts?.id;
-  if(!idApi)return false;
-  const clientId=String(document.getElementById('g_id_onload')?.getAttribute('data-client_id')??'').trim();
-  if(!clientId)return false;
-  try{
-    idApi.initialize({client_id:clientId,callback:handleCredentialResponse});
-    googleIdentityInitialized=true;
-    return true;
-  }catch{
-    return false;
-  }
-}
-function signOutCurrentProvider(){
-  state.home.google={signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',pictureLoaded:false,gender:'',profileMissing:false};
-  clearGoogleSession();
-  try{window.google?.accounts?.id?.disableAutoSelect?.();}catch{}
-  try{firebaseAuth?.signOut?.();}catch{}
-}
 function authProviderBadgeHtml(provider){
   void provider;
   return `<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.2-2.27H12v4.31h6.44a5.5 5.5 0 0 1-2.39 3.61v3h3.86c2.26-2.08 3.58-5.15 3.58-8.65Z"/><path fill="#34A853" d="M12 24c3.24 0 5.95-1.07 7.93-2.91l-3.86-3A7.17 7.17 0 0 1 12 19.3c-3.12 0-5.77-2.11-6.72-4.96H1.3v3.11A12 12 0 0 0 12 24Z"/><path fill="#FBBC05" d="M5.28 14.34a7.2 7.2 0 0 1 0-4.68V6.55H1.3a12 12 0 0 0 0 10.9l3.98-3.11Z"/><path fill="#EA4335" d="M12 4.77c1.76 0 3.34.61 4.58 1.8l3.43-3.43C17.94 1.23 15.24 0 12 0A12 12 0 0 0 1.3 6.55l3.98 3.11C6.23 6.88 8.88 4.77 12 4.77Z"/></svg>`;
 }
-function queueGoogleInlineRender(){
-  window.setTimeout(()=>{if(state.screen==='home')renderGoogleInline();},0);
-  window.requestAnimationFrame(()=>{if(state.screen==='home')renderGoogleInline();});
-}
-window.onGoogleScriptLoaded=()=>{if(state.screen==='home')queueGoogleInlineRender();};
+window.handleCredentialResponse=handleCredentialResponse;
+window.onGoogleScriptLoaded=()=>{if(state.screen==='home')onGoogleScriptLoaded(renderGoogleInline);};
 function bootFirebase(attempt=0){
   if(initFirebaseIfReady()){
     if(signedInWithEmail()){
@@ -6130,40 +6019,6 @@ function bootFirebase(attempt=0){
     return;
   }
   if(attempt<120)window.setTimeout(()=>bootFirebase(attempt+1),250);
-}
-function renderGoogleInline(){
-  clearGoogleInlineRetry();
-  const slot=document.getElementById('google-name-inline')??document.getElementById('google-inline');
-  if(!slot)return;
-  const nameRow=slot.parentElement;
-  if(signedInWithEmail()){
-    slot.classList.add('signed-in');
-    nameRow?.classList.add('signed-in-auth');
-    const label='Google';
-    const profileMissing=Boolean(state.home.google?.profileMissing);
-    const status=profileMissing?`<span class="auth-status auth-status-warning">${t('profileMissing')}</span>`:'';
-    const actionLabel=profileMissing?t('signInAgain'):t('signOut');
-    const actionClass=profileMissing?'auth-btn-retry':'auth-btn-signout';
-    slot.innerHTML=`<span class="auth-provider-badge auth-provider-google" role="img" aria-label="${label}" title="${label}">${authProviderBadgeHtml('google')}</span>${status}<button id="google-signout" class="auth-btn ${actionClass}">${actionLabel}</button>`;
-    document.getElementById('google-signout')?.addEventListener('click',()=>{signOutCurrentProvider();render();});
-    return;
-  }
-  slot.classList.remove('signed-in');
-  nameRow?.classList.remove('signed-in-auth');
-  const hasGsi=Boolean(window.google?.accounts?.id&&ensureGoogleIdentityInitialized());
-  slot.innerHTML=`<div id="google-login-slot"></div>`;
-  const gSlot=document.getElementById('google-login-slot');
-  if(hasGsi){
-    if(gSlot){
-      try{
-        window.google.accounts.id.renderButton(gSlot,{theme:'filled_blue',size:'medium',text:'signin_with',shape:'square',logo_alignment:'left',width:140});
-      }catch{
-        gSlot.innerHTML='';
-      }
-    }
-  }else{
-    if(gSlot)gSlot.innerHTML='';
-  }
 }
 function isMobilePointer(){return window.matchMedia('(max-width: 860px), (pointer: coarse)').matches;}
 function isCoarsePointer(){
@@ -6215,10 +6070,6 @@ function shouldBlockLandscapeMobile(){
   const shortSide=Math.min(window.innerWidth||0,window.innerHeight||0);
   return shortSide>0&&shortSide<600;
 }
-function renderOrientationBlock(){
-  app.innerHTML=`<section class="orientation-block"><div class="orientation-card"><div class="orientation-hero" aria-hidden="true"><span class="orientation-phone">📱</span><span class="orientation-rotate">↻</span></div><h2>${esc(t('portraitTitle'))}</h2><p>${esc(t('portraitBody'))}</p></div></section>`;
-}
-window.handleCredentialResponse=handleCredentialResponse;
 function uiStatus(msg,meta){
   if(meta&&typeof meta==='object'){
     const name=String(meta.name??'').trim();
@@ -7487,17 +7338,6 @@ function historyHtml(h,self,systemLog=[]){
   if(!entries.length)return`<div class="hint">${t('nolog')}</div>`;
   return entries.join('');
 }
-function roomCountdownText(roomData){
-  const status=String(roomData?.status||'');
-  if(status==='finished'||status==='lobby'||status==='starting')return roomLifecycleCountdownText(roomData);
-  const game=roomData?.game;
-  if(!game||game.gameOver)return'-';
-  const startedAt=Number(game.turnStartedAt)||0;
-  if(!startedAt)return'-';
-  const timeout=getRoomTurnTimeout(roomData);
-  const remain=Math.max(0,timeout-(Date.now()-startedAt));
-  return formatCountdownMs(remain);
-}
 function addRoomSystemLog(game,text){
   if(!game||!text)return;
   if(!Array.isArray(game.systemLog))game.systemLog=[];
@@ -8405,7 +8245,7 @@ function renderHome(){
     schedulePopunderAfterRender,
     legalMiniCopy
   });
-  queueGoogleInlineRender();
+  onGoogleScriptLoaded(renderGoogleInline);
 }
 function renderConfig(){
   const diffIndex=difficultyIndex(state.home.aiDifficulty);
@@ -9004,7 +8844,7 @@ function render(){
   syncWebViewportGuardAttrs();
   syncRoomCountdownTicker();
   if(shouldBlockLandscapeMobile()){
-    renderOrientationBlock();
+    app.innerHTML=`<section class="orientation-block"><div class="orientation-card"><div class="orientation-hero" aria-hidden="true"><span class="orientation-phone">📱</span><span class="orientation-rotate">↻</span></div><h2>${esc(t('portraitTitle'))}</h2><p>${esc(t('portraitBody'))}</p></div></section>`;
     return;
   }
   if(state.screen==='home'){renderHome();return;}
@@ -9110,5 +8950,5 @@ document.addEventListener('visibilitychange',()=>{
     }
   }
 });
-window.addEventListener('load',()=>{if(state.screen==='home')queueGoogleInlineRender();},{once:true});
+window.addEventListener('load',()=>{if(state.screen==='home')onGoogleScriptLoaded(renderGoogleInline);},{once:true});
 loadGoogleSession();bootFirebase();syncViewport();render();

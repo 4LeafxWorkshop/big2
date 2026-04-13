@@ -6986,12 +6986,24 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
   .room-privacy-row button,
   .room-card-join-btn,
   .room-join-top-btn {
-    width: 100%;
-    min-width: 0;
+    width: auto;
+  }
+  .room-privacy-row button {
+    min-width: 120px;
+  }
+  .room-card-join-btn {
+    min-width: 96px;
+  }
+  .room-join-top-btn {
+    min-width: 116px;
   }
   .room-card-join-inline {
-    width: 100%;
+    width: auto;
     margin-left: 0;
+  }
+  .room-privacy-row .toggle-combo .toggle-btn {
+    min-width: 0;
+    flex: 0 0 auto;
   }
   .room-id-center {
     padding: 5px 8px;
