@@ -145,6 +145,27 @@ function runPopunderAd(){
   }
 }
 let armedPopunderWindow=null;
+let googlePicturePreloadToken=0;
+function preloadGooglePicture(){
+  const pic=String(state.home.google?.picture??'').trim();
+  state.home.google.pictureLoaded=false;
+  if(!pic)return;
+  const token=++googlePicturePreloadToken;
+  try{
+    const img=new Image();
+    img.onload=()=>{
+      if(token!==googlePicturePreloadToken)return;
+      state.home.google.pictureLoaded=true;
+      render();
+    };
+    img.onerror=()=>{
+      if(token!==googlePicturePreloadToken)return;
+      state.home.google.pictureLoaded=false;
+      render();
+    };
+    img.src=pic;
+  }catch{}
+}
 function armPopunderForGesture(){
   if(APP_CHANNEL==='STORE')return;
   if(!isIOSDevice())return;
@@ -1886,7 +1907,7 @@ const CALLOUT_RESPONSE_TEXT = {
   },
 };
 const app=document.getElementById('app');
-const state={language:'zh-HK',screen:'home',screenBeforeConfig:'home',showRules:false,showLog:false,showLogSheet:false,logTouched:false,showScoreGuide:false,opponentProfileName:'',mottoPeekName:'',selected:new Set(),drag:{id:null,moved:false},playAnimKey:'',autoPassKey:'',score:5000,suggestCost:0,recommendation:null,recommendHint:'',logFab:{x:null,y:null},home:{mode:'solo',name:'玩家',gender:'male',avatarChoice:'male',aiDifficulty:'normal',backColor:'red',theme:'ocean',showIntro:false,showLeaderboard:false,showMoreSettings:false,google:{signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',gender:'',profileMissing:false},leaderboard:{rows:[],sort:'totalDelta',period:'all',limit:20},activeRooms:{rows:[],loading:false,loadedAt:0,error:''}},room:{id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:false,error:'',started:false,unsub:null,selfSeat:-1,recordedGameKey:'',lastMoveKey:'',playerId:'',pendingStart:false,lastResultPlayers:null},sessionId:'',solo:{players:[],botNames:[],totals:[5000,5000,5000,5000],currentSeat:0,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',history:[],aiDifficulty:'normal',lastCardBreach:null},emote:{open:false,active:null}};
+const state={language:'zh-HK',screen:'home',screenBeforeConfig:'home',showRules:false,showLog:false,showLogSheet:false,logTouched:false,showScoreGuide:false,opponentProfileName:'',mottoPeekName:'',selected:new Set(),drag:{id:null,moved:false},playAnimKey:'',autoPassKey:'',score:5000,suggestCost:0,recommendation:null,recommendHint:'',logFab:{x:null,y:null},home:{mode:'solo',name:'玩家',gender:'male',avatarChoice:'male',aiDifficulty:'normal',backColor:'red',theme:'ocean',showIntro:false,showLeaderboard:false,showMoreSettings:false,google:{signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',pictureLoaded:false,gender:'',profileMissing:false},leaderboard:{rows:[],sort:'totalDelta',period:'all',limit:20},activeRooms:{rows:[],loading:false,loadedAt:0,error:''}},room:{id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:false,error:'',started:false,unsub:null,selfSeat:-1,recordedGameKey:'',lastMoveKey:'',playerId:'',pendingStart:false,lastResultPlayers:null},sessionId:'',solo:{players:[],botNames:[],totals:[5000,5000,5000,5000],currentSeat:0,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',history:[],aiDifficulty:'normal',lastCardBreach:null},emote:{open:false,active:null}};
 const {
   EMOTE_STICKERS,
   cardImagePath,
@@ -3909,7 +3930,8 @@ const {
   hashNameSeed,
   pick,
   getGooglePicture:()=>String(state.home.google?.picture??'').trim(),
-  isGoogleSignedIn:()=>Boolean(state.home.google?.signedIn)
+  isGoogleSignedIn:()=>Boolean(state.home.google?.signedIn),
+  isGooglePictureLoaded:()=>Boolean(state.home.google?.pictureLoaded)
 });
 const {
   profileParagraphsHtml,
@@ -3997,6 +4019,7 @@ async function hydrateProfileFromCloudByIdentity(identity){
     state.home.gender=restoredGender;
     if(restoredPicture&&state.home.google?.signedIn){
       state.home.google.picture=restoredPicture;
+      preloadGooglePicture();
     }
     const inGame=state.screen==='game'&&Array.isArray(state.solo.players)&&state.solo.players.length>0&&!state.solo.gameOver;
     if(!inGame){
@@ -6086,8 +6109,9 @@ async function handleCredentialResponse(response){
   const gRaw=String(p.gender??p.sex??'').trim().toLowerCase();
   const googleGender=(gRaw==='female'||gRaw==='male')?gRaw:'';
   const signedIn=Boolean(email||String(p.sub??'').trim());
-  state.home.google={signedIn,provider:'google',name:String(p.name??'').slice(0,18),email,uid:String(p.sub??'').slice(0,128),sub:String(p.sub??'').slice(0,64),token,picture:pic,gender:googleGender,profileMissing:false};
+  state.home.google={signedIn,provider:'google',name:String(p.name??'').slice(0,18),email,uid:String(p.sub??'').slice(0,128),sub:String(p.sub??'').slice(0,64),token,picture:pic,pictureLoaded:false,gender:googleGender,profileMissing:false};
   if(signedIn){
+    preloadGooglePicture();
     const hydrated=await hydrateProfileFromCloudByIdentity(currentLeaderboardIdentity());
     if(state.home.google.name)state.home.name=state.home.google.name;
     if(googleGender)state.home.gender=googleGender;
@@ -6137,7 +6161,7 @@ function ensureGoogleIdentityInitialized(){
   }
 }
 function signOutCurrentProvider(){
-  state.home.google={signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',gender:'',profileMissing:false};
+  state.home.google={signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',pictureLoaded:false,gender:'',profileMissing:false};
   clearGoogleSession();
   try{window.google?.accounts?.id?.disableAutoSelect?.();}catch{}
   try{firebaseAuth?.signOut?.();}catch{}

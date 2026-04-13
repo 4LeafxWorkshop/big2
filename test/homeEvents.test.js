@@ -185,6 +185,26 @@ test('home binder arms popunder during solo start gesture', async()=>{
   assert.equal(started,1);
 });
 
+test('home binder rerenders gender toggle when not signed in', async()=>{
+  const genderButton=makeElement({attrs:{'data-value':'female'}});
+  let renderCount=0;
+  const {state}=bindWith({
+    document:makeDocument({bySelector:{'#gender-combo .combo-btn':[genderButton]}}),
+    state:{
+      home:{mode:'home',showLeaderboard:false,avatarChoice:'male',gender:'male',leaderboard:{sort:'totalDelta',period:'all'}},
+      room:{joinOpen:false,error:'',joinOpenCountdown:15,pendingStart:false,code:'ABCD'},
+      showScoreGuide:false,
+      screen:'home',
+      opponentProfileName:''
+    },
+    render:()=>{renderCount+=1;}
+  });
+  await genderButton.dispatch('click');
+  assert.equal(state.home.avatarChoice,'female');
+  assert.equal(state.home.gender,'female');
+  assert.equal(renderCount,1);
+});
+
 test('home binder toggles leaderboard and refreshes on open', async()=>{
   const homeLeaderboard=makeElement();
   let refreshForce=null;

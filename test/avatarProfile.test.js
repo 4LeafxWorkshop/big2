@@ -5,14 +5,16 @@ import {createAvatarProfileHelpers} from '../src/avatarProfile.js';
 
 function createHelpers({
   googlePicture='',
-  signedIn=false
+  signedIn=false,
+  pictureLoaded=true
 }={}){
   return createAvatarProfileHelpers({
     withBase:(value)=>`/base/${value}`,
     hashNameSeed:()=>12345,
     pick:(arr)=>arr[0],
     getGooglePicture:()=>googlePicture,
-    isGoogleSignedIn:()=>signedIn
+    isGoogleSignedIn:()=>signedIn,
+    isGooglePictureLoaded:()=>pictureLoaded
   });
 }
 
@@ -29,6 +31,11 @@ test('authPictureUrlFrom preserves data urls', ()=>{
 test('selfAvatarDataUri prefers signed-in google picture', ()=>{
   const helpers=createHelpers({googlePicture:'avatars.example.com/self.png',signedIn:true});
   assert.equal(helpers.selfAvatarDataUri('Player','#7aaed8','female'),'https://avatars.example.com/self.png');
+});
+
+test('selfAvatarDataUri falls back to gender avatar until google picture is loaded', ()=>{
+  const helpers=createHelpers({googlePicture:'avatars.example.com/self.png',signedIn:true,pictureLoaded:false});
+  assert.equal(helpers.selfAvatarDataUri('Player','#7aaed8','female'),'/base/avatar-female.png');
 });
 
 test('selfAvatarDataUri falls back to base avatar by gender', ()=>{

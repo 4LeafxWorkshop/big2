@@ -19,7 +19,8 @@ export function createAvatarProfileHelpers(deps){
     hashNameSeed,
     pick,
     getGooglePicture,
-    isGoogleSignedIn
+    isGoogleSignedIn,
+    isGooglePictureLoaded=()=>true
   }=deps;
 
   const AVATAR_BASE_SRC={male:withBase('avatar-male.png'),female:withBase('avatar-female.png')};
@@ -138,7 +139,7 @@ export function createAvatarProfileHelpers(deps){
 
   function selfAvatarDataUri(_name,_color,gender='male'){
     const authPic=authPictureUrl();
-    if(isGoogleSignedIn()&&authPic)return authPic;
+    if(isGoogleSignedIn()&&authPic&&isGooglePictureLoaded())return authPic;
     const g=String(gender??'male')==='female'?'female':'male';
     return AVATAR_BASE_SRC[g];
   }

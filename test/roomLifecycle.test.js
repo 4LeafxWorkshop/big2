@@ -62,6 +62,34 @@ function createDeps(state,overrides={}){
   };
 }
 
+function createPlayingRoomDb(docData,updates){
+  return{
+    collection(name){
+      assert.equal(name,'big2Rooms');
+      return{
+        doc(id){
+          assert.equal(id,'room-1');
+          return {id};
+        }
+      };
+    },
+    async runTransaction(fn){
+      const tx={
+        async get(){
+          return{
+            exists:true,
+            data(){return structuredClone(docData);}
+          };
+        },
+        update(ref,payload){
+          updates.push({ref,payload});
+        }
+      };
+      await fn(tx);
+    }
+  };
+}
+
 test('resetRoomState clears local room session and restores solo home mode', ()=>{
   const state=createBaseState();
   let unsubCalled=0;
@@ -127,4 +155,37 @@ test('leaveRoom with lobby return clears local state and opens the lobby immedia
   assert.equal(state.room.error,'');
   assert.deepEqual(deps.calls.recommendHints,['']);
   assert.equal(deps.calls.render,1);
+});
+
+test('leaveRoom in a playing room transfers the host when others remain', async()=>{
+  const state=createBaseState();
+  state.room.data={
+    status:'playing',
+    hostId:'uid:123',
+    hostName:'Host',
+    players:[
+      {uid:'uid:123',name:'Host',gender:'male',seat:0,lastSeen:0},
+      {uid:'guest:456',name:'Guest',gender:'female',seat:1,lastSeen:0}
+    ],
+    game:{
+      players:[
+        {uid:'uid:123',name:'Host',gender:'male',seat:0,isHuman:true,hand:[{id:'c1'}]},
+        {uid:'guest:456',name:'Guest',gender:'female',seat:1,isHuman:true,hand:[{id:'c2'}]}
+      ]
+    }
+  };
+  const updates=[];
+  const deps=createDeps(state,{
+    currentRoomDb(){return createPlayingRoomDb(state.room.data,updates);},
+    currentRoomPlayerId(){return 'uid:123';},
+    botProfileForSeat(){return{name:'Bot Seat',gender:'male'};}
+  });
+  await deps.controller.leaveRoom(false);
+  assert.equal(updates.length,1);
+  assert.equal(updates[0].payload.hostId,'guest:456');
+  assert.equal(updates[0].payload.hostName,'Guest');
+  assert.equal(updates[0].payload.players.length,1);
+  assert.equal(updates[0].payload.players[0].uid,'guest:456');
+  assert.equal(updates[0].payload.game.players[0].isHuman,false);
+  assert.match(updates[0].payload.game.players[0].uid,/^bot:0:/);
 });

@@ -116,6 +116,7 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       if(signedInWithEmail()&&!state.home.google?.profileMissing){
         void syncLeaderboardProfile(currentLeaderboardIdentity());
       }
+      render();
     }));
     const valueFromIndex=(index)=>{
       if(index<=0)return'easy';

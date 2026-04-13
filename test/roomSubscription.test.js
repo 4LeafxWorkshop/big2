@@ -44,6 +44,87 @@ function createController(overrides={}){
   return createRoomSubscriptionController({...deps,...overrides});
 }
 
+function createSnapshotHarness(overrides={}){
+  const state={room:{id:'',playerId:'',error:'',pendingStart:false,joinOpen:false},home:{mode:'solo'}};
+  const calls={
+    abandon:[],
+    errors:[],
+    renders:0,
+    startPing:0,
+    syncSelf:0,
+    applySnapshots:0,
+    updates:[],
+    deleteDirs:[],
+    maybeRunAi:0
+  };
+  let snapshotCb=null;
+  const roomDb={
+    collection(name){
+      assert.equal(name,'big2Rooms');
+      return{
+        doc(id){
+          assert.equal(id,'room-1');
+          return{
+            update(payload){
+              calls.updates.push(payload);
+              return Promise.resolve();
+            },
+            onSnapshot(cb){
+              snapshotCb=cb;
+              return ()=>{};
+            }
+          };
+        }
+      };
+    }
+  };
+  const controller=createRoomSubscriptionController({
+    FIRESTORE_ROOMS_COLLECTION:'big2Rooms',
+    FIRESTORE_USERS_COLLECTION:'big2Users',
+    LOCAL_ROOM_KEY:'big2.currentRoomId',
+    ROOM_HOST_TAKEOVER_MS:45000,
+    ROOM_STALE_MS:30000,
+    abandonRoomLocally(msg='',openLobby=true){
+      calls.abandon.push({msg,openLobby});
+      state.room.error=msg;
+      state.room.joinOpen=openLobby;
+    },
+    applyRoomGameSnapshot(data){
+      calls.applySnapshots+=1;
+      calls.lastSnapshot=data;
+    },
+    baseRoomPlayerId(){return 'guest:1';},
+    clearRoomStartPending(){},
+    currentAuthUserUid(){return '';},
+    currentRoomDb(){return roomDb;},
+    deleteRoomDirectory:async(id)=>{calls.deleteDirs.push(id);},
+    findRoomDirectoryByCode:async()=>null,
+    getFirebaseDb(){return roomDb;},
+    getFirebaseDbForInstanceId:async()=>roomDb,
+    getState(){return state;},
+    isRoomPlayerActive(){return true;},
+    isRoomPresenceOnlyUpdate(){return false;},
+    matchGuestPlayerId(){return '';},
+    maybeRunRoomAi(){calls.maybeRunAi+=1;},
+    primaryFirebaseInstanceId(){return 'seed-services';},
+    readRoomDirectory:async()=>null,
+    render(){calls.renders+=1;},
+    roomLifecycleExpired(){return false;},
+    roomPlayerIds(players){return players.map((p)=>String(p.uid));},
+    roomResultExpired(){return false;},
+    roomSelfSeat(){return 0;},
+    selectRoomHostCandidate(){return null;},
+    setRoomError(value){calls.errors.push(value); state.room.error=value;},
+    setRoomResultExpiryReached(){},
+    startRoomPresencePing(){calls.startPing+=1;},
+    syncRoomGameRoster(){return null;},
+    syncRoomSelfScoreIfNeeded(){calls.syncSelf+=1;},
+    t(key){return key;},
+    ...overrides
+  });
+  return{state,calls,controller,triggerSnapshot:(snap)=>{assert.ok(snapshotCb,'snapshot callback not registered');snapshotCb(snap);},roomDb};
+}
+
 test('resolveRoomHostInfo falls back to the first player when host is missing', ()=>{
   const controller=createController();
   const info=controller.resolveRoomHostInfo({
@@ -143,4 +224,65 @@ test('resolveRoomDocByDirectory returns null when no firebase db is available', 
   });
   const resolved=await controller.resolveRoomDocByDirectory('room-1','');
   assert.equal(resolved,null);
+});
+
+test('resolveRoomDocByDirectory returns null when a stale room code no longer resolves', async()=>{
+  const firebaseDb={
+    collection(name){
+      assert.equal(name,'big2Rooms');
+      return{
+        where(field,op,value){
+          assert.equal(field,'code');
+          assert.equal(op,'==');
+          assert.equal(value,'ABCD');
+          return{
+            limit(count){
+              assert.equal(count,1);
+              return{
+                get:async()=>({docs:[]})
+              };
+            }
+          };
+        }
+      };
+    }
+  };
+  const controller=createController({
+    getFirebaseDb(){return firebaseDb;}
+  });
+  const resolved=await controller.resolveRoomDocByDirectory('','abcd');
+  assert.equal(resolved,null);
+});
+
+test('subscribeRoom clears reconnect error on a fresh snapshot and re-renders', ()=>{
+  const {state,calls,controller,triggerSnapshot}=createSnapshotHarness();
+  state.room.error='roomReconnecting';
+  controller.subscribeRoom('room-1','ABCD','seed-services');
+  triggerSnapshot({
+    exists:true,
+    data(){
+      return{
+        code:'ABCD',
+        status:'lobby',
+        updatedAt:Date.now(),
+        players:[{uid:'guest:1',name:'Player',seat:0,lastSeen:Date.now()}]
+      };
+    }
+  });
+  assert.equal(state.room.error,'');
+  assert.equal(state.room.id,'room-1');
+  assert.equal(calls.startPing,1);
+  assert.equal(calls.syncSelf,1);
+  assert.equal(calls.renders,1);
+  assert.deepEqual(calls.errors,['']);
+  assert.equal(calls.updates.length,1);
+  assert.deepEqual(calls.updates[0].playerIds,['guest:1']);
+  assert.equal(typeof calls.updates[0].updatedAt,'number');
+});
+
+test('subscribeRoom abandons locally when the room snapshot disappears', ()=>{
+  const {calls,controller,triggerSnapshot}=createSnapshotHarness();
+  controller.subscribeRoom('room-1','ABCD','seed-services');
+  triggerSnapshot({exists:false});
+  assert.deepEqual(calls.abandon,[{msg:'',openLobby:true}]);
 });
