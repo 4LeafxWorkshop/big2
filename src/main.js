@@ -68,7 +68,7 @@ function isRoomPlayerHuman(entry){
   if(!uid)return false;
   if(uid.startsWith('bot:'))return false;
   if(uid.startsWith('uid:')||uid.startsWith('guest:'))return true;
-  return true;
+  return false;
 }
 function selectRoomHostCandidate(players,now){
   const humans=players.filter((p)=>isRoomPlayerHuman(p));
@@ -81,7 +81,7 @@ function selectRoomHostCandidate(players,now){
   return best;
 }
 function matchGuestPlayerId(roomData){
-  if(currentAuthUid())return '';
+  if(String(firebaseAuth?.currentUser?.uid??'').trim())return '';
   const players=Array.isArray(roomData?.players)?roomData.players:[];
   if(!players.length)return '';
   const desiredName=String(state.home.name||'Player').slice(0,32);
@@ -4315,14 +4315,6 @@ function saveGoogleSession(){
 function clearGoogleSession(){
   try{localStorage.removeItem(GOOGLE_SESSION_KEY);}catch{}
 }
-function normalizeAuthProvider(provider){
-  const v=String(provider??'').trim().toLowerCase();
-  if(v==='google')return v;
-  return 'google';
-}
-function authProviderPrefix(){
-  return normalizeAuthProvider(state.home.google?.provider);
-}
 function signedInForPlay(){
   if(state.home.google?.profileMissing)return false;
   const authUser=firebaseAuth?.currentUser;
@@ -4331,11 +4323,9 @@ function signedInForPlay(){
   return Boolean(g.signedIn&&(String(g.email??'').trim()||String(g.uid??'').trim()||String(g.sub??'').trim()));
 }
 function signedInWithEmail(){return Boolean(state.home.google.signedIn&&state.home.google.email);}
-function canSyncLeaderboardProfile(){return signedInWithEmail()&&!state.home.google?.profileMissing;}
-function currentAuthUid(){return String(firebaseAuth?.currentUser?.uid??'').trim();}
 const LOCAL_ROOM_KEY='big2.currentRoomId';
 function baseRoomPlayerId(){
-  const uid=currentAuthUid();
+  const uid=String(firebaseAuth?.currentUser?.uid??'').trim();
   if(uid)return `uid:${uid}`;
   if(!state.sessionId){
     const rand=(()=>{try{return crypto.randomUUID();}catch{return Math.random().toString(36).slice(2,10);}})();
@@ -5276,51 +5266,6 @@ function applyTimeoutStrikeToRoomState(players,game,seat,now=Date.now()){
 function resetTimeoutStrikeForSeat(players,seat){
   return roomTimeoutController.resetTimeoutStrikeForSeat(players,seat);
 }
-async function pruneRoomIfNeeded(){
-  const roomDb=currentRoomDb();
-  if(!state.room.id||!roomDb)return;
-  try{
-    const ref=roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(state.room.id);
-    let shouldDeleteDirectory=false;
-    await roomDb.runTransaction(async(tx)=>{
-      const snap=await tx.get(ref);
-      if(!snap.exists)return;
-      const data=snap.data()??{};
-      if(String(data.status)!=='playing'||!data.game)return;
-      const now=Date.now();
-      const turnStartedAt=Number(data.game?.turnStartedAt||0);
-      const turnStale=turnStartedAt>0&&(now-turnStartedAt>ROOM_PRUNE_PLAYING_MS);
-      if(!turnStale)return;
-      const roster=Array.isArray(data.players)?[...data.players]:[];
-      const active=roster.filter((p)=>isRoomPlayerActive(p,'playing',now));
-      if(active.length===roster.length)return;
-      const activeHumans=active.filter((p)=>isRoomPlayerHuman(p));
-      if(!activeHumans.length){
-        tx.delete(ref);
-        shouldDeleteDirectory=true;
-        return;
-      }
-      let hostId=String(data.hostId??'');
-      let hostName=String(data.hostName??'');
-      if(hostId&&!active.some((p)=>String(p.uid)===hostId)){
-        const nextHost=activeHumans[0]??active[0];
-        hostId=String(nextHost?.uid??'');
-        hostName=String(nextHost?.name??'');
-      }
-      const updatedGame=syncRoomGameRoster(data)??data.game;
-      tx.update(ref,{
-        game:updatedGame,
-        players:active,
-        playerIds:roomPlayerIds(active),
-        hostId,
-        hostName,
-        updatedAt:now,
-        gameVersion:Number(data.gameVersion||0)+1
-      });
-    });
-    if(shouldDeleteDirectory)await deleteRoomDirectory(state.room.id);
-  }catch{}
-}
 async function touchRoomPresence(force=false){
   const roomId=String(state.room.id||'').trim();
   const now=Date.now();
@@ -6194,13 +6139,12 @@ function renderGoogleInline(){
   if(signedInWithEmail()){
     slot.classList.add('signed-in');
     nameRow?.classList.add('signed-in-auth');
-    const current=authProviderPrefix();
     const label='Google';
     const profileMissing=Boolean(state.home.google?.profileMissing);
     const status=profileMissing?`<span class="auth-status auth-status-warning">${t('profileMissing')}</span>`:'';
     const actionLabel=profileMissing?t('signInAgain'):t('signOut');
     const actionClass=profileMissing?'auth-btn-retry':'auth-btn-signout';
-    slot.innerHTML=`<span class="auth-provider-badge auth-provider-${current}" role="img" aria-label="${label}" title="${label}">${authProviderBadgeHtml(current)}</span>${status}<button id="google-signout" class="auth-btn ${actionClass}">${actionLabel}</button>`;
+    slot.innerHTML=`<span class="auth-provider-badge auth-provider-google" role="img" aria-label="${label}" title="${label}">${authProviderBadgeHtml('google')}</span>${status}<button id="google-signout" class="auth-btn ${actionClass}">${actionLabel}</button>`;
     document.getElementById('google-signout')?.addEventListener('click',()=>{signOutCurrentProvider();render();});
     return;
   }

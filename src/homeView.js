@@ -40,7 +40,6 @@ export function renderConfigMarkup(params){
   const {
     diffIndex,
     renderLangMenu,
-    state,
     t,
     soundEnabled,
     calloutDisplayEnabled,
