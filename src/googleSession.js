@@ -94,8 +94,7 @@ export function createGoogleSessionHelpers({
           state.home.google.sub=String(user.uid).slice(0,64);
         }
       }
-    }catch(err){
-      console.warn('firebase auth credential sign-in failed',err);
+    }catch{
     }
     const email=String(p.email??'').trim().toLowerCase().slice(0,120);
     const pic=String(p.picture??'').trim();

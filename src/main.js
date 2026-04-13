@@ -34,6 +34,7 @@ import {createRoomGameRuntimeController} from './roomGameRuntime.js';
 import {createRoomExpiryHelpers} from './roomExpiry.js';
 import {createRoomIdentityHelpers} from './roomIdentity.js';
 import {createRoomMutationsController} from './roomMutations.js';
+import {createRoomActionsController} from './roomActions.js';
 import {createRoomRosterSyncController} from './roomRosterSync.js';
 import {createRoomSubscriptionController} from './roomSubscription.js';
 import {createRoomTimeoutController} from './roomTimeouts.js';
@@ -55,7 +56,7 @@ const ROOM_TIMEOUT_GRACE_MS=2000;
 const ROOM_RESULT_IDLE_MS=120000;
 const ROOM_IDLE_KILL_MS=120000;
 const ROOM_TIMEOUT_STRIKES_MAX=2;
-const ROOM_HOST_TAKEOVER_MS=45000;
+const ROOM_HOST_TAKEOVER_MS=120000;
 const ROOM_HOST_ACTIVE_MS=20000;
 const EMOTE_DURATION_MS=2400;
 const FIVE_KIND_POWER={straight:0,flush:1,fullhouse:2,fourofkind:3,straightflush:4};
@@ -4424,6 +4425,39 @@ const roomMutationsController=createRoomMutationsController({
   setSoloStatus,
   t
 });
+const roomActionsController=createRoomActionsController({
+  FIRESTORE_ROOMS_COLLECTION,
+  ROOM_RESULT_IDLE_MS,
+  addRoomSystemLog,
+  authPictureUrl,
+  baseRoomPlayerId,
+  chooseNextRoomFirebaseInstanceId,
+  cloneRoomGame,
+  collectMainSettings,
+  connectToRoom,
+  currentHumanScoreValue,
+  ensureSingleRoomMembership,
+  findRoomByCode,
+  gateGuestRoomAccess,
+  gateUserRoomAccess,
+  generateRoomCode,
+  getFirebaseDbForInstanceId,
+  getState:()=>state,
+  initFirebaseIfReady,
+  isRoomPlayerActive,
+  isRoomPlayerHuman,
+  nextRoomIdleExpiry,
+  normalizeRoomTotals,
+  render,
+  setRoomError,
+  roomPlayerIds,
+  roomTotalsWithSeatScore,
+  signedInForPlay,
+  subscribeRoom,
+  t,
+  updateActiveRoomPointer,
+  writeRoomDirectory
+});
 const roomSubscriptionController=createRoomSubscriptionController({
   FIRESTORE_ROOMS_COLLECTION,
   FIRESTORE_USERS_COLLECTION,
@@ -4712,8 +4746,8 @@ async function gateGuestRoomAccess(targetRoomId=''){
     if(!active)return{ok:true};
     if(targetRoomId&&active===String(targetRoomId))return{ok:true,already:true};
     if(firebaseDb){
-      const resolved=await resolveRoomDocByDirectory(active,'');
-      if(!resolved){
+      const existing=await findRoomByPlayerId(baseRoomPlayerId());
+      if(!existing||String(existing.id||'')!==active){
         localStorage.removeItem(LOCAL_ROOM_KEY);
         return{ok:true,cleared:true};
       }
@@ -4911,9 +4945,6 @@ async function loadActiveRooms(attempt=0){
       return next;
     });
     state.home.activeRooms.hiddenCount=hiddenRooms;
-    if(hiddenRooms){
-      console.warn('Hidden rooms',hiddenRooms);
-    }
     state.home.activeRooms.loadedAt=Date.now();
   }catch{
     state.home.activeRooms.error='load';
@@ -4923,259 +4954,10 @@ async function loadActiveRooms(attempt=0){
   }
 }
 async function createRoom(){
-  if(!initFirebaseIfReady()){
-    setRoomError(t('roomCreateFail'));
-    return;
-  }
-  if(!signedInForPlay()){
-    setRoomError(t('roomLoginRequired'));
-    return;
-  }
-  setRoomError('');
-  try{
-    if(state.room.id){
-      setRoomError(t('roomAlreadyIn'));
-      return;
-    }
-    const membership=await ensureSingleRoomMembership('');
-    if(!membership.ok){
-      if(membership.roomId){
-        void connectToRoom(membership.roomId,membership.code||'',membership.instanceId||'');
-        void updateActiveRoomPointer(membership.roomId);
-      }
-      setRoomError(t('roomAlreadyIn'));
-      return;
-    }
-    const gate=await gateUserRoomAccess('');
-    const gateGuest=await gateGuestRoomAccess('');
-    if(!gateGuest.ok){
-      setRoomError(t('roomAlreadyIn'));
-      return;
-    }
-    if(!gate.ok){
-      setRoomError(t('roomAlreadyIn'));
-      return;
-    }
-    const firebaseInstanceId=await chooseNextRoomFirebaseInstanceId();
-    const roomDb=await getFirebaseDbForInstanceId(firebaseInstanceId);
-    if(!roomDb){setRoomError(t('roomCreateFail'));return;}
-    let code='';
-    for(let i=0;i<5;i++){
-      const candidate=generateRoomCode();
-      const exists=await findRoomByCode(candidate);
-      if(!exists){code=candidate;break;}
-    }
-    if(!code){setRoomError(t('roomCreateFail'));return;}
-    const uid=baseRoomPlayerId();
-    state.room.playerId=uid;
-    const name=String(state.home.name||'Player').slice(0,32);
-    const now=Date.now();
-    const ref=roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc();
-    const data={
-      hostId:uid,
-      hostName:name,
-      code,
-      status:'lobby',
-      createdAt:now,
-      updatedAt:now,
-      expiresAt:nextRoomIdleExpiry(now),
-        maxPlayers:4,
-        isPrivate:false,
-        players:[{uid,name,gender:state.home.gender==='female'?'female':'male',picture:authPictureUrl(),isHost:true,seat:0,lastSeen:now}],
-      playerIds:[uid],
-      settings:collectMainSettings(),
-      totals:[currentHumanScoreValue(),5000,5000,5000],
-      roundCount:0,
-      gameVersion:0
-    };
-    await ref.set(data);
-    try{
-      await writeRoomDirectory(ref.id,{
-        roomId:ref.id,
-        code,
-        createdAt:now,
-        hostId:uid,
-        hostName:name,
-        firebaseInstanceId
-      });
-    }catch(err){
-      await ref.delete().catch(()=>{});
-      throw err;
-    }
-    subscribeRoom(ref.id,code,firebaseInstanceId,roomDb);
-    void updateActiveRoomPointer(ref.id);
-  }catch(err){
-    console.error('create room failed',err);
-    setRoomError(t('roomCreateFail'));
-  }
+  await roomActionsController.createRoom();
 }
 async function joinRoomByCode(codeRaw){
-  if(!initFirebaseIfReady()){
-    setRoomError(t('roomJoinFail'));
-    return;
-  }
-  if(!signedInForPlay()){
-    setRoomError(t('roomLoginRequired'));
-    return;
-  }
-  const code=String(codeRaw??'').trim().toUpperCase();
-  if(!code)return;
-  setRoomError('');
-  try{
-    const doc=await findRoomByCode(code);
-    if(!doc){setRoomError(t('roomNotFound'));return;}
-    const data=doc.data()??{};
-    const roomDb=(doc.ref?.firestore)||await getFirebaseDbForInstanceId(doc.instanceId);
-    if(!roomDb){setRoomError(t('roomJoinFail'));return;}
-    const status=String(data.status||'');
-    if(status==='playing'){
-      setRoomError(t('roomStatusPlaying'));
-      return;
-    }
-    if(status&&status!=='lobby'&&status!=='starting'&&status!=='finished'){
-      setRoomError(t('roomClosed'));
-      return;
-    }
-    if(state.room.id){
-      const same=String(state.room.id)===String(doc.id);
-      if(same){
-        subscribeRoom(doc.id,code,doc.instanceId,roomDb);
-        void updateActiveRoomPointer(doc.id);
-        state.room.joinOpen=false;
-        render();
-        return;
-      }
-      setRoomError(t('roomAlreadyIn'));
-      return;
-    }
-    const membership=await ensureSingleRoomMembership(doc.id);
-    if(!membership.ok){
-      if(membership.roomId){
-        void connectToRoom(membership.roomId,membership.code||'',membership.instanceId||'');
-        void updateActiveRoomPointer(membership.roomId);
-      }
-      setRoomError(t('roomAlreadyIn'));
-      return;
-    }
-    const gate=await gateUserRoomAccess(doc.id);
-    const gateGuest=await gateGuestRoomAccess(doc.id);
-    if(!gateGuest.ok){
-      setRoomError(t('roomAlreadyIn'));
-      return;
-    }
-    if(!gate.ok){
-      setRoomError(t('roomAlreadyIn'));
-      return;
-    }
-    if(gate.already){
-      subscribeRoom(doc.id,code,doc.instanceId,roomDb);
-      void updateActiveRoomPointer(doc.id);
-      state.room.joinOpen=false;
-      render();
-      return;
-    }
-    const uid=baseRoomPlayerId();
-    state.room.playerId=uid;
-    await roomDb.runTransaction(async(tx)=>{
-      const snap=await tx.get(doc.ref);
-      if(!snap.exists)throw new Error('room missing');
-      const data=snap.data()??{};
-      if(data.status!=='lobby'&&data.status!=='starting'&&data.status!=='finished')throw new Error('room closed');
-      const now=Date.now();
-      let players=Array.isArray(data.players)?[...data.players]:[];
-      const name=String(state.home.name||'Player').slice(0,32);
-      const gender=state.home.gender==='female'?'female':'male';
-      const picture=authPictureUrl();
-      const matchesSelfIdentity=(entry)=>{
-        if(!entry||!isRoomPlayerHuman(entry))return false;
-        const entryUid=String(entry.uid||'').trim();
-        if(entryUid===uid)return true;
-        const entryName=String(entry.name||'').trim();
-        const entryGender=String(entry.gender||'male')==='female'?'female':'male';
-        const entryPicture=String(entry.picture||'').trim();
-        if(entryName!==name||entryGender!==gender)return false;
-        if(picture&&entryPicture&&entryPicture!==picture)return false;
-        if(uid.startsWith('uid:')){
-          return status==='lobby'||status==='starting'||status==='finished';
-        }
-        return entryUid.startsWith('guest:')&&(status==='lobby'||status==='starting');
-      };
-      const matchingIndexes=players.reduce((out,p,idx)=>{
-        if(matchesSelfIdentity(p))out.push(idx);
-        return out;
-      },[]);
-      if(matchingIndexes.length>1){
-        const exactIdx=matchingIndexes.find((idx)=>String(players[idx]?.uid||'')===uid);
-        const keepIdx=Number.isInteger(exactIdx)?exactIdx:matchingIndexes
-          .slice()
-          .sort((a,b)=>(Number(players[b]?.lastSeen||0)-Number(players[a]?.lastSeen||0)))[0];
-        players=players.filter((_,idx)=>!matchingIndexes.includes(idx)||idx===keepIdx);
-      }
-      let already=players.find((p)=>String(p.uid)===uid)||null;
-      const prevCount=players.length;
-      let hostId=String(data.hostId||'').trim();
-      let hostName=String(data.hostName||'').trim();
-      let tookOver=false;
-      if(!already && (data.status==='lobby'||data.status==='starting'||data.status==='finished')){
-        const candidates=players.filter((p)=>matchesSelfIdentity(p)&&isRoomPlayerActive(p,data.status,now));
-        if(candidates.length===1){
-          const idx=players.findIndex((p)=>p===candidates[0]);
-          if(idx>=0){
-            const oldUid=String(players[idx]?.uid||'');
-            players[idx]={...players[idx],uid,name,gender,picture,lastSeen:now};
-            if(oldUid&&hostId===oldUid){
-              hostId=uid;
-              hostName=name;
-            }
-            tookOver=true;
-            already=players[idx];
-          }
-        }
-      }
-      if(!already && !tookOver){
-        if(players.length>=Number(data.maxPlayers||4))throw new Error('room full');
-        const usedSeats=new Set(players.map((p)=>Number(p.seat)));
-        let seat=0;
-        while(usedSeats.has(seat)&&seat<4)seat+=1;
-        if(seat>=4)throw new Error('room full');
-        players.push({uid,name,gender,picture,isHost:false,seat,lastSeen:now});
-      }
-      const updates={players,playerIds:roomPlayerIds(players),updatedAt:now,hostId,hostName};
-      const selfSeat=Number(players.find((p)=>String(p?.uid||'')===uid)?.seat);
-      if(Number.isInteger(selfSeat)&&selfSeat>=0&&selfSeat<4){
-        const nextTotals=roomTotalsWithSeatScore(data.totals,selfSeat,currentHumanScoreValue());
-        const prevTotals=normalizeRoomTotals(data.totals);
-        if(nextTotals.some((v,i)=>v!==prevTotals[i]))updates.totals=nextTotals;
-      }
-      if(String(data.status)==='lobby'||String(data.status)==='starting'){
-        updates.expiresAt=nextRoomIdleExpiry(now);
-      }
-      if(String(data.status)==='finished'){
-        updates.expiresAt=nextRoomIdleExpiry(now);
-        updates.resultExpiresAt=now+ROOM_RESULT_IDLE_MS;
-        updates.gameVersion=Number(data.gameVersion||0)+1;
-      }
-      if(data.game&&String(data.status)==='playing'&&players.length>prevCount){
-        const game=cloneRoomGame(data.game);
-        if(game){
-          const text=t('roomJoinLog').replace('{{name}}',name);
-          addRoomSystemLog(game,text);
-          updates.game=game;
-          updates.gameVersion=Number(data.gameVersion||0)+1;
-        }
-      }
-      tx.update(doc.ref,updates);
-    });
-    subscribeRoom(doc.id,code,doc.instanceId,roomDb);
-    void updateActiveRoomPointer(doc.id);
-    state.room.joinOpen=false;
-    render();
-  }catch(err){
-    console.error('join room failed',err);
-    if(String(err?.message??'').includes('full'))setRoomError(t('roomFull'));
-    else if(String(err?.message??'').includes('closed'))setRoomError(t('roomClosed'));
-    else setRoomError(t('roomJoinFail'));
-  }
+  await roomActionsController.joinRoomByCode(codeRaw);
 }
 function subscribeRoom(roomId,code,firebaseInstanceId='',roomDbOverride=null){
   roomSubscriptionController.subscribeRoom(roomId,code,firebaseInstanceId,roomDbOverride);

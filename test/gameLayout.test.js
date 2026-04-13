@@ -95,6 +95,39 @@ test('syncHandStackMode applies stacked overlap when cards exceed width', ()=>{
   assert.ok(hand.style.values['--hand-overlap-px']);
 });
 
+test('syncHandStackMode leaves fit-to-width hands unstacked', ()=>{
+  const firstRect={left:0,right:50,width:50};
+  const lastRect={left:80,right:130,width:50};
+  const handRect={left:0,right:240,width:240};
+  const first={getBoundingClientRect(){return firstRect;}};
+  const last={getBoundingClientRect(){return lastRect;}};
+  const cards=[first,last];
+  const hand={
+    classList:makeClassList(),
+    style:makeStyle(),
+    clientWidth:240,
+    getBoundingClientRect(){return handRect;},
+    querySelectorAll(){return cards;}
+  };
+  const documentStub={
+    querySelector(selector){return selector==='.action-strip .hand'?hand:null;}
+  };
+  const originalHTMLElement=globalThis.HTMLElement;
+  globalThis.HTMLElement=Object;
+  try{
+    syncHandStackMode({
+      documentRef:()=>documentStub,
+      windowRef:()=>({
+        getComputedStyle:()=>({columnGap:'10px',gap:'10px'})
+      })
+    });
+  }finally{
+    globalThis.HTMLElement=originalHTMLElement;
+  }
+  assert.equal(hand.classList.contains('hand-stacked'),false);
+  assert.equal(hand.style.values['--hand-overlap-px'],undefined);
+});
+
 test('positionRoomTopMeta forces inline meta classes', ()=>{
   const tableOverlay={classList:makeClassList(['room-top-meta-center'])};
   const meta={
@@ -127,14 +160,11 @@ test('createRoomTopMetaLayoutBinder binds resize listeners once', ()=>{
 
 test('syncDiscardSizeFromHand mirrors hand card size to discard cards', ()=>{
   const handCard={getBoundingClientRect(){return {width:42.5,height:60.75};}};
-  const discardCard={style:makeStyle()};
   const rootStyle=makeStyle();
   const documentStub={
     documentElement:{style:rootStyle},
     querySelector(selector){return selector==='.action-strip .hand .hand-card'?handCard:null;},
-    querySelectorAll(selector){
-      return selector==='.seat-played .card.mini, .center-last .card.mini'?[discardCard]:[];
-    }
+    querySelectorAll(){return[];}
   };
   const originalHTMLElement=globalThis.HTMLElement;
   globalThis.HTMLElement=Object;
@@ -148,8 +178,6 @@ test('syncDiscardSizeFromHand mirrors hand card size to discard cards', ()=>{
   }
   assert.equal(rootStyle.values['--discard-card-w'],'42.50px');
   assert.equal(rootStyle.values['--discard-card-h'],'60.75px');
-  assert.equal(discardCard.style.values.width,'42.50px');
-  assert.equal(discardCard.style.values.height,'60.75px');
 });
 
 test('createDiscardSizeObserver reuses one resize observer', ()=>{

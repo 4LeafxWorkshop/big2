@@ -5144,8 +5144,6 @@ body[data-screen='game'] .table-center-stack {
   transform: scale(.78);
   transform-origin: center top;
 }
-.west .opponent-fan { margin-left: 1px; }
-.east .opponent-fan { margin-right: 1px; }
 .west .opponent-fan, .east .opponent-fan {
   transform: none;
   display: flex;
@@ -5234,10 +5232,6 @@ body[data-screen='game'] .table-center-stack {
   transform-origin: center center;
   transform: translateY(calc(var(--fan-lift, 0.5) * var(--opp-fan-closed-lift-px))) rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step)));
 }
-.north .opponent-fan .closed-back:first-child { margin-left: 0; }
-.east .opponent-fan .closed-back:first-child,
-.west .opponent-fan .closed-back:first-child { margin-left: 0; }
-
 /* Top seat: keep horizontal spread, but card axis must stay vertical (upright). */
 .north .opponent-fan .card.back.mini.closed-back {
   transform: rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
@@ -6588,11 +6582,6 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
     margin-top: 0 !important;
     margin-left: var(--opp-fan-closed-shift-x) !important;
     transform: rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
-  }
-  .east .opponent-fan .closed-back:first-child,
-  .west .opponent-fan .closed-back:first-child,
-  .north .opponent-fan .closed-back:first-child {
-    margin-left: 0 !important;
   }
   .mobile-opponent-names {
     display: none;
@@ -9687,6 +9676,7 @@ body[data-screen='game'] .action-strip .hand .hand-card + .hand-card {
   margin-left: 0 !important;
 }
 body[data-screen='game'] .action-strip .hand.hand-stacked {
+  justify-content: center !important;
   gap: 0 !important;
 }
 body[data-screen='game'] .action-strip .hand.hand-stacked .hand-card + .hand-card {
@@ -11632,10 +11622,6 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
     margin-left: var(--opp-fan-closed-shift-x) !important;
     transform-origin: center center !important;
     transform: translateY(calc(var(--fan-lift, 0.5) * var(--opp-fan-closed-lift-px))) rotate(calc((var(--i) - (var(--n) - 1) / 2) * -1 * var(--opp-fan-closed-card-rotate-step))) !important;
-  }
-  body[data-screen='game'][data-orientation='landscape'] .seat.west .opponent-fan .closed-back:first-child,
-  body[data-screen='game'][data-orientation='landscape'] .seat.east .opponent-fan .closed-back:first-child {
-    margin-left: 0 !important;
   }
 }
 
