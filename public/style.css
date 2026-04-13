@@ -5073,15 +5073,15 @@ body[data-screen='game'] .table-center-stack {
 .west .opponent-fan, .east .opponent-fan {
   transform: none;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 0;
   align-items: center;
   align-content: start;
   padding-top: 4px;
 }
 .west .opponent-fan .card.face.mini, .east .opponent-fan .card.face.mini {
-  width: calc(var(--card-w) * .62);
-  height: calc(var(--card-h) * .62);
+  width: calc(var(--card-w) * var(--opp-fan-face-mini-scale));
+  height: calc(var(--card-h) * var(--opp-fan-face-mini-scale));
   padding: 0;
   box-sizing: border-box;
   transform: rotate(90deg);
@@ -5108,14 +5108,14 @@ body[data-screen='game'] .table-center-stack {
 /* Keep mini card dimensions consistent across player panels.
    Panel-specific selectors below can still override when needed. */
 .opponent-fan .card.face.mini {
-  width: calc(var(--card-w) * .62);
-  height: calc(var(--card-h) * .62);
+  width: calc(var(--card-w) * var(--opp-fan-face-mini-scale));
+  height: calc(var(--card-h) * var(--opp-fan-face-mini-scale));
 }
 
 /* Smaller back cards on opponent panels */
 .opponent-fan .card.back.mini {
-  width: calc(var(--card-w) * .72);
-  height: calc(var(--card-h) * .72);
+  width: calc(var(--card-w) * var(--opp-fan-closed-mini-scale));
+  height: calc(var(--card-h) * var(--opp-fan-closed-mini-scale));
 }
 .opponent-fan .card.back.mini.closed-back {
   border: 0;
@@ -5126,7 +5126,7 @@ body[data-screen='game'] .table-center-stack {
 .east .opponent-fan,
 .west .opponent-fan {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: flex-start;
 }
@@ -5142,28 +5142,29 @@ body[data-screen='game'] .table-center-stack {
 
 .east .opponent-fan .closed-back,
 .west .opponent-fan .closed-back {
-  margin-top: calc(var(--card-h) * (-0.30 - (max(var(--n) - var(--closed-tighten-threshold), 0) * 0.018) - (var(--fan-gap, 0.5) * 0.10)));
+  margin-top: 0;
+  margin-left: var(--opp-fan-closed-shift-x);
   transform-origin: center center;
 }
 .east .opponent-fan .closed-back {
-  transform: translateY(calc(var(--fan-lift, 0.5) * -3px)) rotate(90deg) rotate(calc((var(--i) - (var(--n) - 1) / 2) * -2.1deg + var(--fan-jitter, 0deg))) !important;
+  transform: translateY(calc(var(--fan-lift, 0.5) * var(--opp-fan-closed-lift-px))) rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
 }
 .west .opponent-fan .closed-back {
-  transform: translateY(calc(var(--fan-lift, 0.5) * -3px)) rotate(-90deg) rotate(calc((var(--i) - (var(--n) - 1) / 2) * 2.1deg + var(--fan-jitter, 0deg))) !important;
+  transform: translateY(calc(var(--fan-lift, 0.5) * var(--opp-fan-closed-lift-px))) rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
 }
 .north .opponent-fan .closed-back {
   margin-top: 0 !important;
-  margin-left: calc(var(--card-w) * (-0.30 - (max(var(--n) - var(--closed-tighten-threshold), 0) * 0.018) - (var(--fan-gap, 0.5) * 0.10))) !important;
+  margin-left: var(--opp-fan-closed-shift-x) !important;
   transform-origin: center center;
-  transform: translateY(calc(var(--fan-lift, 0.5) * -3px)) rotate(calc((var(--i) - (var(--n) - 1) / 2) * 2.1deg + var(--fan-jitter, 0deg)));
+  transform: translateY(calc(var(--fan-lift, 0.5) * var(--opp-fan-closed-lift-px))) rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step)));
 }
 .north .opponent-fan .closed-back:first-child { margin-left: 0; }
 .east .opponent-fan .closed-back:first-child,
-.west .opponent-fan .closed-back:first-child { margin-top: 0; }
+.west .opponent-fan .closed-back:first-child { margin-left: 0; }
 
 /* Top seat: keep horizontal spread, but card axis must stay vertical (upright). */
 .north .opponent-fan .card.back.mini.closed-back {
-  transform: rotate(calc((var(--i) - (var(--n) - 1) / 2) * 2deg + var(--fan-jitter, 0deg))) !important;
+  transform: rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
 }
 
 /* Keep base back card size aligned with face card; panel-specific rules override above. */
@@ -6335,6 +6336,8 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
   }
   body[data-screen='game'] {
     overflow-y: auto;
+    --opp-fan-closed-mini-scale: .62;
+    --opp-fan-closed-lift-px: -2px;
   }
   body[data-screen='game'] #app {
     height: 100dvh;
@@ -6487,8 +6490,8 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
   .west .opponent-fan .closed-back,
   .north .opponent-fan .closed-back {
     margin-top: 0 !important;
-    margin-left: calc(var(--card-w) * (-0.22 - (max(var(--n) - var(--closed-tighten-threshold), 0) * 0.014) - (var(--fan-gap, 0.5) * 0.1))) !important;
-    transform: rotate(calc((var(--i) - (var(--n) - 1) / 2) * 2deg + var(--fan-jitter, 0deg))) !important;
+    margin-left: var(--opp-fan-closed-shift-x) !important;
+    transform: rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
   }
   .east .opponent-fan .closed-back:first-child,
   .west .opponent-fan .closed-back:first-child,
@@ -6724,7 +6727,8 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
     white-space: nowrap;
   }
   .east .opponent-fan,
-  .west .opponent-fan {
+  .west .opponent-fan,
+  .north .opponent-fan {
     flex-direction: row;
     align-items: center;
     justify-content: center;
@@ -6734,20 +6738,20 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
   .east .opponent-fan .card.back.mini.closed-back,
   .west .opponent-fan .card.back.mini.closed-back,
   .north .opponent-fan .card.back.mini.closed-back {
-    width: calc(var(--card-w) * .62);
-    height: calc(var(--card-h) * .62);
-    margin-top: 0 !important;
-    margin-left: calc(var(--card-w) * (-0.36 - (max(var(--n) - var(--closed-tighten-threshold), 0) * 0.02) - (var(--fan-gap, 0.5) * 0.12))) !important;
+    width: calc(var(--card-w) * var(--opp-fan-closed-mini-scale));
+    height: calc(var(--card-h) * var(--opp-fan-closed-mini-scale));
+    margin-left: var(--opp-fan-closed-shift-x) !important;
     transform-origin: center center;
   }
   .east .opponent-fan .card.back.mini.closed-back {
-    transform: translateY(calc(var(--fan-lift, 0.5) * -2px)) rotate(calc((var(--i) - (var(--n) - 1) / 2) * 2deg + var(--fan-jitter, 0deg))) !important;
+    transform: rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
   }
   .west .opponent-fan .card.back.mini.closed-back {
-    transform: translateY(calc(var(--fan-lift, 0.5) * -2px)) rotate(calc((var(--i) - (var(--n) - 1) / 2) * 2deg + var(--fan-jitter, 0deg))) !important;
+    transform: rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
   }
-  .east .opponent-fan .card.back.mini.closed-back:first-child,
-  .west .opponent-fan .card.back.mini.closed-back:first-child,
+  .north .opponent-fan .card.back.mini.closed-back {
+    transform: rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
+  }
   .north .opponent-fan .card.back.mini.closed-back:first-child {
     margin-left: 0 !important;
   }
@@ -8924,11 +8928,20 @@ body[data-screen='game'] .center-last-south .seat-played {
 
 @media (max-width: 860px) and (orientation: portrait) {
   body[data-screen='game'][data-orientation='portrait'] {
-    --opp-north-closed-scale: .72;
+    --opp-fan-closed-shift-x: calc(var(--card-w) * -0.56);
   }
   body[data-screen='game'][data-orientation='portrait'] .seat.north .opponent-fan .card.back.mini.closed-back {
-    width: calc(var(--card-w) * .72) !important;
-    height: calc(var(--card-h) * .72) !important;
+    width: calc(var(--card-w) * var(--opp-fan-closed-mini-scale)) !important;
+    height: calc(var(--card-h) * var(--opp-fan-closed-mini-scale)) !important;
+  }
+  body[data-screen='game'][data-orientation='portrait'] .seat.north .opponent-fan .card.back.mini.closed-back {
+    margin-top: 0 !important;
+    margin-left: var(--opp-fan-closed-shift-x) !important;
+    transform: rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
+  }
+  body[data-screen='game'][data-orientation='portrait'] .seat.west .opponent-fan .card.back.mini.closed-back,
+  body[data-screen='game'][data-orientation='portrait'] .seat.east .opponent-fan .card.back.mini.closed-back {
+    transform: rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
   }
   body[data-screen='game'][data-orientation='portrait'] .seat.west .opponent-fan-wrap,
   body[data-screen='game'][data-orientation='portrait'] .seat.east .opponent-fan-wrap,
@@ -10363,8 +10376,17 @@ body[data-screen='game'] {
   --opp-north-fan-top: clamp(72px, 8.2vmin, 96px);
   --opp-north-open-gap: clamp(62px, 7.4vmin, 84px);
   --opp-north-open-top: calc(var(--opp-north-fan-top) + var(--opp-north-open-gap));
-  --opp-north-closed-scale: .72;
-  --opp-side-closed-scale: .72;
+  --opp-fan-face-mini-scale: .62;
+  --opp-fan-closed-mini-scale: .72;
+  --opp-closed-card-h: calc(var(--card-h) * var(--opp-closed-scale));
+  --opp-fan-closed-overlap-ratio: -0.42;
+  --opp-fan-closed-shift-y: 0px;
+  --opp-fan-closed-shift-x: calc(var(--card-w) * -0.72);
+  --opp-fan-closed-lift-px: -3px;
+  --opp-fan-closed-rotate-step: 2.1deg;
+  --opp-fan-closed-rotate-step-rev: -2.1deg;
+  --opp-fan-closed-card-rotate-step: 2deg;
+  --opp-closed-scale: .72;
   --opp-side-open-scale: 1;
 }
 body[data-screen='game'] .seat.west,
@@ -10421,7 +10443,7 @@ body[data-screen='game'] .seat.north .opponent-fan {
   position: absolute !important;
   top: var(--opp-north-fan-top) !important;
   left: 50% !important;
-  transform: translateX(-50%) scale(var(--opp-north-closed-scale)) !important;
+  transform: translateX(-50%) scale(var(--opp-closed-scale)) !important;
   transform-origin: top center !important;
 }
 body[data-screen='game'] .seat.north .seat-open-play {
@@ -10449,7 +10471,7 @@ body[data-screen='game'] .seat.east .opponent-fan {
   position: absolute !important;
   top: var(--opp-side-fan-top) !important;
   left: 50% !important;
-  transform: translateX(-50%) scale(var(--opp-side-closed-scale)) rotate(var(--opp-side-fan-tilt, 0deg)) !important;
+  transform: translateX(-50%) scale(var(--opp-closed-scale)) rotate(var(--opp-side-fan-tilt, 0deg)) !important;
   transform-origin: top center !important;
 }
 body[data-screen='game'] .seat.west .seat-open-play,
@@ -10481,8 +10503,11 @@ body[data-screen='game'] .seat.east {
     --opp-open-gap: clamp(62px, 7.8vmin, 78px);
     --opp-north-fan-top: clamp(44px, 5vmin, 52px);
     --opp-north-open-gap: clamp(50px, 5.8vmin, 62px);
-    --opp-north-closed-scale: .72;
-    --opp-side-closed-scale: .72;
+    --opp-fan-closed-mini-scale: .72;
+    --opp-fan-closed-overlap-ratio: -0.42;
+    --opp-fan-closed-shift-y: 0px;
+    --opp-fan-closed-shift-x: calc(var(--card-w) * -0.72);
+    --opp-closed-scale: .72;
     --opp-side-open-scale: 1;
   }
   body[data-screen='game'] .seat.north .seat-open-play .seat-played,
@@ -10506,13 +10531,13 @@ body[data-screen='game'] .seat.east {
     margin-left: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * -0.84) !important;
   }
   body[data-screen='game'] .seat.north .opponent-fan .card.back.mini.closed-back {
-    width: calc(var(--card-w) * .74) !important;
-    height: calc(var(--card-h) * .74) !important;
+    width: calc(var(--card-w) * var(--opp-fan-closed-mini-scale)) !important;
+    height: calc(var(--card-h) * var(--opp-fan-closed-mini-scale)) !important;
   }
   body[data-screen='game'] .seat.west .opponent-fan .card.back.mini.closed-back,
   body[data-screen='game'] .seat.east .opponent-fan .card.back.mini.closed-back {
-    width: calc(var(--card-w) * .72) !important;
-    height: calc(var(--card-h) * .72) !important;
+    width: calc(var(--card-w) * var(--opp-fan-closed-mini-scale)) !important;
+    height: calc(var(--card-h) * var(--opp-fan-closed-mini-scale)) !important;
   }
   body[data-screen='game'] .seat.north .opponent-fan {
     top: var(--opp-north-fan-top) !important;
@@ -10537,14 +10562,14 @@ body[data-screen='game'] .seat.east {
     left: 50% !important;
     right: auto !important;
     top: calc(8px + 44px) !important;
-    transform: translateX(-50%) scale(var(--opp-north-closed-scale)) !important;
+    transform: translateX(-50%) scale(var(--opp-closed-scale)) !important;
   }
   body[data-screen='game'] .seat.west .opponent-fan,
   body[data-screen='game'] .seat.east .opponent-fan {
     left: 50% !important;
     right: auto !important;
     top: calc(36% + 30px) !important;
-    transform: translateX(-50%) scale(var(--opp-side-closed-scale)) !important;
+    transform: translateX(-50%) scale(var(--opp-closed-scale)) !important;
   }
   body[data-screen='game'] .seat.west {
     --opp-side-fan-tilt: 0deg;
@@ -11002,7 +11027,7 @@ body[data-screen='game'] .seat.north.active .seat-section {
     top: 50% !important;
     left: 50% !important;
     width: 100% !important;
-    min-height: calc(40px + (var(--card-h) * 0.72) + (var(--discard-card-h, calc(var(--card-h) * var(--hand-card-scale) * var(--card-scale))) * 1.05) + 12px) !important;
+    min-height: calc(40px + var(--opp-closed-card-h) + (var(--discard-card-h, calc(var(--card-h) * var(--hand-card-scale) * var(--card-scale))) * 1.05) + 12px) !important;
     transform: translate(-50%, -50%) !important;
     display: grid !important;
     grid-template-areas:
@@ -11086,6 +11111,10 @@ body[data-screen='game'] .seat.north.active .seat-section {
   body[data-screen='game'][data-orientation='portrait'] .seat.east .opponent-fan {
     margin-top: 0 !important;
     align-self: start !important;
+  }
+  body[data-screen='game'][data-orientation='portrait'] .seat.west .opponent-fan .card.back.mini.closed-back:first-child,
+  body[data-screen='game'][data-orientation='portrait'] .seat.east .opponent-fan .card.back.mini.closed-back:first-child {
+    margin-top: 0 !important;
   }
   body[data-screen='game'][data-orientation='portrait'] .seat.west .opponent-fan-wrap,
   body[data-screen='game'][data-orientation='portrait'] .seat.east .opponent-fan-wrap {
@@ -11251,7 +11280,7 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
     --opponent-open-card-h: var(--discard-card-h, calc(var(--card-h) * var(--hand-card-scale) * var(--card-scale)));
     --opponent-open-row-h: calc(var(--opponent-open-card-h) + 6px);
     --opponent-open-row-w: calc((var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * 2.52) + 6px);
-    --opponent-station-h: calc(40px + (var(--card-h) * 0.72) + var(--opponent-open-row-h) + 14px);
+    --opponent-station-h: calc(40px + var(--opp-closed-card-h) + var(--opponent-open-row-h) + 14px);
   }
   body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-pack {
     min-height: var(--opponent-station-h) !important;
@@ -11293,9 +11322,9 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
     --opponent-open-card-h: var(--discard-card-h, calc(var(--card-h) * var(--hand-card-scale) * var(--card-scale)));
     --opponent-open-row-h: calc(var(--opponent-open-card-h) + 6px);
     --opponent-open-row-w: calc((var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * 2.52) + 6px);
-    --opponent-station-h: calc(40px + (var(--card-h) * 0.72) + var(--opponent-open-row-h) + 14px);
-    --opp-north-closed-scale: .864;
-    --opp-side-closed-scale: .864;
+    --opponent-station-h: calc(40px + var(--opp-closed-card-h) + var(--opponent-open-row-h) + 14px);
+    --opp-closed-scale: .864;
+    --opp-fan-closed-overlap-ratio: -0.42;
     --opp-side-fan-tilt: 0deg;
   }
   body[data-screen='game'][data-orientation='landscape'] .table-center-grid-wrap {
@@ -11356,7 +11385,7 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
   body[data-screen='game'][data-orientation='landscape'] .seat.west .side-station-stack .opponent-fan,
   body[data-screen='game'][data-orientation='landscape'] .seat.east .side-station-stack .opponent-fan {
     margin-top: 0 !important;
-    transform: scale(var(--opp-side-closed-scale)) rotate(0deg) !important;
+    transform: scale(var(--opp-closed-scale)) rotate(0deg) !important;
   }
   body[data-screen='game'][data-orientation='landscape'] .seat.west .opponent-fan .card.back.mini.closed-back,
   body[data-screen='game'][data-orientation='landscape'] .seat.east .opponent-fan .card.back.mini.closed-back {
@@ -11395,12 +11424,12 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
   }
   body[data-screen='game'][data-orientation='landscape'] .seat.west .opponent-fan .closed-back,
   body[data-screen='game'][data-orientation='landscape'] .seat.east .opponent-fan .closed-back {
-    width: calc(var(--card-w) * .56) !important;
-    height: calc(var(--card-h) * .56) !important;
+    width: calc(var(--card-w) * var(--opp-fan-closed-mini-scale)) !important;
+    height: calc(var(--card-h) * var(--opp-fan-closed-mini-scale)) !important;
     margin-top: 0 !important;
-    margin-left: calc(var(--card-w) * (-0.18 - (max(var(--n) - var(--closed-tighten-threshold), 0) * 0.022) - (var(--fan-gap, 0.5) * 0.12))) !important;
+    margin-left: var(--opp-fan-closed-shift-x) !important;
     transform-origin: center center !important;
-    transform: translateY(calc(var(--fan-lift, 0.5) * -3px)) rotate(calc((var(--i) - (var(--n) - 1) / 2) * 2.1deg + var(--fan-jitter, 0deg))) !important;
+    transform: translateY(calc(var(--fan-lift, 0.5) * var(--opp-fan-closed-lift-px))) rotate(calc((var(--i) - (var(--n) - 1) / 2) * -1 * var(--opp-fan-closed-card-rotate-step))) !important;
   }
   body[data-screen='game'][data-orientation='landscape'] .seat.west .opponent-fan .closed-back:first-child,
   body[data-screen='game'][data-orientation='landscape'] .seat.east .opponent-fan .closed-back:first-child {
@@ -11409,6 +11438,9 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
 }
 
 @media (min-width: 861px) and (orientation: landscape) {
+  body[data-screen='game'][data-orientation='landscape'] {
+    --opp-fan-closed-mini-scale: .56;
+  }
   body[data-screen='game'][data-orientation='landscape'] .seat.north .opponent-fan-wrap,
   body[data-screen='game'][data-orientation='landscape'] .seat.west .opponent-fan-wrap,
   body[data-screen='game'][data-orientation='landscape'] .seat.east .opponent-fan-wrap {
@@ -11444,35 +11476,32 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
     margin-top: 7px !important;
   }
   body[data-screen='game'][data-orientation='landscape'] .seat.north .opponent-fan {
-    transform: scale(var(--opp-side-closed-scale)) !important;
+    transform: scale(var(--opp-closed-scale)) !important;
     transform-origin: top center !important;
   }
   body[data-screen='game'][data-orientation='landscape'] .seat.west .side-station-stack .opponent-fan,
   body[data-screen='game'][data-orientation='landscape'] .seat.east .side-station-stack .opponent-fan {
     left: auto !important;
     right: auto !important;
-    transform: scale(var(--opp-side-closed-scale)) !important;
+    transform: scale(var(--opp-closed-scale)) !important;
     transform-origin: top center !important;
   }
-  body[data-screen='game'][data-orientation='landscape'] .seat.west .opponent-fan,
-  body[data-screen='game'][data-orientation='landscape'] .seat.east .opponent-fan {
-  }
   body[data-screen='game'][data-orientation='landscape'] .seat.north .opponent-fan .card.back.mini.closed-back {
-    width: calc(var(--card-w) * .56) !important;
-    height: calc(var(--card-h) * .56) !important;
+    width: calc(var(--card-w) * var(--opp-fan-closed-mini-scale)) !important;
+    height: calc(var(--card-h) * var(--opp-fan-closed-mini-scale)) !important;
     margin-top: 0 !important;
-    margin-left: calc(var(--card-w) * (-0.18 - (max(var(--n) - var(--closed-tighten-threshold), 0) * 0.022) - (var(--fan-gap, 0.5) * 0.12))) !important;
+    margin-left: var(--opp-fan-closed-shift-x) !important;
     transform-origin: center center !important;
-    transform: translateY(calc(var(--fan-lift, 0.5) * -3px)) rotate(calc((var(--i) - (var(--n) - 1) / 2) * 2.1deg + var(--fan-jitter, 0deg))) !important;
+    transform: translateY(calc(var(--fan-lift, 0.5) * var(--opp-fan-closed-lift-px))) rotate(calc((var(--i) - (var(--n) - 1) / 2) * -1 * var(--opp-fan-closed-card-rotate-step))) !important;
   }
   body[data-screen='game'][data-orientation='landscape'] .seat.west .opponent-fan .card.back.mini.closed-back,
   body[data-screen='game'][data-orientation='landscape'] .seat.east .opponent-fan .card.back.mini.closed-back {
-    width: calc(var(--card-w) * .56) !important;
-    height: calc(var(--card-h) * .56) !important;
+    width: calc(var(--card-w) * var(--opp-fan-closed-mini-scale)) !important;
+    height: calc(var(--card-h) * var(--opp-fan-closed-mini-scale)) !important;
     margin-top: 0 !important;
-    margin-left: calc(var(--card-w) * (-0.18 - (max(var(--n) - var(--closed-tighten-threshold), 0) * 0.022) - (var(--fan-gap, 0.5) * 0.12))) !important;
+    margin-left: var(--opp-fan-closed-shift-x) !important;
     transform-origin: center center !important;
-    transform: translateY(calc(var(--fan-lift, 0.5) * -3px)) rotate(calc((var(--i) - (var(--n) - 1) / 2) * 2.1deg + var(--fan-jitter, 0deg))) !important;
+    transform: translateY(calc(var(--fan-lift, 0.5) * var(--opp-fan-closed-lift-px))) rotate(calc((var(--i) - (var(--n) - 1) / 2) * -1 * var(--opp-fan-closed-card-rotate-step))) !important;
   }
   body[data-screen='game'][data-orientation='landscape'] .seat.north .opponent-fan .closed-back:first-child,
   body[data-screen='game'][data-orientation='landscape'] .seat.west .opponent-fan .closed-back:first-child,
