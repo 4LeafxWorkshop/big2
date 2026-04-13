@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import {renderConfigMarkup, renderHomeMarkup, renderOpponentCard, renderOpponentsMarkup} from '../src/homeView.js';
+import {renderConfigMarkup, renderHomeActionRowHtml, renderHomeMarkup, renderHomeProfileCardHtml, renderHomeSettingsCardHtml, renderHomeTopActionsHtml, renderOpponentCard, renderOpponentsMarkup} from '../src/homeView.js';
 
 function render(overrides={}){
   return renderHomeMarkup({
@@ -61,6 +61,60 @@ test('renderHomeMarkup omits opponent button when not allowed', ()=>{
   });
   assert.doesNotMatch(html,/home-opponents-toggle/);
   assert.match(html,/id="lb-panel"/);
+});
+
+test('renderHomeTopActionsHtml renders the home header buttons', ()=>{
+  const html=renderHomeTopActionsHtml({
+    intro:{btnShow:'Guide'},
+    allowOpponents:true,
+    renderLangMenu:()=>'<div id="lang"></div>',
+    esc:(value)=>String(value),
+    t:(key)=>key
+  });
+  assert.match(html,/home-intro-toggle/);
+  assert.match(html,/home-opponents-toggle/);
+  assert.match(html,/id="lang"/);
+});
+
+test('renderHomeProfileCardHtml renders the avatar and player fields', ()=>{
+  const html=renderHomeProfileCardHtml({
+    homeAvatarSrc:'/avatar.png',
+    esc:(value)=>String(value),
+    state:{home:{name:'Player',avatarChoice:'female'}},
+    t:(key)=>key,
+    aiFieldLeft:'<div id="ai-left"></div>',
+    cardBackLeft:'<div id="back-left"></div>'
+  });
+  assert.match(html,/home-profile-card/);
+  assert.match(html,/id="home-avatar-img"/);
+  assert.match(html,/id="name-input"/);
+  assert.match(html,/id="gender-combo"/);
+});
+
+test('renderHomeSettingsCardHtml renders settings and toggles', ()=>{
+  const html=renderHomeSettingsCardHtml({
+    t:(key)=>key,
+    aiFieldRight:'<div id="ai-right"></div>',
+    soundEnabled:true,
+    calloutDisplayEnabled:false,
+    emoteDisplayEnabled:true,
+    moreSettingsOpen:true,
+    cardBackRight:'<div id="back-right"></div>'
+  });
+  assert.match(html,/home-section-title more-settings-toggle/);
+  assert.match(html,/id="sound-slider"/);
+  assert.match(html,/id="home-more-settings-panel"/);
+  assert.match(html,/id="back-right"/);
+});
+
+test('renderHomeActionRowHtml renders the start buttons row', ()=>{
+  const html=renderHomeActionRowHtml({
+    soloBtnHtml:'<button id="solo-start">solo</button>',
+    roomButtonsHtml:'<button id="room-create">room</button>'
+  });
+  assert.match(html,/home-start-row/);
+  assert.match(html,/id="solo-start"/);
+  assert.match(html,/id="room-create"/);
 });
 
 test('renderConfigMarkup includes config controls and back carousel', ()=>{

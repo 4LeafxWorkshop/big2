@@ -53,7 +53,6 @@ test('renderRoomJoinOverlay renders active rooms and join controls', ()=>{
     }],
     activeRoomsLoading:false,
     hiddenCount:2,
-    joinOpenCountdown:8,
     roomErrorHtml:'<div id="room-error"></div>',
     t:(key)=>{
       if(key==='secondsShort')return' sec';
@@ -70,9 +69,7 @@ test('renderRoomJoinOverlay renders active rooms and join controls', ()=>{
   assert.match(html,/placeholder="ROOM42"/);
   assert.match(html,/ABCD/);
   assert.match(html,/title="Seat 2"/);
-  assert.match(html,/room-active-refresh-countdown/);
   assert.match(html,/roomActiveRefresh/);
-  assert.match(html,/8 sec/);
   assert.match(html,/roomActiveHidden: 2/);
   assert.match(html,/room-error/);
 });

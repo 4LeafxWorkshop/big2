@@ -64,7 +64,7 @@ export function createAvatarProfileHelpers(deps){
     'Axel':'https://avataaars.io/?topType=ShortHairDreads02&accessoriesType=Round&hairColor=Red&facialHairType=BeardMajestic&facialHairColor=Red&clotheType=Hoodie&clotheColor=Red&eyeType=Default&eyebrowType=UnibrowNatural&mouthType=Eating&skinColor=Pale',
     '穎欣':'https://avataaars.io/?topType=LongHairFroBand&accessoriesType=Kurt&hairColor=Blonde&facialHairType=Blank&clotheType=ShirtVNeck&clotheColor=Red&eyeType=Squint&eyebrowType=RaisedExcitedNatural&mouthType=Twinkle&skinColor=Light',
     '佩儀':'https://avataaars.io/?topType=LongHairFrida&accessoriesType=Round&hairColor=Blonde&facialHairType=Blank&clotheType=CollarSweater&clotheColor=Pink&eyeType=WinkWacky&eyebrowType=Default&mouthType=Grimace&skinColor=Pale&backgroundColor=b6e3f4,c0aede,d1d4f9',
-    '少龍':'https://avataaars.io/?avatarStyle=Transparent&topType=ShortHairDreads01&accessoriesType=Sunglasses&hairColor=Brown&facialHairType=BeardLight&facialHairColor=BrownDark&clotheType=BlazerShirt&eyeType=Side&eyebrowType=AngryNatural&mouthType=Concerned&skinColor=Brown&backgroundColor=b6e3f4,c0aede,d1d4f9',
+    '少龍':'https://avataaars.io/?avatarStyle=Transparent&topType=ShortHairDreads01&accessoriesType=Sunglasses&hairColor=Brown&facialHairColor=BrownDark&clotheType=BlazerShirt&eyeType=Side&eyebrowType=AngryNatural&mouthType=Concerned&skinColor=Brown&backgroundColor=b6e3f4,c0aede,d1d4f9',
     'Kane':'https://avataaars.io/?topType=Eyepatch&facialHairType=BeardMedium&facialHairColor=Black&clotheType=ShirtVNeck&clotheColor=Black&eyeType=Surprised&eyebrowType=AngryNatural&mouthType=Grimace&skinColor=DarkBrown&scale=150',
     'Milo':'https://avataaars.io/?topType=WinterHat2&accessoriesType=Blank&hatColor=Blue03&facialHairType=Blank&clotheType=Hoodie&clotheColor=Heather&eyeType=Squint&eyebrowType=UpDownNatural&mouthType=Smile&skinColor=Light',
     'Jade':'https://avataaars.io/?topType=LongHairFro&accessoriesType=Blank&hairColor=PastelPink&facialHairType=Blank&clotheType=ShirtScoopNeck&clotheColor=PastelRed&eyeType=Happy&eyebrowType=UpDown&mouthType=Twinkle&skinColor=Pale',
@@ -78,15 +78,6 @@ export function createAvatarProfileHelpers(deps){
     'Jax':'https://avataaars.io/?topType=ShortHairShortRound&accessoriesType=Round&hairColor=BrownDark&facialHairType=Blank&clotheType=Hoodie&clotheColor=Heather&eyeType=Happy&eyebrowType=RaisedExcitedNatural&mouthType=Grimace&skinColor=Light'
   };
   const AVATAR_OVERRIDE_BY_NAME={
-    '少龍':{
-      eyes:'default',
-      eyebrows:'upDown',
-      mouth:'smile',
-      accessories:'prescription02',
-      top:'shortCurly',
-      skinColor:'d08b5b',
-      hairColor:'2c1b18'
-    }
   };
 
   function authPictureUrlFrom(picRaw){

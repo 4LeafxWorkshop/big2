@@ -32,6 +32,37 @@ export function renderGameLogSheet(params){
   return`<div class="log-sheet" id="log-sheet"><button class="log-sheet-backdrop" id="log-sheet-backdrop" aria-label="${t('close')}"></button><section class="log-sheet-panel side-card log-side-card"><header class="log-sheet-head"><h3 class="log-toggle-title title-with-icon"><span class="title-icon title-icon-log" aria-hidden="true"></span><span>${t('log')}</span></h3><button id="log-sheet-close" class="secondary">${closeLabel}</button></header><div class="history-list">${historyHtml}</div></section></div>`;
 }
 
+export function renderGameSelfTagHtml(params){
+  const {
+    selfAvatar,
+    selfName,
+    selfScore,
+    selfRoundWinsHtml,
+    selfCalloutHtml,
+    esc
+  }=params;
+  return`<div class="seat-name-fixed player-tag"><div class="name">${selfAvatar}<span class="seat-identity"><span class="seat-name-text">${esc(selfName)}</span><span class="seat-subline"><span>${selfScore}</span>${selfRoundWinsHtml}</span></span></div>${selfCalloutHtml}</div>`;
+}
+
+export function renderGameControlRowHtml(params){
+  const {
+    isRecPlay,
+    canPlay,
+    isRecPass,
+    canPass,
+    canSuggest,
+    showRecommendHint,
+    isRecEmpty,
+    recommendHint,
+    t,
+    esc,
+    canAutoSort,
+    emotePanel,
+    handHtml
+  }=params;
+  return`<div class="control-row"><button id="play-btn" class="primary game-cta-btn ${isRecPlay?'recommend-glow-play':''}" ${canPlay?'':'disabled'}><span aria-hidden="true">▶</span><span>${t('play')}</span></button><button id="pass-btn" class="danger game-cta-btn ${isRecPass?'recommend-glow':''}" ${canPass?'':'disabled'}><svg class="pass-icon" aria-hidden="true" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span>${t('pass')}</span></button><span class="recommend-anchor"><button id="suggest-btn" class="secondary game-cta-btn" ${canSuggest?'':'disabled'}><span aria-hidden="true">💡</span><span>${t('suggest')}</span></button>${showRecommendHint?`<span class="recommend-layer"><span class="hint recommend-hint ${isRecEmpty?'rec-empty':''}"><span class="recommend-bulb" aria-hidden="true">💡</span><span>${esc(recommendHint)}</span></span></span>`:''}</span><button id="emote-toggle" class="secondary game-cta-btn emote-toggle" type="button"><span aria-hidden="true">😆</span><span>${t('emote')}</span></button><button id="auto-sort-btn" class="secondary game-cta-btn auto-sort-btn" ${canAutoSort?'':'disabled'}><svg class="sort-icon" aria-hidden="true" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827 1.24 4.874 2.418.49.552.865 1.102 1.126 1.532.26-.430.636-.980 1.126-1.532C9.173 4.24 10.798 3 13 3v1c-1.798 0-3.173 1.01-4.126 2.082A9.6 9.6 0 0 0 7.556 8a9.6 9.6 0 0 0 1.317 1.918C9.828 10.99 11.204 12 13 12v1c-2.202 0-3.827-1.24-4.874-2.418A10.6 10.6 0 0 1 7 9.05c-.26.43-.636.98-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173-1.01 4.126-2.082A9.6 9.6 0 0 0 6.444 8a9.6 9.6 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1-.5-.5"/><path d="M13 5.466V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192m0 9v-3.932a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.120.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192"/></svg></button></div>${emotePanel}<div class="hand">${handHtml}</div><div class="drag-popup" id="drag-popup">${t('drag')}</div>`;
+}
+
 export function renderGameActionZone(params){
   const {
     canControl,
@@ -56,7 +87,7 @@ export function renderGameActionZone(params){
     emotePanel,
     handHtml
   }=params;
-  return`<section class="action-zone"><div class="action-strip ${canControl&&!gameOver?'active':''}" style="--player-color:${playerColor};"><div class="seat-name-fixed player-tag"><div class="name">${selfAvatar}<span class="seat-identity"><span class="seat-name-text">${esc(selfName)}</span><span class="seat-subline"><span>${selfScore}</span>${selfRoundWinsHtml}</span></span></div>${selfCalloutHtml}</div><div class="control-row"><button id="play-btn" class="primary game-cta-btn ${isRecPlay?'recommend-glow-play':''}" ${canPlay?'':'disabled'}><span aria-hidden="true">▶</span><span>${t('play')}</span></button><button id="pass-btn" class="danger game-cta-btn ${isRecPass?'recommend-glow':''}" ${canPass?'':'disabled'}><svg class="pass-icon" aria-hidden="true" viewBox="0 0 16 16"><path d="M4 4l8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span>${t('pass')}</span></button><span class="recommend-anchor"><button id="suggest-btn" class="secondary game-cta-btn" ${canSuggest?'':'disabled'}><span aria-hidden="true">💡</span><span>${t('suggest')}</span></button>${showRecommendHint?`<span class="recommend-layer"><span class="hint recommend-hint ${isRecEmpty?'rec-empty':''}"><span class="recommend-bulb" aria-hidden="true">💡</span><span>${esc(recommendHint)}</span></span></span>`:''}</span><button id="emote-toggle" class="secondary game-cta-btn emote-toggle" type="button"><span aria-hidden="true">😆</span><span>${t('emote')}</span></button><button id="auto-sort-btn" class="secondary game-cta-btn auto-sort-btn" ${canAutoSort?'':'disabled'}><svg class="sort-icon" aria-hidden="true" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827 1.24 4.874 2.418.49.552.865 1.102 1.126 1.532.26-.430.636-.980 1.126-1.532C9.173 4.24 10.798 3 13 3v1c-1.798 0-3.173 1.01-4.126 2.082A9.6 9.6 0 0 0 7.556 8a9.6 9.6 0 0 0 1.317 1.918C9.828 10.99 11.204 12 13 12v1c-2.202 0-3.827-1.24-4.874-2.418A10.6 10.6 0 0 1 7 9.05c-.26.43-.636.980-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173-1.01 4.126-2.082A9.6 9.6 0 0 0 6.444 8a9.6 9.6 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1-.5-.5"/><path d="M13 5.466V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192m0 9v-3.932a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.120.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192"/></svg></button></div>${emotePanel}<div class="hand">${handHtml}</div><div class="drag-popup" id="drag-popup">${t('drag')}</div></div></section>`;
+  return`<section class="action-zone"><div class="action-strip ${canControl&&!gameOver?'active':''}" style="--player-color:${playerColor};">${renderGameSelfTagHtml({selfAvatar,selfName,selfScore,selfRoundWinsHtml,selfCalloutHtml,esc})}${renderGameControlRowHtml({isRecPlay,canPlay,isRecPass,canPass,canSuggest,showRecommendHint,isRecEmpty,recommendHint,t,esc,canAutoSort,emotePanel,handHtml})}</div></section>`;
 }
 
 export function renderGameTable(params){
@@ -132,32 +163,7 @@ export function renderOpponentSeat(params){
   return`<div class="seat ${cls} ${active?'active':''}"${seatAttrs} style="${shellStyle}">${outerLabelHtml}<div class="seat-pack seat-section" style="${sectionStyle}">${sideStationFlowHtml}</div></div>`;
 }
 
-export function renderOpponentLabel(params){
-  const {
-    pColor,
-    avatarSrc,
-    playerAvatarClass,
-    playerName,
-    botNameAttr,
-    hostBadgeHtml,
-    badgeHtml,
-    playerScore,
-    roundWinsHtml,
-    namecardBtn,
-    mottoText,
-    mottoClass,
-    hintText,
-    mottoTilt,
-    mottoTailDir,
-    calloutHtml,
-    emoteHtml,
-    peekActive,
-    opponentAttr,
-    esc
-  }=params;
-  const labelName=`<div class="name"><span class="player-avatar-wrap player-avatar-wrap-opponent avatar-rim" style="--avatar-rim:${pColor};"><img class="player-avatar player-avatar-opponent ${playerAvatarClass}" style="--avatar-outline:${pColor};" src="${avatarSrc}" alt="${esc(playerName)}"${botNameAttr}/>${hostBadgeHtml}${badgeHtml}${mottoText?`<span class="seat-motto-callout" style="--player-color:${pColor};--motto-tilt:${mottoTilt};"><div class="callout-box"><div class="hk-inner"><span class="${mottoClass}">${esc(mottoText)}</span>${hintText?`<span class="hk-chinese-sub">${esc(hintText)}</span>`:''}</div></div><span class="tail tail-${mottoTailDir}"></span></span>`:''}</span><span class="seat-identity"><span class="seat-name-text">${esc(playerName)}</span><span class="seat-subline"><span>${playerScore}</span>${roundWinsHtml}</span>${namecardBtn}</span></div>`;
-  return`<div class="seat-name-fixed${peekActive?' motto-peek':''}"${opponentAttr}>${labelName}${calloutHtml}${emoteHtml}</div>`;
-}
+export {renderOpponentLabel} from './opponentLabel.js';
 
 export function renderOpponentStationFlow(params){
   const {

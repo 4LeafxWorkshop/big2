@@ -1,5 +1,7 @@
 import {renderConfidentialStamp} from './modalViews.js';
 import {resolveAvatarSrc} from './avatarProfile.js';
+import {buildOpponentNamecardHtml} from './opponentNamecard.js';
+import {renderOpponentIdentityHtml, renderOpponentLabel} from './opponentLabel.js';
 
 const TURN_SEAT_CLS=['south','east','north','west'];
 
@@ -188,7 +190,12 @@ export function buildOpponentSeatsHtml(params){
     const mottoTilt=`${(seed%11)-5}deg`;
     const mottoTailDir='north';
     const roundWinsHtml=roundWinsChipHtml(roundWinsBySeat[player.seat]??0);
-    const namecardBtn=player.isBot?`<button type="button" class="seat-namecard" data-opponent-name="${esc(opponentName)}" aria-label="${esc(t('profile'))}">🪪</button>`:'';
+    const namecardBtn=buildOpponentNamecardHtml({
+      isBot:player.isBot,
+      opponentName,
+      t,
+      esc
+    });
     const calloutHtml=seatCalloutHtml(player.seat,player.cls,playerColor,false);
     const emoteHtml=seatEmoteHtml(player.seat,player.cls,playerColor,false);
     const peekActive=isMobilePointer()&&state.mottoPeekName===String(opponentName);
@@ -212,7 +219,8 @@ export function buildOpponentSeatsHtml(params){
       emoteHtml,
       peekActive,
       opponentAttr,
-      esc
+      esc,
+      renderOpponentIdentityHtml
     });
     const shellStyle=`--player-color:${playerColor};border:0 !important;box-shadow:none !important;background:transparent !important;border-radius:0 !important;`;
     const innerNoOutline='border:0 !important;box-shadow:none !important;background:transparent !important;';

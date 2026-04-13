@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import {renderCenterLastMoves, renderGameActionZone, renderGameLogSheet, renderGameShell, renderGameSideZone, renderGameTable, renderGameTopbar, renderOpponentLabel, renderOpponentSeat, renderOpponentSeats, renderOpponentStationFlow, renderSeatLastAction} from '../src/gameView.js';
+import {renderCenterLastMoves, renderGameActionZone, renderGameControlRowHtml, renderGameLogSheet, renderGameSelfTagHtml, renderGameShell, renderGameSideZone, renderGameTable, renderGameTopbar, renderOpponentLabel, renderOpponentSeat, renderOpponentSeats, renderOpponentStationFlow, renderSeatLastAction} from '../src/gameView.js';
 
 test('renderGameTopbar includes the game controls', ()=>{
   const html=renderGameTopbar({
@@ -66,6 +66,44 @@ test('renderGameActionZone renders controls, hand, and drag popup', ()=>{
   assert.match(html,/id="auto-sort-btn"/);
   assert.match(html,/id="drag-popup"/);
   assert.match(html,/recommend-glow-play/);
+});
+
+test('renderGameSelfTagHtml renders the self tag block', ()=>{
+  const html=renderGameSelfTagHtml({
+    selfAvatar:'<img id="avatar"/>',
+    selfName:'Player',
+    selfScore:'5000',
+    selfRoundWinsHtml:'<span id="wins"></span>',
+    selfCalloutHtml:'<span id="callout"></span>',
+    esc:(value)=>String(value)
+  });
+  assert.match(html,/player-tag/);
+  assert.match(html,/id="avatar"/);
+  assert.match(html,/id="wins"/);
+  assert.match(html,/id="callout"/);
+});
+
+test('renderGameControlRowHtml renders the action controls and hand', ()=>{
+  const html=renderGameControlRowHtml({
+    isRecPlay:true,
+    canPlay:true,
+    isRecPass:false,
+    canPass:true,
+    canSuggest:true,
+    showRecommendHint:true,
+    isRecEmpty:false,
+    recommendHint:'Hint',
+    t:(key)=>key,
+    esc:(value)=>String(value),
+    canAutoSort:true,
+    emotePanel:'<div id="emote-panel"></div>',
+    handHtml:'<button class="card"></button>'
+  });
+  assert.match(html,/id="play-btn"/);
+  assert.match(html,/id="suggest-btn"/);
+  assert.match(html,/id="auto-sort-btn"/);
+  assert.match(html,/id="drag-popup"/);
+  assert.match(html,/id="emote-panel"/);
 });
 
 test('renderGameTable renders center stack and win celebration', ()=>{

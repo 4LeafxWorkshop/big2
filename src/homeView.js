@@ -5,6 +5,50 @@ function binarySliderHtml({id,value,onLabel,offLabel,ariaLabel}){
   return `<div class="setting-slider-wrap" id="${id}" style="--setting-index:${index};"><input class="setting-slider" type="range" min="0" max="1" step="1" value="${index}" aria-label="${ariaLabel}"><div class="setting-slider-labels" aria-hidden="true"><span>${offLabel}</span><span>${onLabel}</span></div></div>`;
 }
 
+export function renderHomeTopActionsHtml(params){
+  const {
+    intro,
+    allowOpponents,
+    renderLangMenu,
+    esc,
+    t
+  }=params;
+  return`<div class="royal-head-actions"><button id="home-intro-toggle" class="secondary">${esc(intro.btnShow)}</button><button id="home-score-guide-toggle" class="secondary">${t('scoreGuide')}</button><button id="home-lb-toggle" class="secondary">${t('lb')}</button>${allowOpponents?`<button id="home-opponents-toggle" class="secondary">${t('opponents')}</button>`:''}${renderLangMenu('home-lang-menu')}</div>`;
+}
+
+export function renderHomeProfileCardHtml(params){
+  const {
+    homeAvatarSrc,
+    esc,
+    state,
+    t,
+    aiFieldLeft,
+    cardBackLeft
+  }=params;
+  return`<div class="home-form-col home-form-left home-section"><h3 class="home-section-title"><span class="title-icon title-icon-player" aria-hidden="true"></span>${t('playerSettings')}</h3><div class="home-profile-card"><div class="home-profile-avatar"><img id="home-avatar-img" src="${homeAvatarSrc}" alt="${esc(state.home.name||t('name'))}"/></div><div class="home-profile-fields"><label class="field field-compact"><span>${t('name')}</span><div class="name-with-google"><input id="name-input" value="${esc(state.home.name)}" maxlength="18"/><div id="google-name-inline"></div></div></label><label class="field field-compact"><div class="option-combo toggle-combo" id="gender-combo"><button class="combo-btn toggle-btn ${state.home.avatarChoice==='male'?'active':''}" data-value="male">${t('male')}</button><button class="combo-btn toggle-btn ${state.home.avatarChoice==='female'?'active':''}" data-value="female">${t('female')}</button></div></label></div></div>${aiFieldLeft}${cardBackLeft}</div>`;
+}
+
+export function renderHomeSettingsCardHtml(params){
+  const {
+    t,
+    aiFieldRight,
+    soundEnabled,
+    calloutDisplayEnabled,
+    emoteDisplayEnabled,
+    moreSettingsOpen,
+    cardBackRight
+  }=params;
+  return`<div class="home-form-col home-form-right home-section"><h3 class="home-section-title"><span class="title-icon title-icon-settings" aria-hidden="true"></span>${t('systemSettings')}</h3>${aiFieldRight}<label class="field field-sound"><span>${t('audioVoice')}</span>${binarySliderHtml({id:'sound-slider',value:soundEnabled,onLabel:t('soundOn'),offLabel:t('soundOff'),ariaLabel:t('audioVoice')})}</label><h3 id="home-more-settings-toggle" class="home-section-title more-settings-toggle" role="button" tabindex="0" aria-expanded="${moreSettingsOpen?'true':'false'}"><span class="more-settings-icon" aria-hidden="true">${moreSettingsOpen?'▴':'▾'}</span><span>${t('moreSettings')}</span></h3><div id="home-more-settings-panel" class="more-settings-panel" ${moreSettingsOpen?'':'hidden'}><label class="field field-callout"><span>${t('calloutDisplay')}</span>${binarySliderHtml({id:'callout-display-slider',value:calloutDisplayEnabled,onLabel:t('calloutDisplayOn'),offLabel:t('calloutDisplayOff'),ariaLabel:t('calloutDisplay')})}</label><label class="field field-emote"><span>${t('emoteDisplay')}</span>${binarySliderHtml({id:'emote-display-slider',value:emoteDisplayEnabled,onLabel:t('calloutDisplayOn'),offLabel:t('calloutDisplayOff'),ariaLabel:t('emoteDisplay')})}</label></div>${cardBackRight}</div>`;
+}
+
+export function renderHomeActionRowHtml(params){
+  const {
+    soloBtnHtml,
+    roomButtonsHtml
+  }=params;
+  return`<div class="action-row home-start-row">${soloBtnHtml}${roomButtonsHtml}</div>`;
+}
+
 export function renderHomeMarkup(params){
   const {
     intro,
@@ -33,7 +77,7 @@ export function renderHomeMarkup(params){
     scoreGuideModalHtml
   }=params;
 
-  return`<section class="home-wrap royal-home-wrap"><section class="home-panel royal-home-panel"><header class="royal-home-head"><div class="royal-head-actions"><button id="home-intro-toggle" class="secondary">${esc(intro.btnShow)}</button><button id="home-score-guide-toggle" class="secondary">${t('scoreGuide')}</button><button id="home-lb-toggle" class="secondary">${t('lb')}</button>${allowOpponents?`<button id="home-opponents-toggle" class="secondary">${t('opponents')}</button>`:''}${renderLangMenu('home-lang-menu')}</div><div class="royal-title-wrap"><div class="home-logo-block"><img class="title-logo title-logo-home" src="${withBase('title-lockup-home.png')}" alt="鋤大D TRADITIONAL BIG TWO"/></div></div></header><section class="royal-home-body"><div class="home-form-grid"><div class="home-form-col home-form-left home-section"><h3 class="home-section-title"><span class="title-icon title-icon-player" aria-hidden="true"></span>${t('playerSettings')}</h3><div class="home-profile-card"><div class="home-profile-avatar"><img id="home-avatar-img" src="${homeAvatarSrc}" alt="${esc(state.home.name||t('name'))}"/></div><div class="home-profile-fields"><label class="field field-compact"><span>${t('name')}</span><div class="name-with-google"><input id="name-input" value="${esc(state.home.name)}" maxlength="18"/><div id="google-name-inline"></div></div></label><label class="field field-compact"><div class="option-combo toggle-combo" id="gender-combo"><button class="combo-btn toggle-btn ${state.home.avatarChoice==='male'?'active':''}" data-value="male">${t('male')}</button><button class="combo-btn toggle-btn ${state.home.avatarChoice==='female'?'active':''}" data-value="female">${t('female')}</button></div></label></div></div>${aiFieldLeft}${cardBackLeft}</div><div class="home-form-col home-form-right home-section"><h3 class="home-section-title"><span class="title-icon title-icon-settings" aria-hidden="true"></span>${t('systemSettings')}</h3>${aiFieldRight}<label class="field field-sound"><span>${t('audioVoice')}</span>${binarySliderHtml({id:'sound-slider',value:soundEnabled,onLabel:t('soundOn'),offLabel:t('soundOff'),ariaLabel:t('audioVoice')})}</label><h3 id="home-more-settings-toggle" class="home-section-title more-settings-toggle" role="button" tabindex="0" aria-expanded="${moreSettingsOpen?'true':'false'}"><span class="more-settings-icon" aria-hidden="true">${moreSettingsOpen?'▴':'▾'}</span><span>${t('moreSettings')}</span></h3><div id="home-more-settings-panel" class="more-settings-panel" ${moreSettingsOpen?'':'hidden'}><label class="field field-callout"><span>${t('calloutDisplay')}</span>${binarySliderHtml({id:'callout-display-slider',value:calloutDisplayEnabled,onLabel:t('calloutDisplayOn'),offLabel:t('calloutDisplayOff'),ariaLabel:t('calloutDisplay')})}</label><label class="field field-emote"><span>${t('emoteDisplay')}</span>${binarySliderHtml({id:'emote-display-slider',value:emoteDisplayEnabled,onLabel:t('calloutDisplayOn'),offLabel:t('calloutDisplayOff'),ariaLabel:t('emoteDisplay')})}</label></div>${cardBackRight}</div></div><div class="action-row home-start-row">${soloBtnHtml}${roomButtonsHtml}</div></section></section>${mainPageLegalMiniHtml}${roomLobbyHtml}${roomJoinModal}${state.home.showIntro?introPanelHtml:''}${state.home.showLeaderboard?leaderboardModalHtml:''}${state.showScoreGuide?scoreGuideModalHtml:''}</section>`;
+  return`<section class="home-wrap royal-home-wrap"><section class="home-panel royal-home-panel"><header class="royal-home-head">${renderHomeTopActionsHtml({intro,allowOpponents,renderLangMenu,esc,t})}<div class="royal-title-wrap"><div class="home-logo-block"><img class="title-logo title-logo-home" src="${withBase('title-lockup-home.png')}" alt="鋤大D TRADITIONAL BIG TWO"/></div></div></header><section class="royal-home-body"><div class="home-form-grid">${renderHomeProfileCardHtml({homeAvatarSrc,esc,state,t,aiFieldLeft,cardBackLeft})}${renderHomeSettingsCardHtml({t,aiFieldRight,soundEnabled,calloutDisplayEnabled,emoteDisplayEnabled,moreSettingsOpen,cardBackRight})}</div>${renderHomeActionRowHtml({soloBtnHtml,roomButtonsHtml})}</section></section>${mainPageLegalMiniHtml}${roomLobbyHtml}${roomJoinModal}${state.home.showIntro?introPanelHtml:''}${state.home.showLeaderboard?leaderboardModalHtml:''}${state.showScoreGuide?scoreGuideModalHtml:''}</section>`;
 }
 
 export function renderConfigMarkup(params){
