@@ -5217,7 +5217,8 @@ body[data-screen='game'] .table-center-stack {
 .east .opponent-fan .closed-back,
 .west .opponent-fan .closed-back {
   margin-top: 0;
-  margin-left: var(--opp-fan-closed-shift-x);
+  margin-left: calc(var(--opp-fan-closed-shift-x));
+  left: 15px;
   transform-origin: center center;
 }
 .east .opponent-fan .closed-back {
@@ -5229,6 +5230,7 @@ body[data-screen='game'] .table-center-stack {
 .north .opponent-fan .closed-back {
   margin-top: 0 !important;
   margin-left: var(--opp-fan-closed-shift-x) !important;
+  left: 15px;
   transform-origin: center center;
   transform: translateY(calc(var(--fan-lift, 0.5) * var(--opp-fan-closed-lift-px))) rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step)));
 }
