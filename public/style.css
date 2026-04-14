@@ -5230,7 +5230,7 @@ body[data-screen='game'] .table-center-stack {
 .north .opponent-fan .closed-back {
   margin-top: 0 !important;
   margin-left: var(--opp-fan-closed-shift-x) !important;
-  left: 15px;
+  left: 10px;
   transform-origin: center center;
   transform: translateY(calc(var(--fan-lift, 0.5) * var(--opp-fan-closed-lift-px))) rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step)));
 }
@@ -11967,4 +11967,63 @@ body[data-screen='game'] :is(.seat.west, .seat.east) .side-station-stack .oppone
   margin-top: 0 !important;
   transform-origin: center bottom !important;
   transform: rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
+}
+
+/* Mirror landscape opponent-fan-wrap sizing contract in portrait. */
+body[data-screen='game'][data-orientation='portrait'] .seat.north .opponent-fan-wrap,
+body[data-screen='game'][data-orientation='portrait'] .seat.west .opponent-fan-wrap,
+body[data-screen='game'][data-orientation='portrait'] .seat.east .opponent-fan-wrap {
+  width: max-content !important;
+  max-width: none !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: flex-start !important;
+  justify-self: center !important;
+  margin: 0 auto !important;
+  overflow: visible !important;
+}
+body[data-screen='game'][data-orientation='portrait'] .seat.north .opponent-fan,
+body[data-screen='game'][data-orientation='portrait'] .seat.west .opponent-fan,
+body[data-screen='game'][data-orientation='portrait'] .seat.east .opponent-fan {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: max-content !important;
+  max-width: none !important;
+  margin: 0 auto !important;
+  white-space: nowrap !important;
+  overflow: visible !important;
+}
+body[data-screen='game'][data-orientation='portrait'] .seat.north .opponent-fan {
+  transform: scale(var(--opp-closed-scale)) !important;
+  transform-origin: top center !important;
+}
+body[data-screen='game'][data-orientation='portrait'] .seat.west .side-station-stack .opponent-fan,
+body[data-screen='game'][data-orientation='portrait'] .seat.east .side-station-stack .opponent-fan {
+  transform: scale(var(--opp-closed-scale)) !important;
+  transform-origin: top center !important;
+}
+body[data-screen='game'][data-orientation='portrait'] .seat.north .opponent-fan .card.back.mini.closed-back {
+  width: calc(var(--card-w) * var(--opp-fan-closed-mini-scale)) !important;
+  height: calc(var(--card-h) * var(--opp-fan-closed-mini-scale)) !important;
+  margin-top: 0 !important;
+  margin-left: var(--opp-fan-closed-shift-x) !important;
+  transform-origin: center center !important;
+  transform: rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
+}
+body[data-screen='game'][data-orientation='portrait'] .seat.west .opponent-fan .card.back.mini.closed-back,
+body[data-screen='game'][data-orientation='portrait'] .seat.east .opponent-fan .card.back.mini.closed-back {
+  width: calc(var(--card-w) * var(--opp-fan-closed-mini-scale)) !important;
+  height: calc(var(--card-h) * var(--opp-fan-closed-mini-scale)) !important;
+  margin-top: 0 !important;
+  margin-left: var(--opp-fan-closed-shift-x) !important;
+  transform-origin: center center !important;
+  transform: rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
+}
+body[data-screen='game'][data-orientation='portrait'] .seat.north .opponent-fan .closed-back:first-child,
+body[data-screen='game'][data-orientation='portrait'] .seat.west .opponent-fan .closed-back:first-child,
+body[data-screen='game'][data-orientation='portrait'] .seat.east .opponent-fan .closed-back:first-child {
+  margin-left: 0 !important;
 }
