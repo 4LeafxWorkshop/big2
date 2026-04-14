@@ -1,24 +1,6 @@
 import {renderGenderIconSvg} from './genderIcon.js';
 import {resolveAvatarSrc} from './avatarProfile.js';
-
-export function formatLeaderboardDateTime(ts,language){
-  const n=Number(ts)||0;
-  if(!n)return'-';
-  const localeMap={
-    en:'en-US',
-    'zh-HK':'zh-HK',
-    fr:'fr-FR',
-    de:'de-DE',
-    es:'es-ES',
-    ja:'ja-JP'
-  };
-  const locale=localeMap[language]||'en-US';
-  try{return new Date(n).toLocaleString(locale,{hour12:false});}catch{return'-';}
-}
-
-export function formatLeaderboardPct(n){
-  return `${Math.round((Number(n)||0)*100)}%`;
-}
+import {formatLeaderboardDateTime, formatLeaderboardPct} from './localeFormatters.js';
 
 export function renderConfidentialStamp({text,esc,classes=''}) {
   const className=['result-confidential-stamp',classes].filter(Boolean).join(' ');

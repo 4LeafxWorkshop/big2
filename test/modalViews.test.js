@@ -2,14 +2,13 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
-  formatLeaderboardDateTime,
-  formatLeaderboardPct,
   renderIntroPanel,
   renderLeaderboardModal,
   renderLeaderboardPanel,
   renderOpponentProfileModal,
   renderScoreGuideModal
 } from '../src/modalViews.js';
+import {formatLeaderboardDateTime, formatLeaderboardPct} from '../src/localeFormatters.js';
 
 test('formatLeaderboardPct rounds to a percentage string', ()=>{
   assert.equal(formatLeaderboardPct(0.456),'46%');
