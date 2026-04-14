@@ -70,7 +70,7 @@ export function createGoogleIdentityController({
 
   function signOutCurrentProvider(){
     const state=getState();
-    state.home.google={signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',pictureLoaded:false,gender:'',profileMissing:false};
+    state.home.google={signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',pictureLoaded:false,gender:'',profileMissing:false,hydrating:false};
     clearGoogleSession();
     googleIdentityPrompted=false;
     try{getWindow().google?.accounts?.id?.disableAutoSelect?.();}catch{}

@@ -219,7 +219,7 @@ function guardAction(key,windowMs=800){
 }
 
 const app=document.getElementById('app');
-const state={language:'zh-HK',screen:'home',screenBeforeConfig:'home',showRules:false,showLog:false,showLogSheet:false,logTouched:false,showScoreGuide:false,opponentProfileName:'',mottoPeekName:'',selected:new Set(),drag:{id:null,moved:false},playAnimKey:'',autoPassKey:'',score:5000,suggestCost:0,recommendation:null,recommendHint:'',logFab:{x:null,y:null},home:{mode:'solo',name:'玩家',gender:'male',avatarChoice:'male',aiDifficulty:'normal',backColor:'red',theme:'ocean',showIntro:false,showLeaderboard:false,showMoreSettings:false,google:{signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',pictureLoaded:false,gender:'',profileMissing:false},leaderboard:{rows:[],sort:'totalDelta',period:'all',limit:20},activeRooms:{rows:[],loading:false,loadedAt:0,error:''}},room:{id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:false,error:'',started:false,unsub:null,selfSeat:-1,recordedGameKey:'',lastMoveKey:'',playerId:'',pendingStart:false,lastResultPlayers:null},sessionId:'',solo:{players:[],botNames:[],totals:[5000,5000,5000,5000],currentSeat:0,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',history:[],aiDifficulty:'normal',lastCardBreach:null},emote:{open:false,active:null}};
+const state={language:'zh-HK',screen:'home',screenBeforeConfig:'home',showRules:false,showLog:false,showLogSheet:false,logTouched:false,showScoreGuide:false,opponentProfileName:'',mottoPeekName:'',selected:new Set(),drag:{id:null,moved:false},playAnimKey:'',autoPassKey:'',score:5000,suggestCost:0,recommendation:null,recommendHint:'',logFab:{x:null,y:null},home:{mode:'solo',name:'玩家',gender:'male',avatarChoice:'male',aiDifficulty:'normal',backColor:'red',theme:'ocean',showIntro:false,showLeaderboard:false,showMoreSettings:false,google:{signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',pictureLoaded:false,gender:'',profileMissing:false,hydrating:false},leaderboard:{rows:[],sort:'totalDelta',period:'all',limit:20},activeRooms:{rows:[],loading:false,loadedAt:0,error:''}},room:{id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:false,error:'',started:false,unsub:null,selfSeat:-1,recordedGameKey:'',lastMoveKey:'',playerId:'',pendingStart:false,lastResultPlayers:null},sessionId:'',solo:{players:[],botNames:[],totals:[5000,5000,5000,5000],currentSeat:0,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',history:[],aiDifficulty:'normal',lastCardBreach:null},emote:{open:false,active:null}};
 const {
   EMOTE_STICKERS,
   cardImagePath,
@@ -880,8 +880,28 @@ const {
 function syncSessionScoreFromStore(store,{force=false}={}){
   if(!store||typeof store!=='object'||!store.players||typeof store.players!=='object')return;
   const identity=currentLeaderboardIdentity();
-  const entry=store.players[String(identity.id??'')];
+  const players=store.players;
+  const idRaw=String(identity.id??'').trim();
+  const idLower=idRaw.toLowerCase();
+  const email=String(identity.email??state.home.google?.email??'').trim().toLowerCase();
+  const uid=String(state.home.google?.uid??'').trim();
+  const sub=String(state.home.google?.sub??'').trim();
+  const directKeys=[idRaw,idLower,uid,uid.toLowerCase(),sub,sub.toLowerCase()].filter(Boolean);
+  let matchedKey=directKeys.find((k)=>players[k]);
+  let entry=matchedKey?players[matchedKey]:null;
+  if(!entry&&email){
+    const byEmail=Object.entries(players).find(([,value])=>String(value?.email??'').trim().toLowerCase()===email);
+    if(byEmail){
+      matchedKey=String(byEmail[0]??'').trim();
+      entry=byEmail[1];
+    }
+  }
   if(!entry)return;
+  if(idRaw&&matchedKey&&matchedKey!==idRaw&&!players[idRaw]){
+    players[idRaw]={...entry,id:idRaw};
+    saveLeaderboardStore(store);
+    entry=players[idRaw];
+  }
   const inGame=state.screen==='game'&&Array.isArray(state.solo.players)&&state.solo.players.length>0&&!state.solo.gameOver;
   if(inGame&&!force)return;
   const restored=scoreFromStoredTotal(entry.totalScore);
@@ -892,7 +912,7 @@ async function hydrateProfileFromCloudByIdentity(identity){
   initFirebaseIfReady();
   try{
     const ids=identityLookupIds(identity);
-    if(!ids.length)return false;
+    if(!ids.length)return{status:'not_found'};
     let data=null;
     let foundId='';
     let readFailed=false;
@@ -927,9 +947,9 @@ async function hydrateProfileFromCloudByIdentity(identity){
           saveLeaderboardStore(store);
         }
         state.home.google.profileMissing=false;
-        return true;
+        return{status:'not_found'};
       }
-      return false;
+      return{status:'error'};
     }
     const d=data;
     const restoredName=String(d.name??'').trim().slice(0,18);
@@ -971,10 +991,10 @@ async function hydrateProfileFromCloudByIdentity(identity){
         updatedAt:Number(d.updatedAt)||Date.now()
       },{merge:true});
     }
-    return true;
+    return{status:'found'};
   }catch(err){
     console.error('profile hydrate failed',err);
-    return false;
+    return{status:'error'};
   }
 }
 function initFirebaseIfReady(){
@@ -1233,6 +1253,7 @@ const {
   mergeBrowserGoogleProfile
 }=googleProfileHelpers;
 function signedInForPlay(){
+  if(state.home.google?.hydrating)return false;
   if(state.home.google?.profileMissing)return false;
   const authUser=firebaseAuth?.currentUser;
   if(authUser?.uid)return true;
@@ -1258,6 +1279,7 @@ const googleSessionHelpers=createGoogleSessionHelpers({
 });
 const {
   clearGoogleSession,
+  hydrateProfileBlocking,
   handleCredentialResponse,
   loadGoogleSession,
   saveGoogleSession,
@@ -2399,8 +2421,28 @@ function botLeaderboardIdentity(name,gender){
   return{id:safe.toLowerCase(),name:safe,email:'',gender:g,isBot:true,picture:'',settings:{}};
 }
 function identityLookupIds(identity){
-  const id=String(identity?.id??'').trim().toLowerCase();
-  return id?[id]:[];
+  const ids=[
+    String(identity?.id??'').trim(),
+    String(identity?.email??'').trim().toLowerCase(),
+    String(state.home.google?.uid??'').trim(),
+    String(state.home.google?.sub??'').trim()
+  ].filter(Boolean);
+  const seen=new Set();
+  const out=[];
+  ids.forEach((value)=>{
+    const raw=String(value).trim();
+    if(!raw)return;
+    if(!seen.has(raw)){
+      seen.add(raw);
+      out.push(raw);
+    }
+    const lower=raw.toLowerCase();
+    if(lower&&!seen.has(lower)){
+      seen.add(lower);
+      out.push(lower);
+    }
+  });
+  return out;
 }
 function ensureLeaderboardEntry(store,identity){
   const safe=String(identity?.name??identity??'').trim().slice(0,32);
@@ -2561,7 +2603,7 @@ window.onGoogleScriptLoaded=()=>{if(state.screen==='home')onGoogleScriptLoaded(r
 function bootFirebase(attempt=0){
   if(initFirebaseIfReady()){
     if(signedInWithEmail()){
-      void hydrateProfileFromCloudByIdentity(currentLeaderboardIdentity()).then(()=>{if(state.home.showLeaderboard)refreshLeaderboard(true);render();});
+      void hydrateProfileBlocking().then(()=>{if(state.home.showLeaderboard)refreshLeaderboard(true);render();});
     }
     refreshLeaderboard(true);
     void loadActiveRoomPointer();
