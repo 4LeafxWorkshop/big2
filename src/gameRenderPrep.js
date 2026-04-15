@@ -18,6 +18,14 @@ function buildTurnCompassHtml(v,t){
   return`<div class="table-turn-compass" data-active-seat="${activeSeatCls}" aria-label="${t('turn')}"><span class="table-turn-compass-ring"><span class="table-turn-pointer"></span></span></div>`;
 }
 
+function buildTableInventoryDecorHtml(withBase){
+  return`<div class="table-inventory-decor" aria-hidden="true">
+    <img class="table-inventory-item table-inventory-lemontea" src="${withBase('emotes/emote-lemontea.png')}" alt=""/>
+    <img class="table-inventory-item table-inventory-eggtart" src="${withBase('emotes/emote-eggtart.png')}" alt=""/>
+    <img class="table-inventory-item table-inventory-milktea" src="${withBase('emotes/emote-milktea.png')}" alt=""/>
+  </div>`;
+}
+
 export function buildSelfRenderState(params){
   const {
     self,
@@ -409,6 +417,7 @@ export function buildGameShellMarkup(params){
     renderGameShell,
     centerMovesHtml,
     centerLastMovesHtml,
+    withBase=(path)=>String(path??''),
     congratsOverlayHtml,
     revealHtml,
     resultScreenHtml,
@@ -425,6 +434,7 @@ export function buildGameShellMarkup(params){
     centerMovesHtml:centerMovesHtml(v),
     centerLastMovesHtml:centerLastMovesHtml(lastActions,v.selfSeat),
     turnCompassHtml:buildTurnCompassHtml(v,t),
+    inventoryDecorHtml:buildTableInventoryDecorHtml(withBase),
     showWinCelebrate:!v.gameOver&&youWin,
     t
   });

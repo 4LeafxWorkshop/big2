@@ -499,6 +499,8 @@ let turnLockUntil=0;
 let calloutDisplayEnabled=true;
 let emoteDisplayEnabled=true;
 let vibrateEnabled=true;
+let nativeHaptics=null;
+let nativeHapticsLoadAttempted=false;
 let calloutVoiceMode='auto'; // auto | recorded | off
 let calloutStylePack='energetic'; // forced energetic
 let orientationBlockActive=false;
@@ -3832,9 +3834,61 @@ function playSound(kind){
 function triggerVibration(pattern){
   try{
     if(!vibrateEnabled)return;
+    const cap=window.Capacitor;
+    const platform=String(cap?.getPlatform?.()||'').toLowerCase();
+    const isNativePlatform=Boolean(cap?.isNativePlatform?.()||platform==='ios'||platform==='android');
+    const useNativeHaptics=isNativePlatform&&(platform==='ios'||platform==='android');
+    if(useNativeHaptics){
+      void triggerNativeHaptics(pattern);
+      return;
+    }
     if(typeof navigator?.vibrate!=='function')return;
     navigator.vibrate(pattern);
   }catch{}
+}
+async function loadNativeHaptics(){
+  if(nativeHapticsLoadAttempted)return nativeHaptics;
+  nativeHapticsLoadAttempted=true;
+  try{
+    const cap=window.Capacitor;
+    const direct=cap?.Plugins?.Haptics;
+    if(direct&&typeof direct.vibrate==='function'){
+      nativeHaptics=direct;
+      return nativeHaptics;
+    }
+  }catch{}
+  try{
+    const mod=await import('@capacitor/haptics');
+    const api=mod?.Haptics;
+    if(api&&typeof api.vibrate==='function'){
+      nativeHaptics=api;
+      return nativeHaptics;
+    }
+  }catch{}
+  return null;
+}
+async function triggerNativeHaptics(pattern){
+  const api=await loadNativeHaptics();
+  if(!api||typeof api.vibrate!=='function')return;
+  const arr=Array.isArray(pattern)?pattern:[Number(pattern)||80];
+  const pulses=arr
+    .map((v,i)=>({v:Number(v)||0,i}))
+    .filter((x)=>x.i%2===0&&x.v>0)
+    .map((x)=>Math.max(10,Math.trunc(x.v)));
+  if(!pulses.length){
+    try{await api.vibrate({duration:80});}catch{}
+    return;
+  }
+  let delay=0;
+  pulses.forEach((duration,index)=>{
+    const run=()=>{
+      try{void api.vibrate({duration:Math.min(duration,500)});}catch{}
+    };
+    if(index===0)run();
+    else window.setTimeout(run,delay);
+    const off=Number(arr[(index*2)+1]||0);
+    delay+=duration+Math.max(0,off);
+  });
 }
 function playWinSfxThen(fn,delayFallback=2000){
   const seq=++winSfxSeq;
@@ -5271,6 +5325,7 @@ function renderGame(){
     renderGameShell,
     centerMovesHtml,
     centerLastMovesHtml,
+    withBase,
     congratsOverlayHtml,
     revealHtml:(view)=>revealHtml(view,arr),
     resultScreenHtml:(view)=>resultScreenHtml(view,arr),

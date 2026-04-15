@@ -65,7 +65,7 @@ test('renderGameActionZone renders controls, hand, and drag popup', ()=>{
   assert.match(html,/id="suggest-btn"/);
   assert.match(html,/id="auto-sort-btn"/);
   assert.match(html,/id="drag-popup"/);
-  assert.match(html,/recommend-glow-play/);
+  assert.doesNotMatch(html,/recommend-glow-play/);
 });
 
 test('renderGameSelfTagHtml renders the self tag block', ()=>{

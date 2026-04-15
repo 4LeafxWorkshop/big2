@@ -4075,9 +4075,58 @@ body[data-screen='game'] .table-center-stack {
   justify-items: center;
   padding: 6px;
 }
+.table-inventory-decor {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  display: none;
+}
+.table-inventory-item {
+  position: absolute;
+  display: block;
+  height: auto;
+  max-width: none;
+  filter: drop-shadow(0 10px 18px rgba(0, 0, 0, .28));
+  user-select: none;
+}
+.table-inventory-lemontea {
+  left: clamp(-8px, -1vw, -2px);
+  bottom: clamp(42px, 6.6vmin, 72px);
+  width: clamp(96px, 16.5vmin, 128px);
+}
+.table-inventory-eggtart {
+  right: clamp(-10px, -1vw, -2px);
+  top: clamp(4px, 1vmin, 12px);
+  width: clamp(102px, 16.5vmin, 146px);
+}
+.table-inventory-milktea {
+  right: clamp(-14px, -1.4vw, -3px);
+  bottom: clamp(2px, 1vmin, 14px);
+  width: clamp(116px, 19.5vmin, 162px);
+}
 @media (min-width: 861px) {
   body[data-screen='game'] .table {
     overflow: visible;
+  }
+}
+@media (max-width: 860px) and (orientation: portrait) {
+  .table-inventory-lemontea {
+    left: -8px;
+    bottom: clamp(66px, 9.8vmin, 102px);
+    width: clamp(104px, 20.2vmin, 138px);
+  }
+  .table-inventory-eggtart {
+    left: auto;
+    right: 4px;
+    top: 6px;
+    width: clamp(102px, 18.8vmin, 134px);
+  }
+  .table-inventory-milktea {
+    left: auto;
+    right: 2px;
+    bottom: clamp(22px, 3.9vmin, 38px);
+    width: clamp(112px, 20.5vmin, 146px);
   }
 }
 .seat {

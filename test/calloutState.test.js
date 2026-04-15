@@ -8,6 +8,7 @@ function makeController(overrides={}){
   const scheduled=[];
   const cleared=[];
   const sounds=[];
+  const vibrations=[];
   const locked=[];
   const stateRefs={
     playTypeCallState:{key:'',seat:0,text:'',until:0,startedAt:0,nonce:'',historyLen:0},
@@ -33,10 +34,11 @@ function makeController(overrides={}){
     lockTurnProgress:(ms)=>{locked.push(ms);},
     clearCalloutStates:(kind)=>{cleared.push(kind);},
     playSound:(id)=>{sounds.push(id);},
+    triggerVibration:(pattern)=>{vibrations.push(pattern);},
     speakCallout:(text,gender,meta)=>{spoken.push({text,gender,meta});},
     t:(key)=>key
   });
-  return{controller,stateRefs,spoken,scheduled,cleared,sounds,locked};
+  return{controller,stateRefs,spoken,scheduled,cleared,sounds,locked,vibrations};
 }
 
 test('callout state controller creates pass callout and reuses it until expiry', ()=>{
