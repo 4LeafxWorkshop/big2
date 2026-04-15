@@ -501,6 +501,7 @@ let emoteDisplayEnabled=true;
 let vibrateEnabled=true;
 let nativeHaptics=null;
 let nativeHapticsLoadAttempted=false;
+let hapticFallbackTimer=null;
 let calloutVoiceMode='auto'; // auto | recorded | off
 let calloutStylePack='energetic'; // forced energetic
 let orientationBlockActive=false;
@@ -3842,9 +3843,26 @@ function triggerVibration(pattern){
       void triggerNativeHaptics(pattern);
       return;
     }
-    if(typeof navigator?.vibrate!=='function')return;
-    navigator.vibrate(pattern);
+    if(typeof navigator?.vibrate!=='function'){
+      triggerHapticFallbackPulse();
+      return;
+    }
+    const ok=navigator.vibrate(pattern);
+    if(!ok)triggerHapticFallbackPulse();
   }catch{}
+}
+function triggerHapticFallbackPulse(){
+  const body=document.body;
+  if(!(body instanceof HTMLElement))return;
+  body.setAttribute('data-haptic-fallback','0');
+  // Force restart of CSS pulse animation when called repeatedly.
+  void body.offsetWidth;
+  body.setAttribute('data-haptic-fallback','1');
+  if(hapticFallbackTimer)window.clearTimeout(hapticFallbackTimer);
+  hapticFallbackTimer=window.setTimeout(()=>{
+    hapticFallbackTimer=null;
+    body.setAttribute('data-haptic-fallback','0');
+  },220);
 }
 async function loadNativeHaptics(){
   if(nativeHapticsLoadAttempted)return nativeHaptics;

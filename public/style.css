@@ -11804,6 +11804,17 @@ body[data-screen='game'] .table-center-grid-wrap {
 body[data-screen='game'] .table {
   position: relative !important;
 }
+body[data-screen='game'][data-haptic-fallback='1'] .table {
+  box-shadow:
+    inset 0 0 0 2px rgba(255, 220, 128, .55),
+    0 0 18px rgba(255, 220, 128, .32);
+  filter: saturate(1.08) brightness(1.03);
+  transition: box-shadow .12s ease, filter .12s ease;
+}
+body[data-screen='game'][data-haptic-fallback='1'] .action-strip {
+  box-shadow: 0 0 14px rgba(255, 220, 128, .28);
+  transition: box-shadow .12s ease;
+}
 body[data-screen='game'] {
   --table-felt-inset: clamp(12px, 1.7vw, 20px);
   --room-top-meta-offset-top: var(--table-felt-inset);
