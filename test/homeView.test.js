@@ -22,6 +22,7 @@ function render(overrides={}){
     soundEnabled:true,
     calloutDisplayEnabled:false,
     emoteDisplayEnabled:true,
+    vibrateEnabled:true,
     cardBackRight:'<div id="back-right"></div>',
     soloBtnHtml:'<button id="solo-start">solo</button>',
     roomButtonsHtml:'<button id="room-create">room</button>',
@@ -45,6 +46,7 @@ test('renderHomeMarkup includes the main home controls and optional overlays', (
   assert.match(html,/id="home-more-settings-panel"/);
   assert.match(html,/id="callout-display-slider"/);
   assert.match(html,/id="emote-display-slider"/);
+  assert.match(html,/id="vibrate-slider"/);
   assert.match(html,/id="sound-slider"/);
   assert.match(html,/id="intro-panel"/);
   assert.match(html,/id="score-guide"/);
@@ -98,6 +100,7 @@ test('renderHomeSettingsCardHtml renders settings and toggles', ()=>{
     soundEnabled:true,
     calloutDisplayEnabled:false,
     emoteDisplayEnabled:true,
+    vibrateEnabled:true,
     moreSettingsOpen:true,
     cardBackRight:'<div id="back-right"></div>'
   });

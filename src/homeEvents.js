@@ -14,6 +14,7 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
     bindSoundToggle,
     bindCalloutDisplayToggle,
     bindEmoteDisplayToggle,
+    bindVibrateToggle=()=>{},
     setRoomError,
     t,
     loadActiveRooms,
@@ -159,6 +160,7 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
     bindSoundToggle('sound-slider');
     bindCalloutDisplayToggle('callout-display-slider');
     bindEmoteDisplayToggle('emote-display-slider');
+    bindVibrateToggle('vibrate-slider');
 
     const handleSoloStart=async()=>{
       if(!signedInForPlay())return;

@@ -6,6 +6,8 @@ export function createProfileSettingsHelpers(deps){
     getSoundEnabled,
     getCalloutDisplayEnabled,
     getEmoteDisplayEnabled,
+    getVibrateEnabled=()=>true,
+    setVibrateEnabled=()=>{},
     normalizeCalloutStylePack,
     getCalloutStylePack,
     currentLeaderboardIdentity,
@@ -65,6 +67,7 @@ export function createProfileSettingsHelpers(deps){
       soundEnabled:Boolean(getSoundEnabled()),
       calloutDisplayEnabled:Boolean(getCalloutDisplayEnabled()),
       emoteDisplayEnabled:Boolean(getEmoteDisplayEnabled()),
+      vibrateEnabled:Boolean(getVibrateEnabled()),
       calloutVoiceMode:getSoundEnabled()?'auto':'off',
       calloutStylePack:normalizeCalloutStylePack(getCalloutStylePack()),
       gender:state.home.gender==='female'?'female':'male',
@@ -85,6 +88,7 @@ export function createProfileSettingsHelpers(deps){
     if(typeof settings.soundEnabled==='boolean')deps.setSoundEnabled(Boolean(settings.soundEnabled));
     if(typeof settings.calloutDisplayEnabled==='boolean')deps.setCalloutDisplayEnabled(Boolean(settings.calloutDisplayEnabled));
     if(typeof settings.emoteDisplayEnabled==='boolean')deps.setEmoteDisplayEnabled(Boolean(settings.emoteDisplayEnabled));
+    if(typeof settings.vibrateEnabled==='boolean')setVibrateEnabled(Boolean(settings.vibrateEnabled));
     deps.setCalloutVoiceMode(getSoundEnabled()?'auto':'off');
     deps.setCalloutStylePack(normalizeCalloutStylePack(settings.calloutStylePack));
     const gender=String(settings.gender??'');

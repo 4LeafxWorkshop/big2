@@ -14,6 +14,7 @@ function createHelpers(stateOverrides={}){
   let soundEnabled=true;
   let calloutDisplayEnabled=false;
   let emoteDisplayEnabled=true;
+  let vibrateEnabled=true;
   let calloutStylePack='classic';
   let calloutVoiceMode='auto';
   const helpers=createProfileSettingsHelpers({
@@ -26,6 +27,8 @@ function createHelpers(stateOverrides={}){
     setCalloutDisplayEnabled:(value)=>{calloutDisplayEnabled=value;},
     getEmoteDisplayEnabled:()=>emoteDisplayEnabled,
     setEmoteDisplayEnabled:(value)=>{emoteDisplayEnabled=value;},
+    getVibrateEnabled:()=>vibrateEnabled,
+    setVibrateEnabled:(value)=>{vibrateEnabled=value;},
     normalizeCalloutStylePack:(value)=>value||'classic',
     getCalloutStylePack:()=>calloutStylePack,
     setCalloutStylePack:(value)=>{calloutStylePack=value;},
@@ -39,7 +42,7 @@ function createHelpers(stateOverrides={}){
   return{
     state,
     helpers,
-    getFlags:()=>({soundEnabled,calloutDisplayEnabled,emoteDisplayEnabled,calloutStylePack,calloutVoiceMode})
+    getFlags:()=>({soundEnabled,calloutDisplayEnabled,emoteDisplayEnabled,vibrateEnabled,calloutStylePack,calloutVoiceMode})
   };
 }
 
@@ -49,6 +52,7 @@ test('collectMainSettings reflects current state and toggles', ()=>{
   assert.equal(settings.language,'zh-HK');
   assert.equal(settings.backColor,'red');
   assert.equal(settings.soundEnabled,true);
+  assert.equal(settings.vibrateEnabled,true);
 });
 
 test('applyMainSettings updates state and mutable flags', ()=>{
@@ -60,6 +64,7 @@ test('applyMainSettings updates state and mutable flags', ()=>{
     soundEnabled:false,
     calloutDisplayEnabled:true,
     emoteDisplayEnabled:false,
+    vibrateEnabled:false,
     calloutStylePack:'minimal',
     gender:'female',
     avatarChoice:'google'
@@ -73,6 +78,7 @@ test('applyMainSettings updates state and mutable flags', ()=>{
     soundEnabled:false,
     calloutDisplayEnabled:true,
     emoteDisplayEnabled:false,
+    vibrateEnabled:false,
     calloutStylePack:'minimal',
     calloutVoiceMode:'off'
   });

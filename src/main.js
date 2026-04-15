@@ -498,6 +498,7 @@ let calloutGateUntilPlay=false;
 let turnLockUntil=0;
 let calloutDisplayEnabled=true;
 let emoteDisplayEnabled=true;
+let vibrateEnabled=true;
 let calloutVoiceMode='auto'; // auto | recorded | off
 let calloutStylePack='energetic'; // forced energetic
 let orientationBlockActive=false;
@@ -845,6 +846,8 @@ const {
   setCalloutDisplayEnabled:(value)=>{calloutDisplayEnabled=value;},
   getEmoteDisplayEnabled:()=>emoteDisplayEnabled,
   setEmoteDisplayEnabled:(value)=>{emoteDisplayEnabled=value;},
+  getVibrateEnabled:()=>vibrateEnabled,
+  setVibrateEnabled:(value)=>{vibrateEnabled=value;},
   normalizeCalloutStylePack,
   getCalloutStylePack:()=>calloutStylePack,
   setCalloutStylePack:(value)=>{calloutStylePack=value;},
@@ -3828,6 +3831,7 @@ function playSound(kind){
 }
 function triggerVibration(pattern){
   try{
+    if(!vibrateEnabled)return;
     if(typeof navigator?.vibrate!=='function')return;
     navigator.vibrate(pattern);
   }catch{}
@@ -4670,6 +4674,16 @@ function bindEmoteDisplayToggle(sliderId){
   };
   slider.addEventListener('input',sync);
 }
+function bindVibrateToggle(sliderId){
+  const slider=document.querySelector(`#${sliderId} .setting-slider`);
+  if(!slider||typeof slider!=='object'||!('value' in slider))return;
+  const sync=()=>{
+    const enabled=Number(slider.value)>=1;
+    vibrateEnabled=enabled;
+    slider.parentElement?.style.setProperty('--setting-index',enabled?'1':'0');
+  };
+  slider.addEventListener('input',sync);
+}
 function difficultyIndex(value){
   if(value==='easy')return 0;
   if(value==='hard')return 2;
@@ -4814,6 +4828,7 @@ function renderHome(){
     soundEnabled:Boolean(sound.enabled),
     calloutDisplayEnabled:Boolean(calloutDisplayEnabled),
     emoteDisplayEnabled:Boolean(emoteDisplayEnabled),
+    vibrateEnabled:Boolean(vibrateEnabled),
     moreSettingsOpen:Boolean(state.home.showMoreSettings),
     cardBackRight,
     soloBtnHtml,
@@ -4842,6 +4857,7 @@ function renderHome(){
     bindSoundToggle,
     bindCalloutDisplayToggle,
     bindEmoteDisplayToggle,
+    bindVibrateToggle,
     setRoomError,
     t,
     loadActiveRooms,
