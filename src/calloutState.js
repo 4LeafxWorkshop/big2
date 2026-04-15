@@ -10,6 +10,7 @@ export function createCalloutStateController({
   lockTurnProgress,
   clearCalloutStates,
   playSound,
+  triggerVibration,
   speakCallout,
   t
 }){
@@ -112,6 +113,7 @@ export function createCalloutStateController({
     scheduleCalloutExpiry(lastCardCallState.until);
     lockTurnProgress(900);
     clearCalloutStates('last');
+    triggerVibration([90,45,90]);
     playSound('last');
     speakCallout(lastCardCallState.text||t('lastCardCall'),seatGenderBySeat(v,latest.seat),{clipKey:'last',seat:latest.seat});
     return latest.seat;
@@ -157,6 +159,10 @@ export function createCalloutStateController({
       scheduleCalloutExpiry(playTypeCallState.until);
       lockTurnProgress(900);
       clearCalloutStates('play');
+      const playKind=String(lastPlay.kind||'').toLowerCase();
+      if(playKind==='fourofkind'||playKind==='straightflush'){
+        triggerVibration([70,35,70,35,100]);
+      }
       speakCallout(playTypeCallState.text,seatGenderBySeat(v,lastPlay.seat),{clipKey:`kind-${String(lastPlay.kind||'').toLowerCase()}`,seat:lastPlay.seat});
     }
     if(playTypeCallState.historyLen>0&&v.history.length===playTypeCallState.historyLen){

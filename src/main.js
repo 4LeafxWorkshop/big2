@@ -3826,6 +3826,12 @@ function playSound(kind){
   }
   if(kind==='win'){playTone(392,0.13,'triangle',0.03);playTone(523,0.14,'triangle',0.03,0.06);playTone(659,0.2,'triangle',0.03,0.12);}
 }
+function triggerVibration(pattern){
+  try{
+    if(typeof navigator?.vibrate!=='function')return;
+    navigator.vibrate(pattern);
+  }catch{}
+}
 function playWinSfxThen(fn,delayFallback=2000){
   const seq=++winSfxSeq;
   let done=false;
@@ -4065,6 +4071,7 @@ const {
   lockTurnProgress,
   clearCalloutStates,
   playSound,
+  triggerVibration,
   speakCallout,
   t
 });
