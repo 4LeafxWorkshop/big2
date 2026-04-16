@@ -45,6 +45,7 @@ import {createIntroGuideHelpers} from './introGuide.js';
 import {createRoomLifecycleController} from './roomLifecycle.js';
 import {createRoomGameRuntimeController} from './roomGameRuntime.js';
 import {createRoomExpiryHelpers} from './roomExpiry.js';
+import {createServiceBellController} from './serviceBell.js';
 import {createRoomIdentityHelpers} from './roomIdentity.js';
 import {createRoomMutationsController} from './roomMutations.js';
 import {createRoomActionsController} from './roomActions.js';
@@ -3832,6 +3833,15 @@ function playSound(kind){
   }
   if(kind==='win'){playTone(392,0.13,'triangle',0.03);playTone(523,0.14,'triangle',0.03,0.06);playTone(659,0.2,'triangle',0.03,0.12);}
 }
+const serviceBellController=createServiceBellController({
+  documentRef:()=>document,
+  windowRef:()=>window,
+  withBase:(path)=>withBase(path),
+  unlockAudio,
+  getSoundEnabled:()=>sound.enabled,
+  createAudio:(src)=>new Audio(src)
+});
+globalThis.serviceBellTrigger=()=>serviceBellController.trigger();
 function triggerVibration(pattern){
   try{
     if(!vibrateEnabled)return;
@@ -5556,6 +5566,7 @@ function render(){
   syncWebViewportGuardAttrs();
   syncRoomCountdownTicker();
   if(shouldBlockLandscapeMobile()){
+    serviceBellController.sync({active:false,portraitMode:isPortraitMode()});
     app.innerHTML=`<section class="orientation-block"><div class="orientation-card"><div class="orientation-hero" aria-hidden="true"><span class="orientation-phone">📱</span><span class="orientation-rotate">↻</span></div><h2>${esc(t('portraitTitle'))}</h2><p>${esc(t('portraitBody'))}</p></div></section>`;
     return;
   }
@@ -5563,6 +5574,7 @@ function render(){
   if(state.screen==='config'){renderConfig();return;}
   if(state.screen==='opponents'){renderOpponents();return;}
   renderGame();
+  serviceBellController.sync({active:state.screen==='game',portraitMode:isPortraitMode()});
 }
 function syncViewport(){
   const root=document.documentElement;

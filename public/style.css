@@ -8941,6 +8941,22 @@ body[data-screen='game'] .action-strip .control-row #suggest-btn.game-cta-btn:fo
 body[data-screen='game'] .action-strip .control-row #suggest-btn.game-cta-btn:active {
   transform: none !important;
 }
+body[data-screen='game'] .action-strip .control-row #bell-toggle.game-cta-btn::before {
+  content: none !important;
+}
+body[data-screen='game'] .action-strip .control-row #bell-toggle.game-cta-btn:hover,
+body[data-screen='game'] .action-strip .control-row #bell-toggle.game-cta-btn:focus-visible {
+  transform: none !important;
+  box-shadow: none !important;
+}
+body[data-screen='game'] .action-strip .control-row #bell-toggle.game-cta-btn:hover::before,
+body[data-screen='game'] .action-strip .control-row #bell-toggle.game-cta-btn:focus-visible::before {
+  opacity: 0 !important;
+  transform: none !important;
+}
+body[data-screen='game'] .action-strip .control-row #bell-toggle.game-cta-btn:active {
+  transform: translateY(1px) scale(.93) !important;
+}
 body[data-screen='game'] .action-strip .control-row #play-btn.recommend-glow-play:hover,
 body[data-screen='game'] .action-strip .control-row #play-btn.recommend-glow-play:focus-visible,
 body[data-screen='game'] .action-strip .control-row #play-btn.recommend-glow-play:active,
@@ -8965,6 +8981,9 @@ body[data-screen='game'] .action-strip .control-row #pass-btn.recommend-glow {
     inset 0 1px 0 rgba(255,255,255,.18) !important;
   color: #fff7f8 !important;
 }
+body[data-screen='game'] .action-strip .control-row #bell-toggle:active {
+  transform: translateY(1px) scale(.93) !important;
+}
 body[data-screen='game'] .action-strip .control-row .game-icon-btn {
   display: inline-flex;
   align-items: center;
@@ -8988,6 +9007,102 @@ body[data-screen='game'] .action-strip .control-row .game-icon-btn .sort-icon {
   height: 18px;
   display: block;
   flex: 0 0 auto;
+}
+body[data-screen='game'] .service-bell-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 9400;
+  pointer-events: none;
+  overflow: hidden;
+}
+body[data-screen='game'] .table > .service-bell-layer {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 9400 !important;
+}
+body[data-screen='game'] .service-bell-layer .service-bell-hero-wrap {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: clamp(84px, 13.5vmin, 138px);
+  transform: translate(-50%, -50%);
+}
+body[data-screen='game'] .service-bell-layer .service-bell-hero {
+  width: 100%;
+  height: auto;
+  display: block;
+  opacity: 0;
+  filter: drop-shadow(0 14px 20px rgba(0,0,0,.3));
+  transform-origin: center top;
+}
+body[data-screen='game'] .service-bell-layer.is-ready .service-bell-hero {
+  animation: serviceBellDropBounce 1.05s cubic-bezier(.18, 1.2, .25, 1) forwards;
+}
+body[data-screen='game'] .service-bell-food-layer {
+  position: absolute;
+  inset: 0;
+}
+body[data-screen='game'] .service-bell-food {
+  position: absolute;
+  left: var(--slot-x);
+  top: var(--slot-y);
+  width: var(--food-w, 120px);
+  height: auto;
+  display: block;
+  opacity: 1;
+  will-change: transform, opacity;
+  filter: drop-shadow(0 10px 16px rgba(0,0,0,.28));
+  transform: translate(-50%, -50%) translateX(0);
+  transition:
+    left 420ms cubic-bezier(.2, 1, .22, 1),
+    top 420ms cubic-bezier(.2, 1, .22, 1),
+    transform 560ms cubic-bezier(.18, 1.18, .26, 1),
+    opacity 180ms ease;
+}
+body[data-screen='game'] .service-bell-food.service-bell-dir-left { --offscreen-x: -162vw; }
+body[data-screen='game'] .service-bell-food.service-bell-dir-right { --offscreen-x: 162vw; }
+body[data-screen='game'] .service-bell-food.is-entering,
+body[data-screen='game'] .service-bell-food.is-exiting {
+  opacity: 0;
+}
+body[data-screen='game'] .service-bell-food.is-entering.service-bell-dir-left,
+body[data-screen='game'] .service-bell-food.is-exiting.service-bell-dir-left {
+  transform: translate(-50%, -50%) translateX(var(--offscreen-x));
+}
+body[data-screen='game'] .service-bell-food.is-entering.service-bell-dir-right,
+body[data-screen='game'] .service-bell-food.is-exiting.service-bell-dir-right {
+  transform: translate(-50%, -50%) translateX(var(--offscreen-x));
+}
+body[data-screen='game'] .service-bell-layer[data-orientation='portrait'] .service-bell-slot-tl { --slot-x: 16%; --slot-y: 20%; }
+body[data-screen='game'] .service-bell-layer[data-orientation='portrait'] .service-bell-slot-tr { --slot-x: 84%; --slot-y: 20%; }
+body[data-screen='game'] .service-bell-layer[data-orientation='portrait'] .service-bell-slot-ml { --slot-x: 14%; --slot-y: 79%; }
+body[data-screen='game'] .service-bell-layer[data-orientation='portrait'] .service-bell-slot-mr { --slot-x: 86%; --slot-y: 79%; }
+body[data-screen='game'] .service-bell-layer[data-orientation='landscape'] .service-bell-slot-tl { --slot-x: 8%; --slot-y: 26%; }
+body[data-screen='game'] .service-bell-layer[data-orientation='landscape'] .service-bell-slot-tr { --slot-x: 92%; --slot-y: 26%; }
+body[data-screen='game'] .service-bell-layer[data-orientation='landscape'] .service-bell-slot-ml { --slot-x: 10%; --slot-y: 72%; }
+body[data-screen='game'] .service-bell-layer[data-orientation='landscape'] .service-bell-slot-mr { --slot-x: 90%; --slot-y: 72%; }
+@keyframes serviceBellDropBounce {
+  0% {
+    opacity: 0;
+    transform: translateY(-180px) scale(.82);
+  }
+  28% {
+    opacity: 1;
+    transform: translateY(0) scale(1.02);
+  }
+  45% {
+    transform: translateY(14px) scale(.98);
+  }
+  62% {
+    transform: translateY(-8px) scale(1.01);
+  }
+  78% {
+    transform: translateY(4px) scale(.995);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 body[data-screen='game'] .action-strip .control-row #auto-sort-btn {
   margin-left: auto;
@@ -9029,14 +9144,17 @@ body[data-screen='game'] .action-strip .control-row .game-icon-btn:disabled {
   .last-card-call,
   .emote-panel,
   .table-emote,
-  .self-table-emote {
+  .self-table-emote,
+  .service-bell-hero,
+  .service-bell-food {
     animation: none !important;
   }
   body[data-screen='game'] .action-strip .control-row .game-cta-btn,
   body[data-screen='game'] .action-strip .control-row .game-cta-btn::before,
   .emote-panel .emote-btn,
   .emote-panel .emote-btn img,
-  .game-log-fab {
+  .game-log-fab,
+  .service-bell-food {
     transition: none !important;
   }
 }

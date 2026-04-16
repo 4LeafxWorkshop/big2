@@ -570,6 +570,10 @@ function bindActionControls({
     if(v.gameOver)return;
     openEmotePicker(!state.emote.open);
   });
+  document.getElementById('bell-toggle')?.addEventListener('click',()=>{
+    if(v.gameOver)return;
+    globalThis.serviceBellTrigger?.();
+  });
   app.querySelectorAll('[data-emote-id]').forEach((el)=>{
     const id=el.getAttribute('data-emote-id');
     if(!id)return;
