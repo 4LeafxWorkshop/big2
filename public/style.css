@@ -5000,7 +5000,6 @@ body[data-screen='game'] .table-center-stack {
     0 0 0 2px rgba(255, 214, 128, .65),
     0 0 18px rgba(255, 214, 128, .65),
     0 0 34px rgba(255, 214, 128, .45);
-  animation: recommendGlowPulse 1.6s ease-in-out infinite;
 }
 .recommend-glow-play {
   position: relative;
@@ -5008,35 +5007,6 @@ body[data-screen='game'] .table-center-stack {
     0 0 0 2px rgba(82, 210, 115, .6),
     0 0 18px rgba(82, 210, 115, .6),
     0 0 34px rgba(82, 210, 115, .4);
-  animation: recommendGlowPlayPulse 1.6s ease-in-out infinite;
-}
-@keyframes recommendGlowPulse {
-  0%, 100% {
-    box-shadow:
-      0 0 0 2px rgba(255, 214, 128, .6),
-      0 0 14px rgba(255, 214, 128, .55),
-      0 0 26px rgba(255, 214, 128, .4);
-  }
-  50% {
-    box-shadow:
-      0 0 0 2px rgba(255, 214, 128, .85),
-      0 0 22px rgba(255, 214, 128, .8),
-      0 0 44px rgba(255, 214, 128, .65);
-  }
-}
-@keyframes recommendGlowPlayPulse {
-  0%, 100% {
-    box-shadow:
-      0 0 0 2px rgba(82, 210, 115, .55),
-      0 0 14px rgba(82, 210, 115, .5),
-      0 0 26px rgba(82, 210, 115, .38);
-  }
-  50% {
-    box-shadow:
-      0 0 0 2px rgba(82, 210, 115, .85),
-      0 0 22px rgba(82, 210, 115, .78),
-      0 0 44px rgba(82, 210, 115, .6);
-  }
 }
 .recommend-hint.rec-empty {
   background:
@@ -5414,6 +5384,7 @@ body[data-screen='game'] .table-center-stack {
 .action-strip .control-row #play-btn { order: 2; }
 .action-strip .control-row #pass-btn { order: 3; }
 .action-strip .control-row #emote-toggle { order: 7; }
+.action-strip .control-row #bell-toggle { order: 8; }
 .action-strip .control-row .room-top-meta { order: 5; }
 .action-strip .control-row #auto-sort-btn { order: 6; }
 .action-strip .hand {
@@ -8015,6 +7986,7 @@ body[data-screen='game'] .score-guide-modal {
   }
   body[data-screen='game'][data-game-mode='room'] .action-strip .control-row #auto-sort-btn { order: 6; margin-left: 0 !important; }
   body[data-screen='game'] .action-strip .control-row #emote-toggle { order: 7; }
+  body[data-screen='game'] .action-strip .control-row #bell-toggle { order: 8; }
   body[data-screen='game'][data-game-mode='room'] .action-strip .control-row #auto-sort-btn {
     margin-left: auto !important;
   }
@@ -8963,6 +8935,35 @@ body[data-screen='game'] .action-strip .control-row #pass-btn.game-cta-btn .pass
 body[data-screen='game'] .action-strip .control-row #suggest-btn.game-cta-btn {
   background: linear-gradient(180deg, rgba(90,110,122,.88), rgba(56,73,86,.92)) !important;
   color: #e9f1f6 !important;
+}
+body[data-screen='game'] .action-strip .control-row #suggest-btn.game-cta-btn:hover,
+body[data-screen='game'] .action-strip .control-row #suggest-btn.game-cta-btn:focus-visible,
+body[data-screen='game'] .action-strip .control-row #suggest-btn.game-cta-btn:active {
+  transform: none !important;
+}
+body[data-screen='game'] .action-strip .control-row #play-btn.recommend-glow-play:hover,
+body[data-screen='game'] .action-strip .control-row #play-btn.recommend-glow-play:focus-visible,
+body[data-screen='game'] .action-strip .control-row #play-btn.recommend-glow-play:active,
+body[data-screen='game'] .action-strip .control-row #pass-btn.recommend-glow:hover,
+body[data-screen='game'] .action-strip .control-row #pass-btn.recommend-glow:focus-visible,
+body[data-screen='game'] .action-strip .control-row #pass-btn.recommend-glow:active {
+  transform: none !important;
+}
+body[data-screen='game'] .action-strip .control-row #play-btn.recommend-glow-play {
+  outline: 3px solid rgba(120, 255, 217, .98) !important;
+  outline-offset: 2px;
+  box-shadow:
+    0 0 0 1px rgba(120, 255, 217, .62),
+    inset 0 1px 0 rgba(255,255,255,.18) !important;
+  color: #effff3 !important;
+}
+body[data-screen='game'] .action-strip .control-row #pass-btn.recommend-glow {
+  outline: 3px solid rgba(255, 168, 171, .98) !important;
+  outline-offset: 2px;
+  box-shadow:
+    0 0 0 1px rgba(255, 168, 171, .64),
+    inset 0 1px 0 rgba(255,255,255,.18) !important;
+  color: #fff7f8 !important;
 }
 body[data-screen='game'] .action-strip .control-row .game-icon-btn {
   display: inline-flex;

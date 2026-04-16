@@ -55,7 +55,8 @@ function bindControlRowLabels({app,t,isPortraitMode}){
   const passBtn=controlRow.querySelector('#pass-btn');
   const sortBtn=controlRow.querySelector('#auto-sort-btn');
   const emoteBtn=controlRow.querySelector('#emote-toggle');
-  const order=[suggestAnchor,playBtn,passBtn,sortBtn,emoteBtn].filter(Boolean);
+  const bellBtn=controlRow.querySelector('#bell-toggle');
+  const order=[suggestAnchor,playBtn,passBtn,sortBtn,emoteBtn,bellBtn].filter(Boolean);
   order.forEach((node)=>controlRow.appendChild(node));
   const suggestBtn=controlRow.querySelector('#suggest-btn');
   if(suggestBtn){
@@ -76,8 +77,12 @@ function bindControlRowLabels({app,t,isPortraitMode}){
     emoteBtn.setAttribute('aria-label',t('emote'));
     emoteBtn.setAttribute('title',t('emote'));
   }
+  if(bellBtn){
+    bellBtn.setAttribute('aria-label','Bellhop Bell');
+    bellBtn.setAttribute('title','Bellhop Bell');
+  }
   if(isPortraitMode()){
-    const portraitOrder=[suggestAnchor,playBtn,passBtn,sortBtn,emoteBtn].filter(Boolean);
+    const portraitOrder=[suggestAnchor,playBtn,passBtn,sortBtn,emoteBtn,bellBtn].filter(Boolean);
     portraitOrder.forEach((node)=>controlRow.appendChild(node));
   }
 }

@@ -62,10 +62,14 @@ test('renderGameActionZone renders controls, hand, and drag popup', ()=>{
     handHtml:'<button class="card"></button>'
   });
   assert.match(html,/id="play-btn"/);
+  assert.match(html,/id="play-btn" class="primary game-cta-btn recommend-glow-play"/);
   assert.match(html,/id="suggest-btn"/);
+  assert.match(html,/recommend-glow-play/);
+  assert.match(html,/id="bell-toggle"/);
+  assert.match(html,/🛎️/);
+  assert.match(html,/aria-label="Bellhop Bell"/);
   assert.match(html,/id="auto-sort-btn"/);
   assert.match(html,/id="drag-popup"/);
-  assert.doesNotMatch(html,/recommend-glow-play/);
 });
 
 test('renderGameSelfTagHtml renders the self tag block', ()=>{
@@ -100,10 +104,35 @@ test('renderGameControlRowHtml renders the action controls and hand', ()=>{
     handHtml:'<button class="card"></button>'
   });
   assert.match(html,/id="play-btn"/);
+  assert.match(html,/id="play-btn" class="primary game-cta-btn recommend-glow-play"/);
   assert.match(html,/id="suggest-btn"/);
+  assert.match(html,/recommend-glow-play/);
+  assert.match(html,/id="bell-toggle"/);
+  assert.match(html,/🛎️/);
+  assert.match(html,/aria-label="Bellhop Bell"/);
   assert.match(html,/id="auto-sort-btn"/);
   assert.match(html,/id="drag-popup"/);
   assert.match(html,/id="emote-panel"/);
+});
+
+test('renderGameControlRowHtml adds pass glow when pass is recommended', ()=>{
+  const html=renderGameControlRowHtml({
+    isRecPlay:false,
+    canPlay:true,
+    isRecPass:true,
+    canPass:true,
+    canSuggest:true,
+    showRecommendHint:false,
+    isRecEmpty:false,
+    recommendHint:'Hint',
+    t:(key)=>key,
+    esc:(value)=>String(value),
+    canAutoSort:true,
+    emotePanel:'<div id="emote-panel"></div>',
+    handHtml:'<button class="card"></button>'
+  });
+  assert.match(html,/id="pass-btn" class="danger game-cta-btn recommend-glow"/);
+  assert.doesNotMatch(html,/recommend-glow-play/);
 });
 
 test('renderGameTable renders center stack and win celebration', ()=>{

@@ -27,9 +27,6 @@ export function createCardUiHelpers(deps){
     {id:'love',file:'emote-love.png'},
     {id:'champagne',file:'emote-champagne.png'},
     {id:'shock',file:'emote-shock.png'},
-    {id:'milktea',file:'emote-milktea.png'},
-    {id:'eggtart',file:'emote-eggtart.png'},
-    {id:'lemontea',file:'emote-lemontea.png'}
   ];
 
   const suitName=(s)=>['diamond','club','heart','spade'][s]??'club';
