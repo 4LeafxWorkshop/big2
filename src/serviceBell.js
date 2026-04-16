@@ -6,6 +6,20 @@ const SERVICE_BELL_FOODS=[
 ];
 
 const SERVICE_BELL_SLOTS=['tl','tr','ml','mr'];
+const SERVICE_BELL_SLOT_POINTS={
+  portrait:{
+    tl:{x:'16%',y:'20%'},
+    tr:{x:'84%',y:'20%'},
+    ml:{x:'14%',y:'79%'},
+    mr:{x:'86%',y:'79%'}
+  },
+  landscape:{
+    tl:{x:'8%',y:'26%'},
+    tr:{x:'92%',y:'26%'},
+    ml:{x:'10%',y:'72%'},
+    mr:{x:'90%',y:'72%'}
+  }
+};
 
 function pickRandom(list,random){
   if(!Array.isArray(list)||!list.length)return null;
@@ -28,12 +42,12 @@ export function createServiceBellController(deps={}){
   const random=deps.random??(()=>Math.random());
   const getDoc=()=>documentRef();
   const getWin=()=>windowRef();
-  const raf=deps.requestAnimationFrame??((cb)=>getWin()?.requestAnimationFrame?.(cb)??getWin()?.setTimeout?.(cb,0)??setTimeout(cb,0));
 
   let host=null;
   let layer=null;
   let heroImg=null;
   let active=false;
+  let orientation='landscape';
   let bellHideTimer=0;
   const activeFoods=new Map();
   const occupiedSlots=new Set();
@@ -64,6 +78,7 @@ export function createServiceBellController(deps={}){
     clearTimer(win,entry.voiceTimer);
     clearTimer(win,entry.exitTimer);
     clearTimer(win,entry.removeTimer);
+    clearTimer(win,entry.enterTimer);
     if(typeof HTMLElement!=='undefined'&&entry.el instanceof HTMLElement)entry.el.remove();
     else entry.el?.remove?.();
     occupiedSlots.delete(entry.slot);
@@ -112,23 +127,18 @@ export function createServiceBellController(deps={}){
     return host;
   };
 
-  const finishExit=(id)=>{
-    const entry=activeFoods.get(id);
-    if(!entry)return;
-    clearTimer(getWin(),entry.removeTimer);
-    entry.removeTimer=getWin()?.setTimeout?.(()=>{
-      clearItem(id);
-    },520)??0;
-  };
-
   const startExit=(id)=>{
     const entry=activeFoods.get(id);
     if(!entry)return;
     if(typeof HTMLElement!=='undefined'&&!((entry.el instanceof HTMLElement)))return;
     if(entry.exiting)return;
     entry.exiting=true;
-    entry.el.classList.add('is-exiting');
-    entry.exitTimer=getWin()?.setTimeout?.(()=>finishExit(id),520)??0;
+    entry.el.classList.remove(`service-bell-slot-${entry.slot}`);
+    clearTimer(getWin(),entry.exitTimer);
+    clearTimer(getWin(),entry.removeTimer);
+    entry.removeTimer=getWin()?.setTimeout?.(()=>{
+      clearItem(id);
+    },600)??0;
   };
 
   const spawnFood=()=>{
@@ -141,30 +151,40 @@ export function createServiceBellController(deps={}){
     const item=pickRandom(availableFoods,random);
     const slot=pickRandom(availableSlots,random);
     if(!item||!slot)return false;
+    const side=slot.endsWith('l')?'left':'right';
+    const slotPoint=SERVICE_BELL_SLOT_POINTS[orientation]?.[slot]??SERVICE_BELL_SLOT_POINTS.landscape[slot];
     const el=doc.createElement('img');
-    el.className=`service-bell-food service-bell-food-${item.id} service-bell-slot-${slot} service-bell-dir-${slot.endsWith('l')?'left':'right'} is-entering`;
+    el.className=`service-bell-food service-bell-food-${item.id} service-bell-dir-${side} start-${side}`;
     el.setAttribute('aria-hidden','true');
     el.alt='';
     el.src=withBase(`foods/${item.file}`);
     el.style.setProperty('--food-w',`${item.width}px`);
+    if(slotPoint){
+      el.style.setProperty('--slot-x',slotPoint.x);
+      el.style.setProperty('--slot-y',slotPoint.y);
+    }
     el.dataset.foodId=item.id;
     el.dataset.slot=slot;
-    el.dataset.dir=slot.endsWith('l')?'left':'right';
+    el.dataset.dir=side;
     occupiedSlots.add(slot);
     activeFoods.set(item.id,{
       id:item.id,
       slot,
       el,
+      enterTimer:0,
       exitTimer:0,
       removeTimer:0,
       voiceTimer:0,
       exiting:false
     });
     layer.appendChild(el);
-    raf(()=>{
-      if(!el.isConnected)return;
-      el.classList.remove('is-entering');
-    });
+    const entry=activeFoods.get(item.id);
+    entry.enterTimer=getWin()?.setTimeout?.(()=>{
+      const current=activeFoods.get(item.id);
+      if(current!==entry||!el.isConnected)return;
+      el.classList.add(`service-bell-slot-${slot}`);
+      occupiedSlots.add(slot);
+    },20)??0;
     const win=getWin();
     const voiceTimer=win?.setTimeout?.(()=>{
       playAudio(`audio/foods/${item.voice}`,0.95);
@@ -172,7 +192,6 @@ export function createServiceBellController(deps={}){
     const exitTimer=win?.setTimeout?.(()=>{
       startExit(item.id);
     },2000)??0;
-    const entry=activeFoods.get(item.id);
     if(entry){
       entry.voiceTimer=voiceTimer;
       entry.exitTimer=exitTimer;
@@ -188,6 +207,7 @@ export function createServiceBellController(deps={}){
     }
     const shell=ensureHost();
     if(!shell)return;
+    orientation=params.portraitMode?'portrait':'landscape';
     shell.dataset.orientation=params.portraitMode?'portrait':'landscape';
   };
 
@@ -203,7 +223,7 @@ export function createServiceBellController(deps={}){
     bellHideTimer=getWin()?.setTimeout?.(()=>{
       if(host?.isConnected!==false)host.classList.remove('is-ready');
       bellHideTimer=0;
-    },1050)??0;
+    },700)??0;
     playAudio('audio/foods/bell.mp3',0.85);
     const spawned=spawnFood();
     return spawned;

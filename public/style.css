@@ -8888,7 +8888,7 @@ body[data-screen='game'] .action-strip .control-row .game-cta-btn {
   box-shadow: inset 0 1px 0 rgba(255,255,255,.24), 0 2px 8px rgba(0,0,0,.32);
   font-weight: 800;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   transition:
     transform 160ms var(--playful-pop),
     box-shadow 160ms ease,
@@ -8972,6 +8972,7 @@ body[data-screen='game'] .action-strip .control-row #play-btn.recommend-glow-pla
     0 0 0 1px rgba(120, 255, 217, .62),
     inset 0 1px 0 rgba(255,255,255,.18) !important;
   color: #effff3 !important;
+  overflow: visible !important;
 }
 body[data-screen='game'] .action-strip .control-row #pass-btn.recommend-glow {
   outline: 3px solid rgba(255, 168, 171, .98) !important;
@@ -8980,6 +8981,7 @@ body[data-screen='game'] .action-strip .control-row #pass-btn.recommend-glow {
     0 0 0 1px rgba(255, 168, 171, .64),
     inset 0 1px 0 rgba(255,255,255,.18) !important;
   color: #fff7f8 !important;
+  overflow: visible !important;
 }
 body[data-screen='game'] .action-strip .control-row #bell-toggle:active {
   transform: translateY(1px) scale(.93) !important;
@@ -9036,7 +9038,7 @@ body[data-screen='game'] .service-bell-layer .service-bell-hero {
   transform-origin: center top;
 }
 body[data-screen='game'] .service-bell-layer.is-ready .service-bell-hero {
-  animation: serviceBellDropBounce 1.05s cubic-bezier(.18, 1.2, .25, 1) forwards;
+  animation: serviceBellPressBounce 1.55s cubic-bezier(.2, .85, .25, 1) forwards;
 }
 body[data-screen='game'] .service-bell-food-layer {
   position: absolute;
@@ -9049,55 +9051,84 @@ body[data-screen='game'] .service-bell-food {
   width: var(--food-w, 120px);
   height: auto;
   display: block;
-  opacity: 1;
+  opacity: 0;
   will-change: transform, opacity;
   filter: drop-shadow(0 10px 16px rgba(0,0,0,.28));
-  transform: translate(-50%, -50%) translateX(0);
-  transition:
-    left 420ms cubic-bezier(.2, 1, .22, 1),
-    top 420ms cubic-bezier(.2, 1, .22, 1),
-    transform 560ms cubic-bezier(.18, 1.18, .26, 1),
-    opacity 180ms ease;
+  transform: translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1);
+  transition: all 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+  pointer-events: none;
 }
-body[data-screen='game'] .service-bell-food.service-bell-dir-left { --offscreen-x: -162vw; }
-body[data-screen='game'] .service-bell-food.service-bell-dir-right { --offscreen-x: 162vw; }
-body[data-screen='game'] .service-bell-food.is-entering,
-body[data-screen='game'] .service-bell-food.is-exiting {
-  opacity: 0;
+body[data-screen='game'] .service-bell-food.start-left {
+  transform: translate3d(-50%, -50%, 0) translate3d(-300px, 0, 0) scale(1);
 }
-body[data-screen='game'] .service-bell-food.is-entering.service-bell-dir-left,
-body[data-screen='game'] .service-bell-food.is-exiting.service-bell-dir-left {
-  transform: translate(-50%, -50%) translateX(var(--offscreen-x));
+body[data-screen='game'] .service-bell-food.start-right {
+  transform: translate3d(-50%, -50%, 0) translate3d(300px, 0, 0) scale(1);
 }
-body[data-screen='game'] .service-bell-food.is-entering.service-bell-dir-right,
-body[data-screen='game'] .service-bell-food.is-exiting.service-bell-dir-right {
-  transform: translate(-50%, -50%) translateX(var(--offscreen-x));
+body[data-screen='game'] .service-bell-layer[data-orientation='portrait'] .service-bell-slot-tl {
+  --slot-x: 16%;
+  --slot-y: 20%;
+  opacity: 1;
+  transform: translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1);
 }
-body[data-screen='game'] .service-bell-layer[data-orientation='portrait'] .service-bell-slot-tl { --slot-x: 16%; --slot-y: 20%; }
-body[data-screen='game'] .service-bell-layer[data-orientation='portrait'] .service-bell-slot-tr { --slot-x: 84%; --slot-y: 20%; }
-body[data-screen='game'] .service-bell-layer[data-orientation='portrait'] .service-bell-slot-ml { --slot-x: 14%; --slot-y: 79%; }
-body[data-screen='game'] .service-bell-layer[data-orientation='portrait'] .service-bell-slot-mr { --slot-x: 86%; --slot-y: 79%; }
-body[data-screen='game'] .service-bell-layer[data-orientation='landscape'] .service-bell-slot-tl { --slot-x: 8%; --slot-y: 26%; }
-body[data-screen='game'] .service-bell-layer[data-orientation='landscape'] .service-bell-slot-tr { --slot-x: 92%; --slot-y: 26%; }
-body[data-screen='game'] .service-bell-layer[data-orientation='landscape'] .service-bell-slot-ml { --slot-x: 10%; --slot-y: 72%; }
-body[data-screen='game'] .service-bell-layer[data-orientation='landscape'] .service-bell-slot-mr { --slot-x: 90%; --slot-y: 72%; }
-@keyframes serviceBellDropBounce {
+body[data-screen='game'] .service-bell-layer[data-orientation='portrait'] .service-bell-slot-tr {
+  --slot-x: 84%;
+  --slot-y: 20%;
+  opacity: 1;
+  transform: translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1);
+}
+body[data-screen='game'] .service-bell-layer[data-orientation='portrait'] .service-bell-slot-ml {
+  --slot-x: 14%;
+  --slot-y: 79%;
+  opacity: 1;
+  transform: translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1);
+}
+body[data-screen='game'] .service-bell-layer[data-orientation='portrait'] .service-bell-slot-mr {
+  --slot-x: 86%;
+  --slot-y: 79%;
+  opacity: 1;
+  transform: translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1);
+}
+body[data-screen='game'] .service-bell-layer[data-orientation='landscape'] .service-bell-slot-tl {
+  --slot-x: 8%;
+  --slot-y: 26%;
+  opacity: 1;
+  transform: translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1);
+}
+body[data-screen='game'] .service-bell-layer[data-orientation='landscape'] .service-bell-slot-tr {
+  --slot-x: 92%;
+  --slot-y: 26%;
+  opacity: 1;
+  transform: translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1);
+}
+body[data-screen='game'] .service-bell-layer[data-orientation='landscape'] .service-bell-slot-ml {
+  --slot-x: 10%;
+  --slot-y: 72%;
+  opacity: 1;
+  transform: translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1);
+}
+body[data-screen='game'] .service-bell-layer[data-orientation='landscape'] .service-bell-slot-mr {
+  --slot-x: 90%;
+  --slot-y: 72%;
+  opacity: 1;
+  transform: translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1);
+}
+@keyframes serviceBellPressBounce {
   0% {
     opacity: 0;
-    transform: translateY(-180px) scale(.82);
+    transform: translateY(12px) scale(.86);
   }
-  28% {
+  18% {
     opacity: 1;
-    transform: translateY(0) scale(1.02);
+    transform: translateY(0) scale(1.03);
   }
-  45% {
-    transform: translateY(14px) scale(.98);
+  36% {
+    transform: translateY(4px) scale(.985);
   }
-  62% {
-    transform: translateY(-8px) scale(1.01);
+  56% {
+    transform: translateY(-3px) scale(1.01);
   }
-  78% {
-    transform: translateY(4px) scale(.995);
+  76% {
+    transform: translateY(1px) scale(.997);
   }
   100% {
     opacity: 1;
