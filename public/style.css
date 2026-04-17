@@ -4682,6 +4682,9 @@ body[data-screen='game'] .table-center-stack {
   height: auto;
   display: block;
 }
+.food-callout .callout-box {
+  animation: foodCalloutSlideIn .2s ease-out;
+}
 .play-type-call .hk-text,
 .last-card-call .hk-text {
   font-size: calc(2.05rem * var(--callout-size, 1));
@@ -4923,6 +4926,10 @@ body[data-screen='game'] .table-center-stack {
       0 0 0 2px color-mix(in srgb, var(--player-color, #7ec0ff) 48%, transparent),
       0 0 24px color-mix(in srgb, var(--player-color, #7ec0ff) 42%, transparent);
   }
+}
+@keyframes foodCalloutSlideIn {
+  from { opacity: 0; margin-top: -10px; }
+  to { opacity: 1; margin-top: 0; }
 }
 @keyframes recommendHintPop {
   0% { opacity: 0; transform: translateY(6px) scale(.94); }
@@ -8293,11 +8300,13 @@ body[data-screen='game'] .seat.east .seat-open-play {
   }
   body[data-screen='game'][data-orientation='landscape'] .seat.west .closed-count-pill,
   body[data-screen='game'][data-orientation='landscape'] .seat.east .closed-count-pill {
-    position: static !important;
+    position: absolute !important;
     inset: auto !important;
-    margin: 0 0 0 6px !important;
-    align-self: center !important;
-    justify-self: center !important;
+    right: -4px !important;
+    bottom: 8px !important;
+    left: auto !important;
+    top: auto !important;
+    margin: 0 !important;
     z-index: 12 !important;
   }
   body[data-screen='game'][data-orientation='landscape'] .seat.west .opponent-fan,
@@ -11323,7 +11332,7 @@ body[data-screen='game'] .seat.north.active .seat-section {
     position: absolute !important;
     inset: auto !important;
     right: -4px !important;
-    bottom: -4px !important;
+    bottom: 8px !important;
     left: auto !important;
     top: auto !important;
     margin: 0 !important;
@@ -12113,6 +12122,17 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] :is(.play-type-cal
   border-top-color: var(--bubble-fill) !important;
 }
 
+/* Food callout uses its own anchor class so it won't inherit play/pass seat callout offsets. */
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .food-callout-seat {
+  top: calc(100% + 28px) !important;
+  bottom: auto !important;
+  left: 50% !important;
+  right: auto !important;
+  --callout-base-x: -50%;
+  --callout-base-y: 0px;
+  z-index: 13001 !important;
+}
+
 body[data-screen='game'] :is(.seat.north, .seat.west, .seat.east) > .seat-name-fixed {
   border: 0 !important;
   box-shadow: none !important;
@@ -12226,4 +12246,26 @@ body[data-screen='game'] :is(.seat.west, .seat.east) .side-station-stack .oppone
   margin-top: 0 !important;
   transform-origin: center bottom !important;
   transform: rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
+}
+
+@media (max-width: 860px) and (orientation: portrait) {
+  /* Match landscape-like buffer between closed fan and open cards in portrait. */
+  body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-pack,
+  body[data-screen='game'][data-orientation='portrait'] .seat.west .side-station-stack,
+  body[data-screen='game'][data-orientation='portrait'] .seat.east .side-station-stack {
+    gap: 4px !important;
+  }
+  body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-open-play,
+  body[data-screen='game'][data-orientation='portrait'] .seat.west .seat-open-play,
+  body[data-screen='game'][data-orientation='portrait'] .seat.east .seat-open-play {
+    margin-top: 0 !important;
+  }
+  body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-open-play .seat-played,
+  body[data-screen='game'][data-orientation='portrait'] .seat.west .seat-open-play .seat-played,
+  body[data-screen='game'][data-orientation='portrait'] .seat.east .seat-open-play .seat-played {
+    transform: translateY(8px) !important;
+  }
+  body[data-screen='game'][data-orientation='portrait'] .seat-name-fixed[data-opponent-name] .food-callout-seat {
+    top: calc(100% + 56px) !important;
+  }
 }
