@@ -4677,6 +4677,11 @@ body[data-screen='game'] .table-center-stack {
   height: auto;
   display: block;
 }
+.food-callout .emote-icon img {
+  width: calc(var(--food-callout-w, 64px) * var(--callout-size, 1));
+  height: auto;
+  display: block;
+}
 .play-type-call .hk-text,
 .last-card-call .hk-text {
   font-size: calc(2.05rem * var(--callout-size, 1));
@@ -5126,8 +5131,8 @@ body[data-screen='game'] .table-center-stack {
 }
 .closed-count-pill {
   position: absolute;
-  right: -2px;
-  bottom: -2px;
+  right: -4px;
+  bottom: -4px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -5143,6 +5148,16 @@ body[data-screen='game'] .table-center-stack {
   letter-spacing: .01em;
   box-shadow: 0 2px 6px rgba(0, 0, 0, .26);
   z-index: 3;
+}
+body[data-screen='game'] :is(.seat-pack, .side-station-stack) > .closed-count-pill {
+  position: absolute !important;
+  inset: auto !important;
+  right: -4px !important;
+  bottom: -4px !important;
+  left: auto !important;
+  top: auto !important;
+  margin: 0 !important;
+  z-index: 4 !important;
 }
 .seat-open-play {
   margin-top: 6px;
@@ -5924,7 +5939,7 @@ body[data-screen='game'] .hand.hand-stacked .hand-card.must3-highlight .card-art
   background-position: center;
   background-size: contain;
   opacity: .95;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23d9f1ff' stroke-width='2.1' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12a9 9 0 0 1-15.4 6.4L3 16'/%3E%3Cpath d='M3 12a9 9 0 0 1 15.4-6.4L21 8'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M5 3v18' stroke='%23ffffff' stroke-width='2.2' stroke-linecap='round'/%3E%3Cpath d='M6 5c3.1-1.3 5.9-.9 8.6.3 1.3.6 2.7 1 4.4.8v7.4c-1.9.2-3.4-.3-4.8-.9-2.4-1-4.9-1.3-8.2-.1V5z' fill='%23ffffff'/%3E%3Cpath d='M6 4.7v14.8' stroke='%23ffffff' stroke-width='1.7' stroke-linecap='round' opacity='.0'/%3E%3C/svg%3E");
 }
 .seat-pass-text {
   line-height: 1;
@@ -8256,10 +8271,11 @@ body[data-screen='game'] .seat.east .seat-open-play {
   }
   body[data-screen='game'][data-orientation='landscape'] .seat.west .closed-count-pill,
   body[data-screen='game'][data-orientation='landscape'] .seat.east .closed-count-pill {
-    right: -6px !important;
-    bottom: 6px !important;
-    left: auto !important;
-    top: auto !important;
+    position: static !important;
+    inset: auto !important;
+    margin: 0 0 0 6px !important;
+    align-self: center !important;
+    justify-self: center !important;
     z-index: 12 !important;
   }
   body[data-screen='game'][data-orientation='landscape'] .seat.west .opponent-fan,
@@ -8936,6 +8952,9 @@ body[data-screen='game'] .action-strip .control-row #suggest-btn.game-cta-btn {
   background: linear-gradient(180deg, rgba(90,110,122,.88), rgba(56,73,86,.92)) !important;
   color: #e9f1f6 !important;
 }
+body[data-screen='game'] .action-strip .control-row #suggest-btn.game-cta-btn::before {
+  content: none !important;
+}
 body[data-screen='game'] .action-strip .control-row #suggest-btn.game-cta-btn:hover,
 body[data-screen='game'] .action-strip .control-row #suggest-btn.game-cta-btn:focus-visible,
 body[data-screen='game'] .action-strip .control-row #suggest-btn.game-cta-btn:active {
@@ -8966,19 +8985,19 @@ body[data-screen='game'] .action-strip .control-row #pass-btn.recommend-glow:act
   transform: none !important;
 }
 body[data-screen='game'] .action-strip .control-row #play-btn.recommend-glow-play {
-  outline: 3px solid rgba(120, 255, 217, .98) !important;
-  outline-offset: 2px;
   box-shadow:
-    0 0 0 1px rgba(120, 255, 217, .62),
+    0 0 0 1px rgba(120, 255, 217, .78),
+    0 0 18px rgba(120, 255, 217, .72),
+    0 0 34px rgba(120, 255, 217, .42),
     inset 0 1px 0 rgba(255,255,255,.18) !important;
   color: #effff3 !important;
   overflow: visible !important;
 }
 body[data-screen='game'] .action-strip .control-row #pass-btn.recommend-glow {
-  outline: 3px solid rgba(255, 168, 171, .98) !important;
-  outline-offset: 2px;
   box-shadow:
-    0 0 0 1px rgba(255, 168, 171, .64),
+    0 0 0 1px rgba(255, 168, 171, .8),
+    0 0 18px rgba(255, 168, 171, .72),
+    0 0 34px rgba(255, 168, 171, .42),
     inset 0 1px 0 rgba(255,255,255,.18) !important;
   color: #fff7f8 !important;
   overflow: visible !important;
@@ -9013,14 +9032,19 @@ body[data-screen='game'] .action-strip .control-row .game-icon-btn .sort-icon {
 body[data-screen='game'] .service-bell-layer {
   position: absolute;
   inset: 0;
-  z-index: 9400;
+  z-index: 15050;
   pointer-events: none;
   overflow: hidden;
+  isolation: isolate;
+  display: none;
+}
+body[data-screen='game'] .service-bell-layer.is-ready {
+  display: block;
 }
 body[data-screen='game'] .table > .service-bell-layer {
   position: absolute !important;
   inset: 0 !important;
-  z-index: 9400 !important;
+  z-index: 15050 !important;
 }
 body[data-screen='game'] .service-bell-layer .service-bell-hero-wrap {
   position: absolute;
@@ -9033,12 +9057,12 @@ body[data-screen='game'] .service-bell-layer .service-bell-hero {
   width: 100%;
   height: auto;
   display: block;
-  opacity: 0;
   filter: drop-shadow(0 14px 20px rgba(0,0,0,.3));
   transform-origin: center top;
+  transition: transform 120ms ease-out;
 }
-body[data-screen='game'] .service-bell-layer.is-ready .service-bell-hero {
-  animation: serviceBellPressBounce 1.55s cubic-bezier(.2, .85, .25, 1) forwards;
+body[data-screen='game'] .service-bell-layer.is-pressed .service-bell-hero {
+  transform: translateY(10px) scale(.92);
 }
 body[data-screen='game'] .service-bell-food-layer {
   position: absolute;
@@ -9111,29 +9135,6 @@ body[data-screen='game'] .service-bell-layer[data-orientation='landscape'] .serv
   --slot-y: 72%;
   opacity: 1;
   transform: translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1);
-}
-@keyframes serviceBellPressBounce {
-  0% {
-    opacity: 0;
-    transform: translateY(12px) scale(.86);
-  }
-  18% {
-    opacity: 1;
-    transform: translateY(0) scale(1.03);
-  }
-  36% {
-    transform: translateY(4px) scale(.985);
-  }
-  56% {
-    transform: translateY(-3px) scale(1.01);
-  }
-  76% {
-    transform: translateY(1px) scale(.997);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
 }
 body[data-screen='game'] .action-strip .control-row #auto-sort-btn {
   margin-left: auto;
@@ -11122,8 +11123,13 @@ body[data-screen='game'] .seat.east {
   body[data-screen='game'] .seat.north .closed-count-pill,
   body[data-screen='game'] .seat.west .closed-count-pill,
   body[data-screen='game'] .seat.east .closed-count-pill {
-    right: -2px !important;
-    bottom: -2px !important;
+    position: absolute !important;
+    inset: auto !important;
+    right: -4px !important;
+    bottom: -4px !important;
+    left: auto !important;
+    top: auto !important;
+    margin: 0 !important;
     background: rgba(0, 0, 0, .92) !important;
     z-index: 12 !important;
   }
@@ -11301,8 +11307,13 @@ body[data-screen='game'] .seat.north.active .seat-section {
   body[data-screen='game'][data-orientation='landscape'] .seat.north .closed-count-pill,
   body[data-screen='game'][data-orientation='landscape'] .seat.west .closed-count-pill,
   body[data-screen='game'][data-orientation='landscape'] .seat.east .closed-count-pill {
-    right: -2px !important;
-    bottom: -2px !important;
+    position: absolute !important;
+    inset: auto !important;
+    right: -4px !important;
+    bottom: -4px !important;
+    left: auto !important;
+    top: auto !important;
+    margin: 0 !important;
     z-index: 12 !important;
     background: rgba(0, 0, 0, .92) !important;
   }
@@ -12142,10 +12153,13 @@ body[data-screen='game'] :is(.seat.north, .seat.west, .seat.east) .opponent-fan 
   margin-top: 0 !important;
 }
 body[data-screen='game'] :is(.seat.north, .seat.west, .seat.east) .closed-count-pill {
-  right: -2px !important;
-  bottom: -2px !important;
+  position: absolute !important;
+  inset: auto !important;
+  right: -4px !important;
+  bottom: -4px !important;
   left: auto !important;
   top: auto !important;
+  margin: 0 !important;
 }
 /* Strip legacy vertical spacing on side closed-fan station in all orientations. */
 body[data-screen='game'] :is(.seat.west, .seat.east) .side-station-stack {
