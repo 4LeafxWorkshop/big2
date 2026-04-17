@@ -12269,3 +12269,30 @@ body[data-screen='game'] :is(.seat.west, .seat.east) .side-station-stack .oppone
     top: calc(100% + 56px) !important;
   }
 }
+
+/* Layer lock: food visuals above open/discard cards, below profile labels. */
+body[data-screen='game'] .service-bell-layer,
+body[data-screen='game'] .table > .service-bell-layer {
+  z-index: 12500 !important;
+}
+body[data-screen='game'] :is(.table-center-stack, .center-last, .center-last-north, .center-last-west, .center-last-east, .center-last-south, .seat-open-play, .seat-open-play .seat-played) {
+  z-index: 11000 !important;
+}
+
+/* Final all-views layer contract: profile labels > food > open/discard cards. */
+body[data-screen='game'] :is(.seat.north, .seat.west, .seat.east) :is(> .seat-name-fixed, .seat-pack > .seat-name-fixed, .side-station-stack > .seat-name-fixed),
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] :is(.name, .seat-identity, .seat-name-text, .seat-subline, .seat-round-wins, .seat-namecard, .player-avatar-wrap.player-avatar-wrap-opponent) {
+  position: relative !important;
+  z-index: 13000 !important;
+}
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .food-callout-seat,
+body[data-screen='game'] .service-bell-layer,
+body[data-screen='game'] .table > .service-bell-layer,
+body[data-screen='game'] .service-bell-food-layer,
+body[data-screen='game'] .service-bell-food {
+  z-index: 12500 !important;
+}
+body[data-screen='game'] :is(.table-center-stack, .center-last, .center-last-north, .center-last-west, .center-last-east, .center-last-south, .center-last .seat-played, .seat-open-play, .seat-open-play .seat-played, .seat-open-play .card.mini, .seat-open-play .card.discard-card.mini) {
+  position: relative !important;
+  z-index: 11000 !important;
+}
