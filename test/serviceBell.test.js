@@ -96,10 +96,21 @@ function createMockWindow(){
   };
 }
 
+function drainTimers(win,maxSteps=20){
+  let steps=0;
+  while(win.timers.size&&steps<maxSteps){
+    const [id,fn]=win.timers.entries().next().value;
+    win.timers.delete(id);
+    fn?.();
+    steps+=1;
+  }
+}
+
 test('service bell triggers sound, spawn, and cleanup', ()=>{
   const doc=createMockDoc();
   const win=createMockWindow();
   const audioLog=[];
+  const foodCallouts=[];
   let unlockCount=0;
   const controller=createServiceBellController({
     documentRef:()=>doc,
@@ -118,7 +129,10 @@ test('service bell triggers sound, spawn, and cleanup', ()=>{
     random:()=>{
       const values=[0.0,0.0,0.25];
       return values[audioLog.length]??0.0;
-    }
+    },
+    getFoodCalloutSeat:()=>2,
+    setFoodCallout:(callout)=>foodCallouts.push(callout),
+    clearFoodCallout:()=>foodCallouts.push(null)
   });
 
   controller.sync({active:true,portraitMode:true});
@@ -133,13 +147,46 @@ test('service bell triggers sound, spawn, and cleanup', ()=>{
   assert.equal(unlockCount>0,true);
   assert.match(audioLog[0],/audio\/foods\/bell\.mp3$/);
   assert.equal(host.classList.contains('is-ready'),true);
+  assert.equal(foodCallouts.length,1);
+  assert.equal(foodCallouts[0].seat,2);
+  assert.equal(foodCallouts[0].foodId,'lemontea');
   const layer=host.querySelector('.service-bell-food-layer');
   assert.equal(layer.children.length,1);
   assert.match(layer.children[0].dataset.slot,/tl|tr|ml|mr/);
+  assert.equal(host.classList.contains('is-ready'),true);
 
-  for(const timer of win.timers.values())timer?.();
+  const timerEntries=[...win.timers.entries()];
+  timerEntries[0]?.[1]?.();
+  timerEntries[1]?.[1]?.();
+  assert.equal(host.classList.contains('is-ready'),true);
+
+  timerEntries[2]?.[1]?.();
+  drainTimers(win);
   assert.match(audioLog[1],/audio\/foods\/.*_voice\.mp3$/);
+  assert.equal(host.classList.contains('is-ready'),false);
 
   controller.sync({active:false,portraitMode:true});
   assert.equal(doc.body.children.length,0);
+});
+
+test('service bell skips food callout when seat is unavailable', ()=>{
+  const doc=createMockDoc();
+  const win=createMockWindow();
+  const foodCallouts=[];
+  const controller=createServiceBellController({
+    documentRef:()=>doc,
+    windowRef:()=>win,
+    withBase:(path)=>`/base/${path}`,
+    unlockAudio:()=>{},
+    getSoundEnabled:()=>false,
+    createAudio:()=>null,
+    random:()=>0,
+    getFoodCalloutSeat:()=>null,
+    setFoodCallout:(callout)=>foodCallouts.push(callout),
+    clearFoodCallout:()=>foodCallouts.push(null)
+  });
+
+  controller.sync({active:true,portraitMode:false});
+  assert.equal(controller.trigger(),true);
+  assert.equal(foodCallouts.length,0);
 });

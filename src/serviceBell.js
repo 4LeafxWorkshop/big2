@@ -2,7 +2,9 @@ const SERVICE_BELL_FOODS=[
   {id:'lemontea',file:'lemontea.png',voice:'lemontea_voice.mp3',width:100},
   {id:'pineapplebun',file:'pineapplebun.png',voice:'pineapplebun_voice.mp3',width:160},
   {id:'eggtart',file:'eggtart.png',voice:'eggtart_voice.mp3',width:120},
-  {id:'milktea',file:'milktea.png',voice:'milktea_voice.mp3',width:180}
+  {id:'milktea',file:'milktea.png',voice:'milktea_voice.mp3',width:180},
+  {id:'redbeanice',file:'redbeanice.png',voice:'redbeanice_voice.mp3',width:96},
+  {id:'frenchtoast',file:'frenchtoast.png',voice:'frenchtoast_voice.mp3',width:186}
 ];
 
 const SERVICE_BELL_SLOTS=['tl','tr','ml','mr'];
@@ -39,6 +41,9 @@ export function createServiceBellController(deps={}){
   const unlockAudio=deps.unlockAudio??(()=>{});
   const getSoundEnabled=deps.getSoundEnabled??(()=>true);
   const createAudio=deps.createAudio??((src)=>new Audio(src));
+  const getFoodCalloutSeat=deps.getFoodCalloutSeat??(()=>null);
+  const setFoodCallout=deps.setFoodCallout??(()=>{});
+  const clearFoodCallout=deps.clearFoodCallout??(()=>{});
   const random=deps.random??(()=>Math.random());
   const getDoc=()=>documentRef();
   const getWin=()=>windowRef();
@@ -49,6 +54,7 @@ export function createServiceBellController(deps={}){
   let active=false;
   let orientation='landscape';
   let bellHideTimer=0;
+  let bellPressTimer=0;
   const activeFoods=new Map();
   const occupiedSlots=new Set();
 
@@ -83,6 +89,14 @@ export function createServiceBellController(deps={}){
     else entry.el?.remove?.();
     occupiedSlots.delete(entry.slot);
     activeFoods.delete(id);
+    if(activeFoods.size===0){
+      if(host?.isConnected!==false){
+        host.classList.remove('is-ready');
+        host.classList.remove('is-pressed');
+      }
+      clearTimer(getWin(),bellHideTimer);
+      bellHideTimer=0;
+    }
   };
 
   const clearAll=()=>{
@@ -93,6 +107,9 @@ export function createServiceBellController(deps={}){
     clearAll();
     clearTimer(getWin(),bellHideTimer);
     bellHideTimer=0;
+    clearTimer(getWin(),bellPressTimer);
+    bellPressTimer=0;
+    clearFoodCallout();
     heroImg=null;
     layer=null;
     host?.remove();
@@ -189,6 +206,16 @@ export function createServiceBellController(deps={}){
     const voiceTimer=win?.setTimeout?.(()=>{
       playAudio(`audio/foods/${item.voice}`,0.95);
     },200)??0;
+    const foodCalloutSeat=getFoodCalloutSeat(item,slot);
+    if(Number.isInteger(foodCalloutSeat)){
+      setFoodCallout({
+        seat:foodCalloutSeat,
+        foodId:item.id,
+        file:item.file,
+        width:Math.max(40,Math.round((Number(item.width)||0)*0.45)),
+        ts:Date.now()
+      });
+    }
     const exitTimer=win?.setTimeout?.(()=>{
       startExit(item.id);
     },2000)??0;
@@ -217,13 +244,15 @@ export function createServiceBellController(deps={}){
     if(!shell)return false;
     clearTimer(getWin(),bellHideTimer);
     bellHideTimer=0;
-    shell.classList.remove('is-ready');
-    void shell.offsetWidth;
+    clearTimer(getWin(),bellPressTimer);
+    bellPressTimer=0;
     shell.classList.add('is-ready');
-    bellHideTimer=getWin()?.setTimeout?.(()=>{
-      if(host?.isConnected!==false)host.classList.remove('is-ready');
-      bellHideTimer=0;
-    },700)??0;
+    shell.classList.remove('is-pressed');
+    shell.classList.add('is-pressed');
+    bellPressTimer=getWin()?.setTimeout?.(()=>{
+      if(host===shell)host.classList.remove('is-pressed');
+      bellPressTimer=0;
+    },120)??0;
     playAudio('audio/foods/bell.mp3',0.85);
     const spawned=spawnFood();
     return spawned;
