@@ -12292,7 +12292,10 @@ body[data-screen='game'] .service-bell-food-layer,
 body[data-screen='game'] .service-bell-food {
   z-index: 12500 !important;
 }
-body[data-screen='game'] :is(.table-center-stack, .center-last, .center-last-north, .center-last-west, .center-last-east, .center-last-south, .center-last .seat-played, .seat-open-play, .seat-open-play .seat-played, .seat-open-play .card.mini, .seat-open-play .card.discard-card.mini) {
+body[data-screen='game'] :is(.table-center-stack, .center-last, .center-last-north, .center-last-west, .center-last-east, .center-last-south) {
+  z-index: 11000 !important;
+}
+body[data-screen='game'] :is(.center-last .seat-played, .seat-open-play, .seat-open-play .seat-played, .seat-open-play .card.mini, .seat-open-play .card.discard-card.mini) {
   position: relative !important;
   z-index: 11000 !important;
 }
