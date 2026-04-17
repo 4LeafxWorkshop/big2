@@ -140,6 +140,7 @@ export function buildOpponentSeatsHtml(params){
     renderOpponentStationFlow,
     renderStaticCard,
     renderBackCards,
+    withBase,
     playerColorByViewClass,
     authPictureUrlFrom,
     avatarDataUri,
@@ -149,6 +150,7 @@ export function buildOpponentSeatsHtml(params){
     roundWinsChipHtml,
     seatCalloutHtml,
     seatEmoteHtml,
+    seatFoodCalloutHtml,
     avatarGenderClass,
     opponentFanStyleByName,
     seatLastActionHtml,
@@ -206,6 +208,7 @@ export function buildOpponentSeatsHtml(params){
     });
     const calloutHtml=seatCalloutHtml(player.seat,player.cls,playerColor,false);
     const emoteHtml=seatEmoteHtml(player.seat,player.cls,playerColor,false);
+    const foodCalloutHtml=seatFoodCalloutHtml(player.seat,player.cls,playerColor,false);
     const peekActive=isMobilePointer()&&state.mottoPeekName===String(opponentName);
     const outerLabel=renderOpponentLabel({
       pColor:playerColor,
@@ -225,6 +228,7 @@ export function buildOpponentSeatsHtml(params){
       mottoTailDir,
       calloutHtml,
       emoteHtml,
+      foodCalloutHtml,
       peekActive,
       opponentAttr,
       esc,
@@ -248,6 +252,7 @@ export function buildOpponentSeatsHtml(params){
       fan,
       fanClassName:opponentFanStyleByName(opponentName),
       fanAnchorStyle,
+      closedPileCount:player.count,
       closedCountHtml,
       opponentOpenPlayHtml
     });
@@ -368,6 +373,16 @@ export function buildCalloutRenderState(params){
     const jitter=calloutJitterStyle(viewCls,`emote|${seat}|${activeEmote?.ts||0}|${emoteSticker.id}`);
     return`<div class="emote-callout play-type-call-seat" data-emote-seat="${seat}" style="--player-color:${color};${jitter}"><div class="callout-box"><div class="hk-inner"><span class="emote-icon">${emoteImageHtml}</span></div></div><div class="tail tail-${tailDir}"></div></div>`;
   };
+  const seatFoodCalloutHtml=(seat,viewCls,color,isSelf=false)=>{
+    const foodCallout=state.serviceBell?.foodCallout;
+    if(!foodCallout||!Number.isInteger(foodCallout.seat)||foodCallout.seat!==seat)return'';
+    if(isSelf)return'';
+    const tailDir=viewCls==='north'?'north':viewCls==='east'?'east':viewCls==='west'?'west':'south';
+    const jitter=calloutJitterStyle(viewCls,`food|${seat}|${foodCallout.ts||0}|${foodCallout.foodId||''}`);
+    const foodSrc=withBase(`foods/${foodCallout.file}`);
+    const foodWidth=Number(foodCallout.width)||64;
+    return`<div class="emote-callout food-callout play-type-call-seat" data-food-seat="${seat}" style="--player-color:${color};--food-callout-w:${foodWidth}px;${jitter}"><div class="callout-box"><div class="hk-inner"><span class="emote-icon food-icon"><img src="${foodSrc}" alt="${esc(foodCallout.foodId||'food')}"/></span></div></div><div class="tail tail-${tailDir}"></div></div>`;
+  };
   const selfTableEmoteHtml=(emoteDisplayEnabled&&emoteSticker&&Number.isInteger(v.selfSeat)&&emoteSeat===v.selfSeat)
     ?(emoteSticker.id==='rude'
       ?`<div class="self-table-emote emote-rude"><span class="emote-rude-hit emote-rude-hit-1">${emoteImageHtml}</span><span class="emote-rude-hit emote-rude-hit-2">${emoteImageHtml}</span><span class="emote-rude-hit emote-rude-hit-3">${emoteImageHtml}</span></div>`
@@ -377,7 +392,8 @@ export function buildCalloutRenderState(params){
     emoteSeat,
     selfTableEmoteHtml,
     seatCalloutHtml,
-    seatEmoteHtml
+    seatEmoteHtml,
+    seatFoodCalloutHtml
   };
 }
 

@@ -302,25 +302,39 @@ function bindLogSheetSwipe({
     if(dt>700)return;
     const dx=touch.clientX-swipeState.startX;
     const dy=swipeState.startY-touch.clientY;
-    const absDy=Math.abs(touch.clientY-swipeState.startY);
-    if(dx>90&&absDy<Math.max(28,dx*0.5)){
+    const absDx=Math.abs(dx);
+    const absDy=Math.abs(dy);
+    if(dy>90&&absDx<Math.max(28,dy*0.5)){
+      const logBtn=document.getElementById('log-toggle');
+      if(logBtn&&!logBtn.hasAttribute('disabled')){
+        logBtn.click();
+      }else{
+        state.showLogSheet=true;
+        render();
+      }
+      return;
+    }
+    if(dy<-90&&absDx<Math.max(28,absDy*0.5)){
+      const foodBtn=document.getElementById('bell-toggle');
+      if(foodBtn&&!foodBtn.hasAttribute('disabled')){
+        foodBtn.click();
+      }
+      return;
+    }
+    if(dx>90&&absDy<Math.max(28,absDx*0.5)){
       const suggestBtn=document.getElementById('suggest-btn');
       if(suggestBtn&&!suggestBtn.hasAttribute('disabled')){
         suggestBtn.click();
       }
       return;
     }
-    if(dx<-90&&absDy<Math.max(28,Math.abs(dx)*0.5)){
+    if(dx<-90&&absDy<Math.max(28,absDx*0.5)){
       const emoteBtn=document.getElementById('emote-toggle');
       if(emoteBtn&&!emoteBtn.hasAttribute('disabled')){
         emoteBtn.click();
       }
       return;
     }
-    if(dy<90)return;
-    if(Math.abs(dx)>Math.max(28,dy*0.5))return;
-    state.showLogSheet=true;
-    render();
   },{passive:true});
   document.body.addEventListener('touchcancel',()=>{swipeState.active=false;},{passive:true});
   swipeState.bound=true;

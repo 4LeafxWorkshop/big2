@@ -177,13 +177,16 @@ export function renderOpponentStationFlow(params){
     fan,
     fanClassName,
     fanAnchorStyle,
+    closedPileCount=1,
     closedCountHtml,
     opponentOpenPlayHtml
   }=params;
+  const pileCount=Math.min(5,Math.max(1,Number(closedPileCount)||1));
+  const closedPileHtml=`<div class="closed-card-pile" style="--closed-pile-count:${pileCount};"><div class="opponent-fan ${fanClassName}" style="${fanAnchorStyle}">${fan}</div>${closedCountHtml}</div>`;
   if(useFlowOpponentStation&&isSideSeat){
-    return`<div class="side-station-stack">${innerLabelHtml}<div class="opponent-fan-wrap"><div class="opponent-fan ${fanClassName}" style="${fanAnchorStyle}">${fan}</div>${closedCountHtml}</div>${opponentOpenPlayHtml}</div>`;
+    return`<div class="side-station-stack">${innerLabelHtml}<div class="opponent-fan-wrap">${closedPileHtml}</div>${opponentOpenPlayHtml}</div>`;
   }
-  return`${innerLabelHtml}<div class="opponent-fan-wrap"><div class="opponent-fan ${fanClassName}" style="${fanAnchorStyle}">${fan}</div>${closedCountHtml}</div>${opponentOpenPlayHtml}`;
+  return`${innerLabelHtml}<div class="opponent-fan-wrap">${closedPileHtml}</div>${opponentOpenPlayHtml}`;
 }
 
 export function renderOpponentSeats(seats){

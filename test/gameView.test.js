@@ -205,6 +205,7 @@ test('renderOpponentStationFlow switches side stack markup based on seat mode', 
     fan:'<div id="fan"></div>',
     fanClassName:'fan-west',
     fanAnchorStyle:'justify-self:center;',
+    closedPileCount:5,
     closedCountHtml:'<span id="count"></span>',
     opponentOpenPlayHtml:'<div id="open"></div>'
   });
@@ -219,6 +220,10 @@ test('renderOpponentStationFlow switches side stack markup based on seat mode', 
     opponentOpenPlayHtml:''
   });
   assert.match(sideHtml,/side-station-stack/);
+  assert.match(sideHtml,/closed-card-pile/);
+  assert.match(sideHtml,/--closed-pile-count:5/);
+  assert.match(sideHtml,/closed-card-pile" style="--closed-pile-count:5;"><div class="opponent-fan fan-west" style="justify-self:center;"><div id="fan"><\/div><\/div><span id="count"><\/span>/);
+  assert.match(sideHtml,/id="count"/);
   assert.match(sideHtml,/fan-west/);
   assert.doesNotMatch(northHtml,/side-station-stack/);
   assert.match(northHtml,/fan-north/);

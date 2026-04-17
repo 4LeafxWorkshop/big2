@@ -7,6 +7,7 @@ export function createCalloutAudioController(deps){
   let calloutSpeakSeq=0;
   const calloutAudioCache=new Map();
   let iosSharedCalloutAudio=null;
+  const createAudio=deps.createAudio??((src)=>new Audio(src));
 
   const state=()=>deps.getState();
   const sound=()=>deps.getSound();
@@ -68,12 +69,19 @@ export function createCalloutAudioController(deps){
     const pack=deps.normalizeCalloutStylePack(calloutStylePack());
     const cacheKey=`${lang}|${key}|${g}`;
     const exts=lang==='zh-HK'?['mp3']:['m4a','mp3','wav'];
-    const nameCandidates=[
-      `${key}-${pack}-${g}`,
-      `${key}-${pack}`,
-      `${key}-${g}`,
-      key
-    ];
+    const nameCandidates=key==='line-must3'
+      ?[
+          `${key}-${g}`,
+          `${key}-${pack}-${g}`,
+          `${key}-${pack}`,
+          key
+        ]
+      :[
+          `${key}-${pack}-${g}`,
+          `${key}-${pack}`,
+          `${key}-${g}`,
+          key
+        ];
     for(const baseName of nameCandidates){
       for(const ext of exts){
         const src=deps.withBase(`audio/callout/${lang}/${baseName}.${ext}`);
@@ -84,7 +92,7 @@ export function createCalloutAudioController(deps){
         }else{
           a=calloutAudioCache.get(token);
           if(!a){
-            a=new Audio(src);
+            a=createAudio(src);
             a.preload='auto';
             calloutAudioCache.set(token,a);
           }
