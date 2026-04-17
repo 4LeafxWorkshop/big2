@@ -12060,6 +12060,20 @@ body[data-screen='game'][data-orientation='portrait'] .seat.east .seat-open-play
   body[data-screen='game'][data-orientation='portrait'] :is(.seat.west, .seat.east, .seat.north) .opponent-fan .card.back.mini.closed-back:first-child {
     margin-left: 0 !important;
   }
+  /* Portrait: back assets are 80x116 (~1.45), so match wrapper ratio to remove top/bottom slack. */
+  body[data-screen='game'][data-orientation='portrait'] :is(.seat.north, .seat.west, .seat.east) .opponent-fan .card.back.mini.closed-back {
+    height: calc(var(--card-w) * var(--opp-fan-closed-mini-scale) * 1.45) !important;
+  }
+  body[data-screen='game'][data-orientation='portrait'] :is(.seat.north, .seat.west, .seat.east) .opponent-fan .card.back.mini.closed-back .card-art {
+    object-fit: contain !important;
+  }
+}
+
+@media (orientation: landscape) {
+  /* Landscape: keep full back art visible without crop. */
+  body[data-screen='game'][data-orientation='landscape'] :is(.seat.north, .seat.west, .seat.east) .opponent-fan .card.back.mini.closed-back .card-art {
+    object-fit: contain !important;
+  }
 }
 
 body[data-screen='game'] .seat-name-fixed[data-opponent-name],
