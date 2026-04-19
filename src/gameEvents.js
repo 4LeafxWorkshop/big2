@@ -433,7 +433,6 @@ function bindHomeAndResultActions({
       void leaveRoom();
       return;
     }
-    resetSoloSessionCarryover();
     state.screen='home';
     state.selected.clear();
     state.recommendation=null;

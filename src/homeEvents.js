@@ -174,7 +174,7 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
         if(!synced)await waitMs(250);
       }
       if(!synced)console.warn('profile sync failed on start; continuing to game');
-      startSoloGame({preserveOpponents:false,resetTotals:true});
+      startSoloGame({preserveOpponents:false});
       schedulePopunderAfterRender(350);
     };
 
