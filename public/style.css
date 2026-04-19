@@ -7903,9 +7903,7 @@ body[data-screen='game'] .table-turn-compass-ring {
   display: block;
   border-radius: 50%;
   border: 2px solid rgba(255,255,255,.24);
-  background:
-    radial-gradient(circle at 50% 50%, rgba(255,255,255,.04), rgba(255,255,255,0) 48%),
-    rgba(7, 28, 19, .6);
+  background: transparent;
   box-shadow:
     inset 0 0 0 1px rgba(255,255,255,.08),
     0 8px 18px rgba(0,0,0,.22);
@@ -12124,7 +12122,7 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] :is(.play-type-cal
 
 /* Food callout uses its own anchor class so it won't inherit play/pass seat callout offsets. */
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .food-callout-seat {
-  top: calc(100% + 28px) !important;
+  top: calc(100% + 44px) !important;
   bottom: auto !important;
   left: 50% !important;
   right: auto !important;
@@ -12266,7 +12264,7 @@ body[data-screen='game'] :is(.seat.west, .seat.east) .side-station-stack .oppone
     transform: translateY(8px) !important;
   }
   body[data-screen='game'][data-orientation='portrait'] .seat-name-fixed[data-opponent-name] .food-callout-seat {
-    top: calc(100% + 56px) !important;
+    top: calc(100% + 72px) !important;
   }
 }
 
@@ -12281,16 +12279,21 @@ body[data-screen='game'] :is(.table-center-stack, .center-last, .center-last-nor
 
 /* Final all-views layer contract: profile labels > food > open/discard cards. */
 body[data-screen='game'] :is(.seat.north, .seat.west, .seat.east) :is(> .seat-name-fixed, .seat-pack > .seat-name-fixed, .side-station-stack > .seat-name-fixed),
-body[data-screen='game'] .seat-name-fixed[data-opponent-name] :is(.name, .seat-identity, .seat-name-text, .seat-subline, .seat-round-wins, .seat-namecard, .player-avatar-wrap.player-avatar-wrap-opponent) {
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] :is(.name, .seat-identity, .seat-name-text, .seat-subline, .seat-round-wins, .seat-namecard) {
   position: relative !important;
   z-index: 13000 !important;
 }
-body[data-screen='game'] .seat-name-fixed[data-opponent-name] .food-callout-seat,
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout {
+  z-index: 17002 !important;
+}
 body[data-screen='game'] .service-bell-layer,
 body[data-screen='game'] .table > .service-bell-layer,
 body[data-screen='game'] .service-bell-food-layer,
 body[data-screen='game'] .service-bell-food {
-  z-index: 12500 !important;
+  z-index: 13002 !important;
+}
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .food-callout-seat {
+  z-index: 14020 !important;
 }
 body[data-screen='game'] :is(.table-center-stack, .center-last, .center-last-north, .center-last-west, .center-last-east, .center-last-south) {
   z-index: 11000 !important;
@@ -12298,4 +12301,55 @@ body[data-screen='game'] :is(.table-center-stack, .center-last, .center-last-nor
 body[data-screen='game'] :is(.center-last .seat-played, .seat-open-play, .seat-open-play .seat-played, .seat-open-play .card.mini, .seat-open-play .card.discard-card.mini) {
   position: relative !important;
   z-index: 11000 !important;
+}
+
+/* Final Layer Contract (authoritative)
+   cards < food slide < seat station < all callouts/emote effects */
+body[data-screen='game'] :is(
+  .table-center-stack,
+  .center-last,
+  .center-last-north,
+  .center-last-west,
+  .center-last-east,
+  .center-last-south,
+  .seat-open-play,
+  .seat-open-play .seat-played,
+  .seat-open-play .card.mini,
+  .seat-open-play .card.discard-card.mini
+) {
+  z-index: 11000 !important;
+}
+body[data-screen='game'] :is(
+  .service-bell-layer,
+  .table > .service-bell-layer,
+  .service-bell-food-layer,
+  .service-bell-food
+) {
+  z-index: 13000 !important;
+}
+body[data-screen='game'] :is(
+  .seat-name-fixed[data-opponent-name],
+  .mobile-opponent-name[data-opponent-name],
+  .seat-name-fixed.player-tag
+) {
+  z-index: 14000 !important;
+}
+body[data-screen='game'] :is(
+  .play-type-call,
+  .last-card-call,
+  .emote-callout,
+  .seat-motto-callout,
+  .self-table-emote,
+  .table-emote
+) {
+  z-index: 17000 !important;
+}
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] :is(
+  .play-type-call-seat,
+  .last-card-call-seat,
+  .emote-callout.play-type-call-seat,
+  .food-callout-seat,
+  .seat-motto-callout
+) {
+  z-index: 17001 !important;
 }

@@ -377,7 +377,7 @@ export function buildCalloutRenderState(params){
     const foodCallout=state.serviceBell?.foodCallout;
     if(!foodCallout||!Number.isInteger(foodCallout.seat)||foodCallout.seat!==seat)return'';
     if(isSelf)return'';
-    const tailDir='north';
+    const tailDir=viewCls==='north'?'north':viewCls==='east'?'east':viewCls==='west'?'west':'south';
     const foodSrc=withBase(`foods/${foodCallout.file}`);
     const foodWidth=Number(foodCallout.width)||64;
     return`<div class="emote-callout food-callout food-callout-seat" data-food-seat="${seat}" style="--player-color:${color};--food-callout-w:${foodWidth}px;"><div class="callout-box"><div class="hk-inner"><span class="emote-icon food-icon"><img src="${foodSrc}" alt="${esc(foodCallout.foodId||'food')}"/></span></div></div><div class="tail tail-${tailDir}"></div></div>`;

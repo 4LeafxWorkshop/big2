@@ -44,6 +44,7 @@ export function createServiceBellController(deps={}){
   const getFoodCalloutSeat=deps.getFoodCalloutSeat??(()=>null);
   const setFoodCallout=deps.setFoodCallout??(()=>{});
   const clearFoodCallout=deps.clearFoodCallout??(()=>{});
+  const onFoodSpawn=deps.onFoodSpawn??(()=>{});
   const random=deps.random??(()=>Math.random());
   const getDoc=()=>documentRef();
   const getWin=()=>windowRef();
@@ -216,6 +217,7 @@ export function createServiceBellController(deps={}){
         ts:Date.now()
       });
     }
+    try{onFoodSpawn(item,slot);}catch{}
     const exitTimer=win?.setTimeout?.(()=>{
       startExit(item.id);
     },2000)??0;

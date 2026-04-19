@@ -73,6 +73,15 @@ const ROOM_TIMEOUT_STRIKES_MAX=2;
 const ROOM_HOST_TAKEOVER_MS=120000;
 const ROOM_HOST_ACTIVE_MS=20000;
 const EMOTE_DURATION_MS=2400;
+const FOOD_EMOTE_PREFIX='food:';
+const FOOD_CALLOUT_META={
+  lemontea:{file:'lemontea.png',width:45},
+  pineapplebun:{file:'pineapplebun.png',width:72},
+  eggtart:{file:'eggtart.png',width:54},
+  milktea:{file:'milktea.png',width:81},
+  redbeanice:{file:'redbeanice.png',width:43},
+  frenchtoast:{file:'frenchtoast.png',width:84}
+};
 const FIVE_KIND_POWER={straight:0,flush:1,fullhouse:2,fourofkind:3,straightflush:4};
 
 function roomPruneMs(status=''){
@@ -1530,6 +1539,11 @@ function isRoomPresenceOnlyUpdate(prev,next){
   if(String(prevEmote?.id||'')!==String(nextEmote?.id||''))return false;
   if(Number(prevEmote?.ts||0)!==Number(nextEmote?.ts||0))return false;
   if(String(prevEmote?.by||'')!==String(nextEmote?.by||''))return false;
+  const prevRootEmote=prev?.emote??null;
+  const nextRootEmote=next?.emote??null;
+  if(String(prevRootEmote?.id||'')!==String(nextRootEmote?.id||''))return false;
+  if(Number(prevRootEmote?.ts||0)!==Number(nextRootEmote?.ts||0))return false;
+  if(String(prevRootEmote?.by||'')!==String(nextRootEmote?.by||''))return false;
   const prevPlayers=Array.isArray(prev.players)?prev.players:[];
   const nextPlayers=Array.isArray(next.players)?next.players:[];
   if(prevPlayers.length!==nextPlayers.length)return false;
@@ -2195,6 +2209,24 @@ async function roomSubmitEmote(id,tsOverride=null,byOverride=''){
     const by=String(byOverride||currentRoomPlayerId()||'');
     await ref.update({
       'game.emote':{id:match.id,ts:Math.trunc(now),by}
+    });
+  }catch{}
+}
+async function roomSubmitFoodCallout(foodId,seatOverride=null,tsOverride=null,byOverride=''){
+  const roomDb=currentRoomDb();
+  if(!state.room.id||!roomDb)return;
+  const foodKey=String(foodId||'').trim().toLowerCase();
+  const foodMeta=FOOD_CALLOUT_META[foodKey]||null;
+  if(!foodMeta)return;
+  const seat=Number.isInteger(seatOverride)?seatOverride:roomSelfSeat(state.room.data);
+  if(!Number.isInteger(seat)||seat<0||seat>3)return;
+  const now=Number.isFinite(Number(tsOverride))?Number(tsOverride):Date.now();
+  const by=String(byOverride||`seat:${seat}`);
+  if(!by)return;
+  try{
+    const ref=roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(state.room.id);
+    await ref.update({
+      emote:{id:`${FOOD_EMOTE_PREFIX}${foodKey}`,ts:Math.trunc(now),by}
     });
   }catch{}
 }
@@ -3474,16 +3506,7 @@ function setServiceBellFoodCallout(callout,durationMs=2600){
   },Math.max(0,Number(durationMs)||0));
 }
 function pickRoomFoodCalloutSeat(){
-  if(state.home.mode!=='room')return null;
-  const roomData=state.room.data;
-  if(!roomData)return null;
-  const selfSeat=Number.isInteger(state.room.selfSeat)&&state.room.selfSeat>=0
-    ?state.room.selfSeat
-    :roomSelfSeat(roomData);
-  const players=Array.isArray(roomData.game?.players)?roomData.game.players:Array.isArray(roomData.players)?roomData.players:[];
-  const seats=players.map((p)=>Number(p?.seat)).filter((seat)=>Number.isInteger(seat)&&seat!==selfSeat);
-  if(!seats.length)return null;
-  return seats[Math.floor(Math.random()*seats.length)]??null;
+  return null;
 }
 function canBotEmote(seat){
   const now=Date.now();
@@ -3550,7 +3573,11 @@ function pickBotReaction(game,actorSeat,action,play){
   return{seat:botSeat,id:emoteId,by:String(bot?.uid||'')};
 }
 function syncRoomEmote(roomData){
-  const raw=roomData?.game?.emote ?? roomData?.emote;
+  const gameRaw=roomData?.game?.emote;
+  const rootRaw=roomData?.emote;
+  const gameTs=Number(gameRaw?.ts||0);
+  const rootTs=Number(rootRaw?.ts||0);
+  const raw=(rootTs>=gameTs?rootRaw:gameRaw)??null;
   if(!raw||typeof raw!=='object'){
     if(state.emote.active?.source==='room'){
       state.emote.active=null;
@@ -3568,6 +3595,37 @@ function syncRoomEmote(roomData){
     return;
   }
   const age=Date.now()-ts;
+  if(id.startsWith(FOOD_EMOTE_PREFIX)){
+    const foodId=id.slice(FOOD_EMOTE_PREFIX.length).trim().toLowerCase();
+    const foodMeta=FOOD_CALLOUT_META[foodId]||null;
+    const by=String(raw.by||'').trim();
+    let seat=-1;
+    if(by.startsWith('seat:')){
+      const parsed=Number(by.slice(5));
+      if(Number.isInteger(parsed)&&parsed>=0&&parsed<=3)seat=parsed;
+    }
+    if(seat<0){
+      seat=roomSeatForPlayer(roomData,by);
+    }
+    const selfSeat=Number.isInteger(state.room.selfSeat)&&state.room.selfSeat>=0
+      ?state.room.selfSeat
+      :roomSelfSeat(roomData);
+    if(!foodMeta||!Number.isFinite(age)||age>2600||seat<0||seat===selfSeat){
+      return;
+    }
+    const currentFood=state.serviceBell?.foodCallout;
+    if(currentFood&&currentFood.ts===ts&&currentFood.seat===seat&&currentFood.foodId===foodId){
+      return;
+    }
+    setServiceBellFoodCallout({
+      seat,
+      foodId,
+      file:foodMeta.file,
+      width:foodMeta.width,
+      ts
+    },Math.max(0,2600-age));
+    return;
+  }
   if(age>EMOTE_DURATION_MS){
     if(state.emote.active?.source==='room'&&state.emote.active.ts===ts){
       state.emote.active=null;
@@ -3885,9 +3943,23 @@ const serviceBellController=createServiceBellController({
   createAudio:(src)=>new Audio(src),
   getFoodCalloutSeat:()=>pickRoomFoodCalloutSeat(),
   setFoodCallout:(callout)=>setServiceBellFoodCallout(callout),
-  clearFoodCallout:()=>clearServiceBellFoodCallout()
+  clearFoodCallout:()=>clearServiceBellFoodCallout(),
+  onFoodSpawn:(item)=>{
+    if(state.home.mode!=='room')return;
+    const roomData=state.room.data;
+    let seat=Number.isInteger(state.room.selfSeat)&&state.room.selfSeat>=0
+      ?state.room.selfSeat
+      :roomSelfSeat(roomData);
+    if(!Number.isInteger(seat)||seat<0){
+      seat=roomSeatForPlayer(roomData,currentRoomPlayerId());
+    }
+    void roomSubmitFoodCallout(item?.id||'',seat,Date.now());
+  }
 });
-globalThis.serviceBellTrigger=()=>serviceBellController.trigger();
+globalThis.serviceBellTrigger=()=>{
+  serviceBellController.sync({active:state.screen==='game',portraitMode:isPortraitMode()});
+  return serviceBellController.trigger();
+};
 function triggerVibration(pattern){
   try{
     if(!vibrateEnabled)return;
