@@ -30,12 +30,6 @@ export function createRoomActionsController(deps){
         deps.setRoomError(deps.t('roomAlreadyIn'));
         return;
       }
-      const firebaseInstanceId=await deps.chooseNextRoomFirebaseInstanceId();
-      const roomDb=await deps.getFirebaseDbForInstanceId(firebaseInstanceId);
-      if(!roomDb){
-        deps.setRoomError(deps.t('roomCreateFail'));
-        return;
-      }
       let code='';
       for(let i=0;i<5;i+=1){
         const candidate=deps.generateRoomCode();
@@ -52,41 +46,68 @@ export function createRoomActionsController(deps){
       const uid=deps.baseRoomPlayerId();
       state.room.playerId=uid;
       const name=String(state.home.name||'Player').slice(0,32);
-      const now=Date.now();
-      const ref=roomDb.collection(deps.FIRESTORE_ROOMS_COLLECTION).doc();
-      const data={
-        hostId:uid,
-        hostName:name,
-        code,
-        status:'lobby',
-        createdAt:now,
-        updatedAt:now,
-        expiresAt:deps.nextRoomIdleExpiry(now),
-        maxPlayers:4,
-        isPrivate:false,
-        players:[{uid,name,gender:state.home.gender==='female'?'female':'male',picture:deps.authPictureUrl(),isHost:true,seat:0,lastSeen:now}],
-        playerIds:[uid],
-        settings:deps.collectMainSettings(),
-        totals:[deps.currentHumanScoreValue(),5000,5000,5000],
-        roundCount:0,
-        gameVersion:0
-      };
-      await ref.set(data);
-      try{
-        await deps.writeRoomDirectory(ref.id,{
-          roomId:ref.id,
-          code,
-          createdAt:now,
+      const triedInstanceIds=new Set();
+      let firstInstanceId='';
+      let created=false;
+      let lastError=null;
+      while(true){
+        const firebaseInstanceId=await deps.chooseNextRoomFirebaseInstanceId();
+        if(!firebaseInstanceId)break;
+        if(!firstInstanceId){
+          firstInstanceId=firebaseInstanceId;
+        }else if(firebaseInstanceId===firstInstanceId||triedInstanceIds.has(firebaseInstanceId)){
+          break;
+        }
+        triedInstanceIds.add(firebaseInstanceId);
+        const roomDb=await deps.getFirebaseDbForInstanceId(firebaseInstanceId);
+        if(!roomDb)continue;
+        const now=Date.now();
+        const ref=roomDb.collection(deps.FIRESTORE_ROOMS_COLLECTION).doc();
+        const data={
           hostId:uid,
           hostName:name,
-          firebaseInstanceId
-        });
-      }catch(err){
-        await ref.delete().catch(()=>{});
-        throw err;
+          code,
+          status:'lobby',
+          createdAt:now,
+          updatedAt:now,
+          expiresAt:deps.nextRoomIdleExpiry(now),
+          maxPlayers:4,
+          isPrivate:false,
+          players:[{uid,name,gender:state.home.gender==='female'?'female':'male',picture:deps.authPictureUrl(),isHost:true,seat:0,lastSeen:now}],
+          playerIds:[uid],
+          settings:deps.collectMainSettings(),
+          totals:[deps.currentHumanScoreValue(),5000,5000,5000],
+          roundCount:0,
+          gameVersion:0
+        };
+        try{
+          await ref.set(data);
+          try{
+            await deps.writeRoomDirectory(ref.id,{
+              roomId:ref.id,
+              code,
+              createdAt:now,
+              hostId:uid,
+              hostName:name,
+              firebaseInstanceId
+            });
+          }catch(err){
+            await ref.delete().catch(()=>{});
+            throw err;
+          }
+          deps.subscribeRoom(ref.id,code,firebaseInstanceId,roomDb);
+          void deps.updateActiveRoomPointer(ref.id);
+          created=true;
+          break;
+        }catch(err){
+          lastError=err;
+          console.error('create room shard attempt failed',firebaseInstanceId,err);
+        }
       }
-      deps.subscribeRoom(ref.id,code,firebaseInstanceId,roomDb);
-      void deps.updateActiveRoomPointer(ref.id);
+      if(!created){
+        if(lastError)throw lastError;
+        deps.setRoomError(deps.t('roomCreateFail'));
+      }
     }catch(err){
       console.error('create room failed',err);
       deps.setRoomError(deps.t('roomCreateFail'));
