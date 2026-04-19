@@ -120,11 +120,13 @@ export function createServiceBellController(deps={}){
   const ensureHost=()=>{
     const doc=getDoc();
     if(!doc?.body)return null;
-    const targetParent=doc.querySelector?.('.table')??doc.body;
+    const targetParent=doc.body;
     if(host&&host.isConnected!==false){
       if(host.parentElement!==targetParent)targetParent.appendChild(host);
       layer=host.querySelector('.service-bell-food-layer')??layer;
       heroImg=host.querySelector('.service-bell-hero')??heroImg;
+      host.style.position='fixed';
+      host.style.inset='0';
       return host;
     }
     host=doc.getElementById('service-bell-layer');
@@ -132,12 +134,16 @@ export function createServiceBellController(deps={}){
       if(host.parentElement!==targetParent)targetParent.appendChild(host);
       layer=host.querySelector('.service-bell-food-layer');
       heroImg=host.querySelector('.service-bell-hero');
+      host.style.position='fixed';
+      host.style.inset='0';
       return host;
     }
     host=doc.createElement('div');
     host.id='service-bell-layer';
     host.className='service-bell-layer';
     host.setAttribute('aria-hidden','true');
+    host.style.position='fixed';
+    host.style.inset='0';
     host.innerHTML=`<div class="service-bell-hero-wrap"><img class="service-bell-hero" src="${withBase('foods/bell.png')}" alt="" aria-hidden="true"/></div><div class="service-bell-food-layer" aria-hidden="true"></div>`;
     targetParent.appendChild(host);
     layer=host.querySelector('.service-bell-food-layer');

@@ -72,11 +72,12 @@ export function retargetCalloutTails({
     let dir='south';
     if(!isSelfBubble){
       const seat=bubble.closest('.seat');
+      const isFoodOrEmoteBubble=bubble.classList.contains('food-callout-seat')||bubble.classList.contains('emote-callout');
       if(bubble.classList.contains('seat-motto-callout')){
         dir='north';
       }else if(seat?.classList.contains('north')){
         dir='north';
-      }else if(seat?.classList.contains('west')||seat?.classList.contains('east')){
+      }else if((seat?.classList.contains('west')||seat?.classList.contains('east'))&&!isFoodOrEmoteBubble){
         dir='south';
       }else if(Math.abs(dx)>Math.abs(dy)){
         dir=dx<0?'west':'east';
