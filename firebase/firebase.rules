@@ -89,7 +89,8 @@ service cloud.firestore {
       'projectId',
       'projectNumber',
       'appId',
-      'apiKey'
+      'apiKey',
+      'roomEnabled'
     ];
   }
 
@@ -107,7 +108,8 @@ service cloud.firestore {
       d.appId.size() <= 120 &&
       d.apiKey is string &&
       d.apiKey.size() >= 1 &&
-      d.apiKey.size() <= 80;
+      d.apiKey.size() <= 80 &&
+      (!('roomEnabled' in d) || d.roomEnabled is bool);
   }
 
   function roomDirectoryAllowedKeys() {

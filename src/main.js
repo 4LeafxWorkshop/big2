@@ -319,6 +319,7 @@ const FIRESTORE_FIREBASE_INSTANCES_COLLECTION='big2FirebaseInstances';
 const FIRESTORE_ROOM_DIRECTORY_COLLECTION='big2RoomDirectory';
 const FIRESTORE_ROOM_ROUTING_COLLECTION='big2RoomRouting';
 const ROOM_ROUTING_DOC_ID='rotation';
+const PRIMARY_FIREBASE_ROOM_ENABLED=false;
 const THEMES={
   ocean:{'--bg-a':'#071a2f','--bg-b':'#0f4469','--bg-c':'#15808f','--panel':'rgba(255,255,255,0.08)','--panel-2':'rgba(7,22,34,0.62)','--table-a':'#17334f','--table-b':'#1f4468','--table-c':'#1c4262','--seat-a':'rgba(17,44,70,.82)','--seat-b':'rgba(9,33,55,.78)','--line-a':'rgba(126,177,215,.6)','--line-b':'rgba(126,177,215,.35)','--center-a':'rgba(19,88,49,.92)','--center-b':'rgba(12,63,35,.9)','--accent':'#f4a259','--danger':'#ef476f','--ok':'#52d273'},
   emerald:{'--bg-a':'#08261f','--bg-b':'#0f5a43','--bg-c':'#168f6a','--panel':'rgba(255,255,255,0.08)','--panel-2':'rgba(6,31,23,0.64)','--table-a':'#0e3a2e','--table-b':'#13614a','--table-c':'#15795a','--seat-a':'rgba(11,57,41,.82)','--seat-b':'rgba(8,40,29,.78)','--line-a':'rgba(120,196,156,.6)','--line-b':'rgba(120,196,156,.35)','--center-a':'rgba(23,103,62,.92)','--center-b':'rgba(13,73,44,.9)','--accent':'#f6c453','--danger':'#e95f6f','--ok':'#7ad97a'},
@@ -1018,6 +1019,11 @@ function initFirebaseIfReady(){
 function primaryFirebaseInstanceId(){
   return String(FIREBASE_CONFIG.projectId??'').trim();
 }
+function isFirebaseInstanceRoomEnabled(instance){
+  const projectId=String(instance?.projectId??instance?.id??'').trim();
+  if(projectId&&projectId===primaryFirebaseInstanceId())return PRIMARY_FIREBASE_ROOM_ENABLED;
+  return instance?.roomEnabled!==false;
+}
 function deriveFirebaseInstanceConfig(instance){
   const projectId=String(instance?.projectId??'').trim();
   if(!projectId)return null;
@@ -1054,7 +1060,8 @@ async function loadFirebaseInstances(force=false){
         projectId,
         projectNumber:String(row.projectNumber||'').trim(),
         appId:String(row.appId||'').trim(),
-        apiKey:String(row.apiKey||'').trim()
+        apiKey:String(row.apiKey||'').trim(),
+        roomEnabled:row.roomEnabled!==false
       });
     });
     const primaryId=primaryFirebaseInstanceId();
@@ -1064,7 +1071,8 @@ async function loadFirebaseInstances(force=false){
         projectId:primaryId,
         projectNumber:String(FIREBASE_CONFIG.messagingSenderId||'').trim(),
         appId:String(FIREBASE_CONFIG.appId||'').trim(),
-        apiKey:String(FIREBASE_CONFIG.apiKey||'').trim()
+        apiKey:String(FIREBASE_CONFIG.apiKey||'').trim(),
+        roomEnabled:PRIMARY_FIREBASE_ROOM_ENABLED
       });
     }
     firebaseInstancesCache=out;
@@ -1076,7 +1084,8 @@ async function loadFirebaseInstances(force=false){
       projectId:primaryId,
       projectNumber:String(FIREBASE_CONFIG.messagingSenderId||'').trim(),
       appId:String(FIREBASE_CONFIG.appId||'').trim(),
-      apiKey:String(FIREBASE_CONFIG.apiKey||'').trim()
+      apiKey:String(FIREBASE_CONFIG.apiKey||'').trim(),
+      roomEnabled:PRIMARY_FIREBASE_ROOM_ENABLED
     }]:[];
     return firebaseInstancesCache;
   }
@@ -1133,12 +1142,13 @@ async function chooseNextRoomFirebaseInstanceId(){
   const rows=await loadFirebaseInstances();
   const available=[];
   for(const row of rows){
+    if(!isFirebaseInstanceRoomEnabled(row))continue;
     const projectId=String(row.projectId||row.id||'').trim();
     if(!projectId)continue;
     const db=await getFirebaseDbForInstanceId(projectId);
     if(db)available.push(projectId);
   }
-  if(!available.length)return primaryFirebaseInstanceId();
+  if(!available.length)return'';
   if(!firebaseDb)return available[0];
   try{
     const ref=firebaseDb.collection(FIRESTORE_ROOM_ROUTING_COLLECTION).doc(ROOM_ROUTING_DOC_ID);
@@ -1563,6 +1573,7 @@ async function findRoomByPlayerId(playerId){
   if(!firebaseDb||!playerId)return null;
   const rows=await loadFirebaseInstances();
   for(const row of rows){
+    if(!isFirebaseInstanceRoomEnabled(row))continue;
     const projectId=String(row.projectId||row.id||'').trim();
     const roomDb=await getFirebaseDbForInstanceId(projectId);
     if(!roomDb)continue;
@@ -1883,6 +1894,7 @@ async function loadActiveRooms(attempt=0){
     let hiddenRooms=0;
     const instances=await loadFirebaseInstances();
     for(const instance of instances){
+      if(!isFirebaseInstanceRoomEnabled(instance))continue;
       const instanceId=String(instance.projectId||instance.id||'').trim();
       const roomDb=await getFirebaseDbForInstanceId(instanceId);
       if(!roomDb)continue;
