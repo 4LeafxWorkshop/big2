@@ -468,6 +468,8 @@ let roomPresenceTimer=null;
 const ROOM_PRESENCE_TOUCH_MIN_MS=5000;
 let lastRoomPresenceTouch={roomId:'',at:0};
 let emoteTimer=null;
+let emotePickerTimer=null;
+const EMOTE_PICKER_AUTO_CLOSE_MS=5000;
 const BOT_EMOTE_COOLDOWN_MS=5000;
 const botEmoteCooldownBySeat=new Map();
 let roomCountdownTimer=null;
@@ -3428,7 +3430,17 @@ function relabelSoloBots(){
 }
 
 function openEmotePicker(open,mode='normal'){
+  if(emotePickerTimer){clearTimeout(emotePickerTimer);emotePickerTimer=null;}
   state.emote.open=Boolean(open);
+  if(state.emote.open){
+    emotePickerTimer=window.setTimeout(()=>{
+      emotePickerTimer=null;
+      if(state.emote.open){
+        state.emote.open=false;
+        render();
+      }
+    },EMOTE_PICKER_AUTO_CLOSE_MS);
+  }
   render();
 }
 function triggerEmoteSticker(id){
@@ -3440,6 +3452,7 @@ function triggerEmoteSticker(id){
     :0;
   state.emote.active={id:match.id,ts:now,source:'local',seat:Number.isInteger(seat)&&seat>=0?seat:undefined};
   state.emote.open=false;
+  if(emotePickerTimer){clearTimeout(emotePickerTimer);emotePickerTimer=null;}
   playSound(`emote-${match.id}`);
   if(state.home.mode==='room'){
     void roomSubmitEmote(match.id,now);
@@ -3510,6 +3523,7 @@ function triggerBotEmoteLocal(seat,id){
   const now=Date.now();
   state.emote.active={id:match.id,ts:now,source:'local',by:`seat:${seat}`,seat};
   state.emote.open=false;
+  if(emotePickerTimer){clearTimeout(emotePickerTimer);emotePickerTimer=null;}
   playSound(`emote-${match.id}`);
   if(emoteTimer){clearTimeout(emoteTimer);emoteTimer=null;}
   emoteTimer=window.setTimeout(()=>{
@@ -3609,6 +3623,7 @@ function syncRoomEmote(roomData){
   }
   state.emote.active={id,ts,source:'room',by:String(raw.by||''),seat:hasExplicitSeat?explicitSeat:undefined};
   state.emote.open=false;
+  if(emotePickerTimer){clearTimeout(emotePickerTimer);emotePickerTimer=null;}
   if(emoteTimer){clearTimeout(emoteTimer);emoteTimer=null;}
   const remaining=Math.max(0,EMOTE_DURATION_MS-age);
   emoteTimer=window.setTimeout(()=>{
