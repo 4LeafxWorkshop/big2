@@ -9131,13 +9131,13 @@ body[data-screen='game'] .service-bell-food.start-right {
 }
 body[data-screen='game'] .service-bell-food-layer[data-orientation='portrait'] .service-bell-slot-tl {
   --slot-x: 16%;
-  --slot-y: 20%;
+  --slot-y: 15%;
   opacity: 1;
   transform: translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1);
 }
 body[data-screen='game'] .service-bell-food-layer[data-orientation='portrait'] .service-bell-slot-tr {
   --slot-x: 84%;
-  --slot-y: 20%;
+  --slot-y: 15%;
   opacity: 1;
   transform: translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1);
 }
@@ -9155,13 +9155,13 @@ body[data-screen='game'] .service-bell-food-layer[data-orientation='portrait'] .
 }
 body[data-screen='game'] .service-bell-food-layer[data-orientation='landscape'] .service-bell-slot-tl {
   --slot-x: 8%;
-  --slot-y: 40%;
+  --slot-y: 20%;
   opacity: 1;
   transform: translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1);
 }
 body[data-screen='game'] .service-bell-food-layer[data-orientation='landscape'] .service-bell-slot-tr {
   --slot-x: 92%;
-  --slot-y: 40%;
+  --slot-y: 20%;
   opacity: 1;
   transform: translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1);
 }

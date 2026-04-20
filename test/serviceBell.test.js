@@ -263,7 +263,7 @@ test('service bell reanchors to the table in landscape', ()=>{
   assert.equal(foodLayer.dataset.orientation,'landscape');
   assert.equal(foodLayer.style.zIndex,'');
   assert.equal(foodLayer.children[0].style.props.get('--slot-x'),'8%');
-  assert.equal(foodLayer.children[0].style.props.get('--slot-y'),'40%');
+  assert.equal(foodLayer.children[0].style.props.get('--slot-y'),'20%');
 });
 
 test('service bell reanchors to the table in portrait', ()=>{
@@ -288,12 +288,15 @@ test('service bell reanchors to the table in portrait', ()=>{
   assert.ok(host);
   assert.equal(host.parentElement,table);
   assert.equal(host.style.position,'absolute');
+  assert.equal(controller.trigger(),true);
   const foodLayer=doc.getElementById('service-bell-food-layer');
   assert.ok(foodLayer);
   assert.equal(foodLayer.parentElement,table);
   assert.equal(table.children[0],foodLayer);
   assert.equal(foodLayer.dataset.orientation,'portrait');
   assert.equal(foodLayer.style.zIndex,'');
+  assert.equal(foodLayer.children[0].style.props.get('--slot-x'),'16%');
+  assert.equal(foodLayer.children[0].style.props.get('--slot-y'),'15%');
 });
 
 test('service bell preserves active food when the table is rerendered', ()=>{

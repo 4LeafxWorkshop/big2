@@ -10,15 +10,15 @@ const SERVICE_BELL_FOODS=[
 const SERVICE_BELL_SLOTS=['tl','tr','ml','mr'];
 const SERVICE_BELL_SLOT_POINTS={
   portrait:{
-    tl:{x:'16%',y:'20%'},
-    tr:{x:'84%',y:'20%'},
+    tl:{x:'16%',y:'15%'},
+    tr:{x:'84%',y:'15%'},
     ml:{x:'14%',y:'79%'},
     mr:{x:'86%',y:'79%'}
   },
   landscape:{
     // Spread the lanes wider in landscape so the slide uses the full felt.
-    tl:{x:'8%',y:'40%'},
-    tr:{x:'92%',y:'40%'},
+    tl:{x:'8%',y:'20%'},
+    tr:{x:'92%',y:'20%'},
     ml:{x:'10%',y:'72%'},
     mr:{x:'90%',y:'72%'}
   }
