@@ -111,6 +111,7 @@ test('runGamePostRender mounts log sheet, creates log fab, and runs callbacks', 
       bindRoomTopMetaLayout:()=>{bound+=1;},
       observeDiscardSize:()=>{observed+=1;},
       syncConfettiCanvases:()=>{confetti+=1;},
+      syncLandscapeGameHandSizing:()=>{},
       syncDiscardSizeFromHand:()=>{discardSync+=1;},
       syncHandStackMode:()=>{handSync+=1;},
       retargetCalloutTails:()=>{retargets+=1;},
@@ -134,7 +135,7 @@ test('runGamePostRender mounts log sheet, creates log fab, and runs callbacks', 
   assert.equal(removals.debug,1);
   assert.equal('tapDebugBound' in documentStub.body.dataset,false);
   assert.equal(avatarImg.listeners.length,1);
-  assert.equal(positioned,1);
+  assert.equal(positioned,3);
   assert.equal(bound,1);
   assert.equal(observed,1);
   assert.equal(confetti,1);

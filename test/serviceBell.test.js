@@ -51,11 +51,23 @@ class MockElement {
   }
 
   appendChild(node){
-    if(node.parentElement&&node.parentElement!==this){
+    if(node.parentElement){
       node.parentElement.children=node.parentElement.children.filter((child)=>child!==node);
     }
     node.parentElement=this;
     this.children.push(node);
+    if(node.id)this.doc.index.set(node.id,node);
+    return node;
+  }
+
+  insertBefore(node,before){
+    if(node.parentElement){
+      node.parentElement.children=node.parentElement.children.filter((child)=>child!==node);
+    }
+    node.parentElement=this;
+    const idx=before?this.children.indexOf(before):-1;
+    if(idx>=0)this.children.splice(idx,0,node);
+    else this.children.push(node);
     if(node.id)this.doc.index.set(node.id,node);
     return node;
   }
@@ -247,9 +259,11 @@ test('service bell reanchors to the table in landscape', ()=>{
   const foodLayer=doc.getElementById('service-bell-food-layer');
   assert.ok(foodLayer);
   assert.equal(foodLayer.parentElement,table);
+  assert.equal(table.children[0],foodLayer);
   assert.equal(foodLayer.dataset.orientation,'landscape');
+  assert.equal(foodLayer.style.zIndex,'');
   assert.equal(foodLayer.children[0].style.props.get('--slot-x'),'8%');
-  assert.equal(foodLayer.children[0].style.props.get('--slot-y'),'26%');
+  assert.equal(foodLayer.children[0].style.props.get('--slot-y'),'40%');
 });
 
 test('service bell reanchors to the table in portrait', ()=>{
@@ -277,7 +291,9 @@ test('service bell reanchors to the table in portrait', ()=>{
   const foodLayer=doc.getElementById('service-bell-food-layer');
   assert.ok(foodLayer);
   assert.equal(foodLayer.parentElement,table);
+  assert.equal(table.children[0],foodLayer);
   assert.equal(foodLayer.dataset.orientation,'portrait');
+  assert.equal(foodLayer.style.zIndex,'');
 });
 
 test('service bell preserves active food when the table is rerendered', ()=>{
@@ -310,6 +326,7 @@ test('service bell preserves active food when the table is rerendered', ()=>{
 
   assert.equal(doc.getElementById('service-bell-food-layer'),foodLayer);
   assert.equal(foodLayer.parentElement,second.table);
+  assert.equal(second.table.children[0],foodLayer);
   assert.equal(foodLayer.children[0],food);
   assert.equal(food.dataset.foodId,'lemontea');
 });

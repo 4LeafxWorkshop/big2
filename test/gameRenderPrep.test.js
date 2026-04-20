@@ -115,7 +115,7 @@ test('buildCalloutRenderState keeps room opponent emotes visible even when local
   assert.match(result.seatEmoteHtml(2,'north','#123456',false),/emote-callout/);
 });
 
-test('buildOpponentSeatsHtml keeps the station label above the closed fan and the open row above food', ()=>{
+test('buildOpponentSeatsHtml keeps station identity separate from card layers', ()=>{
   const html=buildOpponentSeatsHtml({
     arr:[
       {viewIndex:1,seat:1,cls:'north',name:'North',rawName:'North',count:3,score:1000,gender:'male',isBot:false,picture:''},

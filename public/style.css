@@ -9155,13 +9155,13 @@ body[data-screen='game'] .service-bell-food-layer[data-orientation='portrait'] .
 }
 body[data-screen='game'] .service-bell-food-layer[data-orientation='landscape'] .service-bell-slot-tl {
   --slot-x: 8%;
-  --slot-y: 26%;
+  --slot-y: 40%;
   opacity: 1;
   transform: translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1);
 }
 body[data-screen='game'] .service-bell-food-layer[data-orientation='landscape'] .service-bell-slot-tr {
   --slot-x: 92%;
-  --slot-y: 26%;
+  --slot-y: 40%;
   opacity: 1;
   transform: translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1);
 }
@@ -12426,4 +12426,68 @@ body[data-screen='game'][data-orientation='landscape'] .seat.north > .seat-open-
 body[data-screen='game'][data-orientation='landscape'] .seat.west > .seat-open-play,
 body[data-screen='game'][data-orientation='landscape'] .seat.east > .seat-open-play {
   top: calc(38% + 100px) !important;
+}
+
+/* Root stack: food is table-level; split paint order without moving anchors. */
+body[data-screen='game'] :is(.seat.north > .seat-pack, .seat.west > .seat-pack, .seat.east > .seat-pack, .seat.west .side-station-stack, .seat.east .side-station-stack, .seat.west .side-station-core, .seat.east .side-station-core) {
+  position: relative !important;
+  z-index: auto !important;
+  isolation: auto !important;
+}
+body[data-screen='game'] :is(.seat.north .closed-card-pile, .seat.west .closed-card-pile, .seat.east .closed-card-pile),
+body[data-screen='game'] :is(.seat.north .opponent-fan-wrap, .seat.west .opponent-fan-wrap, .seat.east .opponent-fan-wrap) {
+  position: relative !important;
+  z-index: auto !important;
+  isolation: auto !important;
+}
+body[data-screen='game'] :is(.seat.north .opponent-fan, .seat.west .opponent-fan, .seat.east .opponent-fan) {
+  position: relative !important;
+  z-index: 11000 !important;
+}
+body[data-screen='game'] :is(.seat.north .closed-back, .seat.west .closed-back, .seat.east .closed-back) {
+  position: relative !important;
+  z-index: 11000 !important;
+}
+body[data-screen='game'] :is(.seat.north .closed-count-pill, .seat.west .closed-count-pill, .seat.east .closed-count-pill) {
+  position: absolute !important;
+  z-index: 20000 !important;
+  transform: translateZ(0) !important;
+}
+body[data-screen='game'] :is(.seat.north .opponent-fan-wrap > .closed-count-pill, .seat.west .opponent-fan-wrap > .closed-count-pill, .seat.east .opponent-fan-wrap > .closed-count-pill) {
+  inset: auto !important;
+  right: -4px !important;
+  bottom: -4px !important;
+  left: auto !important;
+  top: auto !important;
+  margin: 0 !important;
+  z-index: 20000 !important;
+}
+body[data-screen='game'] :is(.seat.north .seat-open-play, .seat.west .seat-open-play, .seat.east .seat-open-play),
+body[data-screen='game'] :is(.seat.north .seat-open-play .seat-played, .seat.west .seat-open-play .seat-played, .seat.east .seat-open-play .seat-played),
+body[data-screen='game'] :is(.seat.north .seat-open-play .card.mini, .seat.west .seat-open-play .card.mini, .seat.east .seat-open-play .card.mini) {
+  position: relative !important;
+  z-index: 11000 !important;
+}
+body[data-screen='game'] .service-bell-food-layer {
+  z-index: auto !important;
+  isolation: auto !important;
+}
+body[data-screen='game'] .service-bell-food {
+  z-index: 12000 !important;
+}
+body[data-screen='game'] :is(.seat.north .seat-name-fixed[data-opponent-name], .seat.west .seat-name-fixed[data-opponent-name], .seat.east .seat-name-fixed[data-opponent-name]) {
+  position: relative !important;
+  z-index: 16000 !important;
+}
+body[data-screen='game'] :is(.seat.west .side-station-core > .seat-name-fixed[data-opponent-name], .seat.east .side-station-core > .seat-name-fixed[data-opponent-name]) {
+  position: relative !important;
+  z-index: 18000 !important;
+  isolation: isolate !important;
+}
+body[data-screen='game'] :is(.seat.west .side-station-core > .seat-name-fixed[data-opponent-name] .name, .seat.east .side-station-core > .seat-name-fixed[data-opponent-name] .name) {
+  position: relative !important;
+  z-index: 18001 !important;
+}
+body[data-screen='game'] :is(.play-type-call, .last-card-call, .emote-callout, .seat-motto-callout, .self-table-emote, .table-emote) {
+  z-index: 19000 !important;
 }

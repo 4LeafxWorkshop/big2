@@ -17,8 +17,8 @@ const SERVICE_BELL_SLOT_POINTS={
   },
   landscape:{
     // Spread the lanes wider in landscape so the slide uses the full felt.
-    tl:{x:'8%',y:'26%'},
-    tr:{x:'92%',y:'26%'},
+    tl:{x:'8%',y:'40%'},
+    tr:{x:'92%',y:'40%'},
     ml:{x:'10%',y:'72%'},
     mr:{x:'90%',y:'72%'}
   }
@@ -63,7 +63,18 @@ export function createServiceBellController(deps={}){
     if(!el||!parent)return;
     el.style.position=parent===getDoc().body?'fixed':'absolute';
     el.style.inset='0';
-    if(zIndex)el.style.zIndex=String(zIndex);
+    el.style.zIndex=zIndex?String(zIndex):'';
+  };
+  const placeFoodHost=(host,parent)=>{
+    if(!host||!parent)return;
+    if(parent===getDoc().body){
+      if(host.parentElement!==parent)parent.appendChild(host);
+      return;
+    }
+    const firstChild=parent.children?.[0]??null;
+    if(host.parentElement!==parent||firstChild!==host){
+      parent.insertBefore?.(host,firstChild)||parent.appendChild(host);
+    }
   };
 
   let heroHost=null;
@@ -168,22 +179,22 @@ export function createServiceBellController(deps={}){
     if(!doc?.body)return null;
     const targetParent=getFoodPlacementParent()??doc.body;
     if(foodHost){
-      if(foodHost.parentElement!==targetParent)targetParent.appendChild(foodHost);
-      applyPlacement(foodHost,targetParent,12000);
+      placeFoodHost(foodHost,targetParent);
+      applyPlacement(foodHost,targetParent);
       return foodHost;
     }
     foodHost=doc.getElementById('service-bell-food-layer');
     if(foodHost&&foodHost.isConnected!==false){
-      if(foodHost.parentElement!==targetParent)targetParent.appendChild(foodHost);
-      applyPlacement(foodHost,targetParent,12000);
+      placeFoodHost(foodHost,targetParent);
+      applyPlacement(foodHost,targetParent);
       return foodHost;
     }
     foodHost=doc.createElement('div');
     foodHost.id='service-bell-food-layer';
     foodHost.className='service-bell-food-layer';
     foodHost.setAttribute('aria-hidden','true');
-    targetParent.appendChild(foodHost);
-    applyPlacement(foodHost,targetParent,12000);
+    placeFoodHost(foodHost,targetParent);
+    applyPlacement(foodHost,targetParent);
     return foodHost;
   };
 
@@ -290,8 +301,10 @@ export function createServiceBellController(deps={}){
     }
     const foodParent=getFoodPlacementParent()??getDoc()?.body;
     if(foodLayer&&foodLayer.parentElement!==foodParent){
-      foodParent.appendChild(foodLayer);
-      applyPlacement(foodLayer,foodParent,12000);
+      placeFoodHost(foodLayer,foodParent);
+      applyPlacement(foodLayer,foodParent);
+    }else if(foodLayer&&foodParent&&foodParent!==getDoc()?.body&&foodParent.children?.[0]!==foodLayer){
+      placeFoodHost(foodLayer,foodParent);
     }
   };
 
