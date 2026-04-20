@@ -78,7 +78,11 @@ function createMockDoc(){
     index:new Map(),
     body:null,
     createElement:(tag)=>new MockElement(tag,doc),
-    getElementById:(id)=>doc.index.get(id)??null
+    getElementById:(id)=>doc.index.get(id)??null,
+    querySelector:(selector)=>{
+      if(selector==='.table')return doc.body.children.find((child)=>child.classList.contains('table'))??null;
+      return null;
+    }
   };
   doc.body=new MockElement('body',doc);
   return doc;
@@ -189,4 +193,30 @@ test('service bell skips food callout when seat is unavailable', ()=>{
   controller.sync({active:true,portraitMode:false});
   assert.equal(controller.trigger(),true);
   assert.equal(foodCallouts.length,0);
+});
+
+test('service bell reanchors to the table in landscape', ()=>{
+  const doc=createMockDoc();
+  const win=createMockWindow();
+  const table=new MockElement('section',doc);
+  table.classList.add('table');
+  doc.body.appendChild(table);
+  const controller=createServiceBellController({
+    documentRef:()=>doc,
+    windowRef:()=>win,
+    withBase:(path)=>`/base/${path}`,
+    unlockAudio:()=>{},
+    getSoundEnabled:()=>false,
+    createAudio:()=>null,
+    random:()=>0,
+    getFoodCalloutSeat:()=>null,
+    setFoodCallout:()=>{},
+    clearFoodCallout:()=>{}
+  });
+
+  controller.sync({active:true,portraitMode:false});
+  const host=doc.getElementById('service-bell-layer');
+  assert.ok(host);
+  assert.equal(host.parentElement,table);
+  assert.equal(host.style.position,'absolute');
 });

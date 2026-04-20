@@ -48,6 +48,19 @@ export function createServiceBellController(deps={}){
   const random=deps.random??(()=>Math.random());
   const getDoc=()=>documentRef();
   const getWin=()=>windowRef();
+  const getPlacementParent=()=>{
+    const doc=getDoc();
+    if(!doc?.body)return null;
+    if(orientation==='landscape'){
+      return doc.querySelector?.('.table')??doc.body;
+    }
+    return doc.body;
+  };
+  const applyPlacement=(el,parent)=>{
+    if(!el||!parent)return;
+    el.style.position=parent===getDoc().body?'fixed':'absolute';
+    el.style.inset='0';
+  };
 
   let host=null;
   let layer=null;
@@ -120,13 +133,12 @@ export function createServiceBellController(deps={}){
   const ensureHost=()=>{
     const doc=getDoc();
     if(!doc?.body)return null;
-    const targetParent=doc.body;
+    const targetParent=getPlacementParent()??doc.body;
     if(host&&host.isConnected!==false){
       if(host.parentElement!==targetParent)targetParent.appendChild(host);
       layer=host.querySelector('.service-bell-food-layer')??layer;
       heroImg=host.querySelector('.service-bell-hero')??heroImg;
-      host.style.position='fixed';
-      host.style.inset='0';
+      applyPlacement(host,targetParent);
       return host;
     }
     host=doc.getElementById('service-bell-layer');
@@ -134,18 +146,16 @@ export function createServiceBellController(deps={}){
       if(host.parentElement!==targetParent)targetParent.appendChild(host);
       layer=host.querySelector('.service-bell-food-layer');
       heroImg=host.querySelector('.service-bell-hero');
-      host.style.position='fixed';
-      host.style.inset='0';
+      applyPlacement(host,targetParent);
       return host;
     }
     host=doc.createElement('div');
     host.id='service-bell-layer';
     host.className='service-bell-layer';
     host.setAttribute('aria-hidden','true');
-    host.style.position='fixed';
-    host.style.inset='0';
     host.innerHTML=`<div class="service-bell-hero-wrap"><img class="service-bell-hero" src="${withBase('foods/bell.png')}" alt="" aria-hidden="true"/></div><div class="service-bell-food-layer" aria-hidden="true"></div>`;
     targetParent.appendChild(host);
+    applyPlacement(host,targetParent);
     layer=host.querySelector('.service-bell-food-layer');
     heroImg=host.querySelector('.service-bell-hero');
     return host;
@@ -236,14 +246,19 @@ export function createServiceBellController(deps={}){
 
   const sync=(params={})=>{
     active=Boolean(params.active);
+    orientation=params.portraitMode?'portrait':'landscape';
     if(!active){
       removeHost();
       return;
     }
     const shell=ensureHost();
     if(!shell)return;
-    orientation=params.portraitMode?'portrait':'landscape';
     shell.dataset.orientation=params.portraitMode?'portrait':'landscape';
+    const targetParent=getPlacementParent()??getDoc()?.body;
+    if(targetParent&&shell.parentElement!==targetParent){
+      targetParent.appendChild(shell);
+      applyPlacement(shell,targetParent);
+    }
   };
 
   const trigger=()=>{
