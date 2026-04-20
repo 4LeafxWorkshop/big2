@@ -88,7 +88,7 @@
   --center-a: rgba(19, 88, 49, .92);
   --center-b: rgba(12, 63, 35, .9);
   --retro-gold: #c9a66b;
-  --card-w: clamp(36px, 5.7vw, 58px);
+  --card-w: clamp(36px, 6vmin, 52px);
   --card-h: calc(var(--card-w) * 1.392857);
   --side-box-h: calc(var(--card-h) * 4.8);
   --card-scale: 1;
@@ -5145,6 +5145,8 @@ body[data-screen='game'] .table-center-stack {
   align-items: flex-end;
   justify-content: flex-start;
   width: max-content;
+  padding-right: 4px;
+  padding-bottom: 4px;
   overflow: visible;
 }
 .closed-card-pile > .opponent-fan {
@@ -5153,8 +5155,8 @@ body[data-screen='game'] .table-center-stack {
 }
 .closed-count-pill {
   position: absolute;
-  right: -4px;
-  bottom: -4px;
+  right: 0;
+  bottom: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -5174,8 +5176,8 @@ body[data-screen='game'] .table-center-stack {
 body[data-screen='game'] :is(.seat-pack, .side-station-stack) > .closed-count-pill {
   position: absolute !important;
   inset: auto !important;
-  right: -4px !important;
-  bottom: -4px !important;
+  right: 0 !important;
+  bottom: 0 !important;
   left: auto !important;
   top: auto !important;
   margin: 0 !important;
@@ -5184,8 +5186,8 @@ body[data-screen='game'] :is(.seat-pack, .side-station-stack) > .closed-count-pi
 body[data-screen='game'] .closed-card-pile > .closed-count-pill {
   position: absolute !important;
   inset: auto !important;
-  right: -4px !important;
-  bottom: -4px !important;
+  right: 0 !important;
+  bottom: 0 !important;
   left: auto !important;
   top: auto !important;
   margin: 0 !important;
@@ -8269,19 +8271,30 @@ body[data-screen='game'] .seat.east .seat-open-play {
     min-height: 0 !important;
     display: grid !important;
     grid-template-areas:
-      "label"
-      "fan"
+      "core"
       "last" !important;
-    grid-template-rows: auto auto auto !important;
+    grid-template-rows: auto auto !important;
     justify-items: center !important;
     align-content: start !important;
     gap: var(--landscape-side-station-gap) !important;
     transform: none !important;
   }
-  body[data-screen='game'][data-orientation='landscape'] .seat.west .side-station-stack > .seat-name-fixed,
-  body[data-screen='game'][data-orientation='landscape'] .seat.east .side-station-stack > .seat-name-fixed,
-  body[data-screen='game'][data-orientation='landscape'] .seat.west .opponent-fan-wrap,
-  body[data-screen='game'][data-orientation='landscape'] .seat.east .opponent-fan-wrap {
+  body[data-screen='game'][data-orientation='landscape'] .seat.west .side-station-stack > .side-station-core,
+  body[data-screen='game'][data-orientation='landscape'] .seat.east .side-station-stack > .side-station-core {
+    grid-area: core !important;
+    display: grid !important;
+    grid-template-areas:
+      "label"
+      "fan" !important;
+    grid-template-rows: auto auto !important;
+    justify-items: center !important;
+    align-content: start !important;
+    gap: var(--landscape-side-station-gap) !important;
+  }
+  body[data-screen='game'][data-orientation='landscape'] .seat.west .side-station-core > .seat-name-fixed,
+  body[data-screen='game'][data-orientation='landscape'] .seat.east .side-station-core > .seat-name-fixed,
+  body[data-screen='game'][data-orientation='landscape'] .seat.west .side-station-core > .opponent-fan-wrap,
+  body[data-screen='game'][data-orientation='landscape'] .seat.east .side-station-core > .opponent-fan-wrap {
     position: relative !important;
     justify-self: center !important;
     align-self: start !important;
@@ -8291,20 +8304,20 @@ body[data-screen='game'] .seat.east .seat-open-play {
     top: auto !important;
     transform: none !important;
   }
-  body[data-screen='game'][data-orientation='landscape'] .seat.west .side-station-stack > .seat-name-fixed,
-  body[data-screen='game'][data-orientation='landscape'] .seat.east .side-station-stack > .seat-name-fixed {
+  body[data-screen='game'][data-orientation='landscape'] .seat.west .side-station-core > .seat-name-fixed,
+  body[data-screen='game'][data-orientation='landscape'] .seat.east .side-station-core > .seat-name-fixed {
     z-index: 13010 !important;
   }
-  body[data-screen='game'][data-orientation='landscape'] .seat.west .opponent-fan-wrap,
-  body[data-screen='game'][data-orientation='landscape'] .seat.east .opponent-fan-wrap {
+  body[data-screen='game'][data-orientation='landscape'] .seat.west .side-station-core > .opponent-fan-wrap,
+  body[data-screen='game'][data-orientation='landscape'] .seat.east .side-station-core > .opponent-fan-wrap {
     z-index: 13000 !important;
     overflow: visible !important;
   }
-body[data-screen='game'][data-orientation='landscape'] .seat.west .seat-open-play,
-body[data-screen='game'][data-orientation='landscape'] .seat.east .seat-open-play {
-  position: relative !important;
-  z-index: 11000 !important;
-  justify-self: center !important;
+  body[data-screen='game'][data-orientation='landscape'] .seat.west .seat-open-play,
+  body[data-screen='game'][data-orientation='landscape'] .seat.east .seat-open-play {
+    position: relative !important;
+    z-index: 11000 !important;
+    justify-self: center !important;
     align-self: start !important;
     margin: 0 !important;
     left: auto !important;
@@ -8316,12 +8329,16 @@ body[data-screen='game'][data-orientation='landscape'] .seat.east .seat-open-pla
   body[data-screen='game'][data-orientation='landscape'] .seat.east .closed-count-pill {
     position: absolute !important;
     inset: auto !important;
-    right: -4px !important;
-    bottom: 8px !important;
+    right: 0 !important;
+    bottom: 0 !important;
     left: auto !important;
     top: auto !important;
     margin: 0 !important;
-    z-index: 12 !important;
+    z-index: 20001 !important;
+  }
+  body[data-screen='game'][data-orientation='landscape'] .seat.west .closed-card-pile,
+  body[data-screen='game'][data-orientation='landscape'] .seat.east .closed-card-pile {
+    z-index: 11002 !important;
   }
   body[data-screen='game'][data-orientation='landscape'] .seat.west .opponent-fan,
   body[data-screen='game'][data-orientation='landscape'] .seat.east .opponent-fan,
@@ -9451,13 +9468,13 @@ body[data-screen='game'] .east .seat-open-play .opponent-open-scale {
 }
 @media (max-width: 860px) {
   body[data-screen='game'] {
-    --card-w: clamp(36px, 6vmin, 52px);
+    --card-w: clamp(46px, 8.6vh, 64px);
   }
 }
 @media (max-width: 860px) and (orientation: portrait) {
   /* Portrait mobile: place south seat panel back into the green table area. */
   body[data-screen='game'] {
-    --card-w: clamp(36px, 6vmin, 52px);
+    --card-w: clamp(46px, 8.6vh, 64px);
   }
   body[data-screen='game'] .table {
     width: 100% !important;
@@ -10796,7 +10813,17 @@ body[data-screen='game'] .seat.east .seat-open-play {
   }
   body[data-screen='game'] .seat.west .seat-open-play,
   body[data-screen='game'] .seat.east .seat-open-play {
-    top: calc(50% + 92px) !important;
+    position: relative !important;
+    grid-area: last !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    transform: none !important;
+    justify-self: center !important;
+    margin-top: 2px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    overflow: visible !important;
   }
 }
 
@@ -11104,10 +11131,17 @@ body[data-screen='game'] .seat.east {
   }
   body[data-screen='game'] .seat.west .seat-open-play,
   body[data-screen='game'] .seat.east .seat-open-play {
-    top: calc(38% + 100px) !important;
-    left: 50% !important;
+    position: relative !important;
+    grid-area: last !important;
+    top: auto !important;
+    left: auto !important;
     right: auto !important;
-    transform: translateX(-50%) !important;
+    transform: none !important;
+    justify-self: center !important;
+    margin-top: 2px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    overflow: visible !important;
   }
   body[data-screen='game'] .seat.north .seat-open-play .seat-played .card.mini + .card.mini,
   body[data-screen='game'] .seat.west .seat-open-play .seat-played .card.mini + .card.mini,
@@ -11201,8 +11235,8 @@ body[data-screen='game'] .seat.east {
   body[data-screen='game'] .seat.east .closed-count-pill {
     position: absolute !important;
     inset: auto !important;
-    right: -4px !important;
-    bottom: -4px !important;
+    right: 0 !important;
+    bottom: 0 !important;
     left: auto !important;
     top: auto !important;
     margin: 0 !important;
@@ -11232,12 +11266,12 @@ body[data-screen='game'] .seat.east {
     overflow: visible !important;
   }
   body[data-screen='game'] .seat.west .seat-open-play {
-    justify-self: start !important;
-    margin-left: 26px !important;
+    justify-self: center !important;
+    margin-left: 0 !important;
   }
   body[data-screen='game'] .seat.east .seat-open-play {
-    justify-self: end !important;
-    margin-right: 26px !important;
+    justify-self: center !important;
+    margin-right: 0 !important;
   }
   body[data-screen='game'] .seat.north .seat-open-play .card.mini,
   body[data-screen='game'] .seat.west .seat-open-play .card.mini,
@@ -11375,23 +11409,10 @@ body[data-screen='game'] .seat.north.active .seat-section {
     left: auto !important;
     right: auto !important;
     transform: none !important;
-    margin-top: 46px !important;
+    margin-top: 0 !important;
     justify-self: center !important;
     align-self: start !important;
     overflow: visible !important;
-  }
-  body[data-screen='game'][data-orientation='landscape'] .seat.north .closed-count-pill,
-  body[data-screen='game'][data-orientation='landscape'] .seat.west .closed-count-pill,
-  body[data-screen='game'][data-orientation='landscape'] .seat.east .closed-count-pill {
-    position: absolute !important;
-    inset: auto !important;
-    right: -4px !important;
-    bottom: 8px !important;
-    left: auto !important;
-    top: auto !important;
-    margin: 0 !important;
-    z-index: 12 !important;
-    background: rgba(0, 0, 0, .92) !important;
   }
   body[data-screen='game'][data-orientation='landscape'] .seat.north .seat-open-play,
   body[data-screen='game'][data-orientation='landscape'] .seat.west .seat-open-play,
@@ -11408,12 +11429,12 @@ body[data-screen='game'] .seat.north.active .seat-section {
     z-index: 1 !important;
   }
   body[data-screen='game'][data-orientation='landscape'] .seat.west .seat-open-play {
-    justify-self: start !important;
-    margin-left: 26px !important;
+    justify-self: center !important;
+    margin-left: 0 !important;
   }
   body[data-screen='game'][data-orientation='landscape'] .seat.east .seat-open-play {
-    justify-self: end !important;
-    margin-right: 26px !important;
+    justify-self: center !important;
+    margin-right: 0 !important;
   }
   body[data-screen='game'][data-orientation='landscape'] .seat.west,
   body[data-screen='game'][data-orientation='landscape'] .seat.east,
@@ -11427,13 +11448,46 @@ body[data-screen='game'] .seat.north.active .seat-section {
 }
 
 @media (max-width: 860px) and (orientation: portrait) {
+  body[data-screen='game'][data-orientation='portrait'] .seat.north .opponent-fan {
+    flex-direction: row-reverse !important;
+    transform: scale(var(--opp-closed-scale)) !important;
+    transform-origin: top center !important;
+  }
   body[data-screen='game'][data-orientation='portrait'] .seat.west .opponent-fan,
   body[data-screen='game'][data-orientation='portrait'] .seat.east .opponent-fan {
+    flex-direction: row-reverse !important;
+    transform: scale(var(--opp-closed-scale)) !important;
+    transform-origin: top center !important;
     top: calc(50% + 34px) !important;
+  }
+  body[data-screen='game'][data-orientation='portrait'] .seat.north .opponent-fan {
+    transform: scale(var(--opp-closed-scale)) !important;
+    transform-origin: top center !important;
+  }
+  body[data-screen='game'][data-orientation='portrait'] .seat.north .opponent-fan .card.back.mini.closed-back,
+  body[data-screen='game'][data-orientation='portrait'] .seat.west .opponent-fan .card.back.mini.closed-back,
+  body[data-screen='game'][data-orientation='portrait'] .seat.east .opponent-fan .card.back.mini.closed-back {
+    transform: rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
+  }
+  body[data-screen='game'][data-orientation='portrait'] .seat.north .closed-count-pill,
+  body[data-screen='game'][data-orientation='portrait'] .seat.west .closed-count-pill,
+  body[data-screen='game'][data-orientation='portrait'] .seat.east .closed-count-pill {
+    right: 0 !important;
+    bottom: 0 !important;
   }
   body[data-screen='game'][data-orientation='portrait'] .seat.west .seat-open-play,
   body[data-screen='game'][data-orientation='portrait'] .seat.east .seat-open-play {
-    top: calc(50% + 92px) !important;
+    position: relative !important;
+    grid-area: last !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    transform: none !important;
+    justify-self: center !important;
+    margin-top: 2px !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
+    overflow: visible !important;
   }
 }
 
@@ -11663,7 +11717,7 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
     justify-self: center !important;
   }
   body[data-screen='game'][data-orientation='landscape'] .seat.north .opponent-fan {
-    margin-top: 7px !important;
+    margin-top: 0 !important;
   }
   body[data-screen='game'][data-orientation='landscape'] .seat.west .side-station-stack .opponent-fan,
   body[data-screen='game'][data-orientation='landscape'] .seat.east .side-station-stack .opponent-fan {
@@ -11753,7 +11807,7 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
     overflow: visible !important;
   }
   body[data-screen='game'][data-orientation='landscape'] .seat.north .opponent-fan {
-    margin-top: 7px !important;
+    margin-top: 0 !important;
   }
   body[data-screen='game'][data-orientation='landscape'] .seat.north .opponent-fan {
     transform: scale(var(--opp-closed-scale)) !important;
@@ -11787,6 +11841,18 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
   body[data-screen='game'][data-orientation='landscape'] .seat.west .opponent-fan .closed-back:first-child,
   body[data-screen='game'][data-orientation='landscape'] .seat.east .opponent-fan .closed-back:first-child {
     margin-left: 0 !important;
+  }
+  body[data-screen='game'][data-orientation='landscape'] .seat.north .opponent-fan {
+    margin-top: 0 !important;
+    z-index: 11001 !important;
+  }
+  body[data-screen='game'][data-orientation='landscape'] .seat.north .closed-card-pile {
+    z-index: 11002 !important;
+  }
+  body[data-screen='game'][data-orientation='landscape'] .seat.north .closed-count-pill {
+    bottom: 0 !important;
+    right: 0 !important;
+    z-index: 20001 !important;
   }
 }
 
@@ -12011,8 +12077,8 @@ body[data-screen='game'] :is(.seat.north, .seat.west, .seat.east) .opponent-fan 
 body[data-screen='game'] :is(.seat.north, .seat.west, .seat.east) .closed-count-pill {
   position: absolute !important;
   inset: auto !important;
-  right: -4px !important;
-  bottom: -4px !important;
+  right: 0 !important;
+  bottom: 0 !important;
   left: auto !important;
   top: auto !important;
   margin: 0 !important;
@@ -12057,16 +12123,6 @@ body[data-screen='game'] :is(.seat.west, .seat.east) .side-station-stack .oppone
   body[data-screen='game'][data-orientation='portrait'] .seat.east .side-station-stack {
     gap: 4px !important;
   }
-  body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-open-play,
-  body[data-screen='game'][data-orientation='portrait'] .seat.west .seat-open-play,
-  body[data-screen='game'][data-orientation='portrait'] .seat.east .seat-open-play {
-    margin-top: 0 !important;
-  }
-  body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-open-play .seat-played,
-  body[data-screen='game'][data-orientation='portrait'] .seat.west .seat-open-play .seat-played,
-  body[data-screen='game'][data-orientation='portrait'] .seat.east .seat-open-play .seat-played {
-    transform: translateY(8px) !important;
-  }
   body[data-screen='game'][data-orientation='portrait'] .seat-name-fixed[data-opponent-name] .food-callout-seat {
     top: calc(100% + 72px) !important;
   }
@@ -12082,7 +12138,7 @@ body[data-screen='game'] :is(.table-center-stack, .center-last, .center-last-nor
 }
 
 /* Final all-views layer contract: profile labels > food > open/discard cards. */
-body[data-screen='game'] :is(.seat.north, .seat.west, .seat.east) :is(> .seat-name-fixed, .seat-pack > .seat-name-fixed, .side-station-stack > .seat-name-fixed),
+body[data-screen='game'] :is(.seat.north > .seat-name-fixed, .seat.west > .seat-name-fixed, .seat.east > .seat-name-fixed, .seat.north .seat-pack > .seat-name-fixed, .seat.west .seat-pack > .seat-name-fixed, .seat.east .seat-pack > .seat-name-fixed, .seat.north .side-station-stack > .seat-name-fixed, .seat.west .side-station-stack > .seat-name-fixed, .seat.east .side-station-stack > .seat-name-fixed),
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] :is(.name, .seat-identity, .seat-name-text, .seat-subline, .seat-round-wins, .seat-namecard) {
   position: relative !important;
   z-index: 13000 !important;
@@ -12182,18 +12238,36 @@ body[data-screen='game'] :is(.seat.north > .seat-open-play, .seat.west > .seat-o
 body[data-screen='game'] .seat.north > .seat-open-play,
 body[data-screen='game'] .seat.west > .seat-open-play,
 body[data-screen='game'] .seat.east > .seat-open-play {
-  left: 50% !important;
-  top: calc(50% + 92px) !important;
-  transform: translateX(-50%) !important;
+  position: relative !important;
+  grid-area: last !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  transform: none !important;
+  justify-self: center !important;
+  margin-top: 2px !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  overflow: visible !important;
 }
 body[data-screen='game'][data-orientation='landscape'] .seat.north > .seat-open-play,
 body[data-screen='game'][data-orientation='landscape'] .seat.west > .seat-open-play,
 body[data-screen='game'][data-orientation='landscape'] .seat.east > .seat-open-play {
-  top: calc(38% + 100px) !important;
+  position: relative !important;
+  grid-area: last !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  transform: none !important;
+  justify-self: center !important;
+  margin-top: 2px !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  overflow: visible !important;
 }
 
 /* Root stack: food is table-level; split paint order without moving anchors. */
-body[data-screen='game'] :is(.seat.north > .seat-pack, .seat.west > .seat-pack, .seat.east > .seat-pack, .seat.west .side-station-stack, .seat.east .side-station-stack, .seat.west .side-station-core, .seat.east .side-station-core) {
+body[data-screen='game'] :is(.seat.north > .seat-pack, .seat.west > .seat-pack, .seat.east > .seat-pack) {
   position: relative !important;
   z-index: auto !important;
   isolation: auto !important;
@@ -12219,18 +12293,42 @@ body[data-screen='game'] :is(.seat.north .closed-count-pill, .seat.west .closed-
 }
 body[data-screen='game'] :is(.seat.north .opponent-fan-wrap > .closed-count-pill, .seat.west .opponent-fan-wrap > .closed-count-pill, .seat.east .opponent-fan-wrap > .closed-count-pill) {
   inset: auto !important;
-  right: -4px !important;
-  bottom: -4px !important;
+  right: 0 !important;
+  bottom: 0 !important;
   left: auto !important;
   top: auto !important;
   margin: 0 !important;
   z-index: 20000 !important;
+}
+body[data-screen='game'] :is(.seat.north .seat-pack, .seat.west .side-station-stack, .seat.east .side-station-stack) {
+  gap: 4px !important;
+}
+body[data-screen='game'] :is(.seat.west .side-station-core, .seat.east .side-station-core) {
+  gap: 4px !important;
+}
+body[data-screen='game'] :is(.seat.west .side-station-core > .opponent-fan-wrap, .seat.east .side-station-core > .opponent-fan-wrap) {
+  margin-top: 4px !important;
+}
+body[data-screen='game'] :is(.seat.north .seat-open-play, .seat.west .seat-open-play, .seat.east .seat-open-play) {
+  margin-top: 2px !important;
 }
 body[data-screen='game'] :is(.seat.north .seat-open-play, .seat.west .seat-open-play, .seat.east .seat-open-play),
 body[data-screen='game'] :is(.seat.north .seat-open-play .seat-played, .seat.west .seat-open-play .seat-played, .seat.east .seat-open-play .seat-played),
 body[data-screen='game'] :is(.seat.north .seat-open-play .card.mini, .seat.west .seat-open-play .card.mini, .seat.east .seat-open-play .card.mini) {
   position: relative !important;
   z-index: 11000 !important;
+}
+body[data-screen='game'] :is(.seat.north .seat-played-pass, .seat.west .seat-played-pass, .seat.east .seat-played-pass, .center-last-south .seat-played-pass) {
+  justify-content: center !important;
+  align-items: center !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+body[data-screen='game'] :is(.seat.north .seat-pass-label, .seat.west .seat-pass-label, .seat.east .seat-pass-label, .center-last-south .seat-pass-label) {
+  justify-content: center !important;
+  align-items: center !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
 }
 body[data-screen='game'] .service-bell-food-layer {
   z-index: auto !important;
