@@ -316,12 +316,13 @@ service cloud.firestore {
       v == null ||
       (
         v is map &&
-        v.keys().hasOnly(['id','ts','by']) &&
+        v.keys().hasOnly(['id','ts','by','seat']) &&
         v.id is string &&
         v.id.size() >= 1 &&
         v.id.size() <= 40 &&
         v.ts is int &&
-        (!('by' in v) || v.by is string)
+        (!('by' in v) || v.by is string) &&
+        (!('seat' in v) || (v.seat is int && v.seat >= 0 && v.seat <= 3))
       );
   }
 

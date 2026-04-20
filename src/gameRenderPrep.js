@@ -307,6 +307,8 @@ export function buildCalloutRenderState(params){
   const emoteSticker=activeEmote?EMOTE_STICKERS.find((entry)=>entry.id===activeEmote.id):null;
   const emoteSeat=(()=>{
     if(!emoteSticker)return null;
+    const explicitSeat=Number(activeEmote?.seat);
+    if(Number.isInteger(explicitSeat)&&explicitSeat>=0&&explicitSeat<=3)return explicitSeat;
     const activeBy=String(activeEmote?.by||'');
     if(activeBy.startsWith('seat:')){
       const seat=Number(activeBy.slice(5));
@@ -326,12 +328,8 @@ export function buildCalloutRenderState(params){
   const emoteImageHtml=emoteSticker
     ?`<img src="${withBase(`emotes/${emoteSticker.file}`)}" alt="${emoteSticker.id}"/>`
     :'';
+  const allowSeatEmotes=Boolean(emoteDisplayEnabled||v.mode==='room');
   const hasSeatCallout=(seat)=>Boolean(calloutDisplayEnabled&&activeCallout&&activeCallout.seat===seat);
-  if(emoteSticker&&emoteSeat!==null&&hasSeatCallout(emoteSeat)){
-    if(state.emote.active&&!state.emote.active.suppressCallout){
-      state.emote.active={...state.emote.active,suppressCallout:true};
-    }
-  }
   const seatCalloutHtml=(seat,viewCls,color,isSelf=false)=>{
     const seatClass=isSelf?'play-type-call-self':'play-type-call-seat';
     const lastClass=isSelf?'last-card-call-self':'last-card-call-seat';
@@ -365,10 +363,10 @@ export function buildCalloutRenderState(params){
     return'';
   };
   const seatEmoteHtml=(seat,viewCls,color,isSelf=false)=>{
-    if(!emoteDisplayEnabled)return'';
+    if(!allowSeatEmotes)return'';
     if(!emoteSticker||emoteSeat===null||emoteSeat!==seat)return'';
     if(isSelf)return'';
-    if(state.emote.active?.suppressCallout)return'';
+    if(activeCallout&&activeCallout.seat===seat)return'';
     const tailDir=viewCls==='north'?'north':viewCls==='east'?'east':viewCls==='west'?'west':'south';
     const jitter=calloutJitterStyle(viewCls,`emote|${seat}|${activeEmote?.ts||0}|${emoteSticker.id}`);
     return`<div class="emote-callout play-type-call-seat" data-emote-seat="${seat}" style="--player-color:${color};${jitter}"><div class="callout-box"><div class="hk-inner"><span class="emote-icon">${emoteImageHtml}</span></div></div><div class="tail tail-${tailDir}"></div></div>`;

@@ -62,6 +62,39 @@ test('retargetCalloutTails retargets self bubble tail and sets anchor', ()=>{
   assert.equal(tail.style.values['--tail-anchor-x'],'27px');
 });
 
+test('retargetCalloutTails centers food callout tails', ()=>{
+  const tail={classList:makeClassList(['tail','tail-north']),style:makeStyle()};
+  const bubbleRect={left:20,top:20,width:80,height:30,right:100,bottom:50};
+  const avatarRect={left:30,top:70,width:20,height:20,right:50,bottom:90};
+  const seat={classList:makeClassList(['north']),querySelector(){return avatar;}};
+  const bubble={
+    classList:makeClassList(['food-callout-seat']),
+    style:makeStyle(),
+    querySelector(selector){return selector==='.tail'?tail:null;},
+    getBoundingClientRect(){return bubbleRect;},
+    closest(selector){return selector==='.seat'?seat:null;}
+  };
+  const avatar={getBoundingClientRect(){return avatarRect;}};
+  const documentStub={
+    querySelectorAll(){return [bubble];},
+    querySelector(selector){return selector==='.player-avatar-wrap-opponent'?avatar:null;},
+    getElementById(){return null;}
+  };
+  const originalHTMLElement=globalThis.HTMLElement;
+  globalThis.HTMLElement=Object;
+  try{
+    retargetCalloutTails({
+      documentRef:()=>documentStub,
+      windowRef:()=>({innerWidth:200,innerHeight:200}),
+      isMobilePointer:()=>false
+    });
+  }finally{
+    globalThis.HTMLElement=originalHTMLElement;
+  }
+  assert.equal(tail.classList.contains('tail-north'),true);
+  assert.equal(tail.style.values['--tail-anchor-x'],'50%');
+});
+
 test('syncHandStackMode applies stacked overlap when cards exceed width', ()=>{
   const firstRect={left:0,right:50,width:50};
   const lastRect={left:70,right:120,width:50};

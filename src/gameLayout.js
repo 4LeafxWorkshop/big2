@@ -111,6 +111,10 @@ export function retargetCalloutTails({
     const shiftedBubbleRect=bubble.getBoundingClientRect();
     const anchorX=Math.max(10,Math.min(shiftedBubbleRect.width-10,ax-shiftedBubbleRect.left));
     const anchorY=Math.max(10,Math.min(shiftedBubbleRect.height-10,ay-shiftedBubbleRect.top));
+    if(bubble.classList.contains('food-callout-seat')&&(dir==='north'||dir==='south')){
+      tail.style.setProperty('--tail-anchor-x','50%');
+      continue;
+    }
     if(dir==='north'||dir==='south'){
       if(isSelfBubble&&dir==='south'){
         tail.style.setProperty('--tail-anchor-x','27px');

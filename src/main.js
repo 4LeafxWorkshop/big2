@@ -45,6 +45,7 @@ import {createIntroGuideHelpers} from './introGuide.js';
 import {createRoomLifecycleController} from './roomLifecycle.js';
 import {createRoomGameRuntimeController} from './roomGameRuntime.js';
 import {createRoomExpiryHelpers} from './roomExpiry.js';
+import {isRoomPresenceOnlyUpdate} from './roomPresence.js';
 import {createServiceBellController} from './serviceBell.js';
 import {createRoomIdentityHelpers} from './roomIdentity.js';
 import {createRoomMutationsController} from './roomMutations.js';
@@ -1521,45 +1522,6 @@ function sanitizeRoomPlayerEntry(entry){
   if(entry?.isHuman===false)next.isHuman=false;
   return next;
 }
-function isRoomPresenceOnlyUpdate(prev,next){
-  if(!prev||!next)return false;
-  const prevStatus=String(prev.status||'');
-  const nextStatus=String(next.status||'');
-  if(prevStatus!==nextStatus)return false;
-  if(prevStatus!=='playing'&&prevStatus!=='finished')return false;
-  if(Number(prev.gameVersion||0)!==Number(next.gameVersion||0))return false;
-  if(String(prev.code||'')!==String(next.code||''))return false;
-  if(String(prev.hostId||'')!==String(next.hostId||''))return false;
-  if(String(prev.hostName||'')!==String(next.hostName||''))return false;
-  if(Boolean(prev.isPrivate)!==Boolean(next.isPrivate))return false;
-  if(Number(prev.maxPlayers||0)!==Number(next.maxPlayers||0))return false;
-  if(Number(prev.roundCount||0)!==Number(next.roundCount||0))return false;
-  const prevEmote=prev?.game?.emote??null;
-  const nextEmote=next?.game?.emote??null;
-  if(String(prevEmote?.id||'')!==String(nextEmote?.id||''))return false;
-  if(Number(prevEmote?.ts||0)!==Number(nextEmote?.ts||0))return false;
-  if(String(prevEmote?.by||'')!==String(nextEmote?.by||''))return false;
-  const prevRootEmote=prev?.emote??null;
-  const nextRootEmote=next?.emote??null;
-  if(String(prevRootEmote?.id||'')!==String(nextRootEmote?.id||''))return false;
-  if(Number(prevRootEmote?.ts||0)!==Number(nextRootEmote?.ts||0))return false;
-  if(String(prevRootEmote?.by||'')!==String(nextRootEmote?.by||''))return false;
-  const prevPlayers=Array.isArray(prev.players)?prev.players:[];
-  const nextPlayers=Array.isArray(next.players)?next.players:[];
-  if(prevPlayers.length!==nextPlayers.length)return false;
-  const prevMap=new Map(prevPlayers.map((p)=>[String(p?.uid??''),p]));
-  for(const p of nextPlayers){
-    const uid=String(p?.uid??'');
-    const before=prevMap.get(uid);
-    if(!before)return false;
-    if(String(before.name||'')!==String(p.name||''))return false;
-    if(String(before.gender||'')!==String(p.gender||''))return false;
-    if(String(before.picture||'')!==String(p.picture||''))return false;
-    if(Boolean(before.isHost)!==Boolean(p.isHost))return false;
-    if(Number(before.seat)!==Number(p.seat))return false;
-  }
-  return true;
-}
 function bumpRoomPlayerLastSeen(players,uid,now){
   if(!uid||!Array.isArray(players))return{players,changed:false};
   let changed=false;
@@ -2207,8 +2169,10 @@ async function roomSubmitEmote(id,tsOverride=null,byOverride=''){
   try{
     const ref=roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(state.room.id);
     const by=String(byOverride||currentRoomPlayerId()||'');
+    const seat=roomSelfSeat(state.room.data);
     await ref.update({
-      'game.emote':{id:match.id,ts:Math.trunc(now),by}
+      emote:{id:match.id,ts:Math.trunc(now),by,seat:Number.isInteger(seat)&&seat>=0?seat:undefined},
+      updatedAt:Math.trunc(now)
     });
   }catch{}
 }
@@ -2272,7 +2236,7 @@ async function roomSubmitPlay(cards,seatOverride=null){
         const updates={game:result.game,updatedAt:now,gameVersion:Number(data.gameVersion||0)+1};
         const reaction=pickBotReaction(result.game,seat,'play',result);
         if(reaction){
-          updates.game={...result.game,emote:{id:reaction.id,ts:Math.trunc(now),by:reaction.by}};
+          updates.game={...result.game,emote:{id:reaction.id,ts:Math.trunc(now),by:reaction.by,seat}};
         }
         const actorUid=(selfSeat===seat)?currentRoomPlayerId():'';
         const bumped=bumpRoomPlayerLastSeen(nextPlayers,actorUid,now);
@@ -2345,7 +2309,7 @@ async function roomSubmitPass(seatOverride=null){
         const updates={game:result.game,updatedAt:now,gameVersion:Number(data.gameVersion||0)+1};
         const reaction=pickBotReaction(result.game,seat,'pass',null);
         if(reaction){
-          updates.game={...result.game,emote:{id:reaction.id,ts:Math.trunc(now),by:reaction.by}};
+          updates.game={...result.game,emote:{id:reaction.id,ts:Math.trunc(now),by:reaction.by,seat}};
         }
         const actorUid=(selfSeat===seat)?currentRoomPlayerId():'';
         const bumped=bumpRoomPlayerLastSeen(nextPlayers,actorUid,now);
@@ -3471,7 +3435,10 @@ function triggerEmoteSticker(id){
   const match=EMOTE_STICKERS.find((x)=>x.id===id);
   if(!match)return;
   const now=Date.now();
-  state.emote.active={id:match.id,ts:now,source:'local'};
+  const seat=state.home.mode==='room'
+    ?roomSelfSeat(state.room.data)
+    :Number.isInteger(v.selfSeat)?v.selfSeat:0;
+  state.emote.active={id:match.id,ts:now,source:'local',seat:Number.isInteger(seat)&&seat>=0?seat:undefined};
   state.emote.open=false;
   playSound(`emote-${match.id}`);
   if(state.home.mode==='room'){
@@ -3541,7 +3508,7 @@ function triggerBotEmoteLocal(seat,id){
   const match=EMOTE_STICKERS.find((x)=>x.id===id);
   if(!match)return;
   const now=Date.now();
-  state.emote.active={id:match.id,ts:now,source:'local',by:`seat:${seat}`};
+  state.emote.active={id:match.id,ts:now,source:'local',by:`seat:${seat}`,seat};
   state.emote.open=false;
   playSound(`emote-${match.id}`);
   if(emoteTimer){clearTimeout(emoteTimer);emoteTimer=null;}
@@ -3595,6 +3562,8 @@ function syncRoomEmote(roomData){
     return;
   }
   const age=Date.now()-ts;
+  const explicitSeat=Number(raw.seat);
+  const hasExplicitSeat=Number.isInteger(explicitSeat)&&explicitSeat>=0&&explicitSeat<=3;
   if(id.startsWith(FOOD_EMOTE_PREFIX)){
     const foodId=id.slice(FOOD_EMOTE_PREFIX.length).trim().toLowerCase();
     const foodMeta=FOOD_CALLOUT_META[foodId]||null;
@@ -3638,7 +3607,7 @@ function syncRoomEmote(roomData){
     if(current.source==='local')return;
     if(current.source==='room')return;
   }
-  state.emote.active={id,ts,source:'room',by:String(raw.by||'')};
+  state.emote.active={id,ts,source:'room',by:String(raw.by||''),seat:hasExplicitSeat?explicitSeat:undefined};
   state.emote.open=false;
   if(emoteTimer){clearTimeout(emoteTimer);emoteTimer=null;}
   const remaining=Math.max(0,EMOTE_DURATION_MS-age);
@@ -5679,6 +5648,8 @@ function render(){
   document.body.setAttribute('data-game-mode',state.home.mode==='room'?'room':'solo');
   document.body.setAttribute('data-ios',isIOSDevice()?'1':'0');
   document.body.setAttribute('data-is-mobile',isMobilePointer()?'1':'0');
+  const blockLandscapeMobile=shouldBlockLandscapeMobile();
+  serviceBellController.sync({active:state.screen==='game'&&!blockLandscapeMobile,portraitMode:isPortraitMode()});
   if(state.screen==='game'&&!isPortraitMode()){
     state.showLog=true;
   }
@@ -5686,8 +5657,7 @@ function render(){
   document.body.setAttribute('data-log-sheet',isPortraitLogSheetOpen()?'1':'0');
   syncWebViewportGuardAttrs();
   syncRoomCountdownTicker();
-  if(shouldBlockLandscapeMobile()){
-    serviceBellController.sync({active:false,portraitMode:isPortraitMode()});
+  if(blockLandscapeMobile){
     app.innerHTML=`<section class="orientation-block"><div class="orientation-card"><div class="orientation-hero" aria-hidden="true"><span class="orientation-phone">📱</span><span class="orientation-rotate">↻</span></div><h2>${esc(t('portraitTitle'))}</h2><p>${esc(t('portraitBody'))}</p></div></section>`;
     return;
   }
@@ -5695,7 +5665,6 @@ function render(){
   if(state.screen==='config'){renderConfig();return;}
   if(state.screen==='opponents'){renderOpponents();return;}
   renderGame();
-  serviceBellController.sync({active:state.screen==='game',portraitMode:isPortraitMode()});
 }
 function syncViewport(){
   const root=document.documentElement;

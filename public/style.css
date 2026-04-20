@@ -4682,8 +4682,11 @@ body[data-screen='game'] .table-center-stack {
   height: auto;
   display: block;
 }
+.food-callout {
+  animation: foodCalloutSlideIn .2s ease-out both;
+}
 .food-callout .callout-box {
-  animation: foodCalloutSlideIn .2s ease-out;
+  animation: none;
 }
 .play-type-call .hk-text,
 .last-card-call .hk-text {
