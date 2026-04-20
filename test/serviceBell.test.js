@@ -25,13 +25,10 @@ class MockElement {
   set innerHTML(value){
     this._innerHTML=String(value??'');
     this.children=[];
-    if(this._innerHTML.includes('service-bell-hero')&&this._innerHTML.includes('service-bell-food-layer')){
+    if(this._innerHTML.includes('service-bell-hero')){
       const hero=new MockElement('img',this.doc);
       hero.classList.add('service-bell-hero');
-      const layer=new MockElement('div',this.doc);
-      layer.classList.add('service-bell-food-layer');
       this.appendChild(hero);
-      this.appendChild(layer);
     }
   }
 
@@ -69,6 +66,7 @@ class MockElement {
     if(selector==='.service-bell-food-layer')return this.children.find((child)=>child.classList.contains('service-bell-food-layer'))??null;
     if(selector==='.service-bell-hero')return this.children.find((child)=>child.classList.contains('service-bell-hero'))??null;
     if(selector==='.service-bell-food')return this.children.find((child)=>child.classList.contains('service-bell-food'))??null;
+    if(selector==='.table-center-stack')return this.children.find((child)=>child.classList.contains('table-center-stack'))??null;
     return null;
   }
 }
@@ -86,6 +84,16 @@ function createMockDoc(){
   };
   doc.body=new MockElement('body',doc);
   return doc;
+}
+
+function attachTable(doc){
+  const table=new MockElement('section',doc);
+  table.classList.add('table');
+  const centerStack=new MockElement('div',doc);
+  centerStack.classList.add('table-center-stack');
+  table.appendChild(centerStack);
+  doc.body.appendChild(table);
+  return{table,centerStack};
 }
 
 function createMockWindow(){
@@ -113,6 +121,7 @@ function drainTimers(win,maxSteps=20){
 test('service bell triggers sound, spawn, and cleanup', ()=>{
   const doc=createMockDoc();
   const win=createMockWindow();
+  const {table,centerStack}=attachTable(doc);
   const audioLog=[];
   const foodCallouts=[];
   let unlockCount=0;
@@ -143,7 +152,7 @@ test('service bell triggers sound, spawn, and cleanup', ()=>{
   const host=doc.getElementById('service-bell-layer');
   assert.ok(host);
   assert.equal(host.dataset.orientation,'portrait');
-  assert.ok(doc.body.children.includes(host));
+  assert.equal(host.parentElement,table);
   assert.equal(host.classList.contains('is-ready'),false);
 
   const spawned=controller.trigger();
@@ -154,9 +163,12 @@ test('service bell triggers sound, spawn, and cleanup', ()=>{
   assert.equal(foodCallouts.length,1);
   assert.equal(foodCallouts[0].seat,2);
   assert.equal(foodCallouts[0].foodId,'lemontea');
-  const layer=host.querySelector('.service-bell-food-layer');
-  assert.equal(layer.children.length,1);
-  assert.match(layer.children[0].dataset.slot,/tl|tr|ml|mr/);
+  const foodLayer=doc.getElementById('service-bell-food-layer');
+  assert.ok(foodLayer);
+  assert.equal(foodLayer.parentElement,table);
+  assert.equal(foodLayer.dataset.orientation,'portrait');
+  assert.equal(foodLayer.children.length,1);
+  assert.match(foodLayer.children[0].dataset.slot,/tl|tr|ml|mr/);
   assert.equal(host.classList.contains('is-ready'),true);
 
   const timerEntries=[...win.timers.entries()];
@@ -170,7 +182,10 @@ test('service bell triggers sound, spawn, and cleanup', ()=>{
   assert.equal(host.classList.contains('is-ready'),false);
 
   controller.sync({active:false,portraitMode:true});
-  assert.equal(doc.body.children.length,0);
+  assert.equal(doc.body.children.length,1);
+  assert.equal(doc.body.children[0].classList.contains('table'),true);
+  assert.equal(doc.getElementById('service-bell-layer'),null);
+  assert.equal(doc.getElementById('service-bell-food-layer'),null);
 });
 
 test('service bell skips food callout when seat is unavailable', ()=>{
@@ -198,9 +213,7 @@ test('service bell skips food callout when seat is unavailable', ()=>{
 test('service bell reanchors to the table in landscape', ()=>{
   const doc=createMockDoc();
   const win=createMockWindow();
-  const table=new MockElement('section',doc);
-  table.classList.add('table');
-  doc.body.appendChild(table);
+  const {table,centerStack}=attachTable(doc);
   const controller=createServiceBellController({
     documentRef:()=>doc,
     windowRef:()=>win,
@@ -219,14 +232,16 @@ test('service bell reanchors to the table in landscape', ()=>{
   assert.ok(host);
   assert.equal(host.parentElement,table);
   assert.equal(host.style.position,'absolute');
+  const foodLayer=doc.getElementById('service-bell-food-layer');
+  assert.ok(foodLayer);
+  assert.equal(foodLayer.parentElement,table);
+  assert.equal(foodLayer.dataset.orientation,'landscape');
 });
 
 test('service bell reanchors to the table in portrait', ()=>{
   const doc=createMockDoc();
   const win=createMockWindow();
-  const table=new MockElement('section',doc);
-  table.classList.add('table');
-  doc.body.appendChild(table);
+  const {table,centerStack}=attachTable(doc);
   const controller=createServiceBellController({
     documentRef:()=>doc,
     windowRef:()=>win,
@@ -245,4 +260,8 @@ test('service bell reanchors to the table in portrait', ()=>{
   assert.ok(host);
   assert.equal(host.parentElement,table);
   assert.equal(host.style.position,'absolute');
+  const foodLayer=doc.getElementById('service-bell-food-layer');
+  assert.ok(foodLayer);
+  assert.equal(foodLayer.parentElement,table);
+  assert.equal(foodLayer.dataset.orientation,'portrait');
 });

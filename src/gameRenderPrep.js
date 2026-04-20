@@ -234,7 +234,7 @@ export function buildOpponentSeatsHtml(params){
       esc,
       renderOpponentIdentityHtml
     });
-    const shellStyle=`--player-color:${playerColor};border:0 !important;box-shadow:none !important;background:transparent !important;border-radius:0 !important;`;
+    const shellStyle=`--player-color:${playerColor};position:relative !important;z-index:13000 !important;border:0 !important;box-shadow:none !important;background:transparent !important;border-radius:0 !important;`;
     const innerNoOutline='border:0 !important;box-shadow:none !important;background:transparent !important;';
     const seatPackAnchorStyle=useFlowOpponentStation
       ?'position:relative !important;width:100% !important;height:100% !important;display:grid !important;align-content:start !important;justify-items:center !important;'

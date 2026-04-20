@@ -53,14 +53,15 @@ export function createServiceBellController(deps={}){
     if(!doc?.body)return null;
     return doc.querySelector?.('.table')??doc.body;
   };
-  const applyPlacement=(el,parent)=>{
+  const applyPlacement=(el,parent,zIndex='')=>{
     if(!el||!parent)return;
     el.style.position=parent===getDoc().body?'fixed':'absolute';
     el.style.inset='0';
+    if(zIndex)el.style.zIndex=String(zIndex);
   };
 
-  let host=null;
-  let layer=null;
+  let heroHost=null;
+  let foodHost=null;
   let heroImg=null;
   let active=false;
   let orientation='landscape';
@@ -101,9 +102,9 @@ export function createServiceBellController(deps={}){
     occupiedSlots.delete(entry.slot);
     activeFoods.delete(id);
     if(activeFoods.size===0){
-      if(host?.isConnected!==false){
-        host.classList.remove('is-ready');
-        host.classList.remove('is-pressed');
+      if(heroHost?.isConnected!==false){
+        heroHost.classList.remove('is-ready');
+        heroHost.classList.remove('is-pressed');
       }
       clearTimer(getWin(),bellHideTimer);
       bellHideTimer=0;
@@ -122,40 +123,62 @@ export function createServiceBellController(deps={}){
     bellPressTimer=0;
     clearFoodCallout();
     heroImg=null;
-    layer=null;
-    host?.remove();
-    host=null;
+    heroHost?.remove();
+    foodHost?.remove();
+    heroHost=null;
+    foodHost=null;
   };
 
-  const ensureHost=()=>{
+  const ensureHeroHost=()=>{
     const doc=getDoc();
     if(!doc?.body)return null;
     const targetParent=getPlacementParent()??doc.body;
-    if(host&&host.isConnected!==false){
-      if(host.parentElement!==targetParent)targetParent.appendChild(host);
-      layer=host.querySelector('.service-bell-food-layer')??layer;
-      heroImg=host.querySelector('.service-bell-hero')??heroImg;
-      applyPlacement(host,targetParent);
-      return host;
+    if(heroHost&&heroHost.isConnected!==false){
+      if(heroHost.parentElement!==targetParent)targetParent.appendChild(heroHost);
+      heroImg=heroHost.querySelector('.service-bell-hero')??heroImg;
+      applyPlacement(heroHost,targetParent,12500);
+      return heroHost;
     }
-    host=doc.getElementById('service-bell-layer');
-    if(host&&host.isConnected!==false){
-      if(host.parentElement!==targetParent)targetParent.appendChild(host);
-      layer=host.querySelector('.service-bell-food-layer');
-      heroImg=host.querySelector('.service-bell-hero');
-      applyPlacement(host,targetParent);
-      return host;
+    heroHost=doc.getElementById('service-bell-layer');
+    if(heroHost&&heroHost.isConnected!==false){
+      if(heroHost.parentElement!==targetParent)targetParent.appendChild(heroHost);
+      heroImg=heroHost.querySelector('.service-bell-hero');
+      applyPlacement(heroHost,targetParent,12500);
+      return heroHost;
     }
-    host=doc.createElement('div');
-    host.id='service-bell-layer';
-    host.className='service-bell-layer';
-    host.setAttribute('aria-hidden','true');
-    host.innerHTML=`<div class="service-bell-hero-wrap"><img class="service-bell-hero" src="${withBase('foods/bell.png')}" alt="" aria-hidden="true"/></div><div class="service-bell-food-layer" aria-hidden="true"></div>`;
-    targetParent.appendChild(host);
-    applyPlacement(host,targetParent);
-    layer=host.querySelector('.service-bell-food-layer');
-    heroImg=host.querySelector('.service-bell-hero');
-    return host;
+    heroHost=doc.createElement('div');
+    heroHost.id='service-bell-layer';
+    heroHost.className='service-bell-layer';
+    heroHost.setAttribute('aria-hidden','true');
+    heroHost.innerHTML=`<div class="service-bell-hero-wrap"><img class="service-bell-hero" src="${withBase('foods/bell.png')}" alt="" aria-hidden="true"/></div>`;
+    targetParent.appendChild(heroHost);
+    applyPlacement(heroHost,targetParent,12500);
+    heroImg=heroHost.querySelector('.service-bell-hero');
+    return heroHost;
+  };
+
+  const ensureFoodHost=()=>{
+    const doc=getDoc();
+    if(!doc?.body)return null;
+    const targetParent=getPlacementParent()??doc.body;
+    if(foodHost&&foodHost.isConnected!==false){
+      if(foodHost.parentElement!==targetParent)targetParent.appendChild(foodHost);
+      applyPlacement(foodHost,targetParent,12000);
+      return foodHost;
+    }
+    foodHost=doc.getElementById('service-bell-food-layer');
+    if(foodHost&&foodHost.isConnected!==false){
+      if(foodHost.parentElement!==targetParent)targetParent.appendChild(foodHost);
+      applyPlacement(foodHost,targetParent,12000);
+      return foodHost;
+    }
+    foodHost=doc.createElement('div');
+    foodHost.id='service-bell-food-layer';
+    foodHost.className='service-bell-food-layer';
+    foodHost.setAttribute('aria-hidden','true');
+    targetParent.appendChild(foodHost);
+    applyPlacement(foodHost,targetParent,12000);
+    return foodHost;
   };
 
   const startExit=(id)=>{
@@ -175,7 +198,8 @@ export function createServiceBellController(deps={}){
   const spawnFood=()=>{
     if(!active)return false;
     const doc=getDoc();
-    if(!doc?.body||!layer)return false;
+    const foodLayer=ensureFoodHost();
+    if(!doc?.body||!foodLayer)return false;
     const availableFoods=SERVICE_BELL_FOODS.filter((item)=>!activeFoods.has(item.id));
     const availableSlots=SERVICE_BELL_SLOTS.filter((slot)=>!occupiedSlots.has(slot));
     if(!availableFoods.length||!availableSlots.length)return false;
@@ -208,7 +232,7 @@ export function createServiceBellController(deps={}){
       voiceTimer:0,
       exiting:false
     });
-    layer.appendChild(el);
+    foodLayer.appendChild(el);
     const entry=activeFoods.get(item.id);
     entry.enterTimer=getWin()?.setTimeout?.(()=>{
       const current=activeFoods.get(item.id);
@@ -248,19 +272,25 @@ export function createServiceBellController(deps={}){
       removeHost();
       return;
     }
-    const shell=ensureHost();
+    const shell=ensureHeroHost();
+    const foodLayer=ensureFoodHost();
     if(!shell)return;
     shell.dataset.orientation=params.portraitMode?'portrait':'landscape';
+    if(foodLayer)foodLayer.dataset.orientation=params.portraitMode?'portrait':'landscape';
     const targetParent=getPlacementParent()??getDoc()?.body;
     if(targetParent&&shell.parentElement!==targetParent){
       targetParent.appendChild(shell);
-      applyPlacement(shell,targetParent);
+      applyPlacement(shell,targetParent,12500);
+    }
+    if(foodLayer&&foodLayer.parentElement!==targetParent){
+      targetParent.appendChild(foodLayer);
+      applyPlacement(foodLayer,targetParent,12000);
     }
   };
 
   const trigger=()=>{
     if(!active)return false;
-    const shell=ensureHost();
+    const shell=ensureHeroHost();
     if(!shell)return false;
     clearTimer(getWin(),bellHideTimer);
     bellHideTimer=0;
@@ -270,7 +300,7 @@ export function createServiceBellController(deps={}){
     shell.classList.remove('is-pressed');
     shell.classList.add('is-pressed');
     bellPressTimer=getWin()?.setTimeout?.(()=>{
-      if(host===shell)host.classList.remove('is-pressed');
+      if(heroHost===shell)heroHost.classList.remove('is-pressed');
       bellPressTimer=0;
     },120)??0;
     playAudio('audio/foods/bell.mp3',0.85);

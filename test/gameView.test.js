@@ -220,6 +220,7 @@ test('renderOpponentStationFlow switches side stack markup based on seat mode', 
     opponentOpenPlayHtml:''
   });
   assert.match(sideHtml,/side-station-stack/);
+  assert.match(sideHtml,/side-station-core/);
   assert.match(sideHtml,/closed-card-pile/);
   assert.match(sideHtml,/--closed-pile-count:5/);
   assert.match(sideHtml,/closed-card-pile" style="--closed-pile-count:5;"><div class="opponent-fan fan-west" style="justify-self:center;"><div id="fan"><\/div><\/div><span id="count"><\/span>/);

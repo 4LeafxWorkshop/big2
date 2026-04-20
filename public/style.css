@@ -7869,7 +7869,6 @@ body[data-screen='game'] .table::after {
 }
 body[data-screen='game'] .table > * {
   position: relative;
-  z-index: 2;
 }
 
 /* Center layer stays transparent so the full inner table felt shows through. */
@@ -9055,7 +9054,7 @@ body[data-screen='game'] .action-strip .control-row .game-icon-btn .sort-icon {
 body[data-screen='game'] .service-bell-layer {
   position: absolute;
   inset: 0;
-  z-index: 15050;
+  z-index: 12500;
   pointer-events: none;
   overflow: hidden;
   isolation: isolate;
@@ -9067,7 +9066,7 @@ body[data-screen='game'] .service-bell-layer.is-ready {
 body[data-screen='game'] .table > .service-bell-layer {
   position: absolute !important;
   inset: 0 !important;
-  z-index: 15050 !important;
+  z-index: 12500 !important;
 }
 body[data-screen='game'] .service-bell-layer .service-bell-hero-wrap {
   position: absolute;
@@ -9090,6 +9089,10 @@ body[data-screen='game'] .service-bell-layer.is-pressed .service-bell-hero {
 body[data-screen='game'] .service-bell-food-layer {
   position: absolute;
   inset: 0;
+  z-index: 12000;
+  pointer-events: none;
+  overflow: hidden;
+  isolation: isolate;
 }
 body[data-screen='game'] .service-bell-food {
   position: absolute;
@@ -9111,49 +9114,49 @@ body[data-screen='game'] .service-bell-food.start-left {
 body[data-screen='game'] .service-bell-food.start-right {
   transform: translate3d(-50%, -50%, 0) translate3d(300px, 0, 0) scale(1);
 }
-body[data-screen='game'] .service-bell-layer[data-orientation='portrait'] .service-bell-slot-tl {
+body[data-screen='game'] .service-bell-food-layer[data-orientation='portrait'] .service-bell-slot-tl {
   --slot-x: 16%;
   --slot-y: 20%;
   opacity: 1;
   transform: translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1);
 }
-body[data-screen='game'] .service-bell-layer[data-orientation='portrait'] .service-bell-slot-tr {
+body[data-screen='game'] .service-bell-food-layer[data-orientation='portrait'] .service-bell-slot-tr {
   --slot-x: 84%;
   --slot-y: 20%;
   opacity: 1;
   transform: translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1);
 }
-body[data-screen='game'] .service-bell-layer[data-orientation='portrait'] .service-bell-slot-ml {
+body[data-screen='game'] .service-bell-food-layer[data-orientation='portrait'] .service-bell-slot-ml {
   --slot-x: 14%;
   --slot-y: 79%;
   opacity: 1;
   transform: translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1);
 }
-body[data-screen='game'] .service-bell-layer[data-orientation='portrait'] .service-bell-slot-mr {
+body[data-screen='game'] .service-bell-food-layer[data-orientation='portrait'] .service-bell-slot-mr {
   --slot-x: 86%;
   --slot-y: 79%;
   opacity: 1;
   transform: translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1);
 }
-body[data-screen='game'] .service-bell-layer[data-orientation='landscape'] .service-bell-slot-tl {
+body[data-screen='game'] .service-bell-food-layer[data-orientation='landscape'] .service-bell-slot-tl {
   --slot-x: 8%;
   --slot-y: 26%;
   opacity: 1;
   transform: translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1);
 }
-body[data-screen='game'] .service-bell-layer[data-orientation='landscape'] .service-bell-slot-tr {
+body[data-screen='game'] .service-bell-food-layer[data-orientation='landscape'] .service-bell-slot-tr {
   --slot-x: 92%;
   --slot-y: 26%;
   opacity: 1;
   transform: translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1);
 }
-body[data-screen='game'] .service-bell-layer[data-orientation='landscape'] .service-bell-slot-ml {
+body[data-screen='game'] .service-bell-food-layer[data-orientation='landscape'] .service-bell-slot-ml {
   --slot-x: 10%;
   --slot-y: 72%;
   opacity: 1;
   transform: translate3d(-50%, -50%, 0) translate3d(0, 0, 0) scale(1);
 }
-body[data-screen='game'] .service-bell-layer[data-orientation='landscape'] .service-bell-slot-mr {
+body[data-screen='game'] .service-bell-food-layer[data-orientation='landscape'] .service-bell-slot-mr {
   --slot-x: 90%;
   --slot-y: 72%;
   opacity: 1;
@@ -12094,6 +12097,16 @@ body[data-screen='game'] .action-strip :is(.play-type-call-self, .last-card-call
 body[data-screen='game'] :is(.seat.north, .seat.west, .seat.east) :is(.opponent-fan-wrap, .opponent-fan, .seat-open-play) {
   z-index: 1 !important;
 }
+body[data-screen='game'] :is(.seat.north .seat-pack, .seat.west .side-station-stack, .seat.east .side-station-stack) {
+  position: relative !important;
+}
+body[data-screen='game'] :is(.seat.north .seat-pack > .seat-name-fixed, .seat.west .side-station-stack > .seat-name-fixed, .seat.east .side-station-stack > .seat-name-fixed, .seat.north .opponent-fan-wrap, .seat.west .side-station-stack > .opponent-fan-wrap, .seat.east .side-station-stack > .opponent-fan-wrap, .seat.north .side-station-core, .seat.west .side-station-core, .seat.east .side-station-core) {
+  position: relative !important;
+  z-index: 13000 !important;
+}
+body[data-screen='game'] :is(.seat.north .opponent-fan-wrap, .seat.west .opponent-fan-wrap, .seat.east .opponent-fan-wrap) {
+  z-index: 13000 !important;
+}
 
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] :is(.play-type-call-seat, .last-card-call-seat, .emote-callout.play-type-call-seat) {
   top: auto !important;
@@ -12289,11 +12302,9 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] :is(.name, .seat-i
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout {
   z-index: 17002 !important;
 }
-body[data-screen='game'] .service-bell-layer,
-body[data-screen='game'] .table > .service-bell-layer,
 body[data-screen='game'] .service-bell-food-layer,
 body[data-screen='game'] .service-bell-food {
-  z-index: 13002 !important;
+  z-index: 12000 !important;
 }
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .food-callout-seat {
   z-index: 14020 !important;
@@ -12323,12 +12334,10 @@ body[data-screen='game'] :is(
   z-index: 11000 !important;
 }
 body[data-screen='game'] :is(
-  .service-bell-layer,
-  .table > .service-bell-layer,
   .service-bell-food-layer,
   .service-bell-food
 ) {
-  z-index: 13000 !important;
+  z-index: 12000 !important;
 }
 body[data-screen='game'] :is(
   .seat-name-fixed[data-opponent-name],
