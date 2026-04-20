@@ -16,6 +16,7 @@ const SERVICE_BELL_SLOT_POINTS={
     mr:{x:'86%',y:'79%'}
   },
   landscape:{
+    // Spread the lanes wider in landscape so the slide uses the full felt.
     tl:{x:'8%',y:'26%'},
     tr:{x:'92%',y:'26%'},
     ml:{x:'10%',y:'72%'},
@@ -52,6 +53,11 @@ export function createServiceBellController(deps={}){
     const doc=getDoc();
     if(!doc?.body)return null;
     return doc.querySelector?.('.table')??doc.body;
+  };
+  const getFoodPlacementParent=()=>{
+    const doc=getDoc();
+    if(!doc?.body)return null;
+    return getPlacementParent()??doc.body;
   };
   const applyPlacement=(el,parent,zIndex='')=>{
     if(!el||!parent)return;
@@ -160,7 +166,7 @@ export function createServiceBellController(deps={}){
   const ensureFoodHost=()=>{
     const doc=getDoc();
     if(!doc?.body)return null;
-    const targetParent=getPlacementParent()??doc.body;
+    const targetParent=getFoodPlacementParent()??doc.body;
     if(foodHost&&foodHost.isConnected!==false){
       if(foodHost.parentElement!==targetParent)targetParent.appendChild(foodHost);
       applyPlacement(foodHost,targetParent,12000);
@@ -282,9 +288,10 @@ export function createServiceBellController(deps={}){
       targetParent.appendChild(shell);
       applyPlacement(shell,targetParent,12500);
     }
-    if(foodLayer&&foodLayer.parentElement!==targetParent){
-      targetParent.appendChild(foodLayer);
-      applyPlacement(foodLayer,targetParent,12000);
+    const foodParent=getFoodPlacementParent()??getDoc()?.body;
+    if(foodLayer&&foodLayer.parentElement!==foodParent){
+      foodParent.appendChild(foodLayer);
+      applyPlacement(foodLayer,foodParent,12000);
     }
   };
 

@@ -160,12 +160,14 @@ test('renderOpponentSeat and renderOpponentSeats wrap seat markup', ()=>{
     shellStyle:'--player-color:#123;',
     outerLabelHtml:'<div id="label"></div>',
     sectionStyle:'display:grid;',
-    sideStationFlowHtml:'<div id="flow"></div>'
+    sideStationFlowHtml:'<div id="flow"></div>',
+    openPlayHtml:'<div id="open"></div>'
   });
   const html=renderOpponentSeats([seat]);
   assert.match(html,/class="seat west active"/);
   assert.match(html,/data-seat-emote-active="1"/);
   assert.match(html,/id="flow"/);
+  assert.match(html,/id="open"/);
 });
 
 test('renderOpponentLabel includes badge, callout, and optional motto', ()=>{
@@ -206,8 +208,7 @@ test('renderOpponentStationFlow switches side stack markup based on seat mode', 
     fanClassName:'fan-west',
     fanAnchorStyle:'justify-self:center;',
     closedPileCount:5,
-    closedCountHtml:'<span id="count"></span>',
-    opponentOpenPlayHtml:'<div id="open"></div>'
+    closedCountHtml:'<span id="count"></span>'
   });
   const northHtml=renderOpponentStationFlow({
     useFlowOpponentStation:true,
@@ -216,8 +217,7 @@ test('renderOpponentStationFlow switches side stack markup based on seat mode', 
     fan:'<div id="fan"></div>',
     fanClassName:'fan-north',
     fanAnchorStyle:'',
-    closedCountHtml:'',
-    opponentOpenPlayHtml:''
+    closedCountHtml:''
   });
   assert.match(sideHtml,/side-station-stack/);
   assert.match(sideHtml,/side-station-core/);

@@ -11,7 +11,11 @@ class MockElement {
     this.parentElement=null;
     this.attributes=new Map();
     this.dataset={};
-    this.style={setProperty:()=>{},removeProperty:()=>{}};
+    this.style={
+      props:new Map(),
+      setProperty:(name,value)=>{this.style.props.set(name,String(value??''));},
+      removeProperty:(name)=>{this.style.props.delete(name);}
+    };
     this.classList={
       values:new Set(),
       add:(...tokens)=>tokens.forEach((token)=>this.classList.values.add(token)),
@@ -79,6 +83,10 @@ function createMockDoc(){
     getElementById:(id)=>doc.index.get(id)??null,
     querySelector:(selector)=>{
       if(selector==='.table')return doc.body.children.find((child)=>child.classList.contains('table'))??null;
+      if(selector==='.table-center-stack'){
+        const table=doc.body.children.find((child)=>child.classList.contains('table'))??null;
+        return table?.children.find((child)=>child.classList.contains('table-center-stack'))??null;
+      }
       return null;
     }
   };
@@ -232,10 +240,13 @@ test('service bell reanchors to the table in landscape', ()=>{
   assert.ok(host);
   assert.equal(host.parentElement,table);
   assert.equal(host.style.position,'absolute');
+  assert.equal(controller.trigger(),true);
   const foodLayer=doc.getElementById('service-bell-food-layer');
   assert.ok(foodLayer);
   assert.equal(foodLayer.parentElement,table);
   assert.equal(foodLayer.dataset.orientation,'landscape');
+  assert.equal(foodLayer.children[0].style.props.get('--slot-x'),'8%');
+  assert.equal(foodLayer.children[0].style.props.get('--slot-y'),'26%');
 });
 
 test('service bell reanchors to the table in portrait', ()=>{

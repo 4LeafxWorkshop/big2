@@ -162,9 +162,10 @@ export function renderOpponentSeat(params){
     shellStyle,
     outerLabelHtml,
     sectionStyle,
-    sideStationFlowHtml
+    sideStationFlowHtml,
+    openPlayHtml=''
   }=params;
-  return`<div class="seat ${cls} ${active?'active':''}"${seatAttrs} style="${shellStyle}">${outerLabelHtml}<div class="seat-pack seat-section" style="${sectionStyle}">${sideStationFlowHtml}</div></div>`;
+  return`<div class="seat ${cls} ${active?'active':''}"${seatAttrs} style="${shellStyle}">${outerLabelHtml}<div class="seat-pack seat-section" style="${sectionStyle}">${sideStationFlowHtml}${openPlayHtml}</div></div>`;
 }
 
 export {renderOpponentLabel} from './opponentLabel.js';
