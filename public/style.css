@@ -11171,13 +11171,14 @@ body[data-screen='game'] .seat.east {
     align-content: start !important;
     justify-items: center !important;
     gap: 0 !important;
+    padding-top: 50% !important;
   }
   body[data-screen='game'] .seat.north .seat-pack {
     padding-top: 8px !important;
   }
   body[data-screen='game'] .seat.west .seat-pack,
   body[data-screen='game'] .seat.east .seat-pack {
-    padding-top: 33% !important;
+    padding-top: 50% !important;
   }
   body[data-screen='game'] .seat.north .seat-pack > .seat-name-fixed,
   body[data-screen='game'] .seat.west .seat-pack > .seat-name-fixed,
