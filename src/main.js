@@ -3437,7 +3437,7 @@ function triggerEmoteSticker(id){
   const now=Date.now();
   const seat=state.home.mode==='room'
     ?roomSelfSeat(state.room.data)
-    :Number.isInteger(v.selfSeat)?v.selfSeat:0;
+    :0;
   state.emote.active={id:match.id,ts:now,source:'local',seat:Number.isInteger(seat)&&seat>=0?seat:undefined};
   state.emote.open=false;
   playSound(`emote-${match.id}`);
