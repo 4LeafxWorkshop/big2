@@ -220,3 +220,29 @@ test('service bell reanchors to the table in landscape', ()=>{
   assert.equal(host.parentElement,table);
   assert.equal(host.style.position,'absolute');
 });
+
+test('service bell reanchors to the table in portrait', ()=>{
+  const doc=createMockDoc();
+  const win=createMockWindow();
+  const table=new MockElement('section',doc);
+  table.classList.add('table');
+  doc.body.appendChild(table);
+  const controller=createServiceBellController({
+    documentRef:()=>doc,
+    windowRef:()=>win,
+    withBase:(path)=>`/base/${path}`,
+    unlockAudio:()=>{},
+    getSoundEnabled:()=>false,
+    createAudio:()=>null,
+    random:()=>0,
+    getFoodCalloutSeat:()=>null,
+    setFoodCallout:()=>{},
+    clearFoodCallout:()=>{}
+  });
+
+  controller.sync({active:true,portraitMode:true});
+  const host=doc.getElementById('service-bell-layer');
+  assert.ok(host);
+  assert.equal(host.parentElement,table);
+  assert.equal(host.style.position,'absolute');
+});

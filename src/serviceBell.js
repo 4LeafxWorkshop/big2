@@ -51,10 +51,7 @@ export function createServiceBellController(deps={}){
   const getPlacementParent=()=>{
     const doc=getDoc();
     if(!doc?.body)return null;
-    if(orientation==='landscape'){
-      return doc.querySelector?.('.table')??doc.body;
-    }
-    return doc.body;
+    return doc.querySelector?.('.table')??doc.body;
   };
   const applyPlacement=(el,parent)=>{
     if(!el||!parent)return;
