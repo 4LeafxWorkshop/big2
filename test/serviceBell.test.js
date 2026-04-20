@@ -51,6 +51,9 @@ class MockElement {
   }
 
   appendChild(node){
+    if(node.parentElement&&node.parentElement!==this){
+      node.parentElement.children=node.parentElement.children.filter((child)=>child!==node);
+    }
     node.parentElement=this;
     this.children.push(node);
     if(node.id)this.doc.index.set(node.id,node);
@@ -275,4 +278,38 @@ test('service bell reanchors to the table in portrait', ()=>{
   assert.ok(foodLayer);
   assert.equal(foodLayer.parentElement,table);
   assert.equal(foodLayer.dataset.orientation,'portrait');
+});
+
+test('service bell preserves active food when the table is rerendered', ()=>{
+  const doc=createMockDoc();
+  const win=createMockWindow();
+  const first=attachTable(doc);
+  const controller=createServiceBellController({
+    documentRef:()=>doc,
+    windowRef:()=>win,
+    withBase:(path)=>`/base/${path}`,
+    unlockAudio:()=>{},
+    getSoundEnabled:()=>false,
+    createAudio:()=>null,
+    random:()=>0,
+    getFoodCalloutSeat:()=>null,
+    setFoodCallout:()=>{},
+    clearFoodCallout:()=>{}
+  });
+
+  controller.sync({active:true,portraitMode:false});
+  assert.equal(controller.trigger(),true);
+  const foodLayer=doc.getElementById('service-bell-food-layer');
+  const food=foodLayer.children[0];
+  assert.ok(food);
+  assert.equal(foodLayer.parentElement,first.table);
+
+  first.table.remove();
+  const second=attachTable(doc);
+  controller.sync({active:true,portraitMode:false});
+
+  assert.equal(doc.getElementById('service-bell-food-layer'),foodLayer);
+  assert.equal(foodLayer.parentElement,second.table);
+  assert.equal(foodLayer.children[0],food);
+  assert.equal(food.dataset.foodId,'lemontea');
 });

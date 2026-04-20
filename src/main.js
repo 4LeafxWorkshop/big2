@@ -5649,7 +5649,9 @@ function render(){
   document.body.setAttribute('data-ios',isIOSDevice()?'1':'0');
   document.body.setAttribute('data-is-mobile',isMobilePointer()?'1':'0');
   const blockLandscapeMobile=shouldBlockLandscapeMobile();
-  serviceBellController.sync({active:state.screen==='game'&&!blockLandscapeMobile,portraitMode:isPortraitMode()});
+  if(state.screen!=='game'||blockLandscapeMobile){
+    serviceBellController.sync({active:false,portraitMode:isPortraitMode()});
+  }
   if(state.screen==='game'&&!isPortraitMode()){
     state.showLog=true;
   }
@@ -5665,6 +5667,7 @@ function render(){
   if(state.screen==='config'){renderConfig();return;}
   if(state.screen==='opponents'){renderOpponents();return;}
   renderGame();
+  serviceBellController.sync({active:true,portraitMode:isPortraitMode()});
 }
 function syncViewport(){
   const root=document.documentElement;

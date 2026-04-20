@@ -139,7 +139,7 @@ export function createServiceBellController(deps={}){
     const doc=getDoc();
     if(!doc?.body)return null;
     const targetParent=getPlacementParent()??doc.body;
-    if(heroHost&&heroHost.isConnected!==false){
+    if(heroHost){
       if(heroHost.parentElement!==targetParent)targetParent.appendChild(heroHost);
       heroImg=heroHost.querySelector('.service-bell-hero')??heroImg;
       applyPlacement(heroHost,targetParent,12500);
@@ -167,7 +167,7 @@ export function createServiceBellController(deps={}){
     const doc=getDoc();
     if(!doc?.body)return null;
     const targetParent=getFoodPlacementParent()??doc.body;
-    if(foodHost&&foodHost.isConnected!==false){
+    if(foodHost){
       if(foodHost.parentElement!==targetParent)targetParent.appendChild(foodHost);
       applyPlacement(foodHost,targetParent,12000);
       return foodHost;
