@@ -204,12 +204,12 @@ export function createServiceBellController(deps={}){
     if(typeof HTMLElement!=='undefined'&&!((entry.el instanceof HTMLElement)))return;
     if(entry.exiting)return;
     entry.exiting=true;
-    entry.el.classList.remove(`service-bell-slot-${entry.slot}`);
+    entry.el.classList.add('is-exiting');
     clearTimer(getWin(),entry.exitTimer);
     clearTimer(getWin(),entry.removeTimer);
     entry.removeTimer=getWin()?.setTimeout?.(()=>{
       clearItem(id);
-    },600)??0;
+    },520)??0;
   };
 
   const spawnFood=()=>{
@@ -226,11 +226,12 @@ export function createServiceBellController(deps={}){
     const side=slot.endsWith('l')?'left':'right';
     const slotPoint=SERVICE_BELL_SLOT_POINTS[orientation]?.[slot]??SERVICE_BELL_SLOT_POINTS.landscape[slot];
     const el=doc.createElement('img');
-    el.className=`service-bell-food service-bell-food-${item.id} service-bell-dir-${side} start-${side}`;
+    el.className=`service-bell-food service-bell-food-${item.id} service-bell-slot-${slot} service-bell-dir-${side} is-entering`;
     el.setAttribute('aria-hidden','true');
     el.alt='';
     el.src=withBase(`foods/${item.file}`);
     el.style.setProperty('--food-w',`${item.width}px`);
+    el.style.setProperty('--offscreen-x',side==='left'?'-300px':'300px');
     if(slotPoint){
       el.style.setProperty('--slot-x',slotPoint.x);
       el.style.setProperty('--slot-y',slotPoint.y);
@@ -254,7 +255,7 @@ export function createServiceBellController(deps={}){
     entry.enterTimer=getWin()?.setTimeout?.(()=>{
       const current=activeFoods.get(item.id);
       if(current!==entry||!el.isConnected)return;
-      el.classList.add(`service-bell-slot-${slot}`);
+      el.classList.remove('is-entering');
       occupiedSlots.add(slot);
     },20)??0;
     const win=getWin();
