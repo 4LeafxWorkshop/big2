@@ -9596,7 +9596,7 @@ body[data-screen='game'] .action-strip {
   body[data-screen='game'] .east .seat-section,
   body[data-screen='game'] .west .seat-section,
   body[data-screen='game'] .north .seat-section {
-    padding-top: 54px !important;
+    padding-top: var(--opp-side-section-pad-top, 54px) !important;
   }
 
   body[data-screen='game'][data-log-open='0'] #app {
@@ -9838,7 +9838,7 @@ body[data-screen='game'] .action-strip {
   body[data-screen='game'][data-orientation='portrait'] .east .seat-section,
   body[data-screen='game'][data-orientation='portrait'] .west .seat-section,
   body[data-screen='game'][data-orientation='portrait'] .north .seat-section {
-    padding-top: 0 !important;
+    padding-top: var(--opp-side-section-pad-top, 54px) !important;
   }
   body[data-screen='game'][data-orientation='portrait'] .north .opponent-fan {
     margin-top: 46px !important;
@@ -12219,6 +12219,7 @@ body[data-screen='game'] :is(.seat.west, .seat.east) .side-station-stack .oppone
     --opp-side-avatar-top: 34%;
     --opp-closed-gap: clamp(22px, 3vmin, 28px);
     --opp-open-gap: clamp(62px, 7.8vmin, 78px);
+    --opp-side-section-pad-top: 54px;
     --opp-north-fan-top: clamp(44px, 5vmin, 52px);
     --opp-north-open-gap: clamp(50px, 5.8vmin, 62px);
     --opp-fan-closed-mini-scale: .68;
@@ -12233,6 +12234,13 @@ body[data-screen='game'] :is(.seat.west, .seat.east) .side-station-stack .oppone
   body[data-screen='game'][data-orientation='portrait'] .seat.west .side-station-stack,
   body[data-screen='game'][data-orientation='portrait'] .seat.east .side-station-stack {
     gap: 4px !important;
+  }
+  body[data-screen='game'][data-orientation='portrait'] {
+    --opp-side-pack-pad-top: 64%;
+  }
+  body[data-screen='game'][data-orientation='portrait'] .seat.west .seat-pack,
+  body[data-screen='game'][data-orientation='portrait'] .seat.east .seat-pack {
+    padding-top: var(--opp-side-pack-pad-top) !important;
   }
   body[data-screen='game'][data-orientation='portrait'] .seat-name-fixed[data-opponent-name] .food-callout-seat {
     top: calc(100% + 72px) !important;
