@@ -2190,7 +2190,6 @@ async function roomSubmitEmote(id,tsOverride=null,byOverride=''){
       :roomSelfSeat(state.room.data);
     await ref.update({
       emote:{id:match.id,ts:Math.trunc(now),by,seat:Number.isInteger(seat)&&seat>=0?seat:undefined},
-      'game.emote':{id:match.id,ts:Math.trunc(now),by,seat:Number.isInteger(seat)&&seat>=0?seat:undefined},
       updatedAt:Math.trunc(now)
     });
   }catch{}
