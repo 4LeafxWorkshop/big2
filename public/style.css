@@ -11107,7 +11107,7 @@ body[data-screen='game'] .seat.east {
   }
   body[data-screen='game'] .seat.west > .seat-name-fixed,
   body[data-screen='game'] .seat.east > .seat-name-fixed {
-    top: 36% !important;
+    top: 42% !important;
     left: 50% !important;
     right: auto !important;
     transform: translate(-50%, -50%) !important;
@@ -11127,7 +11127,7 @@ body[data-screen='game'] .seat.east {
   body[data-screen='game'] .seat.east .opponent-fan {
     left: 50% !important;
     right: auto !important;
-    top: calc(36% + 30px) !important;
+    top: calc(42% + 28px) !important;
     transform: translateX(-50%) scale(var(--opp-closed-scale)) !important;
   }
   body[data-screen='game'] .seat.west {
