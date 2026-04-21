@@ -128,41 +128,53 @@ export function createFooterMenuHelpers(deps){
         '支援手機、平板與桌面快速開局',
         '提供單人對戰與房間對戰',
         '排行榜、個人設定與成績追蹤',
-        '清晰出牌提示、即時狀態與計分明細'
+        '清晰出牌提示、即時狀態與計分明細',
+        '食物提示、表情特效與即時通知',
+        '支援橫向與直向版面，手機同網頁版一致'
       ]
       :fr
         ?[
           'Démarrage rapide sur mobile, tablette et desktop',
           'Solo et parties en salon',
           'Classement, paramètres personnels, suivi des performances',
-          'Indications claires, état en direct et détails de score'
+          'Indications claires, état en direct et détails de score',
+          'Notifications d’objets, effets d’emote et alertes en direct',
+          'Disposition responsive en portrait et paysage'
         ]
         :de
           ?[
             'Schnellstart auf Handy, Tablet und Desktop',
             'Solo‑ und Raumspiele',
             'Rangliste, persönliche Einstellungen, Leistungs‑Tracking',
-            'Klare Hinweise, Live‑Status und Punktedetails'
+            'Klare Hinweise, Live‑Status und Punktedetails',
+            'Food‑Hinweise, Emote‑Effekte und Live‑Meldungen',
+            'Responsive Darstellung im Hoch‑ und Querformat'
           ]
           :es
             ?[
               'Inicio rápido en móvil, tableta y escritorio',
               'Partidas en solitario y en sala',
               'Clasificación, ajustes personales, seguimiento de resultados',
-              'Indicaciones claras, estado en vivo y detalles de puntuación'
+              'Indicaciones claras, estado en vivo y detalles de puntuación',
+              'Avisos de comida, efectos de emote y notificaciones en vivo',
+              'Diseño adaptable en vertical y horizontal'
             ]
             :ja
               ?[
                 'スマホ・タブレット・PCで素早く開始',
                 'ソロ対戦とルーム対戦',
                 'ランキング、個人設定、成績管理',
-                '明確な出牌ガイド、リアルタイム状況、計分詳細'
+                '明確な出牌ガイド、リアルタイム状況、計分詳細',
+                'フード通知、表情エフェクト、ライブ通知',
+                '縦横両対応のレスポンシブレイアウト'
               ]
               :[
                 'Fast start on phone, tablet, and desktop',
                 'Solo and room matches',
                 'Leaderboard, personal settings, performance tracking',
-                'Clear play cues, live status, and scoring details'
+                'Clear play cues, live status, and scoring details',
+                'Food callouts, emote effects, and live notifications',
+                'Responsive portrait and landscape layouts'
               ];
     const aboutNotes=zh
       ?'我們持續優化效能、互動回饋、版面適配與穩定性，並依玩家回饋改進。'
