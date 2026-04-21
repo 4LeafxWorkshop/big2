@@ -32,6 +32,7 @@ function createController(overrides={}){
     roomTotalsWithSeatScore:(totals)=>totals,
     signedInForPlay:()=>false,
     subscribeRoom(){},
+    syncRoomDirectory:async()=>true,
     t:(key)=>key,
     updateActiveRoomPointer(){},
     writeRoomDirectory:async()=>true,

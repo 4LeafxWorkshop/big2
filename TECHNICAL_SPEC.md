@@ -158,19 +158,27 @@ Related engineering docs:
 
 ## 11.1 Firestore Rules Deploy
 - Firebase projects for current rules deploy:
-  - `seed-services`
+  - `Stream-0523`
   - `fourleafbig2`
+  - `fourleafbig2-bot`
+  - `peugeot-0523`
+  - `seed-services`
+  - `seed-services-31`
 - Firebase config folder:
   - `/Users/ronnie/WebstormProjects/big2/firebase`
 - Login check:
   - `npx firebase-tools login:list`
 - Rules deploy:
-  - `npx firebase-tools deploy --only firestore:rules --project seed-services`
+  - `npx firebase-tools deploy --only firestore:rules --project Stream-0523`
   - `npx firebase-tools deploy --only firestore:rules --project fourleafbig2`
+  - `npx firebase-tools deploy --only firestore:rules --project fourleafbig2-bot`
+  - `npx firebase-tools deploy --only firestore:rules --project peugeot-0523`
+  - `npx firebase-tools deploy --only firestore:rules --project seed-services`
+  - `npx firebase-tools deploy --only firestore:rules --project seed-services-31`
 - Operational guard:
   - treat rules deploy as pending until the deploy command succeeds
   - do not treat `login:ci` as a successful deploy
-  - if Firestore rule changes affect room collections, deploy to both projects before considering the task complete
+  - if Firestore rule changes affect room collections, deploy to all active room projects before considering the task complete
 
 ## 12. Mobile Packaging (Capacitor)
 - Wrapper: Capacitor (single web codebase for iOS + Android).

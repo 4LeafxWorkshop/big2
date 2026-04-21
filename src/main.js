@@ -53,6 +53,7 @@ import {createRoomActionsController} from './roomActions.js';
 import {createRoomRosterSyncController} from './roomRosterSync.js';
 import {createRoomSubscriptionController} from './roomSubscription.js';
 import {createRoomTimeoutController} from './roomTimeouts.js';
+import {buildRoomDirectoryDoc, roomDirectoryDocToActiveRoom} from './roomDirectory.js';
 import {getNextSoloRoundWins, getNextSoloTotals, resetSoloSessionCarryoverState} from './soloState.js';
 
 const RANKS=['3','4','5','6','7','8','9','10','J','Q','K','A','2'];
@@ -1148,6 +1149,15 @@ async function writeRoomDirectory(roomId,data){
   await firebaseDb.collection(FIRESTORE_ROOM_DIRECTORY_COLLECTION).doc(String(roomId)).set(data,{merge:false});
   return true;
 }
+async function syncRoomDirectory(roomId,roomData,firebaseInstanceId=''){
+  const doc=buildRoomDirectoryDoc({
+    roomId,
+    roomData,
+    firebaseInstanceId:firebaseInstanceId||state.room?.firebaseInstanceId||primaryFirebaseInstanceId()
+  });
+  if(!doc)return false;
+  return writeRoomDirectory(roomId,doc);
+}
 async function deleteRoomDirectory(roomId){
   if(!firebaseDb||!roomId)return;
   try{
@@ -1432,9 +1442,9 @@ const roomActionsController=createRoomActionsController({
   roomTotalsWithSeatScore,
   signedInForPlay,
   subscribeRoom,
+  syncRoomDirectory,
   t,
-  updateActiveRoomPointer,
-  writeRoomDirectory
+  updateActiveRoomPointer
 });
 const roomSubscriptionController=createRoomSubscriptionController({
   FIRESTORE_ROOMS_COLLECTION,
@@ -1467,6 +1477,7 @@ const roomSubscriptionController=createRoomSubscriptionController({
   selectRoomHostCandidate,
   setRoomError,
   setRoomResultExpiryReached:(value)=>{roomResultExpiryReached=Boolean(value);},
+  syncRoomDirectory,
   startRoomPresencePing,
   syncRoomGameRoster,
   syncRoomSelfScoreIfNeeded,
@@ -1702,162 +1713,122 @@ async function gateGuestRoomAccess(targetRoomId=''){
     return{ok:true};
   }
 }
-async function queryActiveRoomsFromDb(roomDb,instanceId){
-  const statusFilters=['lobby','starting','playing','finished'];
-  const roomFetchLimit=8;
-  const currentPlayerId=currentRoomPlayerId();
-  const currentRoomId=String(state.room.id||'').trim();
+async function queryRecentRoomDirectories(){
+  if(!firebaseDb)return[];
+  const roomFetchLimit=16;
   let snap=null;
   try{
-    snap=await roomDb.collection(FIRESTORE_ROOMS_COLLECTION)
-      .where('status','in',statusFilters)
+    snap=await firebaseDb.collection(FIRESTORE_ROOM_DIRECTORY_COLLECTION)
       .orderBy('updatedAt','desc')
       .limit(roomFetchLimit)
       .get();
   }catch{
     try{
-      snap=await roomDb.collection(FIRESTORE_ROOMS_COLLECTION)
-        .where('status','in',statusFilters)
+      snap=await firebaseDb.collection(FIRESTORE_ROOM_DIRECTORY_COLLECTION)
+        .orderBy('createdAt','desc')
         .limit(roomFetchLimit)
         .get();
     }catch{
-      try{
-        snap=await roomDb.collection(FIRESTORE_ROOMS_COLLECTION)
-          .orderBy('updatedAt','desc')
-          .limit(roomFetchLimit)
-          .get();
-      }catch{
-        snap=await roomDb.collection(FIRESTORE_ROOMS_COLLECTION)
-          .limit(roomFetchLimit)
-          .get();
-      }
+      snap=await firebaseDb.collection(FIRESTORE_ROOM_DIRECTORY_COLLECTION)
+        .limit(roomFetchLimit)
+        .get();
     }
   }
+  return Array.isArray(snap?.docs)?snap.docs:[];
+}
+async function loadActiveRoomsFromDirectoryDocs(directoryDocs){
+  const currentPlayerId=currentRoomPlayerId();
+  const currentRoomId=String(state.room.id||'').trim();
   const now=Date.now();
   const rows=[];
   let hiddenRooms=0;
-  for(const doc of snap.docs){
+  const groupedRoomIds=new Map();
+  directoryDocs.forEach((doc)=>{
     const data=doc.data()??{};
-    const status=String(data.status||'');
-    if(status!=='lobby'&&status!=='starting'&&status!=='playing'&&status!=='finished'){
-      hiddenRooms+=1;
-      continue;
-    }
-    let players=Array.isArray(data.players)?[...data.players]:[];
-    const selfListed=currentPlayerId&&players.some((p)=>String(p?.uid||'')===currentPlayerId);
-    const staleSelfListed=selfListed&&(!currentRoomId||currentRoomId!==String(doc.id||''));
-    if(staleSelfListed){
-      await dropSelfFromRoom({
-        id:doc.id,
-        ref:doc.ref,
-        data(){return data;},
-        instanceId
-      },currentPlayerId);
-      players=players.filter((p)=>String(p?.uid||'')!==currentPlayerId);
-    }
-    const updatedAt=Number(data.updatedAt)||0;
-    if(updatedAt>0){
-      const staleAge=now-updatedAt;
-      if((status==='lobby'||status==='starting'||status==='finished')&&staleAge>ROOM_PRUNE_LOBBY_MS){
-        void roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(doc.id).delete().catch(()=>{});
-        void deleteRoomDirectory(doc.id);
-        hiddenRooms+=1;
-        continue;
+    const roomId=String(data.roomId||doc.id||'').trim();
+    const instanceId=String(data.firebaseInstanceId||primaryFirebaseInstanceId()).trim()||primaryFirebaseInstanceId();
+    if(!roomId||!instanceId)return;
+    const bucket=groupedRoomIds.get(instanceId)??[];
+    bucket.push(roomId);
+    groupedRoomIds.set(instanceId,bucket);
+  });
+  const liveRoomDocs=new Map();
+  for(const [instanceId,roomIds] of groupedRoomIds.entries()){
+    const roomDb=await getFirebaseDbForInstanceId(instanceId);
+    if(!roomDb)continue;
+    const uniqueRoomIds=[...new Set(roomIds)];
+    const snaps=await Promise.all(uniqueRoomIds.map(async(roomId)=>{
+      try{
+        const snap=await roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(roomId).get();
+        return snap.exists?{roomId,snap,instanceId}:null;
+      }catch{
+        return null;
       }
-      if(status==='playing'&&staleAge>ROOM_PRUNE_PLAYING_MS){
-        void roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(doc.id).delete().catch(()=>{});
-        void deleteRoomDirectory(doc.id);
-        hiddenRooms+=1;
-        continue;
-      }
-    }
-    const isPlaying=status==='playing';
-    const activePlayers=isPlaying?players:players.filter((p)=>isRoomPlayerActive(p,status,now));
-    const expectedIds=roomPlayerIds(players);
-    const existingIds=Array.isArray(data.playerIds)?data.playerIds.map((v)=>String(v)):null;
-    const idsMatch=Array.isArray(existingIds)
-      && existingIds.length===expectedIds.length
-      && expectedIds.every((id)=>existingIds.includes(id));
-    if(!isPlaying&&activePlayers.length!==players.length){
-      const activeHumans=activePlayers.filter((p)=>String(p.uid||'').startsWith('uid:')||String(p.uid||'').startsWith('guest:'));
-      if(!activeHumans.length){
-        hiddenRooms+=1;
-        continue;
-      }
-      const hostInfo=resolveRoomHostInfo({...data,players:activePlayers});
-      void roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(doc.id).update({
-        players:activePlayers,
-        playerIds:roomPlayerIds(activePlayers),
-        hostId:hostInfo.hostId,
-        hostName:hostInfo.hostName,
-        updatedAt:now
-      }).catch(()=>{});
-    }else if(!idsMatch){
-      void roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(doc.id).update({
-        playerIds:expectedIds,
-        updatedAt:now
-      }).catch(()=>{});
-    }
-    const humans=activePlayers.filter((p)=>isRoomPlayerHuman(p));
-    if(!humans.length){
-      void roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(doc.id).delete().catch(()=>{});
+    }));
+    snaps.forEach((entry)=>{
+      if(entry)liveRoomDocs.set(entry.roomId,entry);
+    });
+  }
+  for(const doc of directoryDocs){
+    const directoryData=doc.data()??{};
+    const roomId=String(directoryData.roomId||doc.id||'').trim();
+    const liveEntry=liveRoomDocs.get(roomId)||null;
+    if(!liveEntry){
       void deleteRoomDirectory(doc.id);
       hiddenRooms+=1;
       continue;
     }
-    if(status==='finished'&&humans.length>=Number(data.maxPlayers||4)){
+    const liveData=liveEntry.snap.data()??{};
+    const mirroredDoc=buildRoomDirectoryDoc({
+      roomId,
+      roomData:liveData,
+      firebaseInstanceId:liveEntry.instanceId
+    });
+    if(!mirroredDoc){
       hiddenRooms+=1;
       continue;
     }
-    const hostId=String(data.hostId||'').trim();
-    const hostPlayer=hostId?humans.find((p)=>String(p.uid)===hostId):humans[0];
-    let roster=activePlayers
-      .filter((p)=>Number.isFinite(Number(p?.seat))&&Number(p.seat)>=0&&Number(p.seat)<=3)
-      .map((p)=>({
-        seat:Number(p.seat),
-        name:String(p.name||''),
-        gender:p.gender==='female'?'female':'male',
-        picture:String(p.picture||''),
-        uid:String(p.uid||''),
-        lastSeen:Number(p.lastSeen)||0,
-        isBot:!isRoomPlayerHuman(p),
-        avatarColor:'#7aaed8'
-      }));
-    if(status!=='lobby'&&data.game&&Array.isArray(data.game.players)){
-      const gameRoster=data.game.players.map((p,idx)=>{
-        const seat=Number.isFinite(Number(p?.seat))?Number(p.seat):idx;
-        const safeSeat=Number.isFinite(seat)&&seat>=0&&seat<=3?seat:idx;
-        const gender=String(p?.gender||'male')==='female'?'female':'male';
-        const isBot=!p?.isHuman;
-        return{
-          seat:safeSeat,
-          name:String(p?.name||`Bot ${safeSeat+1}`),
-          gender,
-          picture:String(p?.picture||''),
-          uid:String(p?.uid||`bot:${safeSeat}`),
-          lastSeen:0,
-          isBot,
-          avatarColor:isBot?playerColorByViewClass(seatCls[safeSeat]||'south'):'#7aaed8'
-        };
-      });
-      roster=gameRoster.sort((a,b)=>a.seat-b.seat);
+    const row=roomDirectoryDocToActiveRoom(mirroredDoc);
+    if(!row){
+      hiddenRooms+=1;
+      continue;
     }
-    const displayPlayers=Math.max(activePlayers.length,roster.length);
-    rows.push({
-      id:doc.id,
-      code:String(data.code||'').toUpperCase(),
-      hostName:String(hostPlayer?.name||data.hostName||''),
-      hostId:String(hostPlayer?.uid||data.hostId||''),
-      isPrivate:Boolean(data.isPrivate),
-      status,
-      roundCount:Number(data.roundCount||0),
-      players:activePlayers.length,
-      displayPlayers,
-      maxPlayers:Number(data.maxPlayers||4),
-      roster,
-      firebaseInstanceId:instanceId,
-      updatedAt
-    });
+    if(JSON.stringify(directoryData)!==JSON.stringify(mirroredDoc)){
+      void writeRoomDirectory(roomId,mirroredDoc).catch(()=>{});
+    }
+    const status=String(row.status||'');
+    if(status!=='lobby'&&status!=='starting'&&status!=='playing'&&status!=='finished'){
+      hiddenRooms+=1;
+      continue;
+    }
+    const updatedAt=Number(row.updatedAt)||0;
+    if(updatedAt>0){
+      const staleAge=now-updatedAt;
+      if((status==='lobby'||status==='starting'||status==='finished')&&staleAge>ROOM_PRUNE_LOBBY_MS){
+        hiddenRooms+=1;
+        continue;
+      }
+      if(status==='playing'&&staleAge>ROOM_PRUNE_PLAYING_MS){
+        hiddenRooms+=1;
+        continue;
+      }
+    }
+    const roster=Array.isArray(row.roster)?row.roster:[];
+    const humans=roster.filter((entry)=>isRoomPlayerHuman(entry));
+    const selfListed=currentPlayerId&&roster.some((entry)=>String(entry?.uid||'')===currentPlayerId);
+    if(selfListed&&(!currentRoomId||currentRoomId!==roomId)){
+      hiddenRooms+=1;
+      continue;
+    }
+    if(!humans.length&&status!=='playing'){
+      hiddenRooms+=1;
+      continue;
+    }
+    if(status==='finished'&&Number(row.players||0)>=Number(row.maxPlayers||4)){
+      hiddenRooms+=1;
+      continue;
+    }
+    rows.push(row);
   }
   return{rows,hiddenRooms};
 }
@@ -1872,18 +1843,8 @@ async function loadActiveRooms(attempt=0){
   state.home.activeRooms.error='';
   render();
   try{
-    const rows=[];
-    let hiddenRooms=0;
-    const instances=await loadFirebaseInstances();
-    for(const instance of instances){
-      if(!isFirebaseInstanceRoomEnabled(instance))continue;
-      const instanceId=String(instance.projectId||instance.id||'').trim();
-      const roomDb=await getFirebaseDbForInstanceId(instanceId);
-      if(!roomDb)continue;
-      const result=await queryActiveRoomsFromDb(roomDb,instanceId);
-      rows.push(...result.rows);
-      hiddenRooms+=result.hiddenRooms;
-    }
+    const directoryDocs=await queryRecentRoomDirectories();
+    const {rows,hiddenRooms}=await loadActiveRoomsFromDirectoryDocs(directoryDocs);
     rows.sort((a,b)=>(Number(b.updatedAt)||0)-(Number(a.updatedAt)||0));
     state.home.activeRooms.rows=rows.slice(0,4).map((row)=>{
       const next={...row};
@@ -1907,9 +1868,6 @@ async function joinRoomByCode(codeRaw){
 }
 function subscribeRoom(roomId,code,firebaseInstanceId='',roomDbOverride=null){
   roomSubscriptionController.subscribeRoom(roomId,code,firebaseInstanceId,roomDbOverride);
-}
-function resolveRoomHostInfo(roomData){
-  return roomSubscriptionController.resolveRoomHostInfo(roomData);
 }
 async function leaveRoom(toLobby=false){
   await roomLifecycleController.leaveRoom(toLobby);

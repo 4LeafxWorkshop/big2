@@ -12,8 +12,12 @@ This document lists the exact information needed when splitting Big Two across m
   - `big2FirebaseInstances`
   - `big2RoomDirectory`
 - Current room shard projects:
-  - `seed-services`
+  - `Stream-0523`
   - `fourleafbig2`
+  - `fourleafbig2-bot`
+  - `peugeot-0523`
+  - `seed-services`
+  - `seed-services-31`
 - Current live room collections on shards:
   - `big2Rooms`
   - `big2GameLogs`
@@ -154,9 +158,13 @@ For every additional Firebase project later, send this exact block:
 
 - Any time a new field is added to Firestore read/write payloads, `firebase/firebase.rules` must be updated in the same change.
 - After any Firestore schema field change, deploy the updated rules before considering the feature done.
-- For this project, deploy Firestore rules to both active projects:
-  - `seed-services`
+- For this project, deploy Firestore rules to all active room projects:
+  - `Stream-0523`
   - `fourleafbig2`
+  - `fourleafbig2-bot`
+  - `peugeot-0523`
+  - `seed-services`
+  - `seed-services-31`
 - Do not assume a client-only code change is enough when a room/user/log document shape changes.
 - If multiple Firebase projects are used from the browser, each one needs its own web app config.
 - If Google Auth is needed across all shards, the auth setup must be consistent across those projects.

@@ -17,6 +17,14 @@ Room storage is split across Firebase projects:
   - `big2Rooms`
   - `big2GameLogs`
 
+Current active Firebase projects used by this setup:
+- `Stream-0523`
+- `fourleafbig2`
+- `fourleafbig2-bot`
+- `peugeot-0523`
+- `seed-services`
+- `seed-services-31`
+
 `big2FirebaseInstances` schema:
 - doc id: Firebase project id
 - `projectId`: string

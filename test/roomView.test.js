@@ -73,3 +73,27 @@ test('renderRoomJoinOverlay renders active rooms and join controls', ()=>{
   assert.match(html,/roomActiveHidden: 2/);
   assert.match(html,/room-error/);
 });
+
+test('renderRoomJoinOverlay keeps the active rooms block visible while loading', ()=>{
+  const html=renderRoomJoinOverlay({
+    visible:true,
+    activeRooms:[],
+    activeRoomsLoading:true,
+    hiddenCount:0,
+    roomErrorHtml:'',
+    t:(key)=>{
+      if(key==='roomCodeExample')return'ROOM42';
+      return key;
+    },
+    esc:(value)=>String(value),
+    isRoomPlayerHuman:()=>true,
+    authPictureUrlFrom:(value)=>`pic:${value}`,
+    avatarDataUri:(name)=>`avatar:${name}`
+  });
+  assert.match(html,/room-create-card/);
+  assert.match(html,/room-active-block/);
+  assert.match(html,/room-active-grid/);
+  assert.match(html,/room-active-empty/);
+  assert.match(html,/roomActiveEmpty/);
+  assert.doesNotMatch(html,/>\.\.\.</);
+});

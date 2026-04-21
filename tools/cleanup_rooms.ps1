@@ -1,6 +1,7 @@
 $ErrorActionPreference = 'Stop'
 
 param(
+  [ValidateSet('Stream-0523','fourleafbig2','fourleafbig2-bot','peugeot-0523','seed-services','seed-services-31')]
   [string]$Project = 'seed-services'
 )
 

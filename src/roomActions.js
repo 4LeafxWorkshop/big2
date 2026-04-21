@@ -83,14 +83,7 @@ export function createRoomActionsController(deps){
         try{
           await ref.set(data);
           try{
-            await deps.writeRoomDirectory(ref.id,{
-              roomId:ref.id,
-              code,
-              createdAt:now,
-              hostId:uid,
-              hostName:name,
-              firebaseInstanceId
-            });
+            await deps.syncRoomDirectory(ref.id,data,firebaseInstanceId);
           }catch(err){
             await ref.delete().catch(()=>{});
             throw err;

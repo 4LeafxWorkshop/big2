@@ -36,6 +36,7 @@ function createController(overrides={}){
     selectRoomHostCandidate(){return null;},
     setRoomError(){},
     setRoomResultExpiryReached(){},
+    syncRoomDirectory:async()=>true,
     startRoomPresencePing(){},
     syncRoomGameRoster(){return null;},
     syncRoomSelfScoreIfNeeded(){},
@@ -55,6 +56,7 @@ function createSnapshotHarness(overrides={}){
     applySnapshots:0,
     updates:[],
     deleteDirs:[],
+    syncDirectory:[],
     maybeRunAi:0
   };
   let snapshotCb=null;
@@ -116,6 +118,7 @@ function createSnapshotHarness(overrides={}){
     selectRoomHostCandidate(){return null;},
     setRoomError(value){calls.errors.push(value); state.room.error=value;},
     setRoomResultExpiryReached(){},
+    syncRoomDirectory:async(roomId,data,instanceId)=>{calls.syncDirectory.push({roomId,data,instanceId});},
     startRoomPresencePing(){calls.startPing+=1;},
     syncRoomGameRoster(){return null;},
     syncRoomSelfScoreIfNeeded(){calls.syncSelf+=1;},
@@ -273,6 +276,9 @@ test('subscribeRoom clears reconnect error on a fresh snapshot and re-renders', 
   assert.equal(state.room.id,'room-1');
   assert.equal(calls.startPing,1);
   assert.equal(calls.syncSelf,1);
+  assert.equal(calls.syncDirectory.length,1);
+  assert.equal(calls.syncDirectory[0].roomId,'room-1');
+  assert.equal(calls.syncDirectory[0].instanceId,'seed-services');
   assert.equal(calls.renders,1);
   assert.deepEqual(calls.errors,['']);
   assert.equal(calls.updates.length,1);
