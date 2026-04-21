@@ -35,6 +35,13 @@ function clearTimer(win,id){
   try{win?.clearTimeout?.(id);}catch{}
 }
 
+function afterNextPaint(win,fn){
+  if(!win?.requestAnimationFrame){
+    return win?.setTimeout?.(fn,0)??0;
+  }
+  return win.requestAnimationFrame(()=>win.requestAnimationFrame(fn));
+}
+
 export function createServiceBellController(deps={}){
   const documentRef=deps.documentRef??(()=>document);
   const windowRef=deps.windowRef??(()=>window);
@@ -252,12 +259,12 @@ export function createServiceBellController(deps={}){
     });
     foodLayer.appendChild(el);
     const entry=activeFoods.get(item.id);
-    entry.enterTimer=getWin()?.setTimeout?.(()=>{
+    entry.enterTimer=afterNextPaint(getWin(),()=>{
       const current=activeFoods.get(item.id);
       if(current!==entry||!el.isConnected)return;
       el.classList.remove('is-entering');
       occupiedSlots.add(slot);
-    },20)??0;
+    });
     const win=getWin();
     const voiceTimer=win?.setTimeout?.(()=>{
       playAudio(`audio/foods/${item.voice}`,0.95);
