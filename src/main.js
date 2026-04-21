@@ -1195,24 +1195,23 @@ async function deleteRoomPlayerPointer(playerId){
 }
 async function chooseNextRoomFirebaseInstanceId(){
   const rows=await loadFirebaseInstances();
-  const available=[];
+  const enabled=[];
   for(const row of rows){
     if(!isFirebaseInstanceRoomEnabled(row))continue;
     const projectId=String(row.projectId||row.id||'').trim();
     if(!projectId)continue;
-    const db=await getFirebaseDbForInstanceId(projectId);
-    if(db)available.push(projectId);
+    enabled.push(projectId);
   }
-  if(!available.length)return'';
-  if(!firebaseDb)return available[0];
+  if(!enabled.length)return'';
+  if(!firebaseDb)return enabled[0];
   try{
     const ref=firebaseDb.collection(FIRESTORE_ROOM_ROUTING_COLLECTION).doc(ROOM_ROUTING_DOC_ID);
     return await firebaseDb.runTransaction(async(tx)=>{
       const snap=await tx.get(ref);
       const data=snap.exists?(snap.data()??{}):{};
       const lastId=String(data.lastRoomFirebaseInstanceId||'').trim();
-      const idx=available.indexOf(lastId);
-      const nextId=idx<0?available[0]:available[(idx+1)%available.length];
+      const idx=enabled.indexOf(lastId);
+      const nextId=idx<0?enabled[0]:enabled[(idx+1)%enabled.length];
       tx.set(ref,{
         lastRoomFirebaseInstanceId:nextId,
         updatedAt:Date.now()
@@ -1220,7 +1219,7 @@ async function chooseNextRoomFirebaseInstanceId(){
       return nextId;
     });
   }catch{
-    return available[0];
+    return enabled[0];
   }
 }
 async function connectToRoom(roomId,code='',instanceId=''){
