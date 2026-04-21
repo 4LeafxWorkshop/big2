@@ -5871,6 +5871,36 @@ body[data-screen='game'] .self-table-emote.emote-rude {
   opacity: 1;
   transform: translateY(0);
 }
+.action-strip .control-row button[data-tooltip] {
+  position: relative;
+  overflow: visible;
+}
+@media (hover: hover) and (pointer: fine) {
+  .action-strip .control-row button[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 10px);
+    transform: translate(-50%, 8px);
+    padding: 6px 10px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,.24);
+    background: rgba(7, 22, 34, .86);
+    color: #f4f9fb;
+    font-size: .78rem;
+    font-weight: 700;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .14s ease, transform .14s ease;
+    z-index: 24;
+  }
+  .action-strip .control-row button[data-tooltip]:hover::after,
+  .action-strip .control-row button[data-tooltip]:focus-visible::after {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
 .action-strip button { padding: 6px 10px; border-radius: 10px; }
 .action-strip .name { font-size: .84rem; }
 .action-strip .player-tag {

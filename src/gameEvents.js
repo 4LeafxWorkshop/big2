@@ -74,12 +74,19 @@ function bindControlRowLabels({app,t,isPortraitMode}){
   if(emoteBtn){
     const label=emoteBtn.querySelector('span:not([aria-hidden])');
     if(label)label.remove();
-    emoteBtn.setAttribute('aria-label',t('emote'));
-    emoteBtn.setAttribute('title',t('emote'));
+    emoteBtn.setAttribute('aria-label',t('emoteTooltip'));
+    emoteBtn.setAttribute('data-tooltip',t('emoteTooltip'));
+    emoteBtn.removeAttribute('title');
   }
   if(bellBtn){
-    bellBtn.setAttribute('aria-label','Bellhop Bell');
-    bellBtn.setAttribute('title','Bellhop Bell');
+    bellBtn.setAttribute('aria-label',t('serviceBellTooltip'));
+    bellBtn.setAttribute('data-tooltip',t('serviceBellTooltip'));
+    bellBtn.removeAttribute('title');
+  }
+  if(sortBtn){
+    sortBtn.setAttribute('aria-label',t('sortTooltip'));
+    sortBtn.setAttribute('data-tooltip',t('sortTooltip'));
+    sortBtn.removeAttribute('title');
   }
   if(isPortraitMode()){
     const portraitOrder=[suggestAnchor,playBtn,passBtn,sortBtn,emoteBtn,bellBtn].filter(Boolean);
