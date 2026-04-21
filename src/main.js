@@ -77,9 +77,11 @@ const EMOTE_DURATION_MS=2400;
 const FOOD_EMOTE_PREFIX='food:';
 const FOOD_CALLOUT_META={
   lemontea:{file:'lemontea.png',width:45},
+  lemoncokeginger:{file:'lemoncokeginger.png',width:48},
   pineapplebun:{file:'pineapplebun.png',width:72},
   eggtart:{file:'eggtart.png',width:54},
   milktea:{file:'milktea.png',width:81},
+  sausagebun:{file:'sausagebun.png',width:78},
   redbeanice:{file:'redbeanice.png',width:43},
   frenchtoast:{file:'frenchtoast.png',width:84}
 };
