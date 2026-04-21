@@ -12309,6 +12309,10 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] :is(.name, .seat-i
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout {
   z-index: 17002 !important;
 }
+body[data-screen='game'] .seat[data-seat-emote-active='1'] :is(.seat-name-fixed[data-opponent-name], .seat-name-fixed[data-opponent-name] .name) {
+  z-index: 18020 !important;
+  isolation: isolate !important;
+}
 body[data-screen='game'] .service-bell-food-layer,
 body[data-screen='game'] .service-bell-food {
   z-index: 12000 !important;

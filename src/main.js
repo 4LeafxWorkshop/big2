@@ -77,7 +77,7 @@ const EMOTE_DURATION_MS=2400;
 const FOOD_EMOTE_PREFIX='food:';
 const FOOD_CALLOUT_META={
   lemontea:{file:'lemontea.png',width:45},
-  lemoncokeginger:{file:'lemoncokeginger.png',width:48},
+  lemoncokeginger:{file:'lemoncokeginger.png',width:60},
   pineapplebun:{file:'pineapplebun.png',width:72},
   eggtart:{file:'eggtart.png',width:54},
   milktea:{file:'milktea.png',width:81},
@@ -182,6 +182,8 @@ function preloadGooglePicture(){
   const pic=String(state.home.google?.picture??'').trim();
   state.home.google.pictureLoaded=false;
   if(!pic)return;
+  const normalizedPic=authPictureUrlFrom(pic);
+  if(!normalizedPic)return;
   const token=++googlePicturePreloadToken;
   try{
     const img=new Image();
@@ -195,7 +197,7 @@ function preloadGooglePicture(){
       state.home.google.pictureLoaded=false;
       render();
     };
-    img.src=pic;
+    img.src=normalizedPic;
   }catch{}
 }
 function armPopunderForGesture(){
@@ -1952,6 +1954,16 @@ function roomSeatForPlayer(roomData,playerId){
 function roomSelfSeat(roomData){
   return roomSeatForPlayer(roomData,currentRoomPlayerId());
 }
+function resolveRoomEmoteSeat(roomData,raw){
+  const explicitSeat=Number(raw?.seat);
+  if(Number.isInteger(explicitSeat)&&explicitSeat>=0&&explicitSeat<=3)return explicitSeat;
+  const by=String(raw?.by||'').trim();
+  if(by.startsWith('seat:')){
+    const parsed=Number(by.slice(5));
+    if(Number.isInteger(parsed)&&parsed>=0&&parsed<=3)return parsed;
+  }
+  return roomSeatForPlayer(roomData,by);
+}
 async function resetRoomExpiryTo60s(){
   await roomMutationsController.resetRoomExpiryTo60s();
 }
@@ -2173,9 +2185,12 @@ async function roomSubmitEmote(id,tsOverride=null,byOverride=''){
   try{
     const ref=roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(state.room.id);
     const by=String(byOverride||currentRoomPlayerId()||'');
-    const seat=roomSelfSeat(state.room.data);
+    const seat=Number.isInteger(state.room.selfSeat)&&state.room.selfSeat>=0
+      ?state.room.selfSeat
+      :roomSelfSeat(state.room.data);
     await ref.update({
       emote:{id:match.id,ts:Math.trunc(now),by,seat:Number.isInteger(seat)&&seat>=0?seat:undefined},
+      'game.emote':{id:match.id,ts:Math.trunc(now),by,seat:Number.isInteger(seat)&&seat>=0?seat:undefined},
       updatedAt:Math.trunc(now)
     });
   }catch{}
@@ -3458,7 +3473,9 @@ function triggerEmoteSticker(id){
   if(!match)return;
   const now=Date.now();
   const seat=state.home.mode==='room'
-    ?roomSelfSeat(state.room.data)
+    ?(Number.isInteger(state.room.selfSeat)&&state.room.selfSeat>=0
+      ?state.room.selfSeat
+      :roomSelfSeat(state.room.data))
     :0;
   state.emote.active={id:match.id,ts:now,source:'local',seat:Number.isInteger(seat)&&seat>=0?seat:undefined};
   state.emote.open=false;
@@ -3586,20 +3603,12 @@ function syncRoomEmote(roomData){
     return;
   }
   const age=Date.now()-ts;
-  const explicitSeat=Number(raw.seat);
-  const hasExplicitSeat=Number.isInteger(explicitSeat)&&explicitSeat>=0&&explicitSeat<=3;
+  const resolvedSeat=resolveRoomEmoteSeat(roomData,raw);
   if(id.startsWith(FOOD_EMOTE_PREFIX)){
     const foodId=id.slice(FOOD_EMOTE_PREFIX.length).trim().toLowerCase();
     const foodMeta=FOOD_CALLOUT_META[foodId]||null;
     const by=String(raw.by||'').trim();
-    let seat=-1;
-    if(by.startsWith('seat:')){
-      const parsed=Number(by.slice(5));
-      if(Number.isInteger(parsed)&&parsed>=0&&parsed<=3)seat=parsed;
-    }
-    if(seat<0){
-      seat=roomSeatForPlayer(roomData,by);
-    }
+    let seat=resolvedSeat;
     const selfSeat=Number.isInteger(state.room.selfSeat)&&state.room.selfSeat>=0
       ?state.room.selfSeat
       :roomSelfSeat(roomData);
@@ -3631,7 +3640,7 @@ function syncRoomEmote(roomData){
     if(current.source==='local')return;
     if(current.source==='room')return;
   }
-  state.emote.active={id,ts,source:'room',by:String(raw.by||''),seat:hasExplicitSeat?explicitSeat:undefined};
+  state.emote.active={id,ts,source:'room',by:String(raw.by||''),seat:Number.isInteger(resolvedSeat)&&resolvedSeat>=0?resolvedSeat:undefined};
   state.emote.open=false;
   if(emotePickerTimer){clearTimeout(emotePickerTimer);emotePickerTimer=null;}
   if(emoteTimer){clearTimeout(emoteTimer);emoteTimer=null;}

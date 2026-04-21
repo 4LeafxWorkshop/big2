@@ -30,3 +30,34 @@ WOFF2 subset binaries:
 - public/backup/fonts/MaShanZheng-subset.woff2
 - public/backup/fonts/NotoSerifTC-400-subset.woff2
 - public/backup/fonts/NotoSerifTC-700-subset.woff2
+
+Avatar backup set:
+- public/backup/images/avatars/avatar-male.png
+- public/backup/images/avatars/avatar-female.png
+- public/backup/images/avatars/avatar-bot-志明.png
+- public/backup/images/avatars/avatar-bot-俊傑.png
+- public/backup/images/avatars/avatar-bot-家樂.png
+- public/backup/images/avatars/avatar-bot-子朗.png
+- public/backup/images/avatars/avatar-bot-少龍.png
+- public/backup/images/avatars/avatar-bot-天樂.png
+- public/backup/images/avatars/avatar-bot-嘉欣.png
+- public/backup/images/avatars/avatar-bot-芷晴.png
+- public/backup/images/avatars/avatar-bot-穎欣.png
+- public/backup/images/avatars/avatar-bot-佩儀.png
+- public/backup/images/avatars/avatar-bot-詠琪.png
+- public/backup/images/avatars/avatar-bot-秀文.png
+- public/backup/images/avatars/avatar-bot-澄希.png
+- public/backup/images/avatars/avatar-bot-葵芳.png
+- public/backup/images/avatars/avatar-bot-Nova.png
+- public/backup/images/avatars/avatar-bot-Milo.png
+- public/backup/images/avatars/avatar-bot-Jade.png
+- public/backup/images/avatars/avatar-bot-Axel.png
+- public/backup/images/avatars/avatar-bot-Iris.png
+- public/backup/images/avatars/avatar-bot-Luna.png
+- public/backup/images/avatars/avatar-bot-ReXX.png
+- public/backup/images/avatars/avatar-bot-Nora.png
+- public/backup/images/avatars/avatar-bot-Kane.png
+- public/backup/images/avatars/avatar-bot-Skye.png
+- public/backup/images/avatars/avatar-bot-Orion.png
+- public/backup/images/avatars/avatar-bot-葵兄.png
+- public/backup/images/avatars/avatar-bot-Jax.png
