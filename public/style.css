@@ -12152,7 +12152,7 @@ body[data-log-sheet='1'] .history-detail-row .history-cards {
   body[data-screen='game'] .center-last-west .seat-played.seat-played-pair .card.mini + .card.mini,
   body[data-screen='game'] .center-last-east .seat-played.seat-played-pair .card.mini + .card.mini,
   body[data-screen='game'] .center-last-south .seat-played.seat-played-pair .card.mini + .card.mini {
-    margin-left: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * -0.9) !important;
+    margin-left: calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * -0.82) !important;
   }
 }
 
