@@ -11245,7 +11245,7 @@ body[data-screen='game'] .seat.east {
   }
   body[data-screen='game'] .seat.west .seat-pack,
   body[data-screen='game'] .seat.east .seat-pack {
-    padding-top: 50% !important;
+    padding-top: 58% !important;
   }
   body[data-screen='game'] .seat.north .seat-pack > .seat-name-fixed,
   body[data-screen='game'] .seat.west .seat-pack > .seat-name-fixed,
