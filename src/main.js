@@ -347,6 +347,7 @@ const THEMES={
 const seatCls=['south','east','north','west'];
 const PLAYER_COLORS={south:'#ffd166',east:'#ff6b6b',north:'#6bbcff',west:'#a77bff'};
 const playerColorByViewClass=(cls)=>PLAYER_COLORS[cls]??'#f4f9fb';
+let lastCardbackCarouselLanguage='';
 function colorDistanceSq(a,b){
   const ra=hexToRgb(a);
   const rb=hexToRgb(b);
@@ -4297,6 +4298,21 @@ function renderBackCarouselItems(){
 function renderBackCarousel(comboId){
   return `<div class="cardback-carousel" data-carousel="${comboId}"><button class="carousel-btn prev" type="button" data-carousel-dir="prev" aria-label="${t('carouselPrev')}">‹</button><div class="option-combo cardback-combo cardback-track" id="${comboId}" data-carousel-track="1"><div class="cardback-rail">${renderBackCarouselItems()}</div></div><button class="carousel-btn next" type="button" data-carousel-dir="next" aria-label="${t('carouselNext')}">›</button></div>`;
 }
+function captureCardbackCarouselDom(comboIds){
+  const preserved=new Map();
+  comboIds.forEach((comboId)=>{
+    const node=app.querySelector(`.cardback-carousel[data-carousel="${comboId}"]`);
+    if(node instanceof HTMLElement)preserved.set(comboId,node);
+  });
+  return preserved;
+}
+function restoreCardbackCarouselDom(preserved){
+  preserved.forEach((node,comboId)=>{
+    const replacement=app.querySelector(`.cardback-carousel[data-carousel="${comboId}"]`);
+    if(!(replacement instanceof HTMLElement)||!replacement.parentNode)return;
+    replacement.parentNode.replaceChild(node,replacement);
+  });
+}
 const bindRoomTopMetaLayoutDom=createRoomTopMetaLayoutBinder();
 const discardSizeObserverDom=createDiscardSizeObserver();
 let homeCardbackZoomCleanup=null;
@@ -4854,6 +4870,9 @@ function difficultySliderHtml(id,value,t){
   return `<div class="difficulty-slider-wrap" id="${id}" style="--difficulty-index:${diffIndex};"><input class="difficulty-slider" type="range" min="0" max="2" step="1" value="${diffIndex}" aria-label="${t('ai')}"><div class="difficulty-slider-labels" aria-hidden="true"><span>${t('easy')}</span><span>${t('normal')}</span><span>${t('hard')}</span></div></div>`;
 }
 function renderHome(){
+  const preservedCarousels=lastCardbackCarouselLanguage===state.language
+    ?captureCardbackCarouselDom(['back-combo-left','back-combo-right'])
+    :new Map();
   const intro=introText();
   const signedIn=signedInForPlay();
   const inRoom=Boolean(state.room.id);
@@ -5000,6 +5019,8 @@ function renderHome(){
     leaderboardModalHtml:state.home.showLeaderboard?leaderboardModalHtml():'',
     scoreGuideModalHtml:state.showScoreGuide?scoreGuideModalHtml():''
   });
+  restoreCardbackCarouselDom(preservedCarousels);
+  lastCardbackCarouselLanguage=state.language;
 
   bindLangMenu(document.querySelector('.royal-head-actions'),{reloadGoogle:!state.home.google?.signedIn});
   bindHomeEvents({
@@ -5047,6 +5068,9 @@ function renderHome(){
   onGoogleScriptLoaded(renderGoogleInline);
 }
 function renderConfig(){
+  const preservedCarousels=lastCardbackCarouselLanguage===state.language
+    ?captureCardbackCarouselDom(['config-back-combo'])
+    :new Map();
   const diffIndex=difficultyIndex(state.home.aiDifficulty);
   app.innerHTML=renderConfigMarkup({
     diffIndex,
@@ -5058,6 +5082,8 @@ function renderConfig(){
     emoteDisplayEnabled:Boolean(emoteDisplayEnabled),
     renderBackCarousel
   });
+  restoreCardbackCarouselDom(preservedCarousels);
+  lastCardbackCarouselLanguage=state.language;
   bindLangMenu(document.querySelector('.topbar-right'),{reloadGoogle:!state.home.google?.signedIn});
   bindConfigEvents({
     state,
