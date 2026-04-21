@@ -2636,6 +2636,13 @@ function isWebView(){
   const ua=String(navigator?.userAgent??'');
   return /\bwv\b/.test(ua)||/WebView/i.test(ua)||/(Android.*Version\/\d+\.\d+.*Chrome\/\d+\.\d+ Mobile)/i.test(ua);
 }
+function isStandaloneWebApp(){
+  return Boolean(
+    navigator?.standalone||
+    window.matchMedia?.('(display-mode: standalone)').matches||
+    window.matchMedia?.('(display-mode: fullscreen)').matches
+  );
+}
 const MIN_WEB_GAME_WIDTH=480;
 const MIN_WEB_GAME_HEIGHT=520;
 function isWebViewportTooSmall(){
@@ -2652,6 +2659,7 @@ function syncWebViewportGuardAttrs(){
   const h=Math.round(window.innerHeight||0);
   document.body.setAttribute('data-web-too-small',tooSmall?'1':'0');
   document.body.setAttribute('data-webview',(isMobilePointer()||isWebView())?'1':'0');
+  document.body.setAttribute('data-webapp',isStandaloneWebApp()?'1':'0');
   const msg=t('webTooSmall')
     .replace('{{w}}',String(w))
     .replace('{{h}}',String(h))
@@ -5690,12 +5698,16 @@ function syncViewport(){
   const viewportH=Math.max(0,Math.round(window.visualViewport?.height||window.innerHeight||0));
   const coarse=isCoarsePointer();
   const portrait=isPortraitMode();
+  const webApp=isStandaloneWebApp();
+  const appViewportH=viewportH&&webApp&&coarse
+    ?Math.max(0,viewportH-44)
+    :viewportH;
   const scale=coarse
     ?Math.max(0.74,Math.min(1.1,short/520))
     :1;
   root.style.setProperty('--card-scale',scale.toFixed(3));
-  if(viewportH){
-    root.style.setProperty('--app-vh',`${viewportH}px`);
+  if(appViewportH){
+    root.style.setProperty('--app-vh',`${appViewportH}px`);
   }
   const orientation=portrait?'portrait':'landscape';
   const orientationChanged=Boolean(lastOrientation)&&orientation!==lastOrientation;
