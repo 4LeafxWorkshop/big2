@@ -43,19 +43,17 @@ function normalizedRoster(roomData){
     .sort((a,b)=>a.seat-b.seat);
 }
 
-function resolveHostInfo(roomData){
+function resolveHostInfo(roomData,roster){
   const players=Array.isArray(roomData?.players)?roomData.players:[];
-  let hostId=String(roomData?.hostId||'').trim();
-  let hostName=String(roomData?.hostName||'').trim();
-  const hostEntry=hostId?players.find((entry)=>String(entry?.uid||'').trim()===hostId):null;
-  if(!hostEntry){
-    const fallback=players[0]||null;
-    hostId=String(fallback?.uid||'').trim();
-    hostName=String(fallback?.name||'').trim();
-  }else if(!hostName){
-    hostName=String(hostEntry?.name||'').trim();
-  }
-  return{hostId,hostName};
+  const hostId=String(roomData?.hostId||'').trim();
+  const hostPlayer=hostId?players.find((entry)=>String(entry?.uid||'').trim()===hostId):null;
+  const fallback=hostPlayer||players[0]||null;
+  const fallbackUid=String(fallback?.uid||'').trim();
+  const rosterHost=hostId?roster.find((entry)=>String(entry?.uid||'').trim()===hostId):null;
+  return{
+    hostId:hostId||fallbackUid,
+    hostName:String(rosterHost?.name||fallback?.name||'').trim()
+  };
 }
 
 export function buildRoomDirectoryDoc({roomId,roomData,firebaseInstanceId}){
@@ -65,59 +63,41 @@ export function buildRoomDirectoryDoc({roomId,roomData,firebaseInstanceId}){
   const code=String(roomData.code||'').trim().toUpperCase();
   const createdAt=Math.max(0,Number(roomData.createdAt)||0);
   const updatedAt=Math.max(0,Number(roomData.updatedAt)||createdAt);
-  const status=String(roomData.status||'').trim();
-  const maxPlayers=Math.max(2,Math.min(4,Number(roomData.maxPlayers)||4));
-  const playerCount=Math.max(0,Math.min(maxPlayers,Array.isArray(roomData.players)?roomData.players.length:0));
-  const roundCount=Math.max(0,Number(roomData.roundCount)||0);
-  const roster=normalizedRoster(roomData);
-  const {hostId,hostName}=resolveHostInfo(roomData);
-  if(!code||!createdAt||!hostId||!hostName||!status)return null;
+  if(!code||!createdAt)return null;
   return{
     roomId:safeRoomId,
     code,
     createdAt,
-    hostId,
-    hostName,
-    firebaseInstanceId:safeInstanceId,
-    status,
     updatedAt,
-    isPrivate:Boolean(roomData.isPrivate),
-    maxPlayers,
-    playerCount,
-    roundCount,
-    roster
+    firebaseInstanceId:safeInstanceId
   };
 }
 
-export function roomDirectoryDocToActiveRoom(doc){
-  if(!doc)return null;
-  const roomId=String(doc.roomId||'').trim();
-  const code=String(doc.code||'').trim().toUpperCase();
-  const firebaseInstanceId=String(doc.firebaseInstanceId||'').trim();
-  const status=String(doc.status||'').trim();
-  if(!roomId||!code||!firebaseInstanceId||!status)return null;
-  const roster=Array.isArray(doc.roster)
-    ?doc.roster
-      .filter((entry)=>Number.isFinite(Number(entry?.seat)))
-      .map((entry)=>normalizeRosterEntry(entry,entry.seat))
-      .sort((a,b)=>a.seat-b.seat)
-    :[];
-  const maxPlayers=Math.max(2,Math.min(4,Number(doc.maxPlayers)||4));
-  const playerCount=Math.max(0,Math.min(maxPlayers,Number(doc.playerCount)||roster.length||0));
+export function buildActiveRoomRow({roomId,roomData,firebaseInstanceId}){
+  const safeRoomId=String(roomId||'').trim();
+  const safeInstanceId=String(firebaseInstanceId||'').trim();
+  if(!safeRoomId||!roomData||!safeInstanceId)return null;
+  const code=String(roomData.code||'').trim().toUpperCase();
+  const status=String(roomData.status||'').trim();
+  if(!code||!status)return null;
+  const roster=normalizedRoster(roomData);
+  const {hostId,hostName}=resolveHostInfo(roomData,roster);
+  const maxPlayers=Math.max(2,Math.min(4,Number(roomData.maxPlayers)||4));
+  const playerCount=Math.max(0,Math.min(maxPlayers,Array.isArray(roomData.players)?roomData.players.length:0));
   return{
-    id:roomId,
+    id:safeRoomId,
     code,
-    hostName:String(doc.hostName||'').trim(),
-    hostId:String(doc.hostId||'').trim(),
-    isPrivate:Boolean(doc.isPrivate),
+    hostName,
+    hostId,
+    isPrivate:Boolean(roomData.isPrivate),
     status,
-    roundCount:Math.max(0,Number(doc.roundCount)||0),
+    roundCount:Math.max(0,Number(roomData.roundCount)||0),
     players:playerCount,
     displayPlayers:Math.max(playerCount,roster.length),
     maxPlayers,
     roster,
-    firebaseInstanceId,
-    updatedAt:Math.max(0,Number(doc.updatedAt)||Number(doc.createdAt)||0),
-    createdAt:Math.max(0,Number(doc.createdAt)||0)
+    firebaseInstanceId:safeInstanceId,
+    updatedAt:Math.max(0,Number(roomData.updatedAt)||Number(roomData.createdAt)||0),
+    createdAt:Math.max(0,Number(roomData.createdAt)||0)
   };
 }

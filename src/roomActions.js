@@ -19,7 +19,7 @@ export function createRoomActionsController(deps){
       if(!membership.ok){
         if(membership.roomId){
           void deps.connectToRoom(membership.roomId,membership.code||'',membership.instanceId||'');
-          void deps.updateActiveRoomPointer(membership.roomId);
+          void deps.updateActiveRoomPointer(membership.roomId,membership.instanceId||'');
         }
         deps.setRoomError(deps.t('roomAlreadyIn'));
         return;
@@ -89,7 +89,7 @@ export function createRoomActionsController(deps){
             throw err;
           }
           deps.subscribeRoom(ref.id,code,firebaseInstanceId,roomDb);
-          void deps.updateActiveRoomPointer(ref.id);
+          void deps.updateActiveRoomPointer(ref.id,firebaseInstanceId);
           created=true;
           break;
         }catch(err){
@@ -141,14 +141,14 @@ export function createRoomActionsController(deps){
         return;
       }
       const state=deps.getState();
-      if(state.room.id){
-        const same=String(state.room.id)===String(doc.id);
-        if(same){
-          deps.subscribeRoom(doc.id,code,doc.instanceId,roomDb);
-          void deps.updateActiveRoomPointer(doc.id);
-          state.room.joinOpen=false;
-          deps.render();
-          return;
+        if(state.room.id){
+          const same=String(state.room.id)===String(doc.id);
+          if(same){
+            deps.subscribeRoom(doc.id,code,doc.instanceId,roomDb);
+          void deps.updateActiveRoomPointer(doc.id,doc.instanceId||'');
+            state.room.joinOpen=false;
+            deps.render();
+            return;
         }
         deps.setRoomError(deps.t('roomAlreadyIn'));
         return;
@@ -157,7 +157,7 @@ export function createRoomActionsController(deps){
       if(!membership.ok){
         if(membership.roomId){
           void deps.connectToRoom(membership.roomId,membership.code||'',membership.instanceId||'');
-          void deps.updateActiveRoomPointer(membership.roomId);
+          void deps.updateActiveRoomPointer(membership.roomId,membership.instanceId||'');
         }
         deps.setRoomError(deps.t('roomAlreadyIn'));
         return;
@@ -170,7 +170,7 @@ export function createRoomActionsController(deps){
       }
       if(gate.already){
         deps.subscribeRoom(doc.id,code,doc.instanceId,roomDb);
-        void deps.updateActiveRoomPointer(doc.id);
+        void deps.updateActiveRoomPointer(doc.id,doc.instanceId||'');
         state.room.joinOpen=false;
         deps.render();
         return;
@@ -268,7 +268,7 @@ export function createRoomActionsController(deps){
         tx.update(doc.ref,updates);
       });
       deps.subscribeRoom(doc.id,code,doc.instanceId,roomDb);
-      void deps.updateActiveRoomPointer(doc.id);
+      void deps.updateActiveRoomPointer(doc.id,doc.instanceId||'');
       state.room.joinOpen=false;
       deps.render();
     }catch(err){

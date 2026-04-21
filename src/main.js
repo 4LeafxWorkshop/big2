@@ -53,7 +53,7 @@ import {createRoomActionsController} from './roomActions.js';
 import {createRoomRosterSyncController} from './roomRosterSync.js';
 import {createRoomSubscriptionController} from './roomSubscription.js';
 import {createRoomTimeoutController} from './roomTimeouts.js';
-import {buildRoomDirectoryDoc, roomDirectoryDocToActiveRoom} from './roomDirectory.js';
+import {buildActiveRoomRow, buildRoomDirectoryDoc} from './roomDirectory.js';
 import {getNextSoloRoundWins, getNextSoloTotals, resetSoloSessionCarryoverState} from './soloState.js';
 
 const RANKS=['3','4','5','6','7','8','9','10','J','Q','K','A','2'];
@@ -332,6 +332,7 @@ const FIRESTORE_USERS_COLLECTION='big2Users';
 const FIRESTORE_GAMELOGS_COLLECTION='big2GameLogs';
 const FIRESTORE_FIREBASE_INSTANCES_COLLECTION='big2FirebaseInstances';
 const FIRESTORE_ROOM_DIRECTORY_COLLECTION='big2RoomDirectory';
+const FIRESTORE_ROOM_PLAYERS_COLLECTION='big2RoomPlayers';
 const FIRESTORE_ROOM_ROUTING_COLLECTION='big2RoomRouting';
 const ROOM_ROUTING_DOC_ID='rotation';
 const PRIMARY_FIREBASE_ROOM_ENABLED=false;
@@ -1165,6 +1166,33 @@ async function deleteRoomDirectory(roomId){
     await firebaseDb.collection(FIRESTORE_ROOM_DIRECTORY_COLLECTION).doc(String(roomId)).delete();
   }catch{}
 }
+async function readRoomPlayerPointer(playerId){
+  if(!firebaseDb||!playerId)return null;
+  try{
+    const snap=await firebaseDb.collection(FIRESTORE_ROOM_PLAYERS_COLLECTION).doc(String(playerId)).get();
+    return snap.exists?snap:null;
+  }catch{
+    return null;
+  }
+}
+async function writeRoomPlayerPointer(playerId,roomId,firebaseInstanceId=''){
+  if(!firebaseDb||!playerId)return false;
+  const safeRoomId=String(roomId||'').trim();
+  const safeInstanceId=String(firebaseInstanceId||state.room?.firebaseInstanceId||primaryFirebaseInstanceId()).trim()||primaryFirebaseInstanceId();
+  await firebaseDb.collection(FIRESTORE_ROOM_PLAYERS_COLLECTION).doc(String(playerId)).set({
+    playerId:String(playerId),
+    roomId:safeRoomId,
+    firebaseInstanceId:safeInstanceId,
+    updatedAt:Date.now()
+  },{merge:false});
+  return true;
+}
+async function deleteRoomPlayerPointer(playerId){
+  if(!firebaseDb||!playerId)return;
+  try{
+    await firebaseDb.collection(FIRESTORE_ROOM_PLAYERS_COLLECTION).doc(String(playerId)).delete();
+  }catch{}
+}
 async function chooseNextRoomFirebaseInstanceId(){
   const rows=await loadFirebaseInstances();
   const available=[];
@@ -1478,7 +1506,6 @@ const roomSubscriptionController=createRoomSubscriptionController({
   selectRoomHostCandidate,
   setRoomError,
   setRoomResultExpiryReached:(value)=>{roomResultExpiryReached=Boolean(value);},
-  syncRoomDirectory,
   startRoomPresencePing,
   syncRoomGameRoster,
   syncRoomSelfScoreIfNeeded,
@@ -1565,28 +1592,48 @@ async function findRoomByCode(code){
 }
 async function findRoomByPlayerId(playerId){
   if(!firebaseDb||!playerId)return null;
-  const rows=await loadFirebaseInstances();
-  for(const row of rows){
-    if(!isFirebaseInstanceRoomEnabled(row))continue;
-    const projectId=String(row.projectId||row.id||'').trim();
-    const roomDb=await getFirebaseDbForInstanceId(projectId);
-    if(!roomDb)continue;
+  const safePlayerId=String(playerId).trim();
+  if(safePlayerId.startsWith('uid:')){
+    const authUid=safePlayerId.slice(4).trim();
+    if(!authUid)return null;
     try{
-      const snap=await roomDb.collection(FIRESTORE_ROOMS_COLLECTION)
-        .where('playerIds','array-contains',String(playerId))
-        .limit(1)
-        .get();
-      const doc=snap.docs?.[0];
-      if(!doc)continue;
+      const snap=await firebaseDb.collection(FIRESTORE_USERS_COLLECTION).doc(authUid).get();
+      const data=snap.data()??{};
+      const roomId=String(data.currentRoomId??'').trim();
+      if(!roomId)return null;
+      const resolved=await resolveRoomDocByDirectory(roomId,'');
+      if(!resolved)return null;
       return{
-        id:doc.id,
-        ref:doc.ref,
-        data(){return doc.data()??{};},
-        instanceId:projectId
+        id:resolved.doc.id,
+        ref:resolved.ref,
+        data(){return resolved.doc.data()??{};},
+        instanceId:resolved.instanceId,
+        directory:resolved.directory
       };
-    }catch{}
+    }catch{
+      return null;
+    }
   }
-  return null;
+  const pointer=await readRoomPlayerPointer(safePlayerId);
+  if(!pointer)return null;
+  const pointerData=pointer.data()??{};
+  const roomId=String(pointerData.roomId??'').trim();
+  if(!roomId){
+    await deleteRoomPlayerPointer(safePlayerId);
+    return null;
+  }
+  const resolved=await resolveRoomDocByDirectory(roomId,'');
+  if(!resolved){
+    await deleteRoomPlayerPointer(safePlayerId);
+    return null;
+  }
+  return{
+    id:resolved.doc.id,
+    ref:resolved.ref,
+    data(){return resolved.doc.data()??{};},
+    instanceId:resolved.instanceId,
+    directory:resolved.directory
+  };
 }
 async function dropSelfFromRoom(roomDoc,playerId){
   if(!firebaseDb||!roomDoc||!playerId)return;
@@ -1621,6 +1668,7 @@ async function dropSelfFromRoom(roomDoc,playerId){
     tx.update(ref,{players:remaining,playerIds:roomPlayerIds(remaining),updatedAt:now,...hostUpdate});
   });
   if(shouldDeleteDirectory)await deleteRoomDirectory(ref.id);
+  if(String(playerId).startsWith('guest:'))await deleteRoomPlayerPointer(playerId);
 }
 async function ensureSingleRoomMembership(targetRoomId=''){
   const playerId=baseRoomPlayerId();
@@ -1780,22 +1828,14 @@ async function loadActiveRoomsFromDirectoryDocs(directoryDocs){
       continue;
     }
     const liveData=liveEntry.snap.data()??{};
-    const mirroredDoc=buildRoomDirectoryDoc({
+    const row=buildActiveRoomRow({
       roomId,
       roomData:liveData,
       firebaseInstanceId:liveEntry.instanceId
     });
-    if(!mirroredDoc){
-      hiddenRooms+=1;
-      continue;
-    }
-    const row=roomDirectoryDocToActiveRoom(mirroredDoc);
     if(!row){
       hiddenRooms+=1;
       continue;
-    }
-    if(JSON.stringify(directoryData)!==JSON.stringify(mirroredDoc)){
-      void writeRoomDirectory(roomId,mirroredDoc).catch(()=>{});
     }
     const status=String(row.status||'');
     if(status!=='lobby'&&status!=='starting'&&status!=='playing'&&status!=='finished'){
@@ -1954,7 +1994,7 @@ function startRoomPresencePing(){
   roomPresenceTimer=1;
   if(String(state.room.data?.status||'')!=='finished')void touchRoomPresence(true);
 }
-async function updateActiveRoomPointer(roomId){
+async function updateActiveRoomPointer(roomId,instanceId=''){
   const uid=currentAuthUserUid();
   if(!uid){
     try{
@@ -1962,6 +2002,11 @@ async function updateActiveRoomPointer(roomId){
       if(v)localStorage.setItem(LOCAL_ROOM_KEY,v);
       else localStorage.removeItem(LOCAL_ROOM_KEY);
     }catch{}
+    if(!firebaseDb)return;
+    const playerId=baseRoomPlayerId();
+    if(!playerId.startsWith('guest:'))return;
+    if(roomId)await writeRoomPlayerPointer(playerId,roomId,instanceId);
+    else await deleteRoomPlayerPointer(playerId);
     return;
   }
   if(!uid||!firebaseDb)return;

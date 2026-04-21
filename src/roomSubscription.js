@@ -134,9 +134,6 @@ export function createRoomSubscriptionController(deps){
       liveState.room.playerId=resolvedId;
       liveState.home.mode='room';
       liveState.room={...liveState.room,id:roomId,code:code||String(data.code??''),firebaseInstanceId:resolvedInstanceId,data,unsub,joinOpen:false,selfSeat:deps.roomSelfSeat(data)};
-      if(typeof deps.syncRoomDirectory==='function'){
-        void deps.syncRoomDirectory(roomId,data,resolvedInstanceId).catch(()=>{});
-      }
       const selfEntry=Array.isArray(data.players)
         ?data.players.find((p)=>String(p?.uid||'')===String(resolvedId))
         :null;
