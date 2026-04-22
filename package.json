@@ -26,6 +26,7 @@
     "@capacitor/core": "^7.0.0",
     "@capacitor/haptics": "^7.0.5",
     "firebase-admin": "^13.0.2",
+    "qrcode": "^1.5.4",
     "rg": "^0.0.2"
   },
   "devDependencies": {

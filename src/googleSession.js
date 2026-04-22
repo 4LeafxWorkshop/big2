@@ -13,7 +13,9 @@ export function createGoogleSessionHelpers({
   syncLeaderboardProfile,
   loadActiveRoomPointer,
   refreshLeaderboard,
-  render
+  render,
+  afterSuccessfulSignIn=()=>{},
+  afterSessionReady=()=>{}
 }){
   const HYDRATE_TIMEOUT_MS=5000;
   const HYDRATE_RETRY_MAX=3;
@@ -117,7 +119,10 @@ export function createGoogleSessionHelpers({
         void hydrateProfileBlocking().then(()=>{
           if(state.home.showLeaderboard)refreshLeaderboard(true);
           render();
+          void afterSessionReady();
         });
+      }else{
+        void afterSessionReady();
       }
       return true;
     }catch{
@@ -206,6 +211,7 @@ export function createGoogleSessionHelpers({
       }
       if(state.home.showLeaderboard)refreshLeaderboard(true);
       void loadActiveRoomPointer?.();
+      void afterSuccessfulSignIn();
     }
     render();
   }

@@ -22,6 +22,7 @@ import {renderCenterLastMoves, renderGameActionZone, renderGameLogSheet, renderG
 import {buildCalloutRenderState, buildCongratsOverlayHtml, buildGameAuxRenderState, buildGameShellMarkup, buildOpponentSeatsHtml, buildResultScreenHtml, buildRoomMetaTableHtml, buildSelfRenderState} from './gameRenderPrep.js';
 import {renderConfidentialStamp, renderIntroPanel, renderLeaderboardModal, renderLeaderboardPanel, renderOpponentProfileModal, renderScoreGuideModal} from './modalViews.js';
 import {resolveAvatarSrc} from './avatarProfile.js';
+import QRCode from 'qrcode';
 import {BACK_OPTIONS, CALLOUT_RESPONSE_TEXT, KIND, LANGUAGE_NATIVE_LABEL, LANGUAGE_OPTIONS} from './localeData.js';
 import {I18N} from './i18nData.js';
 import {getScoreGuideText} from './scoreGuideData.js';
@@ -39,7 +40,7 @@ import {createGoogleSessionHelpers} from './googleSession.js';
 import {createOpponentProfileHelpers, resolveOpponentProfileModalState, resolveRoomSeatProfile} from './opponentProfile.js';
 import {createOpponentsEventsBinder} from './opponentsEvents.js';
 import {createProfileSettingsHelpers} from './profileSettings.js';
-import {renderRoomJoinOverlay, renderRoomLobbyOverlay} from './roomView.js';
+import {renderRoomInviteOverlay, renderRoomJoinOverlay, renderRoomLobbyOverlay} from './roomView.js';
 import {createFooterMenuHelpers} from './footerMenu.js';
 import {createIntroGuideHelpers} from './introGuide.js';
 import {createRoomLifecycleController} from './roomLifecycle.js';
@@ -113,6 +114,46 @@ function selectRoomHostCandidate(players,now){
   if(lastSeen&&now-lastSeen>ROOM_HOST_ACTIVE_MS)return null;
   return best;
 }
+function normalizeRoomInviteCode(code){
+  return String(code||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,16);
+}
+function roomInviteUrlFromCode(code){
+  const safe=normalizeRoomInviteCode(code);
+  if(!safe||typeof window==='undefined')return'';
+  try{
+    return new URL(`/join/${encodeURIComponent(safe)}`,window.location.origin).toString();
+  }catch{
+    return `${window.location.origin}/join/${encodeURIComponent(safe)}`;
+  }
+}
+function roomInviteShareTextFromCode(code){
+  const safe=normalizeRoomInviteCode(code);
+  const url=roomInviteUrlFromCode(safe);
+  const template=t('roomInviteShareText');
+  return String(template)
+    .replace(/\{\{code\}\}/g,safe)
+    .replace(/\{\{url\}\}/g,url);
+}
+function roomInviteWhatsappUrlFromCode(code){
+  return`https://wa.me/?text=${encodeURIComponent(roomInviteShareTextFromCode(code))}`;
+}
+function extractRoomInviteCodeFromLocation(){
+  if(typeof window==='undefined')return'';
+  try{
+    const url=new URL(window.location.href);
+    const direct=normalizeRoomInviteCode(url.searchParams.get('join')||url.searchParams.get('room')||url.searchParams.get('code')||'');
+    if(direct)return direct;
+    const parts=String(url.pathname||'').split('/').filter(Boolean);
+    const idx=parts.findIndex((part)=>{
+      const lower=String(part||'').toLowerCase();
+      return lower==='join'||lower==='room'||lower==='invite';
+    });
+    if(idx>=0&&parts[idx+1])return normalizeRoomInviteCode(parts[idx+1]);
+    return'';
+  }catch{
+    return'';
+  }
+}
 function matchGuestPlayerId(roomData){
   if(String(firebaseAuth?.currentUser?.uid??'').trim())return '';
   const players=Array.isArray(roomData?.players)?roomData.players:[];
@@ -179,6 +220,8 @@ function runPopunderAd(){
 }
 let armedPopunderWindow=null;
 let googlePicturePreloadToken=0;
+let roomInviteQrRequestToken=0;
+let roomInviteJoinInFlight=false;
 function preloadGooglePicture(){
   const pic=String(state.home.google?.picture??'').trim();
   state.home.google.pictureLoaded=false;
@@ -213,6 +256,78 @@ function armPopunderForGesture(){
     armedPopunderWindow=null;
   }
 }
+function syncPendingRoomInviteFromLocation(){
+  const code=extractRoomInviteCodeFromLocation();
+  if(!code)return false;
+  state.room.pendingInviteCode=code;
+  state.room.joinOpen=true;
+  return true;
+}
+async function refreshRoomInviteQrDataUrl(force=false){
+  const roomCode=normalizeRoomInviteCode(state.room.code||state.room.pendingInviteCode||'');
+  if(!roomCode){
+    state.room.inviteUrl='';
+    state.room.inviteQrDataUrl='';
+    state.room.inviteQrLoading=false;
+    state.room.inviteQrError='';
+    return;
+  }
+  const inviteUrl=roomInviteUrlFromCode(roomCode);
+  if(!force&&state.room.inviteUrl===inviteUrl&&state.room.inviteQrDataUrl){
+    return;
+  }
+  const requestToken=++roomInviteQrRequestToken;
+  state.room.inviteUrl=inviteUrl;
+  state.room.inviteQrLoading=true;
+  state.room.inviteQrError='';
+  render();
+  try{
+    const dataUrl=await QRCode.toDataURL(inviteUrl,{errorCorrectionLevel:'M',margin:1,width:280,color:{dark:'#111111',light:'#ffffff'}});
+    if(requestToken!==roomInviteQrRequestToken)return;
+    state.room.inviteQrDataUrl=dataUrl;
+  }catch(err){
+    if(requestToken!==roomInviteQrRequestToken)return;
+    console.error('room invite qr generation failed',err);
+    state.room.inviteQrDataUrl='';
+    state.room.inviteQrError=t('roomInviteQrFail');
+  }finally{
+    if(requestToken!==roomInviteQrRequestToken)return;
+    state.room.inviteQrLoading=false;
+    render();
+  }
+}
+async function maybeAutoJoinPendingRoomInvite(){
+  if(roomInviteJoinInFlight)return false;
+  if(!signedInForPlay())return false;
+  if(state.room.id)return false;
+  const code=normalizeRoomInviteCode(state.room.pendingInviteCode||'');
+  if(!code)return false;
+  roomInviteJoinInFlight=true;
+  try{
+    const joined=await joinRoomByCode(code);
+    if(joined)state.room.pendingInviteCode='';
+    return joined;
+  }finally{
+    roomInviteJoinInFlight=false;
+  }
+}
+function renderRoomInvitePanelHtml({
+  roomCode,
+  inviteUrl,
+  inviteMessage,
+  inviteQrDataUrl,
+  inviteQrLoading,
+  inviteQrError,
+  t,
+  esc
+}){
+  const qrHtml=inviteQrLoading
+    ?`<div class="room-invite-placeholder">${t('roomInviteLoading')}</div>`
+    :inviteQrDataUrl
+      ?`<img class="room-invite-qr" src="${inviteQrDataUrl}" alt="${t('roomInviteQr')}"/>`
+      :`<div class="room-invite-placeholder">${t('roomInviteEmpty')}</div>`;
+  return`<div class="room-share-panel"><div class="room-share-head"><div><h3>${t('roomInviteTitle')}</h3><p class="room-share-subtitle">${t('roomInviteSubtitle')}</p></div><button id="room-invite-close" class="secondary room-icon-btn room-close-btn"><span>${t('close')}</span></button></div><div class="room-share-code-row"><span class="room-share-code-label">${t('roomCode')}</span><strong class="room-share-code">${esc(roomCode)}</strong></div><div class="room-share-grid"><div class="room-share-qr-col"><div class="room-share-qr">${qrHtml}</div><button id="room-copy-qr" class="secondary room-share-qr-copy">${t('roomInviteCopyQr')}</button></div><div class="room-share-copy"><div class="room-share-message-box"><div class="room-share-message-label">${t('roomInviteMessageLabel')}</div><div class="room-share-message">${esc(inviteMessage)}</div></div><div class="room-share-link-box"><div class="room-share-link-label">${t('roomInviteLink')}</div><a class="room-share-link" href="${esc(inviteUrl)}" target="_blank" rel="noopener noreferrer">${esc(inviteUrl)}</a><div class="room-share-link-hint">${t('roomInviteQrHint')}</div>${inviteQrError?`<div class="hint room-error">${esc(inviteQrError)}</div>`:''}</div><div class="room-share-actions"><button id="room-share-send" class="primary">${t('roomInviteShare')}</button><button id="room-copy-message" class="secondary">${t('roomInviteCopyMessage')}</button></div></div></div></div>`;
+}
 function schedulePopunderAfterRender(delayMs=250){
   if(APP_CHANNEL==='STORE')return;
   const delay=Math.max(0,Number(delayMs)||0);
@@ -235,7 +350,7 @@ function guardAction(key,windowMs=800){
 }
 
 const app=document.getElementById('app');
-const state={language:'zh-HK',screen:'home',screenBeforeConfig:'home',showRules:false,showLog:false,showLogSheet:false,logTouched:false,showScoreGuide:false,opponentProfileName:'',mottoPeekName:'',selected:new Set(),drag:{id:null,moved:false},playAnimKey:'',autoPassKey:'',score:5000,suggestCost:0,recommendation:null,recommendHint:'',logFab:{x:null,y:null},home:{mode:'solo',name:'玩家',gender:'male',avatarChoice:'male',aiDifficulty:'normal',backColor:'red',theme:'ocean',showIntro:false,showLeaderboard:false,showMoreSettings:false,google:{signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',pictureLoaded:false,gender:'',profileMissing:false,hydrating:false},leaderboard:{rows:[],sort:'totalDelta',period:'all',limit:20},activeRooms:{rows:[],loading:false,loadedAt:0,error:''}},room:{id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:false,error:'',started:false,unsub:null,selfSeat:-1,recordedGameKey:'',lastMoveKey:'',playerId:'',pendingStart:false,lastResultPlayers:null},sessionId:'',solo:{players:[],botNames:[],totals:[5000,5000,5000,5000],currentSeat:0,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',history:[],aiDifficulty:'normal',lastCardBreach:null},emote:{open:false,active:null},serviceBell:{foodCallout:null}};
+const state={language:'zh-HK',screen:'home',screenBeforeConfig:'home',showRules:false,showLog:false,showLogSheet:false,logTouched:false,showScoreGuide:false,opponentProfileName:'',mottoPeekName:'',selected:new Set(),drag:{id:null,moved:false},playAnimKey:'',autoPassKey:'',score:5000,suggestCost:0,recommendation:null,recommendHint:'',logFab:{x:null,y:null},home:{mode:'solo',name:'玩家',gender:'male',avatarChoice:'male',aiDifficulty:'normal',backColor:'red',theme:'ocean',showIntro:false,showLeaderboard:false,showMoreSettings:false,google:{signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',pictureLoaded:false,gender:'',profileMissing:false,hydrating:false},leaderboard:{rows:[],sort:'totalDelta',period:'all',limit:20},activeRooms:{rows:[],loading:false,loadedAt:0,error:''}},room:{id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:false,inviteOpen:false,error:'',started:false,unsub:null,selfSeat:-1,recordedGameKey:'',lastMoveKey:'',playerId:'',pendingStart:false,lastResultPlayers:null,inviteUrl:'',inviteQrDataUrl:'',inviteQrLoading:false,inviteQrError:'',pendingInviteCode:''},sessionId:'',solo:{players:[],botNames:[],totals:[5000,5000,5000,5000],currentSeat:0,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',history:[],aiDifficulty:'normal',lastCardBreach:null},emote:{open:false,active:null},serviceBell:{foodCallout:null}};
 const {
   EMOTE_STICKERS,
   cardImagePath,
@@ -1464,6 +1579,7 @@ const roomActionsController=createRoomActionsController({
   isRoomPlayerHuman,
   nextRoomIdleExpiry,
   normalizeRoomTotals,
+  refreshRoomInviteQrDataUrl,
   render,
   setRoomError,
   roomPlayerIds,
@@ -1497,6 +1613,7 @@ const roomSubscriptionController=createRoomSubscriptionController({
   maybeRunRoomAi,
   primaryFirebaseInstanceId,
   readRoomDirectory,
+  refreshRoomInviteQrDataUrl,
   render,
   roomPlayerIds,
   roomLifecycleExpired,
@@ -5003,6 +5120,9 @@ function renderHome(){
   const roomPendingHint='';
   const roomTitle=t('roomTableTitle');
   const roomLobbyCountdown=(inRoom&&roomStatus!=='playing'&&state.room.data)?roomCountdownText(state.room.data):'';
+  const roomInviteCode=normalizeRoomInviteCode(state.room.code||state.room.pendingInviteCode||'');
+  const roomInviteUrl=roomInviteUrlFromCode(roomInviteCode);
+  const roomInviteMessage=roomInviteShareTextFromCode(roomInviteCode);
   const roomLobbyHtml=renderRoomLobbyOverlay({
     visible:inRoom&&roomStatus!=='playing',
     roomTitle,
@@ -5026,11 +5146,26 @@ function renderHome(){
     activeRoomsLoading:Boolean(activeRoomsState?.loading),
     hiddenCount,
     roomErrorHtml,
+    roomCodeValue:state.room.pendingInviteCode,
     t,
     esc,
     isRoomPlayerHuman,
     authPictureUrlFrom,
     avatarDataUri
+  });
+  const roomInviteModal=renderRoomInviteOverlay({
+    visible:inRoom&&roomStatus!=='playing'&&state.room.inviteOpen,
+    invitePanelHtml:renderRoomInvitePanelHtml({
+      roomCode:roomInviteCode,
+      inviteUrl:roomInviteUrl,
+      inviteMessage:roomInviteMessage,
+    inviteQrDataUrl:state.room.inviteQrDataUrl,
+    inviteQrLoading:state.room.inviteQrLoading,
+    inviteQrError:state.room.inviteQrError,
+    whatsappUrl:roomInviteWhatsappUrlFromCode(roomInviteCode),
+    t,
+    esc
+  })
   });
   const soloBtnCore=`<button id="solo-start" class="primary royal-start-btn" ${signedIn?'':'disabled'}>${t('solo')}</button>`;
   const soloBtnHtml=signedIn
@@ -5058,6 +5193,7 @@ function renderHome(){
     roomButtonsHtml,
     mainPageLegalMiniHtml:mainPageLegalMiniHtml(),
     roomLobbyHtml,
+    roomInviteModal,
     roomJoinModal,
     introPanelHtml:state.home.showIntro?introPanelHtml():'',
     leaderboardModalHtml:state.home.showLeaderboard?leaderboardModalHtml():'',
@@ -5107,6 +5243,10 @@ function renderHome(){
     startSoloGame,
     armPopunderForGesture,
     schedulePopunderAfterRender,
+    refreshRoomInviteQrDataUrl,
+    roomInviteUrlFromCode,
+    roomInviteShareTextFromCode,
+    roomInviteWhatsappUrlFromCode,
     legalMiniCopy
   });
   onGoogleScriptLoaded(renderGoogleInline);

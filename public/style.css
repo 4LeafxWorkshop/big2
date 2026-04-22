@@ -1388,6 +1388,13 @@ body[data-screen='home'] .home-wrap {
   place-items: center;
   padding: 10px;
 }
+.room-invite-overlay .room-backdrop {
+  position: absolute;
+  inset: 0;
+}
+.room-invite-overlay .room-card {
+  z-index: 1;
+}
 .room-card {
   width: min(520px, calc(100vw - 24px));
   border-radius: calc(var(--ui-radius-lg) + 2px);
@@ -1453,6 +1460,7 @@ body[data-screen='home'] .home-wrap {
   gap: 8px;
   flex-wrap: wrap;
   font-size: .9rem;
+  white-space: nowrap;
 }
 .room-code strong {
   letter-spacing: .24em;
@@ -1492,6 +1500,140 @@ body[data-screen='home'] .home-wrap {
 }
 .room-id-center button {
   letter-spacing: normal;
+}
+.room-share-panel {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.12);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(82, 210, 115, .1), transparent 30%),
+    rgba(7, 20, 30, .58);
+}
+.room-invite-card {
+  width: min(600px, calc(100vw - 24px));
+}
+.room-share-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+.room-share-head h3 {
+  margin: 0;
+  font-size: 1.02rem;
+}
+.room-share-subtitle {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: .84rem;
+}
+.room-share-code-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(255,255,255,.08);
+}
+.room-share-code-label,
+.room-share-message-label,
+.room-share-link-label {
+  font-size: .78rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+.room-share-code {
+  font-size: 1.02rem;
+  letter-spacing: .18em;
+  color: #f6e0a5;
+  white-space: nowrap;
+}
+.room-share-grid {
+  display: grid;
+  grid-template-columns: minmax(190px, 220px) minmax(0, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.room-share-qr-col {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  align-content: start;
+}
+.room-share-qr {
+  display: grid;
+  place-items: center;
+  padding: 10px;
+  border-radius: 14px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.08);
+  min-height: 240px;
+}
+.room-invite-qr {
+  display: block;
+  width: 100%;
+  max-width: 220px;
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  background: #fff;
+}
+.room-share-qr-copy {
+  min-width: 0;
+}
+.room-invite-placeholder {
+  width: 100%;
+  min-height: 120px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: var(--muted);
+  font-size: .86rem;
+  padding: 12px;
+}
+.room-share-copy {
+  display: grid;
+  gap: 10px;
+}
+.room-share-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.room-share-qr-copy {
+  display: block;
+}
+.room-share-qr-copy button {
+  width: 100%;
+}
+.room-share-message-box,
+.room-share-link-box {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.08);
+}
+.room-share-message {
+  color: var(--text);
+  line-height: 1.4;
+  font-size: .92rem;
+}
+.room-share-link {
+  overflow-wrap: anywhere;
+  color: #9fd7ff;
+  word-break: break-word;
+  font-size: .9rem;
+}
+.room-share-link-hint {
+  color: var(--muted);
+  font-size: .78rem;
 }
 .room-expiry-row {
   display: inline-flex;
@@ -7178,6 +7320,34 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
   }
   .room-code {
     letter-spacing: .26em;
+  }
+  .room-share-panel {
+    padding: 10px;
+    gap: 10px;
+  }
+  .room-invite-card {
+    width: min(600px, calc(100vw - 20px));
+  }
+  .room-share-head {
+    flex-wrap: wrap;
+  }
+  .room-share-grid {
+    grid-template-columns: 1fr;
+  }
+  .room-share-qr-col {
+    justify-items: stretch;
+  }
+  .room-share-qr {
+    min-height: 0;
+  }
+  .room-invite-qr {
+    max-width: 170px;
+  }
+  .room-share-actions {
+    gap: 6px;
+  }
+  .room-share-code-row {
+    padding: 7px 9px;
   }
   .room-active-block {
     padding: 8px;

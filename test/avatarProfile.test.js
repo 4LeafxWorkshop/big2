@@ -52,7 +52,7 @@ test('avatarGenderClass maps female and defaults male', ()=>{
 
 test('avatarDataUri uses bot override image when available', ()=>{
   const helpers=createHelpers();
-  assert.match(helpers.avatarDataUri('志明','#7aaed8','male',true),/^https:\/\/avataaars\.io\//);
+  assert.equal(helpers.avatarDataUri('志明','#7aaed8','male',true),'/base/avatars/avatar-bot-志明.png');
 });
 
 test('avatarDataUri builds dicebear url for non-bot avatars', ()=>{

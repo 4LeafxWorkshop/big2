@@ -45,6 +45,9 @@ export function createRoomActionsController(deps){
       }
       const uid=deps.baseRoomPlayerId();
       state.room.playerId=uid;
+      state.room.code=code;
+      state.room.pendingInviteCode='';
+      state.room.inviteOpen=false;
       const name=String(state.home.name||'Player').slice(0,32);
       const triedInstanceIds=new Set();
       let firstInstanceId='';
@@ -89,6 +92,7 @@ export function createRoomActionsController(deps){
             throw err;
           }
           deps.subscribeRoom(ref.id,code,firebaseInstanceId,roomDb);
+          void deps.refreshRoomInviteQrDataUrl?.(true);
           void deps.updateActiveRoomPointer(ref.id,firebaseInstanceId);
           created=true;
           break;
@@ -144,6 +148,9 @@ export function createRoomActionsController(deps){
         if(state.room.id){
           const same=String(state.room.id)===String(doc.id);
           if(same){
+            state.room.code=code;
+            state.room.pendingInviteCode='';
+            state.room.inviteOpen=false;
             deps.subscribeRoom(doc.id,code,doc.instanceId,roomDb);
           void deps.updateActiveRoomPointer(doc.id,doc.instanceId||'');
             state.room.joinOpen=false;
@@ -169,7 +176,11 @@ export function createRoomActionsController(deps){
         return;
       }
       if(gate.already){
+        state.room.code=code;
+        state.room.pendingInviteCode='';
+        state.room.inviteOpen=false;
         deps.subscribeRoom(doc.id,code,doc.instanceId,roomDb);
+        void deps.refreshRoomInviteQrDataUrl?.(true);
         void deps.updateActiveRoomPointer(doc.id,doc.instanceId||'');
         state.room.joinOpen=false;
         deps.render();
@@ -177,6 +188,9 @@ export function createRoomActionsController(deps){
       }
       const uid=deps.baseRoomPlayerId();
       state.room.playerId=uid;
+      state.room.code=code;
+      state.room.pendingInviteCode='';
+      state.room.inviteOpen=false;
       await roomDb.runTransaction(async(tx)=>{
         const snap=await tx.get(doc.ref);
         if(!snap.exists)throw new Error('room missing');
@@ -268,6 +282,7 @@ export function createRoomActionsController(deps){
         tx.update(doc.ref,updates);
       });
       deps.subscribeRoom(doc.id,code,doc.instanceId,roomDb);
+      void deps.refreshRoomInviteQrDataUrl?.(true);
       void deps.updateActiveRoomPointer(doc.id,doc.instanceId||'');
       state.room.joinOpen=false;
       deps.render();

@@ -36,6 +36,10 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
     startSoloGame,
     armPopunderForGesture=()=>{},
     schedulePopunderAfterRender,
+    refreshRoomInviteQrDataUrl=()=>{},
+    roomInviteUrlFromCode,
+    roomInviteShareTextFromCode,
+    roomInviteWhatsappUrlFromCode,
     legalMiniCopy
   }){
     const doc=documentRef();
@@ -244,6 +248,70 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
 
     doc.getElementById('room-copy')?.addEventListener('click',async()=>{
       try{await navigator.clipboard?.writeText?.(String(state.room.code||''));}catch{}
+    });
+    doc.getElementById('room-share-invite')?.addEventListener('click',async()=>{
+      if(!state.room.code&& !state.room.pendingInviteCode)return;
+      state.room.inviteOpen=true;
+      render();
+      void refreshRoomInviteQrDataUrl(true);
+    });
+    doc.getElementById('room-invite-close')?.addEventListener('click',()=>{
+      state.room.inviteOpen=false;
+      render();
+    });
+    doc.getElementById('room-invite-backdrop')?.addEventListener('click',()=>{
+      state.room.inviteOpen=false;
+      render();
+    });
+    doc.getElementById('room-share-send')?.addEventListener('click',async()=>{
+      const code=String(state.room.code||state.room.pendingInviteCode||'').trim();
+      if(!code)return;
+      const inviteUrl=roomInviteUrlFromCode(code);
+      const inviteMessage=roomInviteShareTextFromCode(code);
+      if(navigator.share){
+        try{
+          await navigator.share({
+            title:t('roomInviteTitle'),
+            text:inviteMessage,
+            url:inviteUrl
+          });
+          return;
+        }catch{}
+      }
+      const whatsappUrl=roomInviteWhatsappUrlFromCode?.(code)||'';
+      if(whatsappUrl){
+        try{
+          win.open(whatsappUrl,'_blank','noopener,noreferrer');
+          return;
+        }catch{}
+      }
+      try{
+        await navigator.clipboard?.writeText?.(inviteMessage);
+      }catch{}
+    });
+    doc.getElementById('room-copy-message')?.addEventListener('click',async()=>{
+      const code=String(state.room.code||state.room.pendingInviteCode||'').trim();
+      if(!code)return;
+      try{
+        await navigator.clipboard?.writeText?.(roomInviteShareTextFromCode(code));
+      }catch{}
+    });
+    doc.getElementById('room-copy-qr')?.addEventListener('click',async()=>{
+      const code=String(state.room.code||state.room.pendingInviteCode||'').trim();
+      if(!code)return;
+      const qrDataUrl=String(state.room.inviteQrDataUrl||'').trim();
+      const inviteUrl=roomInviteUrlFromCode(code);
+      if(qrDataUrl&&navigator.clipboard?.write&&window.ClipboardItem){
+        try{
+          const response=await fetch(qrDataUrl);
+          const blob=await response.blob();
+          await navigator.clipboard.write([new ClipboardItem({[blob.type||'image/png']:blob})]);
+          return;
+        }catch{}
+      }
+      try{
+        await navigator.clipboard?.writeText?.(inviteUrl);
+      }catch{}
     });
     doc.querySelectorAll('[data-room-expiry-reset]').forEach((btn)=>btn.addEventListener('click',async()=>{
       await resetRoomExpiryTo60s();

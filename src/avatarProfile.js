@@ -64,7 +64,11 @@ export function createAvatarProfileHelpers(deps){
     const g=String(gender??'male')==='female'?'female':'male';
     const baseName=String(name??'player')||'player';
     const overrideImage=isBot?AVATAR_IMAGE_BY_BOT_NAME[baseName]??'':'';
-    if(overrideImage)return overrideImage;
+    if(overrideImage){
+      return /^https?:\/\//i.test(overrideImage)||/^data:|^blob:/i.test(overrideImage)
+        ?overrideImage
+        :withBase(overrideImage);
+    }
     const variant=AVATAR_VARIANT_BY_NAME[baseName]??'';
     const seedText=`${g}-${baseName}${variant?`-${variant}`:''}`;
     const seedHash=hashNameSeed(seedText);
