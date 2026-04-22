@@ -68,22 +68,28 @@ export function createRoomLifecycleController(deps){
         const data=snap.data()??{};
         const players=Array.isArray(data.players)?[...data.players]:[];
         const remaining=players.filter((p)=>String(p.uid)!==uid);
+        const now=Date.now();
+        const status=String(data.status??'lobby');
         const leaving=players.find((p)=>String(p.uid)===uid);
         const hostLeaving=String(data.hostId)===uid;
-        const status=String(data.status??'lobby');
         if(!remaining.length){
           tx.delete(ref);
           shouldDeleteDirectory=true;
           return;
         }
-        const remainingHumans=remaining.filter((p)=>String(p.uid||'').startsWith('uid:')||String(p.uid||'').startsWith('guest:'));
+        const remainingHumans=remaining.filter((p)=>deps.isRoomPlayerHuman(p));
         if(!remainingHumans.length){
           tx.delete(ref);
           shouldDeleteDirectory=true;
           return;
         }
-        const hostUpdate=hostLeaving?{hostId:String(remainingHumans[0]?.uid??remaining[0]?.uid??''),hostName:String(remainingHumans[0]?.name??remaining[0]?.name??'')}:{};
-        const now=Date.now();
+        const activeHumans=remainingHumans.filter((p)=>deps.isRoomPlayerActive(p,status,now));
+        if(!activeHumans.length){
+          tx.delete(ref);
+          shouldDeleteDirectory=true;
+          return;
+        }
+        const hostUpdate=hostLeaving?{hostId:String(remainingHumans[0]?.uid??remaining[0]?.uid??''),hostName:String(remainingHumans[0]?.name??remaining[0]?.name??'')}:{}; 
         if(status==='playing'&&data.game&&leaving&&Number.isFinite(Number(leaving.seat))){
           const game=deps.cloneRoomGame(data.game);
           const seat=Number(leaving.seat);

@@ -104,6 +104,39 @@ function isRoomPlayerHuman(entry){
   if(uid.startsWith('uid:')||uid.startsWith('guest:'))return true;
   return false;
 }
+function roomHumanPlayers(roomData){
+  const players=Array.isArray(roomData?.players)?roomData.players:[];
+  return players.filter((entry)=>isRoomPlayerHuman(entry));
+}
+function roomActiveHumanPlayers(roomData,now=Date.now()){
+  const status=String(roomData?.status??'lobby');
+  return roomHumanPlayers(roomData).filter((entry)=>isRoomPlayerActive(entry,status,now));
+}
+function roomShouldAutoDelete(roomData,now=Date.now()){
+  return roomActiveHumanPlayers(roomData,now).length===0;
+}
+async function deleteRoomIfDead(roomDb,roomId,{directoryId=roomId}={}){
+  if(!roomDb||!roomId)return false;
+  const ref=roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(roomId);
+  let deleted=false;
+  try{
+    await roomDb.runTransaction(async(tx)=>{
+      const snap=await tx.get(ref);
+      if(!snap.exists){
+        deleted=true;
+        return;
+      }
+      const data=snap.data()??{};
+      if(!roomShouldAutoDelete(data,Date.now()))return;
+      tx.delete(ref);
+      deleted=true;
+    });
+  }catch{
+    return false;
+  }
+  if(deleted)await deleteRoomDirectory(directoryId);
+  return deleted;
+}
 function selectRoomHostCandidate(players,now){
   const humans=players.filter((p)=>isRoomPlayerHuman(p));
   if(!humans.length)return null;
@@ -957,6 +990,8 @@ function saveLeaderboardStore(store){
   runtimeProfileStore.players=store.players&&typeof store.players==='object'?store.players:{};
 }
 const LOCAL_ROOM_KEY='big2.currentRoomId';
+const FIREBASE_INSTANCES_CACHE_KEY='big2.firebaseInstancesCache';
+const FIREBASE_INSTANCES_CACHE_TTL_MS=6*60*60*1000;
 // Keep room identity helpers early: profile/settings wiring reads currentRoomPlayerId during init.
 const roomIdentityHelpers=createRoomIdentityHelpers({
   getState:()=>state,
@@ -1176,7 +1211,21 @@ function deriveFirebaseInstanceConfig(instance){
 }
 async function loadFirebaseInstances(force=false){
   if(!initFirebaseIfReady())return[];
-  if(firebaseInstancesCache&&!force)return firebaseInstancesCache;
+  if(!force&&firebaseInstancesCache)return firebaseInstancesCache;
+  if(!force){
+    try{
+      const raw=localStorage.getItem(FIREBASE_INSTANCES_CACHE_KEY);
+      if(raw){
+        const parsed=JSON.parse(raw);
+        const cachedAt=Number(parsed?.cachedAt)||0;
+        const rows=Array.isArray(parsed?.rows)?parsed.rows:[];
+        if(cachedAt>0&&(Date.now()-cachedAt)<=FIREBASE_INSTANCES_CACHE_TTL_MS&&rows.length){
+          firebaseInstancesCache=rows;
+          return firebaseInstancesCache;
+        }
+      }
+    }catch{}
+  }
   try{
     const snap=await firebaseDb.collection(FIRESTORE_FIREBASE_INSTANCES_COLLECTION).get();
     const rows=snap.docs.map((doc)=>({
@@ -1210,6 +1259,12 @@ async function loadFirebaseInstances(force=false){
       });
     }
     firebaseInstancesCache=out;
+    try{
+      localStorage.setItem(FIREBASE_INSTANCES_CACHE_KEY,JSON.stringify({
+        cachedAt:Date.now(),
+        rows:out
+      }));
+    }catch{}
     return out;
   }catch{
     const primaryId=primaryFirebaseInstanceId();
@@ -1221,6 +1276,14 @@ async function loadFirebaseInstances(force=false){
       apiKey:String(FIREBASE_CONFIG.apiKey||'').trim(),
       roomEnabled:PRIMARY_FIREBASE_ROOM_ENABLED
     }]:[];
+    try{
+      if(firebaseInstancesCache.length){
+        localStorage.setItem(FIREBASE_INSTANCES_CACHE_KEY,JSON.stringify({
+          cachedAt:Date.now(),
+          rows:firebaseInstancesCache
+        }));
+      }
+    }catch{}
     return firebaseInstancesCache;
   }
 }
@@ -1513,6 +1576,8 @@ const roomLifecycleController=createRoomLifecycleController({
   deleteRoomDirectory,
   getRoomPresenceTimer:()=>roomPresenceTimer,
   getState:()=>state,
+  isRoomPlayerActive,
+  isRoomPlayerHuman,
   loadActiveRooms,
   render,
   roomLeaveLogText:(name)=>t('roomLeaveLog').replace('{{name}}',name),
@@ -1764,14 +1829,22 @@ async function dropSelfFromRoom(roomDoc,playerId){
     const data=snap.data()??{};
     const players=Array.isArray(data.players)?[...data.players]:[];
     const remaining=players.filter((p)=>String(p.uid)!==String(playerId));
+    const now=Date.now();
+    const status=String(data.status??'lobby');
     if(remaining.length===players.length)return;
     if(!remaining.length){
       tx.delete(ref);
       shouldDeleteDirectory=true;
       return;
     }
-    const remainingHumans=remaining.filter((p)=>String(p.uid||'').startsWith('uid:')||String(p.uid||'').startsWith('guest:'));
+    const remainingHumans=remaining.filter((p)=>isRoomPlayerHuman(p));
     if(!remainingHumans.length){
+      tx.delete(ref);
+      shouldDeleteDirectory=true;
+      return;
+    }
+    const activeHumans=remainingHumans.filter((p)=>isRoomPlayerActive(p,status,now));
+    if(!activeHumans.length){
       tx.delete(ref);
       shouldDeleteDirectory=true;
       return;
@@ -1780,7 +1853,6 @@ async function dropSelfFromRoom(roomDoc,playerId){
     const hostUpdate=hostLeaving
       ?{hostId:String(remainingHumans[0]?.uid??remaining[0]?.uid??''),hostName:String(remainingHumans[0]?.name??remaining[0]?.name??'')}
       :{};
-    const now=Date.now();
     tx.update(ref,{players:remaining,playerIds:roomPlayerIds(remaining),updatedAt:now,...hostUpdate});
   });
   if(shouldDeleteDirectory)await deleteRoomDirectory(ref.id);
@@ -1944,6 +2016,11 @@ async function loadActiveRoomsFromDirectoryDocs(directoryDocs){
       continue;
     }
     const liveData=liveEntry.snap.data()??{};
+    if(roomShouldAutoDelete(liveData,now)){
+      void deleteRoomIfDead(liveEntry.snap.ref.firestore,roomId,{directoryId:doc.id});
+      hiddenRooms+=1;
+      continue;
+    }
     const row=buildActiveRoomRow({
       roomId,
       roomData:liveData,
@@ -2758,7 +2835,6 @@ function bootFirebase(attempt=0){
     if(signedInWithEmail()){
       void hydrateProfileBlocking().then(()=>{if(state.home.showLeaderboard)refreshLeaderboard(true);render();});
     }
-    refreshLeaderboard(true);
     void loadActiveRoomPointer();
     return;
   }

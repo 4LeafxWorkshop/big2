@@ -47,6 +47,15 @@ function createDeps(state,overrides={}){
     deleteRoomDirectory:async()=>{},
     getRoomPresenceTimer(){return null;},
     getState(){return state;},
+    isRoomPlayerActive(entry,status,now){
+      const lastSeen=Number(entry?.lastSeen)||0;
+      if(!lastSeen)return status==='playing';
+      return now-lastSeen<300000;
+    },
+    isRoomPlayerHuman(entry){
+      const uid=String(entry?.uid||'');
+      return uid.startsWith('uid:')||uid.startsWith('guest:');
+    },
     loadActiveRooms:async()=>{},
     render(){calls.render+=1;},
     roomLeaveLogText:(name)=>`${name} left`,
@@ -83,6 +92,37 @@ function createPlayingRoomDb(docData,updates){
         },
         update(ref,payload){
           updates.push({ref,payload});
+        }
+      };
+      await fn(tx);
+    }
+  };
+}
+
+function createRoomDbWithDelete(docData,actions){
+  return{
+    collection(name){
+      assert.equal(name,'big2Rooms');
+      return{
+        doc(id){
+          assert.equal(id,'room-1');
+          return{id};
+        }
+      };
+    },
+    async runTransaction(fn){
+      const tx={
+        async get(){
+          return{
+            exists:true,
+            data(){return structuredClone(docData);}
+          };
+        },
+        delete(ref){
+          actions.push({type:'delete',ref});
+        },
+        update(ref,payload){
+          actions.push({type:'update',ref,payload});
         }
       };
       await fn(tx);
@@ -188,4 +228,27 @@ test('leaveRoom in a playing room transfers the host when others remain', async(
   assert.equal(updates[0].payload.players[0].uid,'guest:456');
   assert.equal(updates[0].payload.game.players[0].isHuman,false);
   assert.match(updates[0].payload.game.players[0].uid,/^bot:0:/);
+});
+
+test('leaveRoom deletes the room when no active humans remain', async()=>{
+  const state=createBaseState();
+  state.room.data={
+    status:'lobby',
+    hostId:'uid:123',
+    hostName:'Host',
+    players:[
+      {uid:'uid:123',name:'Host',gender:'male',seat:0,lastSeen:Date.now()},
+      {uid:'guest:456',name:'Guest',gender:'female',seat:1,lastSeen:Date.now()-600000}
+    ]
+  };
+  const actions=[];
+  const deletedDirectories=[];
+  const deps=createDeps(state,{
+    currentRoomDb(){return createRoomDbWithDelete(state.room.data,actions);},
+    deleteRoomDirectory:async(id)=>{deletedDirectories.push(id);}
+  });
+  await deps.controller.leaveRoom(false);
+  assert.equal(actions.length,1);
+  assert.equal(actions[0].type,'delete');
+  assert.deepEqual(deletedDirectories,['room-1']);
 });
