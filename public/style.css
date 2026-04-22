@@ -8171,10 +8171,10 @@ body[data-screen='game'] .table-center-grid-wrap {
 }
 body[data-screen='game'] .table-turn-compass {
   position: absolute;
-  right: 12px;
-  bottom: 12px;
-  width: 40px;
-  height: 40px;
+  right: 18px;
+  bottom: 18px;
+  width: 58px;
+  height: 58px;
   z-index: 5;
   pointer-events: none;
 }
@@ -8182,58 +8182,18 @@ body[data-screen='game'] .table-turn-compass-ring {
   position: relative;
   width: 100%;
   height: 100%;
-  display: block;
-  border-radius: 50%;
-  border: 2px solid rgba(255,255,255,.24);
-  background: transparent;
-  box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,.08),
-    0 8px 18px rgba(0,0,0,.22);
+  display: grid;
+  place-items: center;
+  color: #ffd166;
+  filter: drop-shadow(0 8px 18px rgba(0,0,0,.22));
 }
 body[data-screen='game'] .table-turn-compass .table-turn-pointer {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  width: 3px;
-  height: 12px;
-  transform-origin: 50% 100%;
-  transform: translate(-50%, -100%) rotate(var(--turn-angle, 0deg));
-  background: linear-gradient(180deg, color-mix(in srgb, var(--turn-color, #ffd166) 70%, white 30%), color-mix(in srgb, var(--turn-color, #ffd166) 56%, black 44%));
-  border-radius: 999px 999px 2px 2px;
-  box-shadow: 0 0 4px color-mix(in srgb, var(--turn-color, #ffd166) 20%, transparent);
-  opacity: .78;
-}
-body[data-screen='game'] .table-turn-compass .table-turn-pointer::before {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: -5px;
-  transform: translateX(-50%);
-  border-left: 3px solid transparent;
-  border-right: 3px solid transparent;
-  border-bottom: 5px solid color-mix(in srgb, var(--turn-color, #ffd166) 70%, white 30%);
-}
-body[data-screen='game'] .table-turn-compass .table-turn-pointer::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  bottom: -2px;
-  width: 5px;
-  height: 5px;
-  transform: translateX(-50%);
-  border-radius: 999px;
-  background: rgba(7, 28, 19, .62);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.06);
-}
-body[data-screen='game'] .table-turn-compass[data-active-seat='south'] { --turn-angle: 180deg; }
-body[data-screen='game'] .table-turn-compass[data-active-seat='east'] { --turn-angle: 90deg; }
-body[data-screen='game'] .table-turn-compass[data-active-seat='north'] { --turn-angle: 0deg; }
-body[data-screen='game'] .table-turn-compass[data-active-seat='west'] { --turn-angle: 270deg; }
-body[data-screen='game'] .table-turn-compass[data-active-seat='south'] .table-turn-pointer,
-body[data-screen='game'] .table-turn-compass[data-active-seat='east'] .table-turn-pointer,
-body[data-screen='game'] .table-turn-compass[data-active-seat='north'] .table-turn-pointer,
-body[data-screen='game'] .table-turn-compass[data-active-seat='west'] .table-turn-pointer {
-  --turn-color: #d9bf6a;
+  width: 58px;
+  height: 58px;
+  display: block;
+  color: #d8d8d8;
+  filter: drop-shadow(0 0 4px color-mix(in srgb, #d8d8d8 26%, transparent));
+  opacity: .4;
 }
 
 body[data-screen='game'][data-orientation='portrait'] .table {
@@ -10763,11 +10723,12 @@ body[data-screen='game'] .seat.east.active {
     0 2px 10px rgba(0, 0, 0, .24) !important;
 }
 body[data-screen='game'] .action-strip.active {
-  background: inherit !important;
-}
-body[data-screen='game'] .action-strip.active {
-  box-shadow: none !important;
+  border: 1px solid rgba(255,255,255,.12) !important;
   outline: 0 !important;
+  outline-offset: 0 !important;
+  background: var(--panel-2) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, .08) !important;
 }
 
 body[data-screen='game'] .seat.west.active .seat-section,
