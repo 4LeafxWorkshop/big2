@@ -968,7 +968,6 @@ function leaderboardPanelHtml(){
   return renderLeaderboardPanel({
     leaderboard:state.home.leaderboard,
     botProfiles:[...BOT_PROFILES.zh,...BOT_PROFILES.en],
-    showBotMigrationAction:signedInWithEmail(),
     authPictureUrlFrom,
     avatarDataUri,
     esc,

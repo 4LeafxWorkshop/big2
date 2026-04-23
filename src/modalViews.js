@@ -40,7 +40,6 @@ export function renderLeaderboardPanel(params){
   const {
     leaderboard,
     botProfiles,
-    showBotMigrationAction=false,
     authPictureUrlFrom,
     avatarDataUri,
     esc,
@@ -96,8 +95,7 @@ export function renderLeaderboardPanel(params){
     const avatarFallbackAttr=isBotRow?` data-fallback-src="${esc(avatarFallbackSrc)}" onerror="this.onerror=null;this.src=this.dataset.fallbackSrc"`:'';
     return`<div class="lb-row"><div class="lb-rank">${medal?`<span class="lb-badge ${medalClass}" aria-hidden="true">${medal}</span>`:`#${r.rank??'-'}`}</div><div class="lb-main"><div class="lb-name-line"><div class="lb-name-pack"><span class="${avatarClass}"><img src="${avatarSrc}" alt="${esc(r.name)}"${botNameAttr}${avatarFallbackAttr}/></span><div class="lb-name">${esc(r.name)}</div></div><div class="lb-stat">${r.totalScore}</div></div><div class="lb-subline"><span>${t('score')}: ${r.totalScore} · ${t('lbWins')}: ${r.wins} · ${r.games} ${t('games')} · ${t('lbWR')} ${formatLeaderboardPct(r.winRate)}</span><span>${t('lbUpdated')}: ${formatLeaderboardDateTime(r.updatedAt,language)}</span></div></div></div>`;
   }).join(''):`<div class="hint">${t('lbNoData')}</div>`;
-  const migrationButton=showBotMigrationAction?`<button id="lb-migrate-bots" class="secondary" style="margin-left:auto;">${t('lbMigrateBots')}</button>`:'';
-  return`<section class="lobby-panel leaderboard-panel"><div class="control-row lb-head"><label class="field"><span>${t('lbSort')}</span><select id="lb-sort"><option value="totalDelta" ${leaderboard.sort==='totalDelta'?'selected':''}>${t('lbTotalDelta')}</option><option value="wins" ${leaderboard.sort==='wins'?'selected':''}>${t('lbWins')}</option><option value="games" ${leaderboard.sort==='games'?'selected':''}>${t('lbGames')}</option><option value="winRate" ${leaderboard.sort==='winRate'?'selected':''}>${t('lbWinRate')}</option><option value="avgDelta" ${leaderboard.sort==='avgDelta'?'selected':''}>${t('lbAvgDelta')}</option></select></label><label class="field"><span>${t('lbPeriod')}</span><select id="lb-period"><option value="all" ${leaderboard.period==='all'?'selected':''}>${t('lbAll')}</option><option value="7d" ${leaderboard.period==='7d'?'selected':''}>${t('lb7d')}</option><option value="30d" ${leaderboard.period==='30d'?'selected':''}>${t('lb30d')}</option></select></label>${migrationButton}</div><div class="lb-list">${rowHtml}</div></section>`;
+  return`<section class="lobby-panel leaderboard-panel"><div class="control-row lb-head"><label class="field"><span>${t('lbSort')}</span><select id="lb-sort"><option value="totalDelta" ${leaderboard.sort==='totalDelta'?'selected':''}>${t('lbTotalDelta')}</option><option value="wins" ${leaderboard.sort==='wins'?'selected':''}>${t('lbWins')}</option><option value="games" ${leaderboard.sort==='games'?'selected':''}>${t('lbGames')}</option><option value="winRate" ${leaderboard.sort==='winRate'?'selected':''}>${t('lbWinRate')}</option><option value="avgDelta" ${leaderboard.sort==='avgDelta'?'selected':''}>${t('lbAvgDelta')}</option></select></label><label class="field"><span>${t('lbPeriod')}</span><select id="lb-period"><option value="all" ${leaderboard.period==='all'?'selected':''}>${t('lbAll')}</option><option value="7d" ${leaderboard.period==='7d'?'selected':''}>${t('lb7d')}</option><option value="30d" ${leaderboard.period==='30d'?'selected':''}>${t('lb30d')}</option></select></label></div><div class="lb-list">${rowHtml}</div></section>`;
 }
 
 export function renderLeaderboardModal(params){

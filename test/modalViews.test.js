@@ -132,25 +132,6 @@ test('renderLeaderboardPanel adds fallback source for bot avatars', ()=>{
   assert.match(html,/onerror="this.onerror=null;this.src=this.dataset.fallbackSrc"/);
 });
 
-test('renderLeaderboardPanel shows bot migration action when enabled', ()=>{
-  const html=renderLeaderboardPanel({
-    leaderboard:{
-      rows:[],
-      sort:'totalDelta',
-      period:'all'
-    },
-    botProfiles:[],
-    showBotMigrationAction:true,
-    authPictureUrlFrom:(value)=>`pic:${value}`,
-    avatarDataUri:(name)=>`avatar:${name}`,
-    esc:(value)=>String(value),
-    t:(key)=>key,
-    language:'en'
-  });
-  assert.match(html,/id="lb-migrate-bots"/);
-  assert.match(html,/lbMigrateBots/);
-});
-
 test('renderLeaderboardModal wraps panel content', ()=>{
   const html=renderLeaderboardModal({
     t:(key)=>key,
