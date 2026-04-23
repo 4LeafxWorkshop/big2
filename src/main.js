@@ -4588,12 +4588,25 @@ const bindGameEvents=createGameEventsBinder({
 const bindConfigEvents=createConfigEventsBinder();
 const bindHomeEvents=createHomeEventsBinder();
 const bindOpponentsEvents=createOpponentsEventsBinder();
+const BACK_GOLD_ASSET_VERSION='20260423';
+function versionedBackAssetFile(file){
+  const name=String(file??'').trim();
+  if(!name)return'';
+  if(name==='back-gold.png'||name==='back-gold-sm.png'){
+    return `${name}?v=${BACK_GOLD_ASSET_VERSION}`;
+  }
+  return name;
+}
 function backAssetFile(value){
   const found=BACK_OPTIONS.find((x)=>x.value===value);
-  return found?.file??'back-red.png';
+  return versionedBackAssetFile(found?.file??'back-red.png');
+}
+function backAssetPreviewFile(value){
+  const found=BACK_OPTIONS.find((x)=>x.value===value);
+  return versionedBackAssetFile(found?.preview??found?.file??'back-red.png');
 }
 function renderBackCarouselItems(){
-  const items=BACK_OPTIONS.map((opt)=>`<button class="combo-btn ${state.home.backColor===opt.value?'active':''}" data-value="${opt.value}" aria-label="${opt.label[state.language]??opt.value}"><img class="combo-back-preview" src="${withBase(`card-assets/${opt.preview||opt.file}`)}" alt="${opt.label[state.language]??opt.value}" draggable="false"/></button>`).join('');
+  const items=BACK_OPTIONS.map((opt)=>`<button class="combo-btn ${state.home.backColor===opt.value?'active':''}" data-value="${opt.value}" aria-label="${opt.label[state.language]??opt.value}"><img class="combo-back-preview" src="${withBase(`card-assets/${backAssetPreviewFile(opt.value)}`)}" alt="${opt.label[state.language]??opt.value}" draggable="false"/></button>`).join('');
   return `${items}${items}${items}`;
 }
 function renderBackCarousel(comboId){
