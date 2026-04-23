@@ -11849,6 +11849,13 @@ body[data-screen='game'] .seat.north.active .seat-section {
 }
 
 @media (max-width: 860px) and (orientation: portrait) {
+  body[data-screen='game'] .seat.north > .seat-name-fixed,
+  body[data-screen='game'] .seat.north .seat-pack > .seat-name-fixed {
+    top: 6px !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+  }
   body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-pack > .seat-name-fixed,
   body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-pack > .seat-name-fixed .name,
   body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-pack > .seat-name-fixed .seat-identity,
