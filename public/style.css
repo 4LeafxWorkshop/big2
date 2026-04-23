@@ -598,11 +598,6 @@ body[data-screen='game'] .topbar .game-title-wrap {
   display: block;
   margin-bottom: 0;
 }
-@media (min-width: 861px) {
-  body[data-screen='game'] .title-logo-game {
-    width: clamp(122px, 15vw, 250px);
-  }
-}
 body[data-screen='game'] .topbar .game-title-sub-right {
   margin-top: 0 !important;
   font-size: clamp(.64rem, .94vw, .8rem);
@@ -12738,7 +12733,7 @@ body[data-screen='game'] :is(.play-type-call, .last-card-call, .emote-callout, .
     display: flex !important;
     flex-direction: row !important;
     flex-wrap: wrap !important;
-    align-items: flex-start !important;
+    align-items: center !important;
     justify-content: flex-start !important;
     gap: 8px !important;
   }
@@ -12756,19 +12751,19 @@ body[data-screen='game'] :is(.play-type-call, .last-card-call, .emote-callout, .
   }
   body[data-screen='game'] .topbar-right {
     display: flex !important;
-    flex: 1 1 100% !important;
+    flex: 0 0 auto !important;
     min-width: 0 !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    margin-left: 0 !important;
+    width: auto !important;
+    max-width: none !important;
+    margin-left: auto !important;
     align-items: center !important;
     justify-content: flex-start !important;
   }
   body[data-screen='game'] .topbar-right .control-row {
     display: flex !important;
     flex-wrap: wrap !important;
-    width: 100% !important;
-    max-width: 100% !important;
+    width: auto !important;
+    max-width: none !important;
     justify-content: flex-start !important;
     gap: 4px !important;
     overflow-x: visible !important;
