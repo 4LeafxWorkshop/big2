@@ -7534,6 +7534,18 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
   body[data-screen='game'] .action-strip {
     padding: 6px 8px 8px !important;
     gap: 4px !important;
+    overflow: visible !important;
+    position: relative !important;
+  }
+  body[data-screen='game'] .action-strip .player-tag {
+    position: absolute !important;
+    left: 10px !important;
+    right: auto !important;
+    top: auto !important;
+    bottom: calc(100% + 12px) !important;
+    transform: none !important;
+    z-index: 12 !important;
+    margin: 0 !important;
   }
   body[data-screen='game'] .action-strip .control-row button {
     min-height: 30px !important;
