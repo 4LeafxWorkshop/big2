@@ -592,10 +592,16 @@ body[data-screen='game'] .topbar .game-title-wrap {
   display: inline-flex;
   align-items: flex-end;
   gap: 12px;
+  max-width: min(46vw, 520px);
 }
 .title-logo-game {
   display: block;
   margin-bottom: 0;
+}
+@media (min-width: 861px) {
+  body[data-screen='game'] .title-logo-game {
+    width: clamp(122px, 15vw, 250px);
+  }
 }
 body[data-screen='game'] .topbar .game-title-sub-right {
   margin-top: 0 !important;
@@ -6071,7 +6077,23 @@ body[data-screen='game'] .self-table-emote.emote-rude {
     var(--panel-2);
 }
 .hand-hint { margin-top: 2px; text-align: right; }
-.hand { display: flex; gap: 3px; overflow-x: auto; overflow-y: hidden; min-height: 0; padding-top: 10px; padding-bottom: 2px; justify-content: flex-start; transform: scale(var(--card-scale)); transform-origin: left center; }
+.hand {
+  display: flex;
+  gap: 3px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  min-height: 0;
+  padding-top: 10px;
+  padding-bottom: 2px;
+  justify-content: flex-start;
+  transform: scale(var(--card-scale));
+  transform-origin: left center;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.hand::-webkit-scrollbar {
+  display: none;
+}
 .action-strip .hand {
   transform: none;
 }
@@ -7188,14 +7210,14 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
   }
   body[data-screen='game'] .topbar-right .control-row {
     width: 100%;
-    flex-wrap: nowrap;
-    gap: 3px;
-    overflow-x: auto;
+    flex-wrap: wrap;
+    gap: 4px;
+    overflow-x: visible;
     overflow-y: visible;
   }
   body[data-screen='game'] .topbar-right .control-row button {
     flex: 0 0 auto;
-    min-width: max-content;
+    min-width: fit-content;
     min-height: 28px;
     padding: 2px 4px;
     font-size: clamp(.50rem, .95vw, .66rem);
@@ -9883,8 +9905,8 @@ body[data-screen='game'] .action-strip {
     text-overflow: ellipsis;
   }
   .action-strip .control-row {
-    flex-wrap: nowrap !important;
-    overflow-x: auto !important;
+    flex-wrap: wrap !important;
+    overflow-x: visible !important;
     overflow-y: visible !important;
     gap: 4px !important;
     -webkit-overflow-scrolling: touch;
@@ -9896,6 +9918,7 @@ body[data-screen='game'] .action-strip {
     min-height: 32px !important;
     white-space: nowrap !important;
     flex: 0 0 auto;
+    min-width: max-content;
   }
   body[data-screen='game'] .action-strip .hand .hand-card {
     height: calc(var(--card-h) * 1.34) !important;
@@ -10055,12 +10078,12 @@ body[data-screen='game'] .action-strip {
   }
   body[data-screen='game'] .topbar-right .control-row {
     display: flex !important;
-    flex-wrap: nowrap !important;
+    flex-wrap: wrap !important;
     align-items: center !important;
-    justify-content: flex-end !important;
+    justify-content: flex-start !important;
     gap: 4px !important;
-    width: auto !important;
-    overflow-x: auto !important;
+    width: 100% !important;
+    overflow-x: visible !important;
     overflow-y: visible !important;
   }
   body[data-screen='game'] .topbar-right .control-row button {
@@ -10086,12 +10109,12 @@ body[data-screen='game'] .action-strip {
   }
   body[data-screen='game'] .topbar-right .control-row {
     display: flex !important;
-    flex-wrap: nowrap !important;
+    flex-wrap: wrap !important;
     align-items: center !important;
-    justify-content: flex-end !important;
+    justify-content: flex-start !important;
     gap: 4px !important;
-    width: auto !important;
-    overflow-x: auto !important;
+    width: 100% !important;
+    overflow-x: visible !important;
     overflow-y: visible !important;
   }
   body[data-screen='game'] .topbar-right .control-row button {
@@ -10577,6 +10600,18 @@ body[data-screen='game'] .topbar-right .control-row::-webkit-scrollbar {
   body[data-screen='game'] .topbar-right .control-row {
     overflow-x: auto !important;
     overflow-y: hidden !important;
+  }
+}
+
+@media (min-width: 1501px) {
+  body[data-screen='game'] .topbar {
+    justify-content: flex-start !important;
+  }
+  body[data-screen='game'] .topbar > div:first-child {
+    flex: 0 0 auto !important;
+  }
+  body[data-screen='game'] .topbar-right {
+    margin-left: 10px;
   }
 }
 
@@ -12669,4 +12704,51 @@ body[data-screen='game'] :is(.seat.west .side-station-core > .seat-name-fixed[da
 }
 body[data-screen='game'] :is(.play-type-call, .last-card-call, .emote-callout, .seat-motto-callout, .self-table-emote, .table-emote) {
   z-index: 19000 !important;
+}
+
+@media (min-width: 861px) {
+  body[data-screen='game'] .topbar {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 8px !important;
+  }
+  body[data-screen='game'] .topbar > div:first-child {
+    flex: 0 0 auto !important;
+    min-width: 0 !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+  body[data-screen='game'] .topbar .game-title-wrap {
+    flex: 0 0 auto !important;
+    min-width: 0 !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+  body[data-screen='game'] .topbar-right {
+    display: flex !important;
+    flex: 0 1 auto !important;
+    min-width: 0 !important;
+    width: auto !important;
+    max-width: 100% !important;
+    margin-left: auto !important;
+    align-items: center !important;
+    justify-content: flex-end !important;
+  }
+  body[data-screen='game'] .topbar-right .control-row {
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    width: auto !important;
+    max-width: 100% !important;
+    justify-content: flex-end !important;
+    gap: 4px !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+  }
+  body[data-screen='game'] .topbar-right .control-row button {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+  }
 }
