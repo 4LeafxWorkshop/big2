@@ -150,13 +150,27 @@ function selectRoomHostCandidate(players,now){
 function normalizeRoomInviteCode(code){
   return String(code||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,16);
 }
+function getAppBasePath(){
+  const configured=String(import.meta.env?.BASE_URL??'/').trim();
+  if(configured&&configured!=='./'){
+    return configured.startsWith('/')?configured:`/${configured.replace(/^\/+/,'')}`;
+  }
+  if(typeof window==='undefined')return'/';
+  try{
+    const pathname=new URL('./',window.location.href).pathname||'/';
+    return pathname.endsWith('/')?pathname:`${pathname}/`;
+  }catch{
+    return'/';
+  }
+}
 function roomInviteUrlFromCode(code){
   const safe=normalizeRoomInviteCode(code);
   if(!safe||typeof window==='undefined')return'';
   try{
-    return new URL(`/join/${encodeURIComponent(safe)}`,window.location.origin).toString();
+    const basePath=getAppBasePath();
+    return new URL(`${basePath}join/${encodeURIComponent(safe)}`,window.location.origin).toString();
   }catch{
-    return `${window.location.origin}/join/${encodeURIComponent(safe)}`;
+    return `${window.location.origin}${getAppBasePath()}join/${encodeURIComponent(safe)}`;
   }
 }
 function roomInviteShareTextFromCode(code){

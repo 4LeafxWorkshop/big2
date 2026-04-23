@@ -2375,6 +2375,14 @@ body[data-screen='home'] .home-wrap {
   height: 20px;
   fill: currentColor;
 }
+.room-active-refresh-icon {
+  width: 18px;
+  height: 18px;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23f2dfae' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 12a8 8 0 0 0-13.66-5.66'/%3E%3Cpath d='M4 6v4h4'/%3E%3Cpath d='M4 12a8 8 0 0 0 13.66 5.66'/%3E%3Cpath d='M20 18v-4h-4'/%3E%3C/svg%3E");
+}
 .room-active-card:hover,
 .room-active-card:focus-visible,
 .room-active-card.active {
@@ -2489,6 +2497,10 @@ body[data-screen='home'] .home-wrap {
 }
 .room-active-refresh-label {
   font-weight: 700;
+}
+.room-active-refresh-icon {
+  width: 18px;
+  height: 18px;
 }
 .room-active-hint {
   font-size: .7rem;
