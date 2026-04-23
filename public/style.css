@@ -43,8 +43,11 @@
     margin: 0 !important;
     padding: 0 !important;
     display: flex !important;
+    justify-content: center !important;
     justify-self: center !important;
     align-self: start !important;
+    width: calc(var(--card-w) * 2.7) !important;
+    max-width: 100% !important;
   }
   body[data-screen='game'][data-orientation='portrait'] .seat.west .side-station-core,
   body[data-screen='game'][data-orientation='portrait'] .seat.east .side-station-core {
@@ -11098,9 +11101,12 @@ body[data-screen='game'] .seat.east .seat-open-play {
     min-height: 0 !important;
     grid-template-rows: auto auto auto !important;
     padding-top: 0 !important;
+    align-content: center !important;
+    width: calc(var(--card-w) * 2.7) !important;
+    max-width: 100% !important;
   }
   body[data-screen='game'][data-orientation='portrait'] .seat.north .opponent-fan-wrap {
-    width: max-content !important;
+    width: calc(var(--card-w) * 2.7) !important;
     margin: 0 auto !important;
     justify-self: center !important;
   }
@@ -12474,6 +12480,20 @@ body[data-screen='game'] :is(.seat.west, .seat.east) .side-station-stack .oppone
   body[data-screen='game'][data-orientation='portrait'] .seat.east .side-station-stack {
     gap: 4px !important;
   }
+  body[data-screen='game'][data-orientation='portrait'] .seat.north {
+    width: max-content !important;
+    max-width: 100% !important;
+    justify-self: center !important;
+    align-self: center !important;
+    margin-inline: auto !important;
+  }
+  body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-pack {
+    width: calc(var(--card-w) * 2.7) !important;
+    max-width: 100% !important;
+    margin-inline: auto !important;
+    justify-self: center !important;
+    align-content: center !important;
+  }
   body[data-screen='game'][data-orientation='portrait'] {
     --opp-side-pack-pad-top: 64%;
   }
@@ -12683,6 +12703,10 @@ body[data-screen='game'] :is(.seat.north .opponent-fan-wrap > .closed-count-pill
 }
 body[data-screen='game'] :is(.seat.north .seat-pack, .seat.west .side-station-stack, .seat.east .side-station-stack) {
   gap: 4px !important;
+}
+body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-pack {
+  align-content: center !important;
+  justify-content: center !important;
 }
 body[data-screen='game'] :is(.seat.west .side-station-core, .seat.east .side-station-core) {
   gap: 4px !important;
