@@ -78,6 +78,79 @@ test('renderLeaderboardPanel renders rows and controls', ()=>{
   assert.match(html,/Bot A/);
 });
 
+test('renderLeaderboardPanel ignores stale bot picture and uses bot asset', ()=>{
+  const html=renderLeaderboardPanel({
+    leaderboard:{
+      rows:[{id:'bot:bot-a:0',name:'Bot A',gender:'male',picture:'https://example.com/old.png',games:4,wins:3,winRate:0.75,totalScore:5300,updatedAt:1710000000000}],
+      sort:'totalDelta',
+      period:'all'
+    },
+    botProfiles:[],
+    authPictureUrlFrom:(value)=>`pic:${value}`,
+    avatarDataUri:(name,_color,_gender,isBot)=>`avatar:${name}:${isBot}`,
+    esc:(value)=>String(value),
+    t:(key)=>key,
+    language:'en'
+  });
+  assert.match(html,/src="avatar:Bot A:true"/);
+  assert.doesNotMatch(html,/old\.png/);
+});
+
+test('renderLeaderboardPanel treats bot names as bots even without a bot id prefix', ()=>{
+  const html=renderLeaderboardPanel({
+    leaderboard:{
+      rows:[{id:'axel',name:'Axel',gender:'male',picture:'https://example.com/old.png',games:4,wins:3,winRate:0.75,totalScore:5300,updatedAt:1710000000000}],
+      sort:'totalDelta',
+      period:'all'
+    },
+    botProfiles:[{name:'Axel',gender:'male'}],
+    authPictureUrlFrom:(value)=>`pic:${value}`,
+    avatarDataUri:(name,_color,_gender,isBot)=>`avatar:${name}:${isBot}`,
+    esc:(value)=>String(value),
+    t:(key)=>key,
+    language:'en'
+  });
+  assert.match(html,/src="avatar:Axel:true"/);
+  assert.doesNotMatch(html,/old\.png/);
+});
+
+test('renderLeaderboardPanel adds fallback source for bot avatars', ()=>{
+  const html=renderLeaderboardPanel({
+    leaderboard:{
+      rows:[{id:'bot:bot-a:0',name:'Bot A',gender:'male',picture:'',games:4,wins:3,winRate:0.75,totalScore:5300,updatedAt:1710000000000}],
+      sort:'totalDelta',
+      period:'all'
+    },
+    botProfiles:[],
+    authPictureUrlFrom:(value)=>`pic:${value}`,
+    avatarDataUri:(name,_color,_gender,isBot)=>isBot?`bot:${name}`:`fallback:${name}`,
+    esc:(value)=>String(value),
+    t:(key)=>key,
+    language:'en'
+  });
+  assert.match(html,/data-fallback-src="fallback:Bot A"/);
+  assert.match(html,/onerror="this.onerror=null;this.src=this.dataset.fallbackSrc"/);
+});
+
+test('renderLeaderboardPanel shows bot migration action when enabled', ()=>{
+  const html=renderLeaderboardPanel({
+    leaderboard:{
+      rows:[],
+      sort:'totalDelta',
+      period:'all'
+    },
+    botProfiles:[],
+    showBotMigrationAction:true,
+    authPictureUrlFrom:(value)=>`pic:${value}`,
+    avatarDataUri:(name)=>`avatar:${name}`,
+    esc:(value)=>String(value),
+    t:(key)=>key,
+    language:'en'
+  });
+  assert.match(html,/id="lb-migrate-bots"/);
+  assert.match(html,/lbMigrateBots/);
+});
+
 test('renderLeaderboardModal wraps panel content', ()=>{
   const html=renderLeaderboardModal({
     t:(key)=>key,

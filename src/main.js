@@ -21,7 +21,7 @@ import {createLangMenuController} from './langMenu.js';
 import {renderCenterLastMoves, renderGameActionZone, renderGameLogSheet, renderGameShell, renderGameSideZone, renderGameTable, renderGameTopbar, renderOpponentLabel, renderOpponentSeat, renderOpponentSeats, renderOpponentStationFlow, renderSeatLastAction} from './gameView.js';
 import {buildCalloutRenderState, buildCongratsOverlayHtml, buildGameAuxRenderState, buildGameShellMarkup, buildOpponentSeatsHtml, buildResultScreenHtml, buildRoomMetaTableHtml, buildSelfRenderState} from './gameRenderPrep.js';
 import {renderConfidentialStamp, renderIntroPanel, renderLeaderboardModal, renderLeaderboardPanel, renderOpponentProfileModal, renderScoreGuideModal} from './modalViews.js';
-import {resolveAvatarSrc} from './avatarProfile.js';
+import {botAvatarUrl, resolveAvatarSrc} from './avatarProfile.js';
 import QRCode from 'qrcode';
 import {BACK_OPTIONS, CALLOUT_RESPONSE_TEXT, KIND, LANGUAGE_NATIVE_LABEL, LANGUAGE_OPTIONS} from './localeData.js';
 import {I18N} from './i18nData.js';
@@ -968,6 +968,7 @@ function leaderboardPanelHtml(){
   return renderLeaderboardPanel({
     leaderboard:state.home.leaderboard,
     botProfiles:[...BOT_PROFILES.zh,...BOT_PROFILES.en],
+    showBotMigrationAction:signedInWithEmail(),
     authPictureUrlFrom,
     avatarDataUri,
     esc,
@@ -1474,7 +1475,7 @@ async function readProfileDocByRest(docId){
 function isBotIdentity(identity){return Boolean(identity?.isBot);}
 function buildProfilePayload(identity,entry,updatedAt){
   const isBot=isBotIdentity(identity);
-  const picture=isBot?'':String(identity?.picture??state.home.google?.picture??'').trim();
+  const picture=isBot?currentBotLeaderboardPicture(identity?.name):String(identity?.picture??state.home.google?.picture??'').trim();
   const settings=isBot?{}:(identity?.settings&&typeof identity.settings==='object'?identity.settings:collectMainSettings());
   return{
     id:String(entry.id),
@@ -1482,6 +1483,7 @@ function buildProfilePayload(identity,entry,updatedAt){
     email:String(identity?.email??entry.email??'').toLowerCase().slice(0,120),
     gender:String(identity?.gender??entry.gender??'male')==='female'?'female':'male',
     picture,
+    isBot,
     settings,
     totalScore:scoreFromStoredTotal(entry.totalScore),
     games:Number(entry.games)||0,
@@ -2650,6 +2652,13 @@ function botLeaderboardIdentity(name,gender){
   const g=String(gender??'male')==='female'?'female':'male';
   return{id:safe.toLowerCase(),name:safe,email:'',gender:g,isBot:true,picture:'',settings:{}};
 }
+function currentBotLeaderboardPicture(name){
+  return botAvatarUrl(name,withBase);
+}
+function isBotLeaderboardStoreEntry(entry){
+  if(entry?.isBot===true)return true;
+  return Boolean(currentBotLeaderboardPicture(entry?.name));
+}
 function identityLookupIds(identity){
   const ids=[
     String(identity?.id??'').trim(),
@@ -2772,7 +2781,7 @@ function computeLeaderboardRowsFromStore(store,period,sort,limit){
     const games=Number(entry.games)||0;
     const wins=Number(entry.wins)||0;
     const totalScore=scoreFromStoredTotal(entry.totalScore);
-    return{id,name:String(entry.name??''),email:String(entry.email??''),gender:String(entry.gender??'male')==='female'?'female':'male',picture:String(entry.picture??'').trim(),games,wins,winRate:games?wins/games:0,totalScore,updatedAt:Number(entry.updatedAt)||0};
+    return{id,name:String(entry.name??''),email:String(entry.email??''),gender:String(entry.gender??'male')==='female'?'female':'male',picture:String(entry.picture??'').trim(),isBot:Boolean(entry.isBot),games,wins,winRate:games?wins/games:0,totalScore,updatedAt:Number(entry.updatedAt)||0};
   }).filter((row)=>row.games>0||period==='all');
   rows.sort((a,b)=>{
     if(sort==='wins')return b.wins-a.wins||b.totalScore-a.totalScore||a.name.localeCompare(b.name);
@@ -2784,6 +2793,56 @@ function computeLeaderboardRowsFromStore(store,period,sort,limit){
   void limit;
   return ranked.slice(0,20);
 }
+
+function migrateBotLeaderboardPictures(store){
+  const players=store&&store.players&&typeof store.players==='object'?store.players:{};
+  const now=Date.now();
+  const migrated=[];
+  Object.values(players).forEach((entry)=>{
+    if(!isBotLeaderboardStoreEntry(entry))return;
+    const picture=currentBotLeaderboardPicture(entry?.name);
+    if(!picture)return;
+    const currentPicture=String(entry.picture??'').trim();
+    if(currentPicture===picture&&entry.isBot===true)return;
+    entry.picture=picture;
+    entry.isBot=true;
+    entry.updatedAt=now;
+    migrated.push({...entry});
+  });
+  return migrated;
+}
+
+async function writeMigratedBotEntries(entries){
+  if(!Array.isArray(entries)||!entries.length)return 0;
+  const results=await Promise.all(entries.map(async(entry)=>{
+    const payload=buildProfilePayload({name:entry.name,gender:entry.gender,isBot:true,email:''},entry,entry.updatedAt);
+    try{
+      if(await ensureFirebaseWriteAuth()){
+        const ref=firebaseDb.collection(FIRESTORE_LB_COLLECTION).doc(String(entry.id));
+        await ref.set(payload,{merge:true});
+        return 1;
+      }
+      await writeProfileDocByRest(String(entry.id),payload);
+      return 1;
+    }catch(err){
+      console.error('leaderboard bot migration write failed',err);
+      return 0;
+    }
+  }));
+  return results.reduce((sum,v)=>sum+v,0);
+}
+
+async function migrateBotLeaderboardPicturesNow(){
+  const store=loadLeaderboardStore();
+  const migrated=migrateBotLeaderboardPictures(store);
+  saveLeaderboardStore(store);
+  const wrote=await writeMigratedBotEntries(migrated);
+  if(state.home.showLeaderboard)refreshLeaderboard(true);
+  else refreshLeaderboard();
+  render();
+  return{migrated:migrated.length,wrote};
+}
+
 async function refreshLeaderboardCloud(){
   if(!firebaseDb||leaderboardCloudRefreshInFlight)return;
   leaderboardCloudRefreshInFlight=true;
@@ -2794,9 +2853,13 @@ async function refreshLeaderboardCloud(){
     snap.forEach((doc)=>{
       const d=doc.data()??{};
       const id=String(d.id??doc.id);
-      store.players[id]={id,name:String(d.name??''),email:String(d.email??''),gender:String(d.gender??'male')==='female'?'female':'male',picture:String(d.picture??'').trim(),settings:d.settings&&typeof d.settings==='object'?d.settings:{},games:Number(d.games)||0,wins:Number(d.wins)||0,totalScore:scoreFromStoredTotal(d.totalScore),updatedAt:Number(d.updatedAt)||0};
+      store.players[id]={id,name:String(d.name??''),email:String(d.email??''),gender:String(d.gender??'male')==='female'?'female':'male',picture:String(d.picture??'').trim(),isBot:Boolean(d.isBot)||Boolean(currentBotLeaderboardPicture(d.name)),settings:d.settings&&typeof d.settings==='object'?d.settings:{},games:Number(d.games)||0,wins:Number(d.wins)||0,totalScore:scoreFromStoredTotal(d.totalScore),updatedAt:Number(d.updatedAt)||0};
     });
+    const migratedBotEntries=migrateBotLeaderboardPictures(store);
     saveLeaderboardStore(store);
+    if(migratedBotEntries.length){
+      await writeMigratedBotEntries(migratedBotEntries);
+    }
     syncSessionScoreFromStore(store);
     lb.rows=computeLeaderboardRowsFromStore(store,lb.period,lb.sort,lb.limit);
     leaderboardCloudLoaded=true;
@@ -4516,6 +4579,7 @@ const bindGameEvents=createGameEventsBinder({
   soloApplyPlay,
   shouldRecommendPass,
   suggestPlay,
+  migrateBotLeaderboardPicturesNow,
   cardId,
   reorderCurrent,
   isMobilePointer,

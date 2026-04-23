@@ -82,6 +82,7 @@ service cloud.firestore {
       'email',
       'gender',
       'picture',
+      'isBot',
       'settings',
       'totalScore',
       'games',
@@ -414,6 +415,7 @@ service cloud.firestore {
       (!('email' in d) || (d.email is string && d.email.size() <= 120)) &&
       (!('gender' in d) || (d.gender is string && isValidGender(d.gender))) &&
       (!('picture' in d) || (d.picture is string && d.picture.size() <= 1024)) &&
+      (!('isBot' in d) || d.isBot is bool) &&
 
       d.totalScore is int &&
       d.totalScore >= 0 &&

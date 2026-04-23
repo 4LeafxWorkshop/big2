@@ -11,6 +11,8 @@ import {
 } from './avatarProfileData.js';
 import {AVATAR_IMAGE_BY_BOT_NAME} from './botAvatarProfileData.js';
 
+const BOT_AVATAR_ASSET_VERSION='20260423';
+
 export function resolveAvatarSrc({
   picture,
   name,
@@ -24,6 +26,21 @@ export function resolveAvatarSrc({
   return pic
     ?authPictureUrlFrom(pic)
     :avatarDataUri(name,color,gender,isBot);
+}
+
+function addCacheBuster(url){
+  const suffix=`v=${BOT_AVATAR_ASSET_VERSION}`;
+  return url.includes('?')?`${url}&${suffix}`:`${url}?${suffix}`;
+}
+
+export function botAvatarUrl(name,withBase){
+  const baseName=String(name??'').trim();
+  if(!baseName)return'';
+  const overrideImage=AVATAR_IMAGE_BY_BOT_NAME[baseName]??'';
+  if(!overrideImage)return'';
+  return /^https?:\/\//i.test(overrideImage)||/^data:|^blob:/i.test(overrideImage)
+    ?addCacheBuster(overrideImage)
+    :addCacheBuster(withBase(overrideImage));
 }
 
 export function createAvatarProfileHelpers(deps){
@@ -63,11 +80,9 @@ export function createAvatarProfileHelpers(deps){
   function avatarDataUri(name,_color,gender='male',isBot=false){
     const g=String(gender??'male')==='female'?'female':'male';
     const baseName=String(name??'player')||'player';
-    const overrideImage=isBot?AVATAR_IMAGE_BY_BOT_NAME[baseName]??'':'';
+    const overrideImage=isBot?botAvatarUrl(baseName,withBase):'';
     if(overrideImage){
-      return /^https?:\/\//i.test(overrideImage)||/^data:|^blob:/i.test(overrideImage)
-        ?overrideImage
-        :withBase(overrideImage);
+      return overrideImage;
     }
     const variant=AVATAR_VARIANT_BY_NAME[baseName]??'';
     const seedText=`${g}-${baseName}${variant?`-${variant}`:''}`;

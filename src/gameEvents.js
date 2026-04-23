@@ -645,6 +645,7 @@ export function createGameEventsBinder({
   soloApplyPlay,
   shouldRecommendPass,
   suggestPlay,
+  migrateBotLeaderboardPicturesNow,
   cardId,
   reorderCurrent,
   isMobilePointer,
@@ -733,6 +734,9 @@ export function createGameEventsBinder({
     document.getElementById('intro-backdrop')?.addEventListener('click',()=>{state.home.showIntro=false;render();});
     document.getElementById('lb-close')?.addEventListener('click',()=>{state.home.showLeaderboard=false;render();});
     document.getElementById('lb-backdrop')?.addEventListener('click',()=>{state.home.showLeaderboard=false;render();});
+    document.getElementById('lb-migrate-bots')?.addEventListener('click',()=>{
+      void migrateBotLeaderboardPicturesNow();
+    });
     document.getElementById('lb-sort')?.addEventListener('change',(e)=>{state.home.leaderboard.sort=e.target.value;refreshLeaderboard();render();});
     document.getElementById('lb-period')?.addEventListener('change',(e)=>{state.home.leaderboard.period=e.target.value;refreshLeaderboard();render();});
     if(!topbarDelegateBound){
