@@ -6885,7 +6885,7 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
     border-radius: 10px;
     background: linear-gradient(160deg, var(--seat-a), var(--seat-b));
   }
-  .north { min-height: 74px; align-self: start; }
+  .north { min-height: 74px; align-self: center; }
   .west, .east { align-self: stretch; }
   .east .seat-pack,
   .west .seat-pack,
