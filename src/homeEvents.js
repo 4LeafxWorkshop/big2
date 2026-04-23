@@ -268,9 +268,9 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
     doc.getElementById('room-share-send')?.addEventListener('click',async()=>{
       const code=String(state.room.code||state.room.pendingInviteCode||'').trim();
       if(!code)return;
-      const inviteUrl=roomInviteUrlFromCode(code);
+      const inviteMessage=roomInviteShareTextFromCode(code);
       try{
-        await navigator.clipboard?.writeText?.(inviteUrl);
+        await navigator.clipboard?.writeText?.(inviteMessage);
       }catch{}
     });
     const copyRoomInviteCode=async()=>{
