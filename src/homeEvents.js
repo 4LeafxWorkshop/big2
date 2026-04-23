@@ -246,15 +246,17 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       await joinRoomByCode(code);
     });
 
-    doc.getElementById('room-copy')?.addEventListener('click',async()=>{
-      try{await navigator.clipboard?.writeText?.(String(state.room.code||''));}catch{}
-    });
-    doc.getElementById('room-share-invite')?.addEventListener('click',async()=>{
+    const openRoomInvite=async()=>{
       if(!state.room.code&& !state.room.pendingInviteCode)return;
       state.room.inviteOpen=true;
       render();
       void refreshRoomInviteQrDataUrl(true);
+    };
+    doc.getElementById('room-copy')?.addEventListener('click',async()=>{
+      try{await navigator.clipboard?.writeText?.(String(state.room.code||''));}catch{}
     });
+    doc.getElementById('room-share-invite')?.addEventListener('click',openRoomInvite);
+    doc.querySelectorAll('[data-room-invite-open]').forEach((btn)=>btn.addEventListener('click',openRoomInvite));
     doc.getElementById('room-invite-close')?.addEventListener('click',()=>{
       state.room.inviteOpen=false;
       render();
@@ -267,17 +269,27 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       const code=String(state.room.code||state.room.pendingInviteCode||'').trim();
       if(!code)return;
       const inviteUrl=roomInviteUrlFromCode(code);
+      try{
+        await navigator.clipboard?.writeText?.(inviteUrl);
+      }catch{}
+    });
+    const copyRoomInviteCode=async()=>{
+      const code=String(state.room.code||state.room.pendingInviteCode||'').trim();
+      if(!code)return;
+      try{
+        await navigator.clipboard?.writeText?.(code);
+      }catch{}
+    };
+    doc.getElementById('room-share-code-copy')?.addEventListener('click',copyRoomInviteCode);
+    doc.getElementById('room-share-code-copy')?.addEventListener('keydown',async(e)=>{
+      if(e.key!=='Enter'&&e.key!==' ')return;
+      e.preventDefault();
+      await copyRoomInviteCode();
+    });
+    doc.getElementById('room-share-whatsapp')?.addEventListener('click',async()=>{
+      const code=String(state.room.code||state.room.pendingInviteCode||'').trim();
+      if(!code)return;
       const inviteMessage=roomInviteShareTextFromCode(code);
-      if(navigator.share){
-        try{
-          await navigator.share({
-            title:t('roomInviteTitle'),
-            text:inviteMessage,
-            url:inviteUrl
-          });
-          return;
-        }catch{}
-      }
       const whatsappUrl=roomInviteWhatsappUrlFromCode?.(code)||'';
       if(whatsappUrl){
         try{
@@ -289,18 +301,28 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
         await navigator.clipboard?.writeText?.(inviteMessage);
       }catch{}
     });
-    doc.getElementById('room-copy-message')?.addEventListener('click',async()=>{
+    doc.getElementById('room-share-wechat')?.addEventListener('click',async()=>{
       const code=String(state.room.code||state.room.pendingInviteCode||'').trim();
       if(!code)return;
+      const inviteUrl=roomInviteUrlFromCode(code);
       try{
-        await navigator.clipboard?.writeText?.(roomInviteShareTextFromCode(code));
+        if(navigator.share){
+          await navigator.share({
+            title:t('roomInviteTitle'),
+            text:roomInviteShareTextFromCode(code),
+            url:inviteUrl
+          });
+          return;
+        }
+      }catch{}
+      try{
+        await navigator.clipboard?.writeText?.(inviteUrl);
       }catch{}
     });
-    doc.getElementById('room-copy-qr')?.addEventListener('click',async()=>{
+    doc.getElementById('room-share-download')?.addEventListener('click',async()=>{
       const code=String(state.room.code||state.room.pendingInviteCode||'').trim();
       if(!code)return;
       const qrDataUrl=String(state.room.inviteQrDataUrl||'').trim();
-      const inviteUrl=roomInviteUrlFromCode(code);
       if(qrDataUrl&&navigator.clipboard?.write&&window.ClipboardItem){
         try{
           const response=await fetch(qrDataUrl);
@@ -310,7 +332,7 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
         }catch{}
       }
       try{
-        await navigator.clipboard?.writeText?.(inviteUrl);
+        await navigator.clipboard?.writeText?.(roomInviteUrlFromCode(code));
       }catch{}
     });
     doc.querySelectorAll('[data-room-expiry-reset]').forEach((btn)=>btn.addEventListener('click',async()=>{

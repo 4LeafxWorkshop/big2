@@ -359,7 +359,7 @@ function renderRoomInvitePanelHtml({
     :inviteQrDataUrl
       ?`<img class="room-invite-qr" src="${inviteQrDataUrl}" alt="${t('roomInviteQr')}"/>`
       :`<div class="room-invite-placeholder">${t('roomInviteEmpty')}</div>`;
-  return`<div class="room-share-panel"><div class="room-share-head"><div><h3>${t('roomInviteTitle')}</h3><p class="room-share-subtitle">${t('roomInviteSubtitle')}</p></div><button id="room-invite-close" class="secondary room-icon-btn room-close-btn"><span>${t('close')}</span></button></div><div class="room-share-code-row"><span class="room-share-code-label">${t('roomCode')}</span><strong class="room-share-code">${esc(roomCode)}</strong></div><div class="room-share-grid"><div class="room-share-qr-col"><div class="room-share-qr">${qrHtml}</div><button id="room-copy-qr" class="secondary room-share-qr-copy">${t('roomInviteCopyQr')}</button></div><div class="room-share-copy"><div class="room-share-message-box"><div class="room-share-message-label">${t('roomInviteMessageLabel')}</div><div class="room-share-message">${esc(inviteMessage)}</div></div><div class="room-share-link-box"><div class="room-share-link-label">${t('roomInviteLink')}</div><a class="room-share-link" href="${esc(inviteUrl)}" target="_blank" rel="noopener noreferrer">${esc(inviteUrl)}</a><div class="room-share-link-hint">${t('roomInviteQrHint')}</div>${inviteQrError?`<div class="hint room-error">${esc(inviteQrError)}</div>`:''}</div><div class="room-share-actions"><button id="room-share-send" class="primary">${t('roomInviteShare')}</button><button id="room-copy-message" class="secondary">${t('roomInviteCopyMessage')}</button></div></div></div></div>`;
+  return`<div class="room-share-panel room-share-panel-simple"><div class="room-share-head"><div><h3>${t('roomInviteTitle')}</h3><p class="room-share-subtitle">掃描二維碼或點擊下方按鈕分享連結給好友。</p></div><button id="room-invite-close" class="secondary room-icon-btn room-close-btn"><span>${t('close')}</span></button></div><div class="room-share-grid-simple"><div class="room-share-left"><div class="room-share-qr-box">${qrHtml}</div></div><div class="room-share-right"><div id="room-share-code-copy" class="room-share-code-pill" role="button" tabindex="0" aria-label="點擊複製房間代碼" title="點擊複製房間代碼"><span class="room-share-code-label">ID:</span><strong class="room-share-code">${esc(roomCode)}</strong></div><button id="room-share-send" class="primary room-share-main-btn"><i class="fa-solid fa-link" aria-hidden="true"></i><span>複製分享連結</span></button><div class="room-share-icon-row"><button id="room-share-whatsapp" class="secondary room-share-mini-btn" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp room-share-mini-icon" aria-hidden="true"></i></button><button id="room-share-wechat" class="secondary room-share-mini-btn" aria-label="WeChat"><i class="fa-brands fa-weixin room-share-mini-icon" aria-hidden="true"></i></button><button id="room-share-download" class="secondary room-share-mini-btn" aria-label="Download QR"><i class="fa-solid fa-download room-share-mini-icon" aria-hidden="true"></i></button></div>${inviteQrError?`<div class="hint room-error">${esc(inviteQrError)}</div>`:''}</div></div>`;
 }
 function schedulePopunderAfterRender(delayMs=250){
   if(APP_CHANNEL==='STORE')return;
@@ -5228,9 +5228,7 @@ function renderHome(){
   const loginHint=t('loginToStart');
   const roomLobbyBtnCore=inRoom?'':`<button id="room-lobby-open" class="secondary royal-room-btn" ${signedIn?'':'disabled'}>${t('roomEnter')}</button>`;
   const roomButtonsHtml=roomLobbyBtnCore
-    ?(signedIn
-      ?roomLobbyBtnCore
-      :`<span class="locked-btn">${roomLobbyBtnCore}<span class="locked-tip">${esc(loginHint)}</span></span>`)
+    ?roomLobbyBtnCore
     :'';
   const roomSeats=[0,1,2,3].map((seat)=>{
     const seatLabel=t('seatLabel').replace('{{n}}',String(seat+1));
@@ -5247,13 +5245,13 @@ function renderHome(){
       avatarDataUri
     });
     if(!seatData){
-      return`<div class="lobby-seat empty"><div class="lobby-seat-avatar empty">+</div><div class="lobby-seat-name">${t('roomSeatOpen')}</div><div class="lobby-seat-label">${seatLabel}</div></div>`;
+      return`<button type="button" class="lobby-seat lobby-seat-button empty" data-room-invite-open="1" aria-label="${t('roomSeatInvite')}"><div class="lobby-seat-avatar empty" aria-hidden="true">+</div><div class="lobby-seat-name">${t('roomSeatInvite')}</div><div class="lobby-seat-label">${seatLabel}</div></button>`;
     }
     const {entryName,avatarSrc,isHost,offline,displayName}=seatData;
-    const hostBadge=isHost?`<span class="lobby-seat-host-badge">🚩</span>`:'';
+    const hostBadge=isHost?`<span class="lobby-seat-host-badge-text">${t('roomHostTag')}</span>`:'';
     const nameHtml=`<div class="lobby-seat-name">${displayName?esc(displayName):'&nbsp;'}</div>`;
     return`<div class="lobby-seat ${isHost?'host':''} ${offline?'offline':''}">
-      <span class="lobby-seat-avatar-wrap"><img class="lobby-seat-avatar" src="${avatarSrc}" alt="${esc(entryName)}"/>${hostBadge}</span>
+      <span class="lobby-seat-avatar-wrap"><span class="lobby-seat-avatar-anchor"><img class="lobby-seat-avatar" src="${avatarSrc}" alt="${esc(entryName)}"/>${hostBadge}</span></span>
       ${nameHtml}
       <div class="lobby-seat-label">${seatLabel}</div>
     </div>`;
@@ -5267,7 +5265,19 @@ function renderHome(){
       </div>`
     :'';
   const roomStartControl=roomIsHost
-    ?`${`<button id="room-start" class="primary" ${(roomStarting||!roomCanStart||roomStartPending)?'disabled':''}>${t('roomStart')}</button>`}${roomStartPending?`<span class="hint">${t('roomSending')}</span>`:roomStarting?`<span class="hint">${t('roomStarting')}</span>`:(!roomStarting&&!roomCanStart)?`<span class="hint">${t('roomNeedPlayers')}</span>`:''}`
+    ?(() => {
+        const disabled=roomStarting||!roomCanStart||roomStartPending;
+        const subtitle=!roomCanStart&&!roomStarting&&!roomStartPending
+          ?`<span class="room-start-subtitle">${t('roomNeedPlayersShort')}</span>`
+          :'';
+        const button=`<button id="room-start" class="primary room-start-btn" ${disabled?'disabled':''}><span class="room-start-main">${t('roomStart')}</span>${subtitle}</button>`;
+        const hint=roomStartPending
+          ?`<span class="hint">${t('roomSending')}</span>`
+          :roomStarting
+            ?`<span class="hint">${t('roomStarting')}</span>`
+            :'';
+        return `${button}${hint}`;
+      })()
     :`<span class="hint">${roomStarting?t('roomStarting'):t('roomWaitingHost')}</span>`;
   const roomPendingHint='';
   const roomTitle=t('roomTableTitle');
@@ -5322,7 +5332,7 @@ function renderHome(){
   const soloBtnCore=`<button id="solo-start" class="primary royal-start-btn" ${signedIn?'':'disabled'}>${t('solo')}</button>`;
   const soloBtnHtml=signedIn
     ?soloBtnCore
-    :`<span class="locked-btn">${soloBtnCore}<span class="locked-tip">${esc(loginHint)}</span></span>`;
+    :`<button id="solo-start" class="primary royal-start-btn" disabled><span class="home-btn-main">${t('solo')}</span><span class="home-btn-subtitle">${esc(loginHint)}</span></button>`;
   app.innerHTML=renderHomeMarkup({
     intro,
     allowOpponents,

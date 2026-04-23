@@ -62,7 +62,7 @@ export function buildSelfRenderState(params){
   const selfDangerLast=Boolean(!v.gameOver&&self&&self.count===1);
   const selfActive=Boolean(!v.gameOver&&self&&v.currentSeat===self.seat);
   const selfIsHost=hostSeat!==null&&self&&hostSeat===self.seat;
-  const selfHostBadgeHtml=selfIsHost?`<span class="lobby-seat-host-badge">🚩</span>`:'';
+  const selfHostBadgeHtml=selfIsHost?`<span class="lobby-seat-host-badge-text">${t('roomHostTag')}</span>`:'';
   const selfBadgeHtml=selfDangerLast
     ?`<span class="avatar-status-badge warning ${selfActive?'danger':''}" aria-label="${esc(t('lastCardCall'))}"></span>`
     :(selfActive?`<span class="avatar-status-badge turn" aria-label="${esc(t('wait'))}"></span>`:'');
@@ -168,7 +168,7 @@ export function buildOpponentSeatsHtml(params){
     const useFlowOpponentStation=true;
     const dangerLast=Boolean(!v.gameOver&&player.count===1);
     const isHostSeat=hostSeat!==null&&hostSeat===player.seat;
-    const hostBadgeHtml=isHostSeat?`<span class="lobby-seat-host-badge">🚩</span>`:'';
+    const hostBadgeHtml=isHostSeat?`<span class="lobby-seat-host-badge-text">${t('roomHostTag')}</span>`:'';
     const badgeHtml=dangerLast
       ?`<span class="avatar-status-badge warning ${active?'danger':''}" aria-label="${esc(t('lastCardCall'))}"></span>`
       :(active?`<span class="avatar-status-badge turn" aria-label="${esc(t('wait'))}"></span>`:'');
@@ -542,7 +542,7 @@ export function buildResultScreenHtml(params){
     const isSelf=p.seat===v.selfSeat;
     const color=playerColorByViewClass(p.cls);
     const isHostSeat=hostSeat!==null&&hostSeat===p.seat;
-    const hostBadgeHtml=isHostSeat?`<span class="lobby-seat-host-badge">🚩</span>`:'';
+    const hostBadgeHtml=isHostSeat?`<span class="lobby-seat-host-badge-text">${t('roomHostTag')}</span>`:'';
     const snapshot=snapshotBySeat?snapshotBySeat.get(p.seat)||null:null;
     const snapName=String(snapshot?.name||p.name||'');
     const snapGender=String(snapshot?.gender||p.gender||'male')==='female'?'female':'male';
