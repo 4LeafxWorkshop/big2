@@ -4207,6 +4207,8 @@ body[data-screen='game'] .topbar {
   position: sticky;
   top: 0;
   z-index: 1;
+  flex-wrap: wrap !important;
+  align-items: flex-start !important;
   pointer-events: auto;
   isolation: isolate;
   background: transparent !important;
@@ -6080,8 +6082,7 @@ body[data-screen='game'] .self-table-emote.emote-rude {
 .hand {
   display: flex;
   gap: 3px;
-  overflow-x: auto;
-  overflow-y: hidden;
+  overflow: hidden;
   min-height: 0;
   padding-top: 10px;
   padding-bottom: 2px;
@@ -6749,7 +6750,7 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
   }
   body[data-screen='game'] {
     overflow-y: auto;
-    --opp-fan-closed-mini-scale: .62;
+    --opp-fan-closed-mini-scale: .72;
     --opp-fan-closed-lift-px: -2px;
   }
   body[data-screen='game'] #app {
@@ -6829,14 +6830,14 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
   body[data-screen='game'] .topbar-right .control-row {
     width: 100%;
     display: flex;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     gap: 3px;
-    overflow-x: auto;
+    overflow-x: visible;
     overflow-y: visible;
   }
   body[data-screen='game'] .topbar-right .control-row button {
-    flex: 1 1 0;
-    min-width: 0;
+    flex: 0 0 auto;
+    min-width: max-content;
     min-height: 32px;
     padding: 3px 5px;
     font-size: clamp(.58rem, 2.1vw, .72rem);
@@ -7132,7 +7133,8 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
     padding-top: 6px;
   }
   .action-strip .control-row {
-    overflow-x: auto;
+    flex-wrap: wrap;
+    overflow-x: visible;
     overflow-y: visible;
     -webkit-overflow-scrolling: touch;
     padding-bottom: 2px;
@@ -7141,7 +7143,7 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
     display: none !important;
   }
   .action-strip .hand {
-    overflow: visible;
+    overflow: hidden;
     justify-content: center;
     padding-left: 8px;
     padding-right: 8px;
@@ -9740,22 +9742,22 @@ body[data-screen='game'] .action-strip {
   body[data-screen='game'] .topbar {
     display: flex !important;
     flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    align-items: center !important;
-    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
     gap: 6px !important;
   }
   body[data-screen='game'] .topbar-right .control-row {
     display: flex !important;
-    flex-wrap: nowrap !important;
-    width: auto !important;
-    overflow-x: auto !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    overflow-x: visible !important;
     overflow-y: visible !important;
     gap: 3px !important;
   }
   body[data-screen='game'][data-ios='1'] .action-strip,
   body[data-screen='game'][data-ios='1'] .action-strip .hand {
-    overflow: visible !important;
+    overflow: hidden !important;
   }
   body[data-screen='game'][data-ios='1'] .action-zone {
     padding-bottom: 0 !important;
@@ -9888,12 +9890,13 @@ body[data-screen='game'] .action-strip {
   }
   /* Mobile portrait: keep action buttons compact in one row. */
   body[data-screen='game'] .topbar-right .control-row {
-    flex-wrap: nowrap !important;
+    flex-wrap: wrap !important;
     gap: 3px !important;
+    width: 100% !important;
   }
   body[data-screen='game'] .topbar-right .control-row button {
     flex: 0 0 auto;
-    min-width: max-content;
+    min-width: 0;
     padding: 3px 6px !important;
     font-size: clamp(.62rem, 2.4vw, .74rem) !important;
     min-height: 30px !important;
@@ -10071,10 +10074,15 @@ body[data-screen='game'] .action-strip {
   body[data-screen='game'] .topbar {
     display: flex !important;
     flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    align-items: center !important;
-    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
     gap: 8px !important;
+  }
+  body[data-screen='game'] .topbar-right {
+    width: 100% !important;
+    margin-left: 0 !important;
+    justify-content: flex-start !important;
   }
   body[data-screen='game'] .topbar-right .control-row {
     display: flex !important;
@@ -10102,10 +10110,15 @@ body[data-screen='game'] .action-strip {
   body[data-screen='game'] .topbar {
     display: flex !important;
     flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    align-items: center !important;
-    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
     gap: 8px !important;
+  }
+  body[data-screen='game'] .topbar-right {
+    width: 100% !important;
+    margin-left: 0 !important;
+    justify-content: flex-start !important;
   }
   body[data-screen='game'] .topbar-right .control-row {
     display: flex !important;
@@ -10135,7 +10148,7 @@ body[data-screen='game'] .action-strip {
   body[data-screen='game'] .action-strip .hand {
     position: relative !important;
     z-index: 8 !important;
-    overflow: visible !important;
+    overflow: hidden !important;
     padding-top: 14px !important;
     min-height: calc(var(--card-h) * 1.2 + 34px) !important;
   }
@@ -10187,9 +10200,9 @@ body[data-screen='game'] .action-strip .hand {
   max-width: 100% !important;
   min-width: 0 !important;
   box-sizing: border-box !important;
-  overflow: visible !important;
+  overflow: hidden !important;
   overflow-x: hidden !important;
-  overflow-y: visible !important;
+  overflow-y: hidden !important;
   max-height: none !important;
   padding-right: 0 !important;
 }
@@ -10230,35 +10243,36 @@ body[data-screen='game'][data-log-open='0'] .side-zone.log-collapsed .log-toggle
 }
 
 /* Final tablet-portrait lock:
-   1) topbar controls stay in one row
+   1) topbar controls stay inside the header
    2) south seat name sits top-center of south panel (web-like) */
 @media (min-width: 700px) and (max-width: 1200px) and (orientation: portrait) {
   body[data-screen='game'] .topbar {
     display: flex !important;
     flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    align-items: center !important;
-    justify-content: space-between !important;
+    flex-wrap: wrap !important;
+    align-items: flex-start !important;
+    justify-content: flex-start !important;
     gap: 6px !important;
     padding: 8px 10px !important;
   }
   body[data-screen='game'] .topbar-right {
     width: 100% !important;
     min-width: 0 !important;
-    justify-items: center !important;
+    margin-left: 0 !important;
+    justify-items: stretch !important;
   }
   body[data-screen='game'] .topbar-right .control-row {
     display: flex !important;
-    flex-wrap: nowrap !important;
+    flex-wrap: wrap !important;
     width: 100% !important;
     overflow-x: visible !important;
     overflow-y: visible !important;
     gap: 5px !important;
-    justify-content: center !important;
-    padding: 2px 6px !important;
-    border-radius: 999px !important;
-    background: rgba(255,255,255,.05) !important;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.08) !important;
+    justify-content: flex-start !important;
+    padding: 2px 0 !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
   }
   body[data-screen='game'] .topbar-right .control-row button {
     flex: 0 0 auto !important;
@@ -10580,12 +10594,12 @@ body[data-screen='game'][data-web-too-small='1'][data-webview='1'] .game-shell {
   user-select: auto !important;
   filter: none;
 }
-/* Keep game topbar controls on one line. */
+/* Keep game topbar controls inside the header. */
 body[data-screen='game'] .topbar-right .control-row {
-  flex-wrap: nowrap !important;
+  flex-wrap: wrap !important;
   overflow: visible !important;
   scrollbar-width: none;
-  white-space: nowrap;
+  white-space: normal;
 }
 body[data-screen='game'] .topbar-right .control-row::-webkit-scrollbar {
   height: 0;
@@ -10597,9 +10611,21 @@ body[data-screen='game'] .topbar-right .control-row::-webkit-scrollbar {
     min-width: 0;
     max-width: 100%;
   }
+  body[data-screen='game'] .topbar {
+    flex-wrap: wrap !important;
+    align-items: flex-start !important;
+  }
+  body[data-screen='game'] .topbar-right {
+    width: 100% !important;
+    margin-left: 0 !important;
+    justify-content: flex-start !important;
+  }
   body[data-screen='game'] .topbar-right .control-row {
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
+    width: 100% !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+    flex-wrap: wrap !important;
+    justify-content: flex-start !important;
   }
 }
 
@@ -10611,7 +10637,8 @@ body[data-screen='game'] .topbar-right .control-row::-webkit-scrollbar {
     flex: 0 0 auto !important;
   }
   body[data-screen='game'] .topbar-right {
-    margin-left: 10px;
+    width: 100% !important;
+    margin-left: 0 !important;
   }
 }
 
@@ -12174,7 +12201,7 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
   body[data-screen='game'][data-ios='1'] .action-zone,
   body[data-screen='game'][data-ios='1'] .action-strip,
   body[data-screen='game'][data-ios='1'] .action-strip .hand {
-    overflow: visible !important;
+    overflow: hidden !important;
     padding-bottom: 0 !important;
   }
   body[data-screen='game'][data-ios='1'] .action-strip .hand {
@@ -12432,11 +12459,11 @@ body[data-screen='game'] :is(.seat.west, .seat.east) .side-station-stack .oppone
     --opp-side-section-pad-top: 54px;
     --opp-north-fan-top: clamp(44px, 5vmin, 52px);
     --opp-north-open-gap: clamp(50px, 5.8vmin, 62px);
-    --opp-fan-closed-mini-scale: .68;
+    --opp-fan-closed-mini-scale: .72;
     --opp-fan-closed-overlap-ratio: -0.42;
     --opp-fan-closed-shift-y: 0px;
     --opp-fan-closed-shift-x: calc(var(--card-w) * -0.56);
-    --opp-closed-scale: .62;
+    --opp-closed-scale: .72;
     --opp-side-open-scale: 1;
   }
   /* Match landscape-like buffer between closed fan and open cards in portrait. */
@@ -12710,8 +12737,8 @@ body[data-screen='game'] :is(.play-type-call, .last-card-call, .emote-callout, .
   body[data-screen='game'] .topbar {
     display: flex !important;
     flex-direction: row !important;
-    flex-wrap: nowrap !important;
-    align-items: center !important;
+    flex-wrap: wrap !important;
+    align-items: flex-start !important;
     justify-content: flex-start !important;
     gap: 8px !important;
   }
@@ -12729,23 +12756,23 @@ body[data-screen='game'] :is(.play-type-call, .last-card-call, .emote-callout, .
   }
   body[data-screen='game'] .topbar-right {
     display: flex !important;
-    flex: 0 1 auto !important;
+    flex: 1 1 100% !important;
     min-width: 0 !important;
-    width: auto !important;
+    width: 100% !important;
     max-width: 100% !important;
-    margin-left: auto !important;
+    margin-left: 0 !important;
     align-items: center !important;
-    justify-content: flex-end !important;
+    justify-content: flex-start !important;
   }
   body[data-screen='game'] .topbar-right .control-row {
     display: flex !important;
-    flex-wrap: nowrap !important;
-    width: auto !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
     max-width: 100% !important;
-    justify-content: flex-end !important;
+    justify-content: flex-start !important;
     gap: 4px !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
   }
   body[data-screen='game'] .topbar-right .control-row button {
     flex: 0 0 auto !important;

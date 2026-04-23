@@ -154,12 +154,6 @@ export function syncHandStackMode({
   let overlap=(natural-available)/(count-1);
   const maxOverlap=Math.max(0,(cardW+gap)-1);
   overlap=Math.max(0,Math.min(overlap,maxOverlap));
-  const comfortLimit=Math.max(0,cardW*0.82);
-  if(overlap>comfortLimit){
-    hand.style.setProperty('overflow-x','auto','important');
-    hand.style.setProperty('-webkit-overflow-scrolling','touch');
-    return;
-  }
 
   hand.classList.add('hand-stacked');
   hand.style.setProperty('--hand-overlap-px',`${overlap.toFixed(2)}px`);

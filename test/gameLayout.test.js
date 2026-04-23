@@ -161,6 +161,40 @@ test('syncHandStackMode leaves fit-to-width hands unstacked', ()=>{
   assert.equal(hand.style.values['--hand-overlap-px'],undefined);
 });
 
+test('syncHandStackMode keeps dense hands stacked instead of enabling horizontal scroll', ()=>{
+  const cards=[];
+  for(let i=0;i<5;i+=1){
+    cards.push({
+      getBoundingClientRect(){return {left:i*40,right:i*40+50,width:50};}
+    });
+  }
+  const handRect={left:0,right:100,width:100};
+  const hand={
+    classList:makeClassList(),
+    style:makeStyle(),
+    clientWidth:100,
+    getBoundingClientRect(){return handRect;},
+    querySelectorAll(){return cards;}
+  };
+  const documentStub={
+    querySelector(selector){return selector==='.action-strip .hand'?hand:null;}
+  };
+  const originalHTMLElement=globalThis.HTMLElement;
+  globalThis.HTMLElement=Object;
+  try{
+    syncHandStackMode({
+      documentRef:()=>documentStub,
+      windowRef:()=>({
+        getComputedStyle:()=>({columnGap:'10px',gap:'10px'})
+      })
+    });
+  }finally{
+    globalThis.HTMLElement=originalHTMLElement;
+  }
+  assert.equal(hand.classList.contains('hand-stacked'),true);
+  assert.notEqual(hand.style.values['overflow-x'],'auto');
+});
+
 test('positionRoomTopMeta forces inline meta classes', ()=>{
   const tableOverlay={classList:makeClassList(['room-top-meta-center'])};
   const meta={
