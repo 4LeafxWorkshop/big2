@@ -10494,6 +10494,16 @@ body[data-screen='game'][data-log-open='0'] .side-zone.log-collapsed .log-side-c
     max-width: 100% !important;
   }
 }
+@media (min-width: 861px) and (max-width: 1400px) and (orientation: landscape) {
+  body[data-screen='game'] .game-shell {
+    grid-template-columns: minmax(0, 1fr) !important;
+    grid-template-rows: minmax(0, 1fr) auto !important;
+  }
+  body[data-screen='game'] .side-zone,
+  body[data-screen='game'] .side-zone.log-collapsed {
+    display: none !important;
+  }
+}
 
 .win-celebrate {
   position: absolute;
@@ -12221,10 +12231,11 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
   body[data-screen='game'][data-ios='1'] .action-zone,
   body[data-screen='game'][data-ios='1'] .action-strip,
   body[data-screen='game'][data-ios='1'] .action-strip .hand {
-    overflow: hidden !important;
+    overflow: visible !important;
     padding-bottom: 0 !important;
   }
   body[data-screen='game'][data-ios='1'] .action-strip .hand {
+    overflow: hidden !important;
     min-height: calc(var(--card-h) * 1.14 + 18px) !important;
     padding-bottom: 2px !important;
   }
