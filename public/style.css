@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿@font-face {
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿@font-face {
   font-family: 'Ma Shan Zheng';
   font-style: normal;
   font-weight: 400;
@@ -2144,6 +2144,27 @@ body[data-screen='home'] .home-wrap {
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 8px;
   align-items: center;
+}
+.room-join-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 2px 0 1px;
+  color: rgba(255,255,255,.54);
+  font-size: .74rem;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+.room-join-divider::before,
+.room-join-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.24), transparent);
+}
+.room-join-divider span {
+  padding: 0 2px;
 }
 .room-active-block {
   display: grid;
@@ -7561,6 +7582,11 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
   }
   .room-join-top-btn {
     min-width: 116px;
+  }
+  .room-join-divider {
+    gap: 8px;
+    margin: 0;
+    font-size: .7rem;
   }
   .room-card-join-inline {
     width: auto;

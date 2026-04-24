@@ -57,6 +57,8 @@ test('renderRoomJoinOverlay renders active rooms and join controls', ()=>{
     t:(key)=>{
       if(key==='secondsShort')return' sec';
       if(key==='roomCodeExample')return'ROOM42';
+      if(key==='roomEnterCode')return'Enter Room Code';
+      if(key==='roomOr')return'or';
       if(key==='seatLabel')return'Seat {{n}}';
       return key;
     },
@@ -67,6 +69,9 @@ test('renderRoomJoinOverlay renders active rooms and join controls', ()=>{
   });
   assert.match(html,/id="room-code-input"/);
   assert.match(html,/placeholder="ROOM42"/);
+  assert.match(html,/Enter Room Code/);
+  assert.match(html,/room-join-divider/);
+  assert.ok(html.indexOf('room-join-divider') < html.indexOf('room-create-card'));
   assert.match(html,/ABCD/);
   assert.match(html,/title="Seat 2"/);
   assert.match(html,/roomActiveRefresh/);

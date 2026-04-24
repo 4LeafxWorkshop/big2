@@ -13,7 +13,7 @@ function maskRoomCode(code){
 }
 
 export function renderRoomCreateCardHtml({t}){
-  return`<button class="secondary room-card-join-btn room-icon-btn" id="room-create-card" type="button" aria-label="${t('roomCreate')}"><svg class="room-inline-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4 4.5A1.5 1.5 0 0 1 5.5 3H15a1 1 0 1 1 0 2H6v14h9a1 1 0 1 1 0 2H5.5A1.5 1.5 0 0 1 4 19.5v-15Z"/><path d="M15 8a1 1 0 0 1 1-1h3v-3a1 1 0 1 1 2 0v3h3a1 1 0 1 1 0 2h-3v3a1 1 0 1 1-2 0V9h-3a1 1 0 0 1-1-1Z"/><path d="M12 12.5a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0Z"/></svg><span>${t('roomCreate')}</span></button>`;
+  return`<button class="secondary room-card-join-btn room-icon-btn" id="room-create-card" type="button" aria-label="${t('roomCreate')}"><svg class="room-inline-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4.5 4.5A1.5 1.5 0 0 1 6 3h10a1 1 0 1 1 0 2H6v14h10a1 1 0 1 1 0 2H6A1.5 1.5 0 0 1 4.5 19.5z"/><path d="M15 8a1 1 0 0 1 1-1h2V5a1 1 0 1 1 2 0v2h2a1 1 0 1 1 0 2h-2v2a1 1 0 1 1-2 0V9h-2a1 1 0 0 1-1-1Z"/><path d="M12 12.5a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0Z"/></svg><span>${t('roomCreate')}</span></button>`;
 }
 
 export function renderRoomSeatMiniHtml(params){

@@ -115,6 +115,15 @@ export function createGoogleSessionHelpers({
       const state=getState();
       state.home.google={...state.home.google,signedIn:true,provider:'google',email,hydrating:true,profileMissing:false};
       applyCachedGoogleProfileFromStore(email);
+      const firebaseAuth=getFirebaseAuth();
+      const authPicture=String(firebaseAuth?.currentUser?.photoURL??'').trim();
+      if(authPicture&&!String(state.home.google.picture??'').trim()){
+        mergeBrowserGoogleProfile({
+          picture:authPicture,
+          pictureLoaded:false
+        });
+        preloadGooglePicture();
+      }
       if(initFirebaseIfReady()){
         void hydrateProfileBlocking().then(()=>{
           if(state.home.showLeaderboard)refreshLeaderboard(true);

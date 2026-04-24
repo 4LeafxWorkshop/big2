@@ -56,6 +56,30 @@ test('loadGoogleSession restores cached browser email and profile', ()=>{
   assert.equal(state.home.google.email,'user@example.com');
 });
 
+test('loadGoogleSession restores auth photo url when cached profile has no picture', ()=>{
+  const state=createState();
+  const storage=createStorage(JSON.stringify({email:'user@example.com'}));
+  const preloadCalls=[];
+  const helpers=createGoogleSessionHelpers({
+    getState:()=>state,
+    getStorage:()=>storage,
+    sessionKey:'google-session',
+    getFirebaseAuth:()=>({currentUser:{photoURL:'https://example.com/avatar.png'}}),
+    mergeBrowserGoogleProfile:(overrides)=>{state.home.google={...state.home.google,...overrides};},
+    applyCachedGoogleProfileFromStore:()=>false,
+    preloadGooglePicture:()=>{preloadCalls.push(true);},
+    initFirebaseIfReady:()=>false,
+    hydrateProfileFromCloudByIdentity:async()=>false,
+    currentLeaderboardIdentity:()=>({id:'user@example.com'}),
+    refreshLeaderboard:()=>{},
+    render:()=>{}
+  });
+  assert.equal(helpers.loadGoogleSession(),true);
+  assert.equal(state.home.google.picture,'https://example.com/avatar.png');
+  assert.equal(state.home.google.pictureLoaded,false);
+  assert.equal(preloadCalls.length,1);
+});
+
 test('saveGoogleSession and clearGoogleSession update storage', ()=>{
   const state=createState();
   const storage=createStorage();

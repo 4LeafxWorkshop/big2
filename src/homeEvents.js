@@ -221,6 +221,12 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       const code=doc.getElementById('room-code-input')?.value??'';
       await joinRoomByCode(code);
     });
+    doc.getElementById('room-code-input')?.addEventListener('input',()=>{
+      const input=doc.getElementById('room-code-input');
+      if(!input)return;
+      const next=String(input.value||'').toUpperCase();
+      if(input.value!==next)input.value=next;
+    });
     doc.getElementById('room-active-refresh')?.addEventListener('click',async()=>{
       await loadActiveRooms();
     });

@@ -291,6 +291,28 @@ function preloadGooglePicture(){
     img.src=normalizedPic;
   }catch{}
 }
+function syncGooglePictureFromAuth(){
+  const authPic=String(firebaseAuth?.currentUser?.photoURL??'').trim();
+  if(!authPic)return false;
+  if(!state.home.google?.signedIn)return false;
+  if(String(state.home.google.picture??'').trim()===authPic&&state.home.google.pictureLoaded)return false;
+  mergeBrowserGoogleProfile({
+    picture:authPic,
+    pictureLoaded:false
+  });
+  preloadGooglePicture();
+  return true;
+}
+function attachFirebaseAuthPictureSync(){
+  if(firebaseAuthPictureSyncAttached)return;
+  if(!firebaseAuth?.onAuthStateChanged)return;
+  firebaseAuthPictureSyncAttached=true;
+  firebaseAuth.onAuthStateChanged(()=>{
+    if(syncGooglePictureFromAuth()&&state.screen==='home'){
+      render();
+    }
+  });
+}
 function armPopunderForGesture(){
   if(APP_CHANNEL==='STORE')return;
   if(!isIOSDevice())return;
@@ -669,6 +691,7 @@ function resetCalloutPlaybackState(){
 let lastCardProcessedHistoryLen=0;
 let firebaseAuth=null;
 let firebaseDb=null;
+let firebaseAuthPictureSyncAttached=false;
 const firebaseRoomApps=new Map();
 const firebaseRoomDbs=new Map();
 let firebaseInstancesCache=null;
@@ -1196,6 +1219,7 @@ function initFirebaseIfReady(){
     if(!fb.apps?.length)fb.initializeApp(FIREBASE_CONFIG);else fb.app();
     firebaseAuth=fb.auth?.();
     firebaseDb=fb.firestore();
+    attachFirebaseAuthPictureSync();
     return true;
   }catch{return false;}
 }
@@ -2908,6 +2932,7 @@ window.handleCredentialResponse=handleCredentialResponse;
 window.onGoogleScriptLoaded=()=>{if(state.screen==='home')onGoogleScriptLoaded(renderGoogleInline);};
 function bootFirebase(attempt=0){
   if(initFirebaseIfReady()){
+    syncGooglePictureFromAuth();
     if(signedInWithEmail()){
       void hydrateProfileBlocking().then(()=>{if(state.home.showLeaderboard)refreshLeaderboard(true);render();});
     }
