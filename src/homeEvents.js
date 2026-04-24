@@ -259,19 +259,15 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       void refreshRoomInviteQrDataUrl(true);
     };
     const shareRoomInviteWithQr=async(code)=>{
-      const inviteMessage=roomInviteShareTextFromCode(code);
-      const inviteUrl=roomInviteUrlFromCode(code);
-      const qrDataUrl=String(state.room.inviteQrDataUrl||'').trim();
-      if(qrDataUrl&&navigator.share){
+      const cardDataUrl=String(state.room.inviteCardDataUrl||'').trim();
+      if(cardDataUrl&&navigator.share){
         try{
-          const response=await fetch(qrDataUrl);
+          const response=await fetch(cardDataUrl);
           const blob=await response.blob();
           const file=new File([blob],`big2-room-${code}.png`,{type:blob.type||'image/png'});
           if(!navigator.canShare||navigator.canShare({files:[file]})){
             await navigator.share({
               title:t('roomInviteTitle'),
-              text:inviteMessage,
-              url:inviteUrl,
               files:[file]
             });
             return true;
@@ -333,28 +329,40 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
     doc.getElementById('room-share-wechat')?.addEventListener('click',async()=>{
       const code=String(state.room.code||state.room.pendingInviteCode||'').trim();
       if(!code)return;
-      const inviteUrl=roomInviteUrlFromCode(code);
+      const cardDataUrl=String(state.room.inviteCardDataUrl||'').trim();
       try{
+        if(cardDataUrl&&navigator.share){
+          const response=await fetch(cardDataUrl);
+          const blob=await response.blob();
+          const file=new File([blob],`big2-room-${code}.png`,{type:blob.type||'image/png'});
+          if(!navigator.canShare||navigator.canShare({files:[file]})){
+            await navigator.share({
+              title:t('roomInviteTitle'),
+              files:[file]
+            });
+            return;
+          }
+        }
         if(navigator.share){
           await navigator.share({
             title:t('roomInviteTitle'),
             text:roomInviteShareTextFromCode(code),
-            url:inviteUrl
+            url:roomInviteUrlFromCode(code)
           });
           return;
         }
       }catch{}
       try{
-        await navigator.clipboard?.writeText?.(inviteUrl);
+        await navigator.clipboard?.writeText?.(roomInviteUrlFromCode(code));
       }catch{}
     });
     doc.getElementById('room-share-download')?.addEventListener('click',async()=>{
       const code=String(state.room.code||state.room.pendingInviteCode||'').trim();
       if(!code)return;
-      const qrDataUrl=String(state.room.inviteQrDataUrl||'').trim();
-      if(qrDataUrl&&navigator.clipboard?.write&&window.ClipboardItem){
+      const cardDataUrl=String(state.room.inviteCardDataUrl||'').trim();
+      if(cardDataUrl&&navigator.clipboard?.write&&window.ClipboardItem){
         try{
-          const response=await fetch(qrDataUrl);
+          const response=await fetch(cardDataUrl);
           const blob=await response.blob();
           await navigator.clipboard.write([new ClipboardItem({[blob.type||'image/png']:blob})]);
           return;

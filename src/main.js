@@ -184,6 +184,155 @@ function roomInviteShareTextFromCode(code){
 function roomInviteWhatsappUrlFromCode(code){
   return`https://wa.me/?text=${encodeURIComponent(roomInviteShareTextFromCode(code))}`;
 }
+function wrapInviteCardText(ctx,text,maxWidth){
+  const paragraphs=String(text??'').split(/\r?\n/);
+  const lines=[];
+  paragraphs.forEach((paragraph)=>{
+    if(!paragraph){
+      lines.push('');
+      return;
+    }
+    const words=paragraph.split(/\s+/).filter(Boolean);
+    let line='';
+    const pushChunk=(chunk)=>{
+      if(chunk)lines.push(chunk);
+    };
+    if(!words.length){
+      lines.push('');
+      return;
+    }
+    for(const word of words){
+      const candidate=line?`${line} ${word}`:word;
+      if(ctx.measureText(candidate).width<=maxWidth){
+        line=candidate;
+        continue;
+      }
+      if(line){
+        pushChunk(line);
+        line='';
+      }
+      if(ctx.measureText(word).width<=maxWidth){
+        line=word;
+        continue;
+      }
+      let chunk='';
+      for(const ch of Array.from(word)){
+        const next=chunk+ch;
+        if(ctx.measureText(next).width<=maxWidth){
+          chunk=next;
+        }else{
+          pushChunk(chunk);
+          chunk=ch;
+        }
+      }
+      line=chunk;
+    }
+    if(line)pushChunk(line);
+  });
+  return lines;
+}
+function loadImageFromDataUrl(src){
+  return new Promise((resolve,reject)=>{
+    try{
+      const img=new Image();
+      img.onload=()=>resolve(img);
+      img.onerror=()=>reject(new Error('image-load-failed'));
+      img.src=src;
+    }catch(err){
+      reject(err);
+    }
+  });
+}
+function roundRect(ctx,x,y,w,h,r,fill=false,stroke=true){
+  if(!ctx)return;
+  const radius=Math.min(r,Math.abs(w)/2,Math.abs(h)/2);
+  ctx.beginPath();
+  ctx.moveTo(x+radius,y);
+  ctx.arcTo(x+w,y,x+w,y+h,radius);
+  ctx.arcTo(x+w,y+h,x,y+h,radius);
+  ctx.arcTo(x,y+h,x,y,radius);
+  ctx.arcTo(x,y,x+w,y,radius);
+  ctx.closePath();
+  if(fill)ctx.fill();
+  if(stroke)ctx.stroke();
+}
+async function buildRoomInviteCardDataUrl({qrDataUrl,roomCode,inviteMessage,inviteUrl}){
+  if(typeof document==='undefined')return'';
+  try{
+    const qrImage=await loadImageFromDataUrl(qrDataUrl);
+    const canvas=document.createElement('canvas');
+    const ctx=canvas.getContext('2d');
+    if(!ctx)return'';
+    const width=1080;
+    const padding=72;
+    const contentWidth=width-(padding*2);
+    const qrSize=392;
+    const titleFont='700 54px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    const subtitleFont='500 28px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    const labelFont='700 24px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    const bodyFont='500 28px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    const linkFont='600 26px ui-monospace, SFMono-Regular, Menlo, Consolas, monospace';
+    canvas.width=width;
+    canvas.height=1500;
+    ctx.fillStyle='#f6fbff';
+    ctx.fillRect(0,0,width,canvas.height);
+    const bg=ctx.createLinearGradient(0,0,0,canvas.height);
+    bg.addColorStop(0,'#f8fbff');
+    bg.addColorStop(1,'#eef5fb');
+    ctx.fillStyle=bg;
+    ctx.fillRect(0,0,width,canvas.height);
+    ctx.strokeStyle='rgba(19, 44, 70, .12)';
+    ctx.lineWidth=3;
+    ctx.fillStyle='#ffffff';
+    roundRect(ctx,padding,36,width-(padding*2),canvas.height-72,36,true,true);
+    ctx.fillStyle='#13314d';
+    ctx.textAlign='center';
+    ctx.textBaseline='top';
+    ctx.font=titleFont;
+    ctx.fillText(String(t('roomInviteTitle')),width/2,78);
+    ctx.fillStyle='rgba(19, 49, 77, .78)';
+    ctx.font=subtitleFont;
+    wrapInviteCardText(ctx,String(t('roomInviteSubtitle')),contentWidth).forEach((line,i)=>{
+      ctx.fillText(line,width/2,148+(i*34));
+    });
+    const qrBoxX=(width-qrSize)/2;
+    const qrBoxY=250;
+    ctx.fillStyle='#ffffff';
+    roundRect(ctx,qrBoxX-18,qrBoxY-18,qrSize+36,qrSize+36,28,true,false);
+    ctx.strokeStyle='rgba(19, 44, 70, .12)';
+    roundRect(ctx,qrBoxX-18,qrBoxY-18,qrSize+36,qrSize+36,28,false,true);
+    ctx.drawImage(qrImage,qrBoxX,qrBoxY,qrSize,qrSize);
+    ctx.textAlign='left';
+    ctx.fillStyle='#13314d';
+    ctx.font=labelFont;
+    const messageLabelY=700;
+    ctx.fillText(String(t('roomInviteMessageLabel')),padding,messageLabelY);
+    ctx.font=bodyFont;
+    ctx.fillStyle='#17314c';
+    const messageLines=wrapInviteCardText(ctx,inviteMessage,contentWidth);
+    messageLines.forEach((line,i)=>{
+      ctx.fillText(line,padding,messageLabelY+38+(i*36));
+    });
+    const linkLabelY=messageLabelY+38+(messageLines.length*36)+34;
+    ctx.font=labelFont;
+    ctx.fillStyle='#13314d';
+    ctx.fillText(String(t('roomInviteLink')),padding,linkLabelY);
+    ctx.font=linkFont;
+    ctx.fillStyle='#0b5fa5';
+    const linkLines=wrapInviteCardText(ctx,inviteUrl,contentWidth);
+    linkLines.forEach((line,i)=>{
+      ctx.fillText(line,padding,linkLabelY+38+(i*34));
+    });
+    const codeY=linkLabelY+38+(linkLines.length*34)+52;
+    ctx.font='600 24px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+    ctx.fillStyle='rgba(19, 49, 77, .7)';
+    ctx.fillText(`${String(t('roomRoomId'))}: ${String(roomCode||'').trim()}`,padding,codeY);
+    return canvas.toDataURL('image/png');
+  }catch(err){
+    console.error('room invite card generation failed',err);
+    return qrDataUrl;
+  }
+}
 function extractRoomInviteCodeFromLocation(){
   if(typeof window==='undefined')return'';
   try{
@@ -337,29 +486,38 @@ async function refreshRoomInviteQrDataUrl(force=false){
   if(!roomCode){
     state.room.inviteUrl='';
     state.room.inviteQrDataUrl='';
+    state.room.inviteCardDataUrl='';
     state.room.inviteQrLoading=false;
     state.room.inviteQrError='';
     return;
   }
   const inviteUrl=roomInviteUrlFromCode(roomCode);
-  const inviteQrPayload=roomInviteShareTextFromCode(roomCode);
-  if(!force&&state.room.inviteQrPayload===inviteQrPayload&&state.room.inviteQrDataUrl){
+  const inviteMessage=roomInviteShareTextFromCode(roomCode);
+  if(!force&&state.room.inviteUrl===inviteUrl&&state.room.inviteQrPayload===inviteMessage&&state.room.inviteQrDataUrl&&state.room.inviteCardDataUrl){
     return;
   }
   const requestToken=++roomInviteQrRequestToken;
   state.room.inviteUrl=inviteUrl;
-  state.room.inviteQrPayload=inviteQrPayload;
+  state.room.inviteQrPayload=inviteMessage;
   state.room.inviteQrLoading=true;
   state.room.inviteQrError='';
   render();
   try{
-    const dataUrl=await QRCode.toDataURL(inviteQrPayload,{errorCorrectionLevel:'M',margin:1,width:280,color:{dark:'#111111',light:'#ffffff'}});
+    const qrDataUrl=await QRCode.toDataURL(inviteUrl,{errorCorrectionLevel:'M',margin:1,width:280,color:{dark:'#111111',light:'#ffffff'}});
+    const cardDataUrl=await buildRoomInviteCardDataUrl({
+      qrDataUrl,
+      roomCode,
+      inviteMessage,
+      inviteUrl
+    });
     if(requestToken!==roomInviteQrRequestToken)return;
-    state.room.inviteQrDataUrl=dataUrl;
+    state.room.inviteQrDataUrl=qrDataUrl;
+    state.room.inviteCardDataUrl=cardDataUrl||qrDataUrl;
   }catch(err){
     if(requestToken!==roomInviteQrRequestToken)return;
     console.error('room invite qr generation failed',err);
     state.room.inviteQrDataUrl='';
+    state.room.inviteCardDataUrl='';
     state.room.inviteQrError=t('roomInviteQrFail');
   }finally{
     if(requestToken!==roomInviteQrRequestToken)return;
@@ -421,7 +579,7 @@ function guardAction(key,windowMs=800){
 }
 
 const app=document.getElementById('app');
-const state={language:'zh-HK',screen:'home',screenBeforeConfig:'home',showRules:false,showLog:false,showLogSheet:false,logTouched:false,showScoreGuide:false,opponentProfileName:'',mottoPeekName:'',selected:new Set(),drag:{id:null,moved:false},playAnimKey:'',autoPassKey:'',score:5000,suggestCost:0,recommendation:null,recommendHint:'',logFab:{x:null,y:null},home:{mode:'solo',name:'玩家',gender:'male',avatarChoice:'male',aiDifficulty:'normal',backColor:'red',theme:'ocean',showIntro:false,showLeaderboard:false,showMoreSettings:false,google:{signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',pictureLoaded:false,gender:'',profileMissing:false,hydrating:false},leaderboard:{rows:[],sort:'totalDelta',period:'all',limit:20},activeRooms:{rows:[],loading:false,loadedAt:0,error:''}},room:{id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:false,inviteOpen:false,error:'',started:false,unsub:null,selfSeat:-1,recordedGameKey:'',lastMoveKey:'',playerId:'',pendingStart:false,lastResultPlayers:null,inviteUrl:'',inviteQrDataUrl:'',inviteQrLoading:false,inviteQrError:'',pendingInviteCode:'',inviteQrPayload:'',adPromptGameKey:''},sessionId:'',solo:{players:[],botNames:[],totals:[5000,5000,5000,5000],currentSeat:0,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',history:[],aiDifficulty:'normal',lastCardBreach:null},emote:{open:false,active:null},serviceBell:{foodCallout:null}};
+const state={language:'zh-HK',screen:'home',screenBeforeConfig:'home',showRules:false,showLog:false,showLogSheet:false,logTouched:false,showScoreGuide:false,opponentProfileName:'',mottoPeekName:'',selected:new Set(),drag:{id:null,moved:false},playAnimKey:'',autoPassKey:'',score:5000,suggestCost:0,recommendation:null,recommendHint:'',logFab:{x:null,y:null},home:{mode:'solo',name:'玩家',gender:'male',avatarChoice:'male',aiDifficulty:'normal',backColor:'red',theme:'ocean',showIntro:false,showLeaderboard:false,showMoreSettings:false,google:{signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',pictureLoaded:false,gender:'',profileMissing:false,hydrating:false},leaderboard:{rows:[],sort:'totalDelta',period:'all',limit:20},activeRooms:{rows:[],loading:false,loadedAt:0,error:''}},room:{id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:false,inviteOpen:false,error:'',started:false,unsub:null,selfSeat:-1,recordedGameKey:'',lastMoveKey:'',playerId:'',pendingStart:false,lastResultPlayers:null,inviteUrl:'',inviteQrDataUrl:'',inviteCardDataUrl:'',inviteQrLoading:false,inviteQrError:'',pendingInviteCode:'',inviteQrPayload:'',adPromptGameKey:''},sessionId:'',solo:{players:[],botNames:[],totals:[5000,5000,5000,5000],currentSeat:0,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',history:[],aiDifficulty:'normal',lastCardBreach:null},emote:{open:false,active:null},serviceBell:{foodCallout:null}};
 const {
   EMOTE_STICKERS,
   cardImagePath,
