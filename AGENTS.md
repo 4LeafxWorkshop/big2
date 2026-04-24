@@ -39,4 +39,4 @@
 - Skip the build for documentation-only changes such as `.md` edits.
 
 ## Popunder Ad
-- Use this ad URL when starting a new game and keep focus on the game tab: `https://omg10.com/4/10798765`
+- Use this ad URL when starting a new game and keep focus on the game tab: `https://omg10.com/4/10921720`

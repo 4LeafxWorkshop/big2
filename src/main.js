@@ -383,7 +383,7 @@ function matchGuestPlayerId(roomData){
 }
 function runPopunderAd(){
   if(APP_CHANNEL==='STORE')return;
-  const url='https://omg10.com/4/10798765';
+  const url='https://omg10.com/4/10921720';
   try{
     let win=armedPopunderWindow;
     if(win&&!win.closed){
