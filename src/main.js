@@ -1563,7 +1563,9 @@ const googleSessionHelpers=createGoogleSessionHelpers({
   syncLeaderboardProfile,
   loadActiveRoomPointer,
   refreshLeaderboard,
-  render
+  render,
+  afterSuccessfulSignIn:()=>{void maybeAutoJoinPendingRoomInvite();},
+  afterSessionReady:()=>{void maybeAutoJoinPendingRoomInvite();}
 });
 const {
   clearGoogleSession,
@@ -6180,5 +6182,6 @@ document.addEventListener('visibilitychange',()=>{
     }
   }
 });
+syncPendingRoomInviteFromLocation();
 window.addEventListener('load',()=>{if(state.screen==='home')onGoogleScriptLoaded(renderGoogleInline);},{once:true});
 loadGoogleSession();bootFirebase();syncViewport();render();
