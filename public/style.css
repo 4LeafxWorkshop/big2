@@ -9221,7 +9221,7 @@ body[data-screen='game'] .result-avatar {
 }
 body[data-screen='game'] .result-avatar-wrap .lobby-seat-host-badge-text,
 body[data-screen='game'] .player-avatar-wrap .lobby-seat-host-badge-text {
-  left: -14px;
+  left: -26px;
   right: auto;
   bottom: -2px;
   top: auto;
