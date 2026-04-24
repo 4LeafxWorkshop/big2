@@ -385,7 +385,6 @@ function matchGuestPlayerId(roomData){
 function runPopunderAd(){
   if(APP_CHANNEL==='STORE')return;
   const url='https://omg10.com/4/10798765';
-  const isIos=isIOSDevice();
   try{
     let win=armedPopunderWindow;
     if(win&&!win.closed){
@@ -401,11 +400,7 @@ function runPopunderAd(){
       win=window.open(url,'big2_ad_tab');
     }
     armedPopunderWindow=win&&!win.closed?win:null;
-    if(!win){
-      if(isIos)return;
-      window.location.href=url;
-      return;
-    }
+    if(!win)return;
     try{win.blur();}catch{}
     try{window.focus();}catch{}
   }catch(err){
