@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Big 2</title>
+  <script>
+    (function(){
+      var path=window.location.pathname||'';
+      var search=window.location.search||'';
+      var hash=window.location.hash||'';
+      var parts=path.split('/').filter(Boolean);
+      var idx=parts.findIndex(function(part){
+        var lower=String(part||'').toLowerCase();
+        return lower==='join'||lower==='room'||lower==='invite';
+      });
+      if(idx>=0&&parts[idx+1]){
+        var code=encodeURIComponent(String(parts[idx+1]||'').trim().toUpperCase());
+        var cut=path.indexOf('/'+parts[idx]);
+        var base=cut>=0?path.slice(0,cut):path;
+        if(!base.endsWith('/'))base+='/';
+        var extra=search?('&'+search.slice(1)):'';
+        window.location.replace(base+'?join='+code+extra+hash);
+        return;
+      }
+      window.location.replace('./'+search+hash);
+    })();
+  </script>
+</head>
+<body></body>
+</html>
