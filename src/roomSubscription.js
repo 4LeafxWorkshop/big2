@@ -1,4 +1,13 @@
 export function createRoomSubscriptionController(deps){
+  function normalizeEmail(value){
+    return String(value??'').trim().toLowerCase();
+  }
+  function roomPlayerMatchesCurrentUser(entry){
+    const currentEmail=normalizeEmail(deps.currentUserEmail?.());
+    const entryEmail=normalizeEmail(entry?.email);
+    if(currentEmail&&entryEmail&&entryEmail===currentEmail)return true;
+    return String(entry?.uid||'')===String(deps.baseRoomPlayerId());
+  }
   async function resolveRoomDocByDirectory(roomId='',code=''){
     const roomIdText=String(roomId||'').trim();
     const codeText=String(code||'').trim().toUpperCase();
@@ -127,9 +136,10 @@ export function createRoomSubscriptionController(deps){
       void syncRoomHostIfNeeded(ref,data);
       const prevRoomData=liveState.room.data;
       let resolvedId=String(liveState.room.playerId||'').trim();
+      const matchedCurrent=Array.isArray(data.players)?data.players.find((p)=>roomPlayerMatchesCurrentUser(p))||null:null;
       if(!resolvedId||!Array.isArray(data.players)||!data.players.some((p)=>String(p?.uid||'')===resolvedId)){
         const guestMatch=deps.matchGuestPlayerId(data);
-        resolvedId=guestMatch||deps.baseRoomPlayerId();
+        resolvedId=String(matchedCurrent?.uid||'').trim()||guestMatch||deps.baseRoomPlayerId();
       }
       liveState.room.playerId=resolvedId;
       liveState.home.mode='room';
@@ -137,9 +147,9 @@ export function createRoomSubscriptionController(deps){
       if((String(data.status||'')==='lobby'||String(data.status||'')==='starting')&&deps.refreshRoomInviteQrDataUrl){
         void deps.refreshRoomInviteQrDataUrl(false);
       }
-      const selfEntry=Array.isArray(data.players)
+      const selfEntry=matchedCurrent||(Array.isArray(data.players)
         ?data.players.find((p)=>String(p?.uid||'')===String(resolvedId))
-        :null;
+        :null);
       deps.setRoomResultExpiryReached(deps.roomResultExpired(data));
       if(deps.roomLifecycleExpired(data,now)){
         void roomDb.collection(deps.FIRESTORE_ROOMS_COLLECTION).doc(roomId).delete().catch(()=>{});
@@ -268,9 +278,8 @@ export function createRoomSubscriptionController(deps){
         const local=String(localStorage.getItem(deps.LOCAL_ROOM_KEY)||'').trim();
         if(local&&!state.room.id){
           const resolved=await resolveRoomDocByDirectory(local,'');
-          const playerId=deps.baseRoomPlayerId();
           const players=Array.isArray(resolved?.doc?.data?.()?.players)?resolved.doc.data().players:[];
-          if(resolved&&players.some((p)=>String(p?.uid||'')===String(playerId))){
+          if(resolved&&players.some((p)=>roomPlayerMatchesCurrentUser(p))){
             void connectToRoom(local,'');
           }else{
             try{localStorage.removeItem(deps.LOCAL_ROOM_KEY);}catch{}
@@ -290,9 +299,8 @@ export function createRoomSubscriptionController(deps){
       const roomId=String(data.currentRoomId??'').trim();
       if(!roomId)return;
       const resolved=await resolveRoomDocByDirectory(roomId,'');
-      const playerId=deps.baseRoomPlayerId();
       const players=Array.isArray(resolved?.doc?.data?.()?.players)?resolved.doc.data().players:[];
-      if(resolved&&players.some((p)=>String(p?.uid||'')===String(playerId))){
+      if(resolved&&players.some((p)=>roomPlayerMatchesCurrentUser(p))){
         void connectToRoom(roomId,'');
       }else{
         await ref.set({currentRoomId:'',updatedAt:Date.now()},{merge:true});

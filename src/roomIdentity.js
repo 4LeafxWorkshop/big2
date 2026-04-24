@@ -1,4 +1,8 @@
 export function createRoomIdentityHelpers({getState,getFirebaseAuth}){
+  function currentUserEmail(){
+    return String(getState()?.home?.google?.email??'').trim().toLowerCase();
+  }
+
   function currentAuthUserUid(){
     return String(getFirebaseAuth()?.currentUser?.uid??'').trim();
   }
@@ -24,6 +28,7 @@ export function createRoomIdentityHelpers({getState,getFirebaseAuth}){
   return{
     baseRoomPlayerId,
     currentAuthUserUid,
+    currentUserEmail,
     currentRoomPlayerId
   };
 }

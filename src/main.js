@@ -99,10 +99,9 @@ function isRoomPlayerActive(entry,status,now){
 }
 function isRoomPlayerHuman(entry){
   const uid=String(entry?.uid||'').trim();
-  if(!uid)return false;
   if(uid.startsWith('bot:'))return false;
-  if(uid.startsWith('uid:')||uid.startsWith('guest:'))return true;
-  return false;
+  if(uid)return true;
+  return Boolean(String(entry?.email||'').trim());
 }
 function roomHumanPlayers(roomData){
   const players=Array.isArray(roomData?.players)?roomData.players:[];
@@ -1192,6 +1191,7 @@ const roomIdentityHelpers=createRoomIdentityHelpers({
 const {
   baseRoomPlayerId,
   currentAuthUserUid,
+  currentUserEmail,
   currentRoomPlayerId
 }=roomIdentityHelpers;
 const {
@@ -1804,6 +1804,7 @@ const roomMutationsController=createRoomMutationsController({
   currentHumanScoreValue,
   currentRoomDb,
   currentRoomPlayerId,
+  currentUserEmail,
   getFirebaseDb:()=>firebaseDb,
   getState:()=>state,
   nextRoomIdleExpiry,
@@ -1828,6 +1829,7 @@ const roomActionsController=createRoomActionsController({
   collectMainSettings,
   connectToRoom,
   currentHumanScoreValue,
+  currentUserEmail,
   ensureSingleRoomMembership,
   findRoomByCode,
   gateGuestRoomAccess,
@@ -1862,6 +1864,7 @@ const roomSubscriptionController=createRoomSubscriptionController({
   baseRoomPlayerId,
   clearRoomStartPending,
   currentAuthUserUid,
+  currentUserEmail,
   currentRoomDb,
   deleteRoomDirectory,
   findRoomDirectoryByCode,
@@ -1916,6 +1919,25 @@ function roomPlayerIds(players){
   });
   return Array.from(seen);
 }
+function normalizedRoomPlayerEmail(value){
+  return String(value??'').trim().toLowerCase().slice(0,120);
+}
+function roomPlayerMatchesIdentity(entry,{playerId='',email=''}={}){
+  const targetEmail=normalizedRoomPlayerEmail(email);
+  const entryEmail=normalizedRoomPlayerEmail(entry?.email);
+  if(targetEmail&&entryEmail&&entryEmail===targetEmail)return true;
+  return String(entry?.uid??'').trim()===String(playerId??'').trim();
+}
+function findRoomPlayerByIdentity(roomData,{playerId='',email=''}={}){
+  const roster=Array.isArray(roomData?.players)?roomData.players:[];
+  return roster.find((entry)=>roomPlayerMatchesIdentity(entry,{playerId,email}))||null;
+}
+function findCurrentRoomPlayerEntry(roomData){
+  return findRoomPlayerByIdentity(roomData,{
+    playerId:currentRoomPlayerId(),
+    email:currentUserEmail()
+  });
+}
 function normalizeRoomTotals(totals){
   if(Array.isArray(totals)&&totals.length===4)return totals.map((v)=>clampScoreValue(v));
   return[5000,5000,5000,5000];
@@ -1933,6 +1955,7 @@ function sanitizeRoomPlayerEntry(entry){
   const timeoutStrikesRaw=Number(entry?.timeoutStrikes);
   const next={
     uid:String(entry?.uid||'').trim(),
+    email:normalizedRoomPlayerEmail(entry?.email),
     name:String(entry?.name||'').slice(0,32),
     gender:String(entry?.gender||'male')==='female'?'female':'male',
     picture:String(entry?.picture||'').trim(),
@@ -2024,7 +2047,9 @@ async function dropSelfFromRoom(roomDoc,playerId){
     if(!snap.exists)return;
     const data=snap.data()??{};
     const players=Array.isArray(data.players)?[...data.players]:[];
-    const remaining=players.filter((p)=>String(p.uid)!==String(playerId));
+    const email=currentUserEmail();
+    const leaving=players.find((p)=>roomPlayerMatchesIdentity(p,{playerId,email}))||null;
+    const remaining=players.filter((p)=>!roomPlayerMatchesIdentity(p,{playerId,email}));
     const now=Date.now();
     const status=String(data.status??'lobby');
     if(remaining.length===players.length)return;
@@ -2045,7 +2070,7 @@ async function dropSelfFromRoom(roomDoc,playerId){
       shouldDeleteDirectory=true;
       return;
     }
-    const hostLeaving=String(data.hostId)===String(playerId);
+    const hostLeaving=leaving?String(data.hostId)===String(leaving.uid):String(data.hostId)===String(playerId);
     const hostUpdate=hostLeaving
       ?{hostId:String(remainingHumans[0]?.uid??remaining[0]?.uid??''),hostName:String(remainingHumans[0]?.name??remaining[0]?.name??'')}
       :{};
@@ -2075,8 +2100,7 @@ async function ensureSingleRoomMembership(targetRoomId=''){
   }
   const data=existing.data()??{};
   const status=String(data.status||'');
-  const players=Array.isArray(data.players)?data.players:[];
-  const entry=players.find((p)=>String(p.uid)===String(playerId));
+  const entry=findRoomPlayerByIdentity(data,{playerId,email:currentUserEmail()});
   if(!entry){
     await dropSelfFromRoom(existing,playerId);
     return{ok:true,cleared:true};
@@ -2108,9 +2132,8 @@ async function gateUserRoomAccess(targetRoomId=''){
     }
     const roomData=resolved.doc.data()??{};
     const roomStatus=String(roomData.status||'');
-    const roomPlayers=Array.isArray(roomData.players)?roomData.players:[];
     const playerId=baseRoomPlayerId();
-    const entry=roomPlayers.find((p)=>String(p.uid)===String(playerId));
+    const entry=findRoomPlayerByIdentity(roomData,{playerId,email:currentUserEmail()});
     if(!entry){
       await ref.set({currentRoomId:'',updatedAt:Date.now()},{merge:true});
       return{ok:true,cleared:true};
@@ -2171,6 +2194,7 @@ async function queryRecentRoomDirectories(){
 }
 async function loadActiveRoomsFromDirectoryDocs(directoryDocs){
   const currentPlayerId=currentRoomPlayerId();
+  const currentEmail=currentUserEmail();
   const currentRoomId=String(state.room.id||'').trim();
   const now=Date.now();
   const rows=[];
@@ -2245,8 +2269,10 @@ async function loadActiveRoomsFromDirectoryDocs(directoryDocs){
     }
     const roster=Array.isArray(row.roster)?row.roster:[];
     const humans=roster.filter((entry)=>isRoomPlayerHuman(entry));
-    const selfListed=currentPlayerId&&roster.some((entry)=>String(entry?.uid||'')===currentPlayerId);
+    const selfListed=roster.some((entry)=>roomPlayerMatchesIdentity(entry,{playerId:currentPlayerId,email:currentEmail}));
     if(selfListed&&(!currentRoomId||currentRoomId!==roomId)){
+      await dropSelfFromRoom(liveEntry,currentPlayerId);
+      if(!currentRoomId)await updateActiveRoomPointer('');
       hiddenRooms+=1;
       continue;
     }
@@ -2340,7 +2366,8 @@ function roomSeatForPlayer(roomData,playerId){
   return Number.isFinite(Number(entry?.seat))?Number(entry.seat):-1;
 }
 function roomSelfSeat(roomData){
-  return roomSeatForPlayer(roomData,currentRoomPlayerId());
+  const entry=findCurrentRoomPlayerEntry(roomData);
+  return Number.isFinite(Number(entry?.seat))?Number(entry.seat):-1;
 }
 function resolveRoomEmoteSeat(roomData,raw){
   const explicitSeat=Number(raw?.seat);

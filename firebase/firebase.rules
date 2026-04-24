@@ -337,6 +337,7 @@ service cloud.firestore {
       (!('gameVersion' in d) || d.gameVersion is int);
   }
 
+
   function isValidRoomEmote(v) {
     return
       v == null ||

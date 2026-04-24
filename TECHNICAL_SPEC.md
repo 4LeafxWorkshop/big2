@@ -158,7 +158,7 @@ Related engineering docs:
 
 ## 11.1 Firestore Rules Deploy
 - Firebase projects for current rules deploy:
-  - `Stream-0523`
+  - `stream-0523`
   - `fourleafbig2`
   - `fourleafbig2-bot`
   - `peugeot-0523`
@@ -169,7 +169,7 @@ Related engineering docs:
 - Login check:
   - `npx firebase-tools login:list`
 - Rules deploy:
-  - `npx firebase-tools deploy --only firestore:rules --project Stream-0523`
+  - `npx firebase-tools deploy --only firestore:rules --project stream-0523`
   - `npx firebase-tools deploy --only firestore:rules --project fourleafbig2`
   - `npx firebase-tools deploy --only firestore:rules --project fourleafbig2-bot`
   - `npx firebase-tools deploy --only firestore:rules --project peugeot-0523`

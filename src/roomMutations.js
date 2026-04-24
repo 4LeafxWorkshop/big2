@@ -232,6 +232,7 @@ export function createRoomMutationsController(deps){
     const uid=deps.currentRoomPlayerId();
     if(!uid)return;
     const desiredName=String(state.home.name||'Player').slice(0,32);
+    const desiredEmail=String(deps.currentUserEmail?.()||'').trim().toLowerCase();
     const desiredGender=state.home.gender==='female'?'female':'male';
     const desiredPic=deps.authPictureUrl();
     try{
@@ -246,6 +247,7 @@ export function createRoomMutationsController(deps){
         const next=players.map((p)=>{
           const patch=deps.sanitizeRoomPlayerEntry(p);
           if(String(p.uid)!==uid)return patch;
+          if(desiredEmail&&String(p.email??'').trim().toLowerCase()!==desiredEmail){patch.email=desiredEmail;touched=true;}
           if(desiredName&&String(p.name??'')!==desiredName){patch.name=desiredName;touched=true;}
           if(desiredGender&&String(p.gender??'')!==desiredGender){patch.gender=desiredGender;touched=true;}
           if(String(p.picture??'').trim()!==desiredPic){patch.picture=desiredPic;touched=true;}

@@ -44,6 +44,7 @@ export function createRoomActionsController(deps){
         return;
       }
       const uid=deps.baseRoomPlayerId();
+      const email=String(deps.currentUserEmail?.()||'').trim().toLowerCase();
       state.room.playerId=uid;
       state.room.code=code;
       state.room.pendingInviteCode='';
@@ -76,7 +77,7 @@ export function createRoomActionsController(deps){
           expiresAt:deps.nextRoomIdleExpiry(now),
           maxPlayers:4,
           isPrivate:false,
-          players:[{uid,name,gender:state.home.gender==='female'?'female':'male',picture:deps.authPictureUrl(),isHost:true,seat:0,lastSeen:now}],
+          players:[{uid,email,name,gender:state.home.gender==='female'?'female':'male',picture:deps.authPictureUrl(),isHost:true,seat:0,lastSeen:now}],
           playerIds:[uid],
           settings:deps.collectMainSettings(),
           totals:[deps.currentHumanScoreValue(),5000,5000,5000],
@@ -187,6 +188,7 @@ export function createRoomActionsController(deps){
         return;
       }
       const uid=deps.baseRoomPlayerId();
+      const email=String(deps.currentUserEmail?.()||'').trim().toLowerCase();
       state.room.playerId=uid;
       state.room.code=code;
       state.room.pendingInviteCode='';
@@ -203,6 +205,8 @@ export function createRoomActionsController(deps){
         const picture=deps.authPictureUrl();
         const matchesSelfIdentity=(entry)=>{
           if(!entry||!deps.isRoomPlayerHuman(entry))return false;
+          const entryEmail=String(entry.email||'').trim().toLowerCase();
+          if(email&&entryEmail===email)return true;
           const entryUid=String(entry.uid||'').trim();
           if(entryUid===uid)return true;
           const entryName=String(entry.name||'').trim();
@@ -237,7 +241,7 @@ export function createRoomActionsController(deps){
             const idx=players.findIndex((p)=>p===candidates[0]);
             if(idx>=0){
               const oldUid=String(players[idx]?.uid||'');
-              players[idx]={...players[idx],uid,name,gender,picture,lastSeen:now};
+              players[idx]={...players[idx],uid,email,name,gender,picture,lastSeen:now};
               if(oldUid&&hostId===oldUid){
                 hostId=uid;
                 hostName=name;
@@ -253,7 +257,7 @@ export function createRoomActionsController(deps){
           let seat=0;
           while(usedSeats.has(seat)&&seat<4)seat+=1;
           if(seat>=4)throw new Error('room full');
-          players.push({uid,name,gender,picture,isHost:false,seat,lastSeen:now});
+          players.push({uid,email,name,gender,picture,isHost:false,seat,lastSeen:now});
         }
         const updates={players,playerIds:deps.roomPlayerIds(players),updatedAt:now,hostId,hostName};
         const selfSeat=Number(players.find((p)=>String(p?.uid||'')===uid)?.seat);
