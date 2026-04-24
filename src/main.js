@@ -419,7 +419,7 @@ function guardAction(key,windowMs=800){
 }
 
 const app=document.getElementById('app');
-const state={language:'zh-HK',screen:'home',screenBeforeConfig:'home',showRules:false,showLog:false,showLogSheet:false,logTouched:false,showScoreGuide:false,opponentProfileName:'',mottoPeekName:'',selected:new Set(),drag:{id:null,moved:false},playAnimKey:'',autoPassKey:'',score:5000,suggestCost:0,recommendation:null,recommendHint:'',logFab:{x:null,y:null},home:{mode:'solo',name:'玩家',gender:'male',avatarChoice:'male',aiDifficulty:'normal',backColor:'red',theme:'ocean',showIntro:false,showLeaderboard:false,showMoreSettings:false,google:{signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',pictureLoaded:false,gender:'',profileMissing:false,hydrating:false},leaderboard:{rows:[],sort:'totalDelta',period:'all',limit:20},activeRooms:{rows:[],loading:false,loadedAt:0,error:''}},room:{id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:false,inviteOpen:false,error:'',started:false,unsub:null,selfSeat:-1,recordedGameKey:'',lastMoveKey:'',playerId:'',pendingStart:false,lastResultPlayers:null,inviteUrl:'',inviteQrDataUrl:'',inviteQrLoading:false,inviteQrError:'',pendingInviteCode:''},sessionId:'',solo:{players:[],botNames:[],totals:[5000,5000,5000,5000],currentSeat:0,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',history:[],aiDifficulty:'normal',lastCardBreach:null},emote:{open:false,active:null},serviceBell:{foodCallout:null}};
+const state={language:'zh-HK',screen:'home',screenBeforeConfig:'home',showRules:false,showLog:false,showLogSheet:false,logTouched:false,showScoreGuide:false,opponentProfileName:'',mottoPeekName:'',selected:new Set(),drag:{id:null,moved:false},playAnimKey:'',autoPassKey:'',score:5000,suggestCost:0,recommendation:null,recommendHint:'',logFab:{x:null,y:null},home:{mode:'solo',name:'玩家',gender:'male',avatarChoice:'male',aiDifficulty:'normal',backColor:'red',theme:'ocean',showIntro:false,showLeaderboard:false,showMoreSettings:false,google:{signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',pictureLoaded:false,gender:'',profileMissing:false,hydrating:false},leaderboard:{rows:[],sort:'totalDelta',period:'all',limit:20},activeRooms:{rows:[],loading:false,loadedAt:0,error:''}},room:{id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:false,inviteOpen:false,error:'',started:false,unsub:null,selfSeat:-1,recordedGameKey:'',lastMoveKey:'',playerId:'',pendingStart:false,lastResultPlayers:null,inviteUrl:'',inviteQrDataUrl:'',inviteQrLoading:false,inviteQrError:'',pendingInviteCode:'',adPromptGameKey:''},sessionId:'',solo:{players:[],botNames:[],totals:[5000,5000,5000,5000],currentSeat:0,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',history:[],aiDifficulty:'normal',lastCardBreach:null},emote:{open:false,active:null},serviceBell:{foodCallout:null}};
 const {
   EMOTE_STICKERS,
   cardImagePath,
@@ -2308,6 +2308,13 @@ function applyRoomGameSnapshot(roomData){
   const game=roomData?.game;
   if(!game||!Array.isArray(game.players)||!game.players.length)return;
   syncRoomEmote(roomData);
+  if(String(roomData?.status??'')==='playing'){
+    const roomGameKey=`${String(state.room.id||roomData?.id||'')}:${String(roomData?.gameVersion??'')}`;
+    if(roomGameKey&&state.room.adPromptGameKey!==roomGameKey){
+      state.room.adPromptGameKey=roomGameKey;
+      schedulePopunderAfterRender(350);
+    }
+  }
   const move=game.lastMove;
   if(move&&typeof move==='object'){
     const key=`${move.type||''}:${move.seat||0}:${move.ts||0}`;

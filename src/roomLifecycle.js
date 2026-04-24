@@ -14,7 +14,7 @@ export function createRoomLifecycleController(deps){
     deps.setRoomResultExpiryReached(false);
     void deps.updateActiveRoomPointer('');
     deps.clearRoomStartPending();
-    state.room={id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:false,inviteOpen:false,error:'',started:false,unsub:null,selfSeat:-1,recordedGameKey:'',lastMoveKey:'',playerId:'',pendingStart:false,lastResultPlayers:null,inviteUrl:'',inviteQrDataUrl:'',inviteQrLoading:false,inviteQrError:'',pendingInviteCode:''};
+    state.room={id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:false,inviteOpen:false,error:'',started:false,unsub:null,selfSeat:-1,recordedGameKey:'',lastMoveKey:'',playerId:'',pendingStart:false,lastResultPlayers:null,inviteUrl:'',inviteQrDataUrl:'',inviteQrLoading:false,inviteQrError:'',pendingInviteCode:'',adPromptGameKey:''};
     state.room.playerId='';
     if(state.home.mode==='room')state.home.mode='solo';
   }
@@ -32,7 +32,7 @@ export function createRoomLifecycleController(deps){
     deps.setRecommendHint('');
     state.opponentProfileName='';
     state.home.mode='solo';
-    state.room={id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:Boolean(openLobby),inviteOpen:false,error:String(msg||''),started:false,unsub:null,selfSeat:-1,recordedGameKey:'',lastMoveKey:'',playerId:'',pendingStart:false,lastResultPlayers:null,inviteUrl:'',inviteQrDataUrl:'',inviteQrLoading:false,inviteQrError:'',pendingInviteCode:''};
+    state.room={id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:Boolean(openLobby),inviteOpen:false,error:String(msg||''),started:false,unsub:null,selfSeat:-1,recordedGameKey:'',lastMoveKey:'',playerId:'',pendingStart:false,lastResultPlayers:null,inviteUrl:'',inviteQrDataUrl:'',inviteQrLoading:false,inviteQrError:'',pendingInviteCode:'',adPromptGameKey:''};
     state.room.playerId='';
     deps.render();
   }
