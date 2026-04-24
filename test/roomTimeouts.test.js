@@ -20,6 +20,9 @@ function createController(overrides={}){
     cloneRoomGame(game){
       return structuredClone(game);
     },
+    isRoomPlayerHuman(entry){
+      return Boolean(entry?.isHuman);
+    },
     t(key){
       return key;
     }
@@ -47,8 +50,14 @@ test('applyTimeoutStrikeToRoomState increments strike count before replacement t
 test('applyTimeoutStrikeToRoomState replaces player with bot at max strikes', ()=>{
   const {controller,logs}=createController();
   const result=controller.applyTimeoutStrikeToRoomState(
-    [{uid:'uid:1',name:'Alice',seat:0,timeoutStrikes:1,isHuman:true}],
-    {players:[{uid:'uid:1',name:'Alice',gender:'female',picture:'x',isHuman:true}]},
+    [
+      {uid:'uid:1',name:'Alice',seat:0,timeoutStrikes:1,isHuman:true},
+      {uid:'uid:2',name:'Bob',seat:1,timeoutStrikes:0,isHuman:true}
+    ],
+    {players:[
+      {uid:'uid:1',name:'Alice',gender:'female',picture:'x',isHuman:true},
+      {uid:'uid:2',name:'Bob',gender:'male',picture:'',isHuman:true}
+    ]},
     0,
     123
   );
@@ -61,6 +70,21 @@ test('applyTimeoutStrikeToRoomState replaces player with bot at max strikes', ()
   assert.equal(result.players[0].timeoutStrikes,0);
   assert.equal(result.game.players[0].uid,'bot:0:Bot 1');
   assert.equal(result.game.players[0].isHuman,false);
+  assert.deepEqual(logs,['Alice roomKickedTimeout']);
+});
+
+test('applyTimeoutStrikeToRoomState deletes room when timed out player is the last human', ()=>{
+  const {controller,logs}=createController();
+  const result=controller.applyTimeoutStrikeToRoomState(
+    [{uid:'uid:1',name:'Alice',seat:0,timeoutStrikes:1,isHuman:true}],
+    {players:[{uid:'uid:1',name:'Alice',gender:'female',picture:'x',isHuman:true}]},
+    0,
+    123
+  );
+  assert.equal(result.changed,true);
+  assert.equal(result.kicked,true);
+  assert.equal(result.roomDeleted,true);
+  assert.deepEqual(result.players,[]);
   assert.deepEqual(logs,['Alice roomKickedTimeout']);
 });
 

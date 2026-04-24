@@ -34,6 +34,12 @@ export function createRoomTimeoutController(deps){
       return{players:roster,game:nextGame,changed:true,kicked:false,strikes};
     }
     const kickedName=String(current.name||'Player');
+    const remainingHumans=roster.filter((p,playerIdx)=>playerIdx!==idx&&deps.isRoomPlayerHuman(p));
+    if(!remainingHumans.length){
+      nextGame=deps.cloneRoomGame(game);
+      deps.addRoomSystemLog(nextGame,`${kickedName} ${deps.t('roomKickedTimeout')}`);
+      return{players:[],game:nextGame,changed:true,kicked:true,roomDeleted:true,strikes,playerName:kickedName};
+    }
     const replaced=replaceTimedOutPlayerWithBot(roster,seat);
     const replacement=replaced.find((p)=>Number(p?.seat)===seat)||buildReplacementBotEntry(seat);
     nextGame=deps.cloneRoomGame(game);

@@ -1879,6 +1879,7 @@ const roomSubscriptionController=createRoomSubscriptionController({
   readRoomDirectory,
   refreshRoomInviteQrDataUrl,
   render,
+  schedulePopunderAfterRender,
   roomPlayerIds,
   roomLifecycleExpired,
   roomResultExpired,
@@ -2387,6 +2388,7 @@ const roomTimeoutController=createRoomTimeoutController({
   addRoomSystemLog,
   botProfileForSeat,
   cloneRoomGame,
+  isRoomPlayerHuman,
   t
 });
 function applyTimeoutStrikeToRoomState(players,game,seat,now=Date.now()){
@@ -2492,13 +2494,6 @@ function applyRoomGameSnapshot(roomData){
   const game=roomData?.game;
   if(!game||!Array.isArray(game.players)||!game.players.length)return;
   syncRoomEmote(roomData);
-  if(String(roomData?.status??'')==='playing'){
-    const roomGameKey=`${String(state.room.id||roomData?.id||'')}:${String(roomData?.gameVersion??'')}`;
-    if(roomGameKey&&state.room.adPromptGameKey!==roomGameKey){
-      state.room.adPromptGameKey=roomGameKey;
-      schedulePopunderAfterRender(350);
-    }
-  }
   const move=game.lastMove;
   if(move&&typeof move==='object'){
     const key=`${move.type||''}:${move.seat||0}:${move.ts||0}`;
@@ -2666,6 +2661,10 @@ async function roomSubmitPlay(cards,seatOverride=null){
       if(timedOut&&target?.isHuman){
         const timeoutUpdate=applyTimeoutStrikeToRoomState(nextPlayers,game,seat,now);
         if(timeoutUpdate.changed){
+          if(timeoutUpdate.roomDeleted){
+            tx.delete(ref);
+            return;
+          }
           nextPlayers=timeoutUpdate.players;
           game=timeoutUpdate.game||game;
           target=game.players?.[seat];
@@ -2739,6 +2738,10 @@ async function roomSubmitPass(seatOverride=null){
       if(timedOut&&target?.isHuman){
         const timeoutUpdate=applyTimeoutStrikeToRoomState(nextPlayers,game,seat,now);
         if(timeoutUpdate.changed){
+          if(timeoutUpdate.roomDeleted){
+            tx.delete(ref);
+            return;
+          }
           nextPlayers=timeoutUpdate.players;
           game=timeoutUpdate.game||game;
           target=game.players?.[seat];

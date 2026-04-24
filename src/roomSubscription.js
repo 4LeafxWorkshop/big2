@@ -163,7 +163,15 @@ export function createRoomSubscriptionController(deps){
       }
       deps.startRoomPresencePing();
       deps.syncRoomSelfScoreIfNeeded();
+      const prevStatus=String(prevRoomData?.status||'');
       const roomStatus=String(data.status);
+      if(roomStatus==='playing'&&prevStatus!=='playing'){
+        const roomStartKey=`${String(roomId||'').trim()}:${String(data.gameVersion??'').trim()}`;
+        if(roomStartKey&&liveState.room.adPromptGameKey!==roomStartKey){
+          liveState.room.adPromptGameKey=roomStartKey;
+          deps.schedulePopunderAfterRender?.(350);
+        }
+      }
       if(liveState.room.pendingStart&&(roomStatus==='starting'||roomStatus==='playing')){
         deps.clearRoomStartPending();
       }
