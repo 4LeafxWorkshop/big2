@@ -2004,7 +2004,7 @@ body[data-screen='home'] .home-wrap {
 }
 .lobby-seat-host-badge-text {
   position: absolute;
-  left: -2px;
+  left: 1px;
   bottom: -2px;
   display: inline-flex;
   align-items: center;
