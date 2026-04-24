@@ -113,7 +113,7 @@ export function createFooterMenuHelpers(deps){
               ?'データは第三者マーケティング目的で販売せず、必要な期間のみ保持します。Cookieはブラウザで管理できますが、無効化するとログインや設定保存に影響する場合があります。お問い合わせや訂正・削除は連絡先からお願いします。'
               :'We do not sell your data for third‑party marketing and retain it only as needed before cleanup. You can manage cookies in your browser; disabling them may affect sign-in or preferences. For questions or correction/removal requests, contact us.';
     const aboutIntro=zh
-      ?'《鋤大D（Big Two）》網頁版專注於跨裝置一致體驗。'
+      ?'《鋤大D（Big Two）》網頁版，專注提供簡潔、順手、跨裝置一致的對局體驗。'
       :fr
         ?'Cette version web de Big Two vise une expérience cohérente sur tous les appareils.'
         :de
@@ -125,12 +125,12 @@ export function createFooterMenuHelpers(deps){
               :'This browser-based Big Two focuses on consistent play across devices.';
     const aboutList=zh
       ?[
-        '支援手機、平板與桌面快速開局',
+        '支援手機、平板與桌面，開局即玩',
         '提供單人對戰與房間對戰',
         '排行榜、個人設定與成績追蹤',
         '清晰出牌提示、即時狀態與計分明細',
-        '食物提示、表情特效與即時通知',
-        '支援橫向與直向版面，手機同網頁版一致'
+        '房間代碼分享、等待室與即時通知',
+        '支援橫向與直向版面，操作一致'
       ]
       :fr
         ?[
@@ -177,7 +177,7 @@ export function createFooterMenuHelpers(deps){
                 'Responsive portrait and landscape layouts'
               ];
     const aboutNotes=zh
-      ?'我們持續優化效能、互動回饋、版面適配與穩定性，並依玩家回饋改進。'
+      ?'我們持續優化效能、互動手感、版面適配與穩定性，並根據玩家回饋調整細節。'
       :fr
         ?'Nous améliorons en continu les performances, le feedback, l’interface et la stabilité selon les retours.'
         :de
