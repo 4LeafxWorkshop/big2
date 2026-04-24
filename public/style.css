@@ -1534,11 +1534,31 @@ body[data-screen='home'] .home-wrap {
   -webkit-tap-highlight-color: transparent;
 }
 .room-code-copy-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
   font-size: .7rem;
   color: rgba(236, 248, 241, .84);
   letter-spacing: .04em;
   text-transform: none;
   white-space: nowrap;
+}
+.room-code-copy-icon {
+  font-size: .9em;
+  line-height: 1;
+  opacity: .92;
+  margin: 0;
+}
+.room-expiry-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.room-expiry-icon {
+  font-size: .92em;
+  line-height: 1;
+  opacity: .92;
 }
 .room-code-copy .room-code {
   display: block;
@@ -1560,10 +1580,10 @@ body[data-screen='home'] .home-wrap {
   color: #f1fff4 !important;
 }
 .room-share-icon {
-  width: 18px;
-  height: 18px;
+  font-size: 18px;
+  line-height: 1;
   flex: 0 0 auto;
-  display: block;
+  display: inline-block;
 }
 .room-share-panel {
   display: grid;
@@ -2108,6 +2128,9 @@ body[data-screen='home'] .home-wrap {
   justify-content: space-between;
   gap: 8px;
   flex-wrap: wrap;
+}
+.room-join-card .room-actions {
+  justify-content: flex-end;
 }
 .room-start-btn {
   display: inline-flex;
@@ -7565,6 +7588,9 @@ body[data-screen='game'] .side-zone:not(.log-collapsed) .history-list {
   .room-actions,
   .room-privacy-row {
     gap: 6px;
+  }
+  .room-join-card .room-actions {
+    justify-content: flex-end;
   }
   .room-privacy-row {
     align-items: flex-start;
