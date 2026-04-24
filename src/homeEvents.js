@@ -259,21 +259,15 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       void refreshRoomInviteQrDataUrl(true);
     };
     const shareRoomInviteWithQr=async(code)=>{
-      const cardDataUrl=String(state.room.inviteCardDataUrl||'').trim();
-      if(cardDataUrl&&navigator.share){
-        try{
-          const response=await fetch(cardDataUrl);
-          const blob=await response.blob();
-          const file=new File([blob],`big2-room-${code}.png`,{type:blob.type||'image/png'});
-          if(!navigator.canShare||navigator.canShare({files:[file]})){
-            await navigator.share({
-              title:t('roomInviteTitle'),
-              files:[file]
-            });
-            return true;
-          }
-        }catch{}
-      }
+      if(!navigator.share)return false;
+      try{
+        await navigator.share({
+          title:t('roomInviteTitle'),
+          text:roomInviteShareTextFromCode(code),
+          url:roomInviteUrlFromCode(code)
+        });
+        return true;
+      }catch{}
       return false;
     };
     doc.getElementById('room-copy')?.addEventListener('click',async()=>{
@@ -329,47 +323,26 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
     doc.getElementById('room-share-wechat')?.addEventListener('click',async()=>{
       const code=String(state.room.code||state.room.pendingInviteCode||'').trim();
       if(!code)return;
-      const cardDataUrl=String(state.room.inviteCardDataUrl||'').trim();
-      try{
-        if(cardDataUrl&&navigator.share){
-          const response=await fetch(cardDataUrl);
-          const blob=await response.blob();
-          const file=new File([blob],`big2-room-${code}.png`,{type:blob.type||'image/png'});
-          if(!navigator.canShare||navigator.canShare({files:[file]})){
-            await navigator.share({
-              title:t('roomInviteTitle'),
-              files:[file]
-            });
-            return;
-          }
-        }
-        if(navigator.share){
+      if(navigator.share){
+        try{
           await navigator.share({
             title:t('roomInviteTitle'),
             text:roomInviteShareTextFromCode(code),
             url:roomInviteUrlFromCode(code)
           });
           return;
-        }
-      }catch{}
+        }catch{}
+      }
       try{
-        await navigator.clipboard?.writeText?.(roomInviteUrlFromCode(code));
+        await navigator.clipboard?.writeText?.(roomInviteShareTextFromCode(code));
       }catch{}
     });
     doc.getElementById('room-share-download')?.addEventListener('click',async()=>{
       const code=String(state.room.code||state.room.pendingInviteCode||'').trim();
       if(!code)return;
-      const cardDataUrl=String(state.room.inviteCardDataUrl||'').trim();
-      if(cardDataUrl&&navigator.clipboard?.write&&window.ClipboardItem){
-        try{
-          const response=await fetch(cardDataUrl);
-          const blob=await response.blob();
-          await navigator.clipboard.write([new ClipboardItem({[blob.type||'image/png']:blob})]);
-          return;
-        }catch{}
-      }
+      const inviteMessage=roomInviteShareTextFromCode(code);
       try{
-        await navigator.clipboard?.writeText?.(roomInviteUrlFromCode(code));
+        await navigator.clipboard?.writeText?.(inviteMessage);
       }catch{}
     });
     doc.querySelectorAll('[data-room-expiry-reset]').forEach((btn)=>btn.addEventListener('click',async()=>{

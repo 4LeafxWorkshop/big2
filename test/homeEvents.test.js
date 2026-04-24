@@ -122,6 +122,10 @@ function bindWith(overrides={}){
     startSoloGame:overrides.startSoloGame??(()=>{}),
     armPopunderForGesture:overrides.armPopunderForGesture??(()=>{}),
     schedulePopunderAfterRender:overrides.schedulePopunderAfterRender??(()=>{}),
+    refreshRoomInviteQrDataUrl:overrides.refreshRoomInviteQrDataUrl??(()=>{}),
+    roomInviteUrlFromCode:overrides.roomInviteUrlFromCode??((code)=>`https://example.com/${code}`),
+    roomInviteShareTextFromCode:overrides.roomInviteShareTextFromCode??((code)=>`Invite ${code}`),
+    roomInviteWhatsappUrlFromCode:overrides.roomInviteWhatsappUrlFromCode??(()=>''), 
     legalMiniCopy:overrides.legalMiniCopy??(()=>({labels:{},content:{}}))
   });
   return {state,doc,win};
@@ -327,4 +331,44 @@ test('home binder updates difficulty styles and binds toggles', async()=>{
   assert.deepEqual(soundCalls,['sound-slider']);
   assert.deepEqual(calloutCalls,['callout-display-slider']);
   assert.deepEqual(emoteCalls,['emote-display-slider']);
+});
+
+test('home binder copies invite content as text only from download button', async()=>{
+  const downloadBtn=makeElement();
+  const clipboardWrites=[];
+  const previousNavigator=globalThis.navigator;
+  Object.defineProperty(globalThis,'navigator',{
+    configurable:true,
+    value:{
+      clipboard:{
+        async writeText(value){
+          clipboardWrites.push(value);
+        }
+      }
+    }
+  });
+  try{
+    bindWith({
+      document:makeDocument({byId:{'room-share-download':downloadBtn}}),
+      state:{
+        home:{mode:'home',showLeaderboard:false,leaderboard:{sort:'totalDelta',period:'all'}},
+        room:{joinOpen:false,error:'',joinOpenCountdown:15,pendingStart:false,code:'ABCD'},
+        showScoreGuide:false,
+        screen:'home',
+        opponentProfileName:''
+      },
+      roomInviteShareTextFromCode:(code)=>`Invite for ${code}`
+    });
+    await downloadBtn.dispatch('click');
+    assert.deepEqual(clipboardWrites,['Invite for ABCD']);
+  }finally{
+    if(previousNavigator===undefined){
+      delete globalThis.navigator;
+    }else{
+      Object.defineProperty(globalThis,'navigator',{
+        configurable:true,
+        value:previousNavigator
+      });
+    }
+  }
 });
