@@ -1975,8 +1975,10 @@ body[data-screen='home'] .home-wrap {
 }
 .lobby-seat-avatar-wrap {
   position: relative;
-  display: inline-block;
-  padding: 0 8px 14px 8px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  padding: 0 0 14px;
   line-height: 0;
 }
 .lobby-seat-avatar-anchor {
@@ -9219,7 +9221,7 @@ body[data-screen='game'] .result-avatar {
 }
 body[data-screen='game'] .result-avatar-wrap .lobby-seat-host-badge-text,
 body[data-screen='game'] .player-avatar-wrap .lobby-seat-host-badge-text {
-  left: -10px;
+  left: -14px;
   right: auto;
   bottom: -2px;
   top: auto;
