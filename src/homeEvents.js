@@ -258,6 +258,28 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       render();
       void refreshRoomInviteQrDataUrl(true);
     };
+    const shareRoomInviteWithQr=async(code)=>{
+      const inviteMessage=roomInviteShareTextFromCode(code);
+      const inviteUrl=roomInviteUrlFromCode(code);
+      const qrDataUrl=String(state.room.inviteQrDataUrl||'').trim();
+      if(qrDataUrl&&navigator.share){
+        try{
+          const response=await fetch(qrDataUrl);
+          const blob=await response.blob();
+          const file=new File([blob],`big2-room-${code}.png`,{type:blob.type||'image/png'});
+          if(!navigator.canShare||navigator.canShare({files:[file]})){
+            await navigator.share({
+              title:t('roomInviteTitle'),
+              text:inviteMessage,
+              url:inviteUrl,
+              files:[file]
+            });
+            return true;
+          }
+        }catch{}
+      }
+      return false;
+    };
     doc.getElementById('room-copy')?.addEventListener('click',async()=>{
       try{await navigator.clipboard?.writeText?.(String(state.room.code||''));}catch{}
     });
@@ -274,6 +296,7 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
     doc.getElementById('room-share-send')?.addEventListener('click',async()=>{
       const code=String(state.room.code||state.room.pendingInviteCode||'').trim();
       if(!code)return;
+      if(await shareRoomInviteWithQr(code))return;
       const inviteMessage=roomInviteShareTextFromCode(code);
       try{
         await navigator.clipboard?.writeText?.(inviteMessage);
