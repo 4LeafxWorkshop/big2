@@ -11,6 +11,8 @@
     "test": "node --test",
     "build:cap": "cross-env CAPACITOR=1 vite build",
     "build:cap:store": "cross-env CAPACITOR=1 VITE_APP_CHANNEL=store vite build",
+    "android:refresh": "node tools/android-refresh.mjs",
+    "android:refresh:store": "node tools/android-refresh.mjs --store",
     "preview": "vite preview",
     "cap:sync": "npx cap sync",
     "cap:open:ios": "npx cap open ios",

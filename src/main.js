@@ -1310,7 +1310,7 @@ async function hydrateProfileFromCloudByIdentity(identity){
           entry.name=name||entry.name;
           entry.email=email||entry.email;
           entry.gender=state.home.gender==='female'?'female':'male';
-          entry.picture=String(state.home.google?.picture??entry.picture??'').trim();
+          entry.picture=normalizeStoredHumanPicture(state.home.google?.picture??entry.picture??'');
           entry.settings=collectMainSettings();
           entry.totalScore=scoreFromStoredTotal(entry.totalScore);
           entry.updatedAt=Date.now();
@@ -1339,6 +1339,7 @@ async function hydrateProfileFromCloudByIdentity(identity){
     if(entry){
       entry.name=restoredName||entry.name;
       entry.gender=restoredGender;
+      if(restoredPicture)entry.picture=restoredPicture;
       entry.settings=collectMainSettings();
       entry.totalScore=restoredScore;
       entry.games=Number(d.games)||Number(entry.games)||0;
@@ -2906,6 +2907,7 @@ function identityLookupIds(identity){
   const ids=[
     String(identity?.id??'').trim(),
     String(identity?.email??'').trim().toLowerCase(),
+    String(currentAuthUserUid()??'').trim(),
     String(state.home.google?.uid??'').trim(),
     String(state.home.google?.sub??'').trim()
   ].filter(Boolean);
@@ -2926,13 +2928,18 @@ function identityLookupIds(identity){
   });
   return out;
 }
+function normalizeStoredHumanPicture(value){
+  const raw=String(value??'').trim();
+  if(!raw||raw==='null'||raw==='undefined'||raw==='[object Object]')return'';
+  return authPictureUrlFrom(raw)?raw:'';
+}
 function ensureLeaderboardEntry(store,identity){
   const safe=String(identity?.name??identity??'').trim().slice(0,32);
   if(!safe)return null;
   const email=String(identity?.email??'').trim().toLowerCase().slice(0,120);
   const gender=String(identity?.gender??state.home.gender??'male')==='female'?'female':'male';
   const isBot=isBotIdentity(identity);
-  const picture=isBot?'':String(identity?.picture??state.home.google?.picture??'').trim();
+  const picture=isBot?'':normalizeStoredHumanPicture(identity?.picture??state.home.google?.picture??'');
   const key=isBot
     ?safe.toLowerCase()
     :String(identity?.id??email??safe.toLowerCase()).trim().slice(0,180);
@@ -3015,9 +3022,16 @@ function computeLeaderboardRowsFromStore(store,period,sort,limit){
     const key=email||name.toLowerCase();
     if(!key)return;
     const current=merged[key];
-    if(!current||Number(entry.updatedAt||0)>=Number(current.updatedAt||0)){
-      merged[key]={...entry};
+    if(!current){
+      merged[key]={...entry,picture:normalizeStoredHumanPicture(entry.picture)};
+      return;
     }
+    const entryIsNewer=Number(entry.updatedAt||0)>=Number(current.updatedAt||0);
+    const latest=entryIsNewer?entry:current;
+    const older=entryIsNewer?current:entry;
+    const latestPicture=normalizeStoredHumanPicture(latest.picture);
+    const olderPicture=normalizeStoredHumanPicture(older.picture);
+    merged[key]={...older,...latest,picture:latestPicture||olderPicture||''};
   });
   const rows=Object.values(merged).map((entry)=>{
     const id=String(entry.id??'').trim();

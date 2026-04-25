@@ -165,6 +165,27 @@ export function createGoogleSessionHelpers({
     return Boolean(state.home.google.signedIn&&state.home.google.email);
   }
 
+  function normalizePictureString(raw){
+    const value=String(raw??'').trim();
+    if(!value)return'';
+    if(value==='null'||value==='undefined'||value==='[object Object]')return'';
+    return value;
+  }
+
+  function normalizePictureValue(value){
+    if(typeof value==='string')return normalizePictureString(value);
+    if(value&&typeof value==='object'){
+      const direct=
+        normalizePictureString(value.url)||
+        normalizePictureString(value.href)||
+        normalizePictureString(value.src)||
+        normalizePictureString(value.path)||
+        normalizePictureString(value.webPath);
+      if(direct)return direct;
+    }
+    return normalizePictureString(value);
+  }
+
   async function completeGoogleSignIn({
     token='',
     email='',
@@ -176,6 +197,8 @@ export function createGoogleSessionHelpers({
     const state=getState();
     token=String(token??'').trim();
     if(!token)return;
+    const tokenPayload=parseJwtPayload?.(token)??{};
+    let firebaseUid=String(state.home.google?.uid??'').trim();
     initFirebaseIfReady();
     try{
       const fb=getWindow().firebase;
@@ -185,15 +208,19 @@ export function createGoogleSessionHelpers({
         const res=await firebaseAuth.signInWithCredential(cred);
         const user=res?.user;
         if(user?.uid){
-          state.home.google.uid=String(user.uid).slice(0,128);
+          firebaseUid=String(user.uid).trim().slice(0,128);
+          state.home.google.uid=firebaseUid;
           if(!sub)state.home.google.sub=String(user.uid).slice(0,64);
+        }
+        if(!picture){
+          picture=normalizePictureValue(user?.photoURL??firebaseAuth?.currentUser?.photoURL);
         }
       }
     }catch{
     }
-    email=String(email??'').trim().toLowerCase().slice(0,120);
-    picture=String(picture??'').trim();
-    sub=String(sub??'').trim();
+    email=String(email??tokenPayload.email??'').trim().toLowerCase().slice(0,120);
+    picture=normalizePictureValue(picture)||normalizePictureValue(tokenPayload.picture);
+    sub=String(sub??tokenPayload.sub??'').trim();
     gender=String(gender??'').trim().toLowerCase();
     const googleGender=(gender==='female'||gender==='male')?gender:'';
     const signedIn=Boolean(email||sub);
@@ -202,7 +229,7 @@ export function createGoogleSessionHelpers({
       provider:'google',
       name:String(name??'').slice(0,18),
       email,
-      uid:String(sub).slice(0,128),
+      uid:String(firebaseUid||sub).slice(0,128),
       sub:String(sub).slice(0,64),
       token,
       picture,
@@ -222,7 +249,7 @@ export function createGoogleSessionHelpers({
         const emailKey=String(email).trim().toLowerCase().slice(0,120);
         if(emailKey)storage.setItem(sessionKey,JSON.stringify({email:emailKey}));
       }
-      if(hydrated?.ok&&hydrated.status==='found'){
+      if(hydrated?.ok){
         await syncLeaderboardProfile(currentLeaderboardIdentity());
       }
       if(state.home.showLeaderboard)refreshLeaderboard(true);
@@ -254,7 +281,7 @@ export function createGoogleSessionHelpers({
       token,
       email:String(user?.email??''),
       name:String(user?.name??''),
-      picture:String(user?.imageUrl??''),
+      picture:normalizePictureValue(user?.imageUrl),
       sub:String(user?.id??'')
     });
   }

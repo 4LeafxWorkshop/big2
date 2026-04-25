@@ -5,6 +5,7 @@ import {createGoogleSessionHelpers} from '../src/googleSession.js';
 
 function createState(){
   return{
+    score:5000,
     home:{
       google:{
         signedIn:false,
@@ -20,6 +21,9 @@ function createState(){
         profileMissing:false
       },
       showLeaderboard:false
+    },
+    solo:{
+      totals:[5000,5000,5000,5000]
     }
   };
 }
@@ -33,6 +37,10 @@ function createStorage(seed=''){
     setItem:(key,value)=>{data.set(key,String(value));},
     removeItem:(key)=>{data.delete(key);}
   };
+}
+
+function encodeJwtPayload(payload){
+  return `x.${Buffer.from(JSON.stringify(payload)).toString('base64url')}.y`;
 }
 
 test('loadGoogleSession restores cached browser email and profile', ()=>{
@@ -143,11 +151,11 @@ test('handleNativeGoogleUser signs into firebase and stores native profile', asy
   });
   assert.equal(state.home.google.signedIn,true);
   assert.equal(state.home.google.email,'native@example.com');
-  assert.equal(state.home.google.uid,'google-sub-1');
+  assert.equal(state.home.google.uid,'firebase-uid-1');
   assert.equal(state.home.google.sub,'google-sub-1');
   assert.equal(state.home.google.picture,'https://example.com/pic.png');
   assert.equal(storage.getItem('google-session'),JSON.stringify({email:'native@example.com'}));
-  assert.equal(syncIdentity,null);
+  assert.deepEqual(syncIdentity,{id:'native@example.com'});
 });
 
 test('handleNativeGoogleUser accepts top-level native idToken fallback', async()=>{
@@ -191,7 +199,102 @@ test('handleNativeGoogleUser accepts top-level native idToken fallback', async()
   });
   assert.equal(state.home.google.signedIn,true);
   assert.equal(state.home.google.email,'native2@example.com');
-  assert.equal(state.home.google.uid,'google-sub-2');
+  assert.equal(state.home.google.uid,'firebase-uid-2');
   assert.equal(state.home.google.sub,'google-sub-2');
   assert.equal(storage.getItem('google-session'),JSON.stringify({email:'native2@example.com'}));
+});
+
+test('handleNativeGoogleUser accepts object-shaped imageUrl payloads', async()=>{
+  const state=createState();
+  const helpers=createGoogleSessionHelpers({
+    getState:()=>state,
+    getWindow:()=>({
+      firebase:{
+        auth:{
+          GoogleAuthProvider:{
+            credential:(token)=>({token})
+          }
+        }
+      }
+    }),
+    getStorage:()=>createStorage(),
+    sessionKey:'google-session',
+    getFirebaseAuth:()=>({
+      signInWithCredential:async()=>({
+        user:{uid:'firebase-uid-3'}
+      })
+    }),
+    mergeBrowserGoogleProfile:(overrides)=>{state.home.google={...state.home.google,...overrides};},
+    applyCachedGoogleProfileFromStore:()=>false,
+    preloadGooglePicture:()=>{},
+    initFirebaseIfReady:()=>true,
+    hydrateProfileFromCloudByIdentity:async()=>({status:'not_found'}),
+    currentLeaderboardIdentity:()=>({id:state.home.google.email}),
+    syncLeaderboardProfile:async()=>{},
+    loadActiveRoomPointer:()=>{},
+    refreshLeaderboard:()=>{},
+    render:()=>{}
+  });
+  await helpers.handleNativeGoogleUser({
+    id:'google-sub-3',
+    email:'native3@example.com',
+    name:'Native User 3',
+    imageUrl:{url:'https://example.com/pic3.png'},
+    authentication:{idToken:'native-token-3'}
+  });
+  assert.equal(state.home.google.uid,'firebase-uid-3');
+  assert.equal(state.home.google.sub,'google-sub-3');
+  assert.equal(state.home.google.picture,'https://example.com/pic3.png');
+});
+
+test('handleNativeGoogleUser falls back to token picture and syncs profile on not_found hydrate', async()=>{
+  const state=createState();
+  let syncCalls=0;
+  const helpers=createGoogleSessionHelpers({
+    getState:()=>state,
+    getWindow:()=>({
+      firebase:{
+        auth:{
+          GoogleAuthProvider:{
+            credential:(token)=>({token})
+          }
+        }
+      }
+    }),
+    getStorage:()=>createStorage(),
+    sessionKey:'google-session',
+    getFirebaseAuth:()=>({
+      currentUser:{photoURL:''},
+      signInWithCredential:async()=>({
+        user:{uid:'firebase-uid-4',photoURL:''}
+      })
+    }),
+    mergeBrowserGoogleProfile:(overrides)=>{state.home.google={...state.home.google,...overrides};},
+    applyCachedGoogleProfileFromStore:()=>false,
+    preloadGooglePicture:()=>{},
+    initFirebaseIfReady:()=>true,
+    hydrateProfileFromCloudByIdentity:async()=>({status:'not_found'}),
+    currentLeaderboardIdentity:()=>({id:state.home.google.email}),
+    syncLeaderboardProfile:async()=>{syncCalls+=1;},
+    loadActiveRoomPointer:()=>{},
+    refreshLeaderboard:()=>{},
+    render:()=>{}
+  });
+  await helpers.handleNativeGoogleUser({
+    id:'google-sub-4',
+    email:'native4@example.com',
+    name:'Native User 4',
+    imageUrl:'',
+    authentication:{
+      idToken:encodeJwtPayload({
+        email:'native4@example.com',
+        sub:'google-sub-4',
+        picture:'https://example.com/pic4.png'
+      })
+    }
+  });
+  assert.equal(state.home.google.uid,'firebase-uid-4');
+  assert.equal(state.home.google.sub,'google-sub-4');
+  assert.equal(state.home.google.picture,'https://example.com/pic4.png');
+  assert.equal(syncCalls,1);
 });
