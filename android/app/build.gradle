@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace "com.seedservices.big2"
+    namespace "com.fourleafx.big2"
     compileSdk rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.seedservices.big2"
+        applicationId "com.fourleafx.big2"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1

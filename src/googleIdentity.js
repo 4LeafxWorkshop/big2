@@ -7,6 +7,9 @@ export function createGoogleIdentityController({
   getRender=()=>()=>{},
   signedInWithEmail,
   clearGoogleSession,
+  nativeGoogleSignIn=async()=>false,
+  nativeGoogleSignOut=async()=>false,
+  useNativeGoogleAuth=()=>false,
   handleCredentialResponse,
   authProviderBadgeHtml
 }){
@@ -73,6 +76,7 @@ export function createGoogleIdentityController({
     state.home.google={signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',pictureLoaded:false,gender:'',profileMissing:false,hydrating:false};
     clearGoogleSession();
     googleIdentityPrompted=false;
+    try{void nativeGoogleSignOut();}catch{}
     try{getWindow().google?.accounts?.id?.disableAutoSelect?.();}catch{}
     try{getFirebaseAuth()?.signOut?.();}catch{}
   }
@@ -107,6 +111,16 @@ export function createGoogleIdentityController({
     }
     slot.classList.remove('signed-in');
     nameRow?.classList.remove('signed-in-auth');
+    if(useNativeGoogleAuth()){
+      slot.innerHTML=`<button id="google-native-signin" class="auth-btn auth-btn-google">Google</button>`;
+      doc.getElementById('google-native-signin')?.addEventListener('click',()=>{
+        void nativeGoogleSignIn().then(()=>{
+          getRender()();
+        }).catch(()=>{
+        });
+      });
+      return;
+    }
     const hasGsi=Boolean(getWindow().google?.accounts?.id&&ensureGoogleIdentityInitialized());
     slot.innerHTML=`<div id="google-login-slot"></div>`;
     const gSlot=doc.getElementById('google-login-slot');

@@ -56,6 +56,7 @@ import {createRoomSubscriptionController} from './roomSubscription.js';
 import {createRoomTimeoutController} from './roomTimeouts.js';
 import {buildActiveRoomRow, buildRoomDirectoryDoc} from './roomDirectory.js';
 import {getNextSoloRoundWins, getNextSoloTotals, resetSoloSessionCarryoverState} from './soloState.js';
+import {GoogleAuth} from '@codetrix-studio/capacitor-google-auth';
 
 const RANKS=['3','4','5','6','7','8','9','10','J','Q','K','A','2'];
 const SUITS=[
@@ -1724,6 +1725,7 @@ const googleSessionHelpers=createGoogleSessionHelpers({
 });
 const {
   clearGoogleSession,
+  handleNativeGoogleUser,
   hydrateProfileBlocking,
   handleCredentialResponse,
   loadGoogleSession,
@@ -1739,6 +1741,16 @@ const googleIdentityController=createGoogleIdentityController({
   getRender:()=>render,
   signedInWithEmail,
   clearGoogleSession,
+  useNativeGoogleAuth:()=>isNativeAndroidApp(),
+  nativeGoogleSignIn:async()=>{
+    const user=await GoogleAuth.signIn();
+    await handleNativeGoogleUser(user);
+    return true;
+  },
+  nativeGoogleSignOut:async()=>{
+    await GoogleAuth.signOut();
+    return true;
+  },
   handleCredentialResponse,
   authProviderBadgeHtml
 });
@@ -3142,6 +3154,22 @@ function isCoarsePointer(){
 function isWebView(){
   const ua=String(navigator?.userAgent??'');
   return /\bwv\b/.test(ua)||/WebView/i.test(ua)||/(Android.*Version\/\d+\.\d+.*Chrome\/\d+\.\d+ Mobile)/i.test(ua);
+}
+function nativePlatform(){
+  const cap=window.Capacitor;
+  return String(cap?.getPlatform?.()??'').trim().toLowerCase();
+}
+function isNativeAndroidApp(){
+  const cap=window.Capacitor;
+  return Boolean(cap?.isNativePlatform?.()&&nativePlatform()==='android');
+}
+function initNativeGoogleAuth(){
+  if(!isNativeAndroidApp())return;
+  try{
+    GoogleAuth.initialize();
+  }catch(err){
+    console.warn('native google auth init failed',err);
+  }
 }
 function isStandaloneWebApp(){
   return Boolean(
@@ -6369,4 +6397,5 @@ document.addEventListener('visibilitychange',()=>{
 });
 syncPendingRoomInviteFromLocation();
 window.addEventListener('load',()=>{if(state.screen==='home')onGoogleScriptLoaded(renderGoogleInline);},{once:true});
+initNativeGoogleAuth();
 loadGoogleSession();bootFirebase();syncViewport();render();

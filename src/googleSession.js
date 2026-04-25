@@ -165,11 +165,17 @@ export function createGoogleSessionHelpers({
     return Boolean(state.home.google.signedIn&&state.home.google.email);
   }
 
-  async function handleCredentialResponse(response){
+  async function completeGoogleSignIn({
+    token='',
+    email='',
+    name='',
+    picture='',
+    sub='',
+    gender=''
+  }={}){
     const state=getState();
-    const token=String(response?.credential??'').trim();
+    token=String(token??'').trim();
     if(!token)return;
-    const p=parseJwtPayload?.(token)??{};
     initFirebaseIfReady();
     try{
       const fb=getWindow().firebase;
@@ -180,25 +186,26 @@ export function createGoogleSessionHelpers({
         const user=res?.user;
         if(user?.uid){
           state.home.google.uid=String(user.uid).slice(0,128);
-          state.home.google.sub=String(user.uid).slice(0,64);
+          if(!sub)state.home.google.sub=String(user.uid).slice(0,64);
         }
       }
     }catch{
     }
-    const email=String(p.email??'').trim().toLowerCase().slice(0,120);
-    const pic=String(p.picture??'').trim();
-    const gRaw=String(p.gender??p.sex??'').trim().toLowerCase();
-    const googleGender=(gRaw==='female'||gRaw==='male')?gRaw:'';
-    const signedIn=Boolean(email||String(p.sub??'').trim());
+    email=String(email??'').trim().toLowerCase().slice(0,120);
+    picture=String(picture??'').trim();
+    sub=String(sub??'').trim();
+    gender=String(gender??'').trim().toLowerCase();
+    const googleGender=(gender==='female'||gender==='male')?gender:'';
+    const signedIn=Boolean(email||sub);
     mergeBrowserGoogleProfile({
       signedIn,
       provider:'google',
-      name:String(p.name??'').slice(0,18),
+      name:String(name??'').slice(0,18),
       email,
-      uid:String(p.sub??'').slice(0,128),
-      sub:String(p.sub??'').slice(0,64),
+      uid:String(sub).slice(0,128),
+      sub:String(sub).slice(0,64),
       token,
-      picture:pic,
+      picture,
       pictureLoaded:false,
       gender:googleGender,
       profileMissing:false,
@@ -225,8 +232,36 @@ export function createGoogleSessionHelpers({
     render();
   }
 
+  async function handleCredentialResponse(response){
+    const token=String(response?.credential??'').trim();
+    if(!token)return;
+    const p=parseJwtPayload?.(token)??{};
+    const gRaw=String(p.gender??p.sex??'').trim().toLowerCase();
+    await completeGoogleSignIn({
+      token,
+      email:String(p.email??''),
+      name:String(p.name??''),
+      picture:String(p.picture??''),
+      sub:String(p.sub??''),
+      gender:gRaw
+    });
+  }
+
+  async function handleNativeGoogleUser(user){
+    const token=String(user?.authentication?.idToken??user?.idToken??'').trim();
+    if(!token)return;
+    await completeGoogleSignIn({
+      token,
+      email:String(user?.email??''),
+      name:String(user?.name??''),
+      picture:String(user?.imageUrl??''),
+      sub:String(user?.id??'')
+    });
+  }
+
   return{
     clearGoogleSession,
+    handleNativeGoogleUser,
     hydrateProfileBlocking,
     handleCredentialResponse,
     loadGoogleSession,

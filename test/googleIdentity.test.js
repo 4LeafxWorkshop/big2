@@ -27,9 +27,28 @@ function createState(){
 
 function createDoc(){
   const gIdOnload={attrs:new Map(),setAttribute(key,value){this.attrs.set(key,value);},getAttribute(key){return this.attrs.get(key);}};
+  const nodes=new Map();
+  const googleNameInline={
+    innerHTML:'',
+    classList:{add(){},remove(){}},
+    parentElement:{classList:{add(){},remove(){}}}
+  };
   return{
     gIdOnload,
-    getElementById:(id)=>id==='g_id_onload'?gIdOnload:null,
+    googleNameInline,
+    getElementById:(id)=>{
+      if(id==='g_id_onload')return gIdOnload;
+      if(id==='google-name-inline')return googleNameInline;
+      if(id==='google-native-signin'){
+        if(!nodes.has(id))nodes.set(id,{addEventListener(type,handler){this[type]=handler;}});
+        return nodes.get(id);
+      }
+      if(id==='google-signout'){
+        if(!nodes.has(id))nodes.set(id,{addEventListener(type,handler){this[type]=handler;}});
+        return nodes.get(id);
+      }
+      return null;
+    },
     querySelector:()=>null,
     createElement:(tag)=>({tag,async:false,src:'',onload:null,onerror:null}),
     head:{appendChild:()=>{}}
@@ -79,4 +98,33 @@ test('signOutCurrentProvider clears browser google state and calls firebase sign
   assert.equal(state.home.google.email,'');
   assert.equal(signOutCalled,true);
   assert.equal(disableAutoSelectCalled,true);
+});
+
+test('renderGoogleInline uses native Android button when native auth is enabled', async()=>{
+  const state=createState();
+  state.home.google.signedIn=false;
+  state.home.google.email='';
+  const doc=createDoc();
+  let signInCalls=0;
+  let renderCalls=0;
+  const controller=createGoogleIdentityController({
+    getState:()=>state,
+    getWindow:()=>({}),
+    getDocument:()=>doc,
+    getFirebaseAuth:()=>null,
+    getT:()=>((x)=>x),
+    getRender:()=>()=>{renderCalls+=1;},
+    signedInWithEmail:()=>false,
+    clearGoogleSession:()=>{},
+    nativeGoogleSignIn:async()=>{signInCalls+=1;},
+    nativeGoogleSignOut:async()=>{},
+    useNativeGoogleAuth:()=>true,
+    handleCredentialResponse:()=>{},
+    authProviderBadgeHtml:()=>''
+  });
+  controller.renderGoogleInline();
+  assert.match(doc.googleNameInline.innerHTML,/google-native-signin/);
+  await doc.getElementById('google-native-signin').click();
+  assert.equal(signInCalls,1);
+  assert.equal(renderCalls,1);
 });

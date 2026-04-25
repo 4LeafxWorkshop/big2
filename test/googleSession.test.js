@@ -100,3 +100,98 @@ test('saveGoogleSession and clearGoogleSession update storage', ()=>{
   helpers.clearGoogleSession();
   assert.equal(storage.getItem('google-session'),null);
 });
+
+test('handleNativeGoogleUser signs into firebase and stores native profile', async()=>{
+  const state=createState();
+  const storage=createStorage();
+  let syncIdentity=null;
+  const helpers=createGoogleSessionHelpers({
+    getState:()=>state,
+    getWindow:()=>({
+      firebase:{
+        auth:{
+          GoogleAuthProvider:{
+            credential:(token)=>({token})
+          }
+        }
+      }
+    }),
+    getStorage:()=>storage,
+    sessionKey:'google-session',
+    getFirebaseAuth:()=>({
+      signInWithCredential:async()=>({
+        user:{uid:'firebase-uid-1'}
+      })
+    }),
+    mergeBrowserGoogleProfile:(overrides)=>{state.home.google={...state.home.google,...overrides};},
+    applyCachedGoogleProfileFromStore:()=>false,
+    preloadGooglePicture:()=>{},
+    initFirebaseIfReady:()=>true,
+    hydrateProfileFromCloudByIdentity:async()=>({status:'not_found'}),
+    currentLeaderboardIdentity:()=>({id:state.home.google.email}),
+    syncLeaderboardProfile:async(identity)=>{syncIdentity=identity;},
+    loadActiveRoomPointer:()=>{},
+    refreshLeaderboard:()=>{},
+    render:()=>{}
+  });
+  await helpers.handleNativeGoogleUser({
+    id:'google-sub-1',
+    email:'native@example.com',
+    name:'Native User',
+    imageUrl:'https://example.com/pic.png',
+    authentication:{idToken:'native-token'}
+  });
+  assert.equal(state.home.google.signedIn,true);
+  assert.equal(state.home.google.email,'native@example.com');
+  assert.equal(state.home.google.uid,'google-sub-1');
+  assert.equal(state.home.google.sub,'google-sub-1');
+  assert.equal(state.home.google.picture,'https://example.com/pic.png');
+  assert.equal(storage.getItem('google-session'),JSON.stringify({email:'native@example.com'}));
+  assert.equal(syncIdentity,null);
+});
+
+test('handleNativeGoogleUser accepts top-level native idToken fallback', async()=>{
+  const state=createState();
+  const storage=createStorage();
+  const helpers=createGoogleSessionHelpers({
+    getState:()=>state,
+    getWindow:()=>( {
+      firebase:{
+        auth:{
+          GoogleAuthProvider:{
+            credential:(token)=>({token})
+          }
+        }
+      }
+    }),
+    getStorage:()=>storage,
+    sessionKey:'google-session',
+    getFirebaseAuth:()=>( {
+      signInWithCredential:async()=>( {
+        user:{uid:'firebase-uid-2'}
+      })
+    }),
+    mergeBrowserGoogleProfile:(overrides)=>{state.home.google={...state.home.google,...overrides};},
+    applyCachedGoogleProfileFromStore:()=>false,
+    preloadGooglePicture:()=>{},
+    initFirebaseIfReady:()=>true,
+    hydrateProfileFromCloudByIdentity:async()=>({status:'not_found'}),
+    currentLeaderboardIdentity:()=>({id:state.home.google.email}),
+    syncLeaderboardProfile:async()=>{},
+    loadActiveRoomPointer:()=>{},
+    refreshLeaderboard:()=>{},
+    render:()=>{}
+  });
+  await helpers.handleNativeGoogleUser({
+    id:'google-sub-2',
+    idToken:'native-token-top-level',
+    email:'native2@example.com',
+    name:'Native User 2',
+    imageUrl:'https://example.com/pic2.png'
+  });
+  assert.equal(state.home.google.signedIn,true);
+  assert.equal(state.home.google.email,'native2@example.com');
+  assert.equal(state.home.google.uid,'google-sub-2');
+  assert.equal(state.home.google.sub,'google-sub-2');
+  assert.equal(storage.getItem('google-session'),JSON.stringify({email:'native2@example.com'}));
+});

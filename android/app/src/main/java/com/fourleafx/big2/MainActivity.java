@@ -1,4 +1,4 @@
-package com.seedservices.big2;
+package com.fourleafx.big2;
 
 import com.getcapacitor.BridgeActivity;
 

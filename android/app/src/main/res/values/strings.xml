@@ -1,7 +1,8 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Big2</string>
-    <string name="title_activity_main">Big2</string>
-    <string name="package_name">com.seedservices.big2</string>
-    <string name="custom_url_scheme">com.seedservices.big2</string>
+    <string name="app_name">港式鋤大D Big2</string>
+    <string name="title_activity_main">港式鋤大D Big2</string>
+    <string name="package_name">com.fourleafx.big2</string>
+    <string name="custom_url_scheme">com.fourleafx.big2</string>
+    <string name="server_client_id">1029664741170-fp23lh13vgpjpg6omci855j2ofag4khc.apps.googleusercontent.com</string>
 </resources>
