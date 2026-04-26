@@ -8,6 +8,9 @@ export function renderRoomLobbyOverlay(params){
     roomTitle,
     roomCode,
     roomLobbyCountdown,
+    inviteQrDataUrl,
+    inviteQrLoading,
+    inviteQrError,
     roomPrivacyRow,
     roomSeats,
     roomErrorHtml,
@@ -18,16 +21,22 @@ export function renderRoomLobbyOverlay(params){
     esc
   }=params;
   if(!visible)return'';
+
   const roomCodeCopyLabel=String(t('roomCodeClickCopy'));
   const roomCodeCopyLabelOpen=roomCodeCopyLabel.replace(/[）)]$/,'');
   const roomCodeCopyLabelClose=roomCodeCopyLabel.endsWith('）')?'）':roomCodeCopyLabel.endsWith(')')?')':'';
-  return`<div class="room-overlay"><div class="room-card room-lobby-card room-card-icon"><div class="room-head room-lobby-head"><div class="room-lobby-head-title"><span class="room-corner-icon room-corner-icon-reception" aria-hidden="true">${roomLobbyIconHtml}</span><h3>${roomTitle}</h3></div><div class="room-expiry-row room-expiry-top"><span class="room-expiry-label"><i class="fa-solid fa-clock room-expiry-icon" aria-hidden="true"></i><span>${t('roomCountdown')}</span></span><button type="button" class="room-expiry-reset-btn" data-room-expiry-reset="1"><strong data-room-countdown-value>${esc(roomLobbyCountdown)}</strong></button></div></div><div class="room-id-center"><button id="room-copy" type="button" class="room-code-copy" aria-label="${roomCodeCopyLabel}"><span class="room-code-copy-label"><span>${esc(roomCodeCopyLabelOpen)}</span><i class="fa-solid fa-copy room-code-copy-icon" aria-hidden="true"></i><span>${esc(roomCodeCopyLabelClose)}</span></span><strong class="room-code">${esc(roomCode)}</strong></button><button id="room-share-invite" type="button" class="secondary room-icon-btn room-share-link-btn"><i class="fa-solid fa-share-nodes room-share-icon" aria-hidden="true"></i><span>${t('roomShareLink')}</span></button></div>${roomPrivacyRow}<div class="lobby-table">${roomSeats}</div>${roomErrorHtml}<div class="room-actions">${roomStartControl}${roomPendingHint}<button id="room-leave" class="secondary" ${roomStarting?'disabled':''}>${t('roomLeave')}</button></div></div></div>`;
-}
+  const qrHtml=inviteQrLoading
+    ?`<div class="room-lobby-qr-placeholder">${t('roomInviteLoading')}</div>`
+    :inviteQrDataUrl
+      ?`<img class="room-lobby-qr" src="${inviteQrDataUrl}" alt="${t('roomInviteQr')}"/>`
+      :`<div class="room-lobby-qr-placeholder">${t('roomInviteEmpty')}</div>`;
+  const inviteQrNote=inviteQrError?`<div class="hint room-error">${esc(inviteQrError)}</div>`:'';
+  const roomLobbyTitle=String(t('roomLobbyCodeTitle'));
+  const roomLobbySubtitle=String(t('roomLobbyCodeSubtitle'));
+  const roomCopyButtonLabel=String(t('roomCopyCodeBtn'));
+  const roomQrCaption=String(t('roomInviteQrCaption'));
 
-export function renderRoomInviteOverlay(params){
-  const {visible,invitePanelHtml=''}=params;
-  if(!visible)return'';
-  return`<div class="room-overlay room-invite-overlay"><div id="room-invite-backdrop" class="room-backdrop"></div><div class="room-card room-invite-card room-card-icon">${invitePanelHtml}</div></div>`;
+  return`<div class="room-overlay"><div class="room-card room-lobby-card room-card-icon"><div class="room-head room-lobby-head"><div class="room-lobby-head-title"><span class="room-corner-icon room-corner-icon-reception" aria-hidden="true">${roomLobbyIconHtml}</span><h3>${roomTitle}</h3></div><div class="room-expiry-row room-expiry-top"><span class="room-expiry-label"><i class="fa-solid fa-clock room-expiry-icon" aria-hidden="true"></i><span>${t('roomCountdown')}</span></span><button type="button" class="room-expiry-reset-btn" data-room-expiry-reset="1"><strong data-room-countdown-value>${esc(roomLobbyCountdown)}</strong></button></div></div><div class="room-id-center room-id-center-with-qr"><div class="room-lobby-main"><div class="room-lobby-copy-block"><div class="room-lobby-copy-title">${roomLobbyTitle}</div><strong class="room-code">${esc(roomCode)}</strong><p class="room-lobby-copy-subtitle">${roomLobbySubtitle}</p></div><div class="room-share-box"><button id="room-copy" type="button" class="secondary room-share-copy-btn" aria-label="${roomCodeCopyLabel}"><i class="fa-solid fa-copy room-share-link-icon" aria-hidden="true"></i><span>${roomCopyButtonLabel}</span></button><button id="room-share-send" type="button" class="primary room-share-link-btn room-share-action-btn"><i class="fa-solid fa-link room-share-link-icon" aria-hidden="true"></i><span>${t('roomShareLink')}</span></button><div class="room-share-inline-actions"><button id="room-share-whatsapp" type="button" class="secondary room-share-mini-btn" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp room-share-mini-icon" aria-hidden="true"></i></button><button id="room-share-wechat" type="button" class="secondary room-share-mini-btn" aria-label="WeChat"><i class="fa-brands fa-weixin room-share-mini-icon" aria-hidden="true"></i></button><button id="room-share-download" type="button" class="secondary room-share-mini-btn" aria-label="Download QR"><i class="fa-solid fa-download room-share-mini-icon" aria-hidden="true"></i></button></div></div>${inviteQrNote}</div><div class="room-id-divider" aria-hidden="true"></div><button id="room-copy-qr" type="button" class="room-lobby-qr-box" aria-label="${t('roomInviteQr')}"><div class="room-lobby-qr-box-inner">${qrHtml}<div class="room-lobby-qr-caption">${roomQrCaption}</div></div></button></div>${roomPrivacyRow}<div class="lobby-table">${roomSeats}</div><div class="room-actions">${roomStartControl}${roomPendingHint}<button id="room-leave" class="secondary" ${roomStarting?'disabled':''}>${t('roomLeave')}</button></div></div></div>`;
 }
 
 export function renderRoomJoinOverlay(params){
@@ -62,5 +71,11 @@ export function renderRoomJoinOverlay(params){
   const hiddenNote=hiddenCount?`<span class="room-active-hidden">${t('roomActiveHidden')}: ${hiddenCount}</span>`:'';
   const createRoomSection=`<div class="room-create-section">${renderRoomCreateCardHtml({t})}</div>`;
   const activeRoomsBlock=`<div class="room-active-block"><div class="room-active-head"><span>${t('roomActiveList')}</span>${hiddenNote}<button id="room-active-refresh" class="secondary room-icon-btn"><span class="room-inline-icon room-active-refresh-icon" aria-hidden="true"></span><span class="room-active-refresh-label">${t('roomActiveRefresh')}</span></button></div><div class="room-active-grid">${cards}${empty}</div></div>`;
-  return`<div class="room-overlay"><div class="room-card room-join-card room-card-icon"><div class="room-head"><span class="room-corner-icon room-corner-icon-reception" aria-hidden="true">${roomLobbyIconHtml}</span><h3>${t('roomLobby')}</h3></div><label class="field"><span>${t('roomEnterCode')}</span><div class="room-code-row"><input id="room-code-input" class="room-input" maxlength="8" value="${esc(roomCodeValue||'')}" placeholder="${t('roomCodeExample')}" autocapitalize="characters" spellcheck="false" inputmode="latin"/><button id="room-join-confirm" class="secondary room-icon-btn room-join-top-btn"><svg class="room-inline-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M10 6a4 4 0 1 1 0 8 4 4 0 0 1 0-8m0 10c4.418 0 8 1.79 8 4v1H2v-1c0-2.21 3.582-4 8-4m10-8h-2V6h-2v2h-2v2h2v2h2v-2h2z"/></svg><span>${t('roomJoin')}</span></button></div></label><div class="room-join-divider" aria-hidden="true"><span>${t('roomOr')}</span></div>${createRoomSection}${activeRoomsBlock}${roomErrorHtml}<div class="room-actions"><button id="room-join-cancel" class="secondary room-icon-btn"><span>${t('home')}</span></button></div></div></div>`;
+  const roomCodeValueSafe=String(roomCodeValue||'').toUpperCase().slice(0,6);
+  const roomCodeBoxes=Array.from({length:6},(_,i)=>{
+    const ch=roomCodeValueSafe[i]||'';
+    const filled=Boolean(ch);
+    return`<span class="room-code-box ${filled?'filled':''}">${filled?esc(ch):''}</span>`;
+  }).join('');
+  return`<div class="room-overlay"><div class="room-card room-join-card room-card-icon"><div class="room-head"><span class="room-corner-icon room-corner-icon-reception" aria-hidden="true">${roomLobbyIconHtml}</span><h3>${t('roomLobby')}</h3></div><div class="field room-code-field"><span>${t('roomEnterCode')}</span><div class="room-code-row room-code-row-segmented"><div class="room-code-segments" aria-hidden="true">${roomCodeBoxes}</div><input id="room-code-input" class="room-input room-code-input-overlay" maxlength="6" value="${esc(roomCodeValueSafe)}" placeholder="${t('roomCodeExample')}" autocapitalize="characters" spellcheck="false" inputmode="latin"/><button id="room-join-confirm" class="secondary room-icon-btn room-join-top-btn"><svg class="room-inline-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M10 6a4 4 0 1 1 0 8 4 4 0 0 1 0-8m0 10c4.418 0 8 1.79 8 4v1H2v-1c0-2.21 3.582-4 8-4m10-8h-2V6h-2v2h-2v2h2v2h2v-2h2z"/></svg><span>${t('roomJoin')}</span></button></div><div class="room-code-hint"><i class="fa-solid fa-circle-info" aria-hidden="true"></i><span>${t('roomEnterCodeHint')}</span></div><div class="room-code-extra"><div class="room-join-divider" aria-hidden="true"><span>${t('roomOr')}</span></div>${createRoomSection}</div></div>${activeRoomsBlock}${roomErrorHtml}<div class="room-actions"><button id="room-join-cancel" class="secondary room-icon-btn"><span>${t('home')}</span></button></div></div></div>`;
 }

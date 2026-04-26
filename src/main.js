@@ -40,7 +40,7 @@ import {createGoogleSessionHelpers} from './googleSession.js';
 import {createOpponentProfileHelpers, resolveOpponentProfileModalState, resolveRoomSeatProfile} from './opponentProfile.js';
 import {createOpponentsEventsBinder} from './opponentsEvents.js';
 import {createProfileSettingsHelpers} from './profileSettings.js';
-import {renderRoomInviteOverlay, renderRoomJoinOverlay, renderRoomLobbyOverlay} from './roomView.js';
+import {renderRoomJoinOverlay, renderRoomLobbyOverlay} from './roomView.js';
 import {createFooterMenuHelpers} from './footerMenu.js';
 import {createIntroGuideHelpers} from './introGuide.js';
 import {createRoomLifecycleController} from './roomLifecycle.js';
@@ -534,23 +534,6 @@ async function maybeAutoJoinPendingRoomInvite(){
   }finally{
     roomInviteJoinInFlight=false;
   }
-}
-function renderRoomInvitePanelHtml({
-  roomCode,
-  inviteUrl,
-  inviteMessage,
-  inviteQrDataUrl,
-  inviteQrLoading,
-  inviteQrError,
-  t,
-  esc
-}){
-  const qrHtml=inviteQrLoading
-    ?`<div class="room-invite-placeholder">${t('roomInviteLoading')}</div>`
-    :inviteQrDataUrl
-      ?`<img class="room-invite-qr" src="${inviteQrDataUrl}" alt="${t('roomInviteQr')}"/>`
-      :`<div class="room-invite-placeholder">${t('roomInviteEmpty')}</div>`;
-  return`<div class="room-share-panel room-share-panel-simple"><div class="room-share-head"><div><h3>${t('roomInviteTitle')}</h3><p class="room-share-subtitle">${t('roomInviteSubtitle')}</p></div><button id="room-invite-close" class="secondary room-icon-btn room-close-btn"><span>${t('close')}</span></button></div><div class="room-share-grid-simple"><div class="room-share-left"><div class="room-share-qr-box">${qrHtml}</div></div><div class="room-share-right"><div id="room-share-code-copy" class="room-share-code-pill" role="button" tabindex="0" aria-label="${t('roomCodeClickCopy')}" title="${t('roomCodeClickCopy')}"><span class="room-share-code-label">ID:</span><strong class="room-share-code">${esc(roomCode)}</strong></div><button id="room-share-send" class="primary room-share-main-btn"><i class="fa-solid fa-link" aria-hidden="true"></i><span>${t('roomShareLink')}</span></button><div class="room-share-icon-row"><button id="room-share-whatsapp" class="secondary room-share-mini-btn" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp room-share-mini-icon" aria-hidden="true"></i></button><button id="room-share-wechat" class="secondary room-share-mini-btn" aria-label="WeChat"><i class="fa-brands fa-weixin room-share-mini-icon" aria-hidden="true"></i></button><button id="room-share-download" class="secondary room-share-mini-btn" aria-label="Download QR"><i class="fa-solid fa-download room-share-mini-icon" aria-hidden="true"></i></button></div>${inviteQrError?`<div class="hint room-error">${esc(inviteQrError)}</div>`:''}</div></div>`;
 }
 function schedulePopunderAfterRender(delayMs=250){
   if(APP_CHANNEL==='STORE')return;
@@ -5540,7 +5523,7 @@ function renderHome(){
       avatarDataUri
     });
     if(!seatData){
-      return`<button type="button" class="lobby-seat lobby-seat-button empty" data-room-invite-open="1" aria-label="${t('roomSeatInvite')}"><div class="lobby-seat-avatar empty" aria-hidden="true">+</div><div class="lobby-seat-name">${t('roomSeatInvite')}</div><div class="lobby-seat-label">${seatLabel}</div></button>`;
+      return`<button type="button" class="lobby-seat lobby-seat-button empty" data-room-share-send="1" aria-label="${t('roomSeatInvite')}"><div class="lobby-seat-avatar empty" aria-hidden="true">+</div><div class="lobby-seat-name">${t('roomSeatInvite')}</div><div class="lobby-seat-label">${seatLabel}</div></button>`;
     }
     const {entryName,avatarSrc,isHost,offline,displayName}=seatData;
     const hostBadge=isHost?`<span class="lobby-seat-host-badge-text">${t('roomHostTag')}</span>`:'';
@@ -5562,15 +5545,18 @@ function renderHome(){
   const roomStartControl=roomIsHost
     ?(() => {
         const disabled=roomStarting||!roomCanStart||roomStartPending;
-        const subtitle=!roomCanStart&&!roomStarting&&!roomStartPending
-          ?`<span class="room-start-subtitle">${t('roomNeedPlayersShort')}</span>`
-          :'';
-        const button=`<button id="room-start" class="primary room-start-btn" ${disabled?'disabled':''}><span class="room-start-main">${t('roomStart')}</span>${subtitle}</button>`;
+        const subtitle=roomStarting||roomStartPending
+          ?''
+          :roomCanStart
+            ?`<span class="room-start-subtitle">${esc(t('startReadySubtitle'))}</span>`
+            :`<span class="room-start-subtitle">${t('roomNeedPlayersShort')}</span>`
+        ;
         const hint=roomStartPending
           ?`<span class="hint">${t('roomSending')}</span>`
           :roomStarting
             ?`<span class="hint">${t('roomStarting')}</span>`
-            :'';
+          :'';
+        const button=`<button id="room-start" class="primary room-start-btn" ${disabled?'disabled':''}><span class="room-start-main">${t('roomStart')}</span>${subtitle}</button>`;
         return `${button}${hint}`;
       })()
     :`<span class="hint">${roomStarting?t('roomStarting'):t('roomWaitingHost')}</span>`;
@@ -5585,6 +5571,9 @@ function renderHome(){
     roomTitle,
     roomCode:state.room.code,
     roomLobbyCountdown,
+    inviteQrDataUrl:state.room.inviteQrDataUrl,
+    inviteQrLoading:state.room.inviteQrLoading,
+    inviteQrError:state.room.inviteQrError,
     roomPrivacyRow,
     roomSeats,
     roomErrorHtml,
@@ -5610,21 +5599,7 @@ function renderHome(){
     authPictureUrlFrom,
     avatarDataUri
   });
-  const roomInviteModal=renderRoomInviteOverlay({
-    visible:inRoom&&roomStatus!=='playing'&&state.room.inviteOpen,
-    invitePanelHtml:renderRoomInvitePanelHtml({
-      roomCode:roomInviteCode,
-      inviteUrl:roomInviteUrl,
-      inviteMessage:roomInviteMessage,
-    inviteQrDataUrl:state.room.inviteQrDataUrl,
-    inviteQrLoading:state.room.inviteQrLoading,
-    inviteQrError:state.room.inviteQrError,
-    whatsappUrl:roomInviteWhatsappUrlFromCode(roomInviteCode),
-    t,
-    esc
-  })
-  });
-  const soloBtnCore=`<button id="solo-start" class="primary royal-start-btn" ${signedIn?'':'disabled'}>${t('solo')}</button>`;
+  const soloBtnCore=`<button id="solo-start" class="primary royal-start-btn" ${signedIn?'':'disabled'}><span class="home-btn-main">${t('solo')}</span><span class="home-btn-subtitle">${esc(t('startReadySubtitle'))}</span></button>`;
   const soloBtnHtml=signedIn
     ?soloBtnCore
     :`<button id="solo-start" class="primary royal-start-btn" disabled><span class="home-btn-main">${t('solo')}</span><span class="home-btn-subtitle">${esc(loginHint)}</span></button>`;
@@ -5650,7 +5625,6 @@ function renderHome(){
     roomButtonsHtml,
     mainPageLegalMiniHtml:mainPageLegalMiniHtml(),
     roomLobbyHtml,
-    roomInviteModal,
     roomJoinModal,
     introPanelHtml:state.home.showIntro?introPanelHtml():'',
     leaderboardModalHtml:state.home.showLeaderboard?leaderboardModalHtml():'',

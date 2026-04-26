@@ -226,6 +226,13 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       if(!input)return;
       const next=String(input.value||'').toUpperCase();
       if(input.value!==next)input.value=next;
+      const boxes=doc.querySelectorAll('.room-code-box');
+      const value=next.slice(0,boxes.length);
+      boxes.forEach((box,idx)=>{
+        const ch=value[idx]||'';
+        box.textContent=ch;
+        box.classList.toggle('filled',Boolean(ch));
+      });
     });
     doc.getElementById('room-active-refresh')?.addEventListener('click',async()=>{
       await loadActiveRooms();
@@ -252,12 +259,6 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       await joinRoomByCode(code);
     });
 
-    const openRoomInvite=async()=>{
-      if(!state.room.code&& !state.room.pendingInviteCode)return;
-      state.room.inviteOpen=true;
-      render();
-      void refreshRoomInviteQrDataUrl(true);
-    };
     const shareRoomInviteWithQr=async(code)=>{
       if(!navigator.share)return false;
       try{
@@ -270,20 +271,34 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       }catch{}
       return false;
     };
+    const copyRoomInviteQr=async()=>{
+      const dataUrl=String(state.room.inviteQrDataUrl||'').trim();
+      const inviteUrl=String(state.room.inviteUrl||roomInviteUrlFromCode(String(state.room.code||state.room.pendingInviteCode||'').trim())||'').trim();
+      if(!dataUrl){
+        if(inviteUrl){
+          try{
+            await navigator.clipboard?.writeText?.(inviteUrl);
+          }catch{}
+        }
+        return;
+      }
+      try{
+        const blob=await (await fetch(dataUrl)).blob();
+        if(globalThis.ClipboardItem&&navigator.clipboard?.write){
+          await navigator.clipboard.write([new ClipboardItem({[blob.type||'image/png']:blob})]);
+          return;
+        }
+      }catch{}
+      if(inviteUrl){
+        try{
+          await navigator.clipboard?.writeText?.(inviteUrl);
+        }catch{}
+      }
+    };
     doc.getElementById('room-copy')?.addEventListener('click',async()=>{
       try{await navigator.clipboard?.writeText?.(String(state.room.code||''));}catch{}
     });
-    doc.getElementById('room-share-invite')?.addEventListener('click',openRoomInvite);
-    doc.querySelectorAll('[data-room-invite-open]').forEach((btn)=>btn.addEventListener('click',openRoomInvite));
-    doc.getElementById('room-invite-close')?.addEventListener('click',()=>{
-      state.room.inviteOpen=false;
-      render();
-    });
-    doc.getElementById('room-invite-backdrop')?.addEventListener('click',()=>{
-      state.room.inviteOpen=false;
-      render();
-    });
-    doc.getElementById('room-share-send')?.addEventListener('click',async()=>{
+    const shareRoomInvite=async()=>{
       const code=String(state.room.code||state.room.pendingInviteCode||'').trim();
       if(!code)return;
       if(await shareRoomInviteWithQr(code))return;
@@ -291,7 +306,9 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       try{
         await navigator.clipboard?.writeText?.(inviteMessage);
       }catch{}
-    });
+    };
+    doc.getElementById('room-share-send')?.addEventListener('click',shareRoomInvite);
+    doc.querySelectorAll('[data-room-share-send]').forEach((btn)=>btn.addEventListener('click',shareRoomInvite));
     const copyRoomInviteCode=async()=>{
       const code=String(state.room.code||state.room.pendingInviteCode||'').trim();
       if(!code)return;
@@ -299,6 +316,7 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
         await navigator.clipboard?.writeText?.(code);
       }catch{}
     };
+    doc.getElementById('room-copy-qr')?.addEventListener('click',copyRoomInviteQr);
     doc.getElementById('room-share-code-copy')?.addEventListener('click',copyRoomInviteCode);
     doc.getElementById('room-share-code-copy')?.addEventListener('keydown',async(e)=>{
       if(e.key!=='Enter'&&e.key!==' ')return;
