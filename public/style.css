@@ -5043,6 +5043,7 @@ body[data-screen='game'] .table-center-stack {
 .west,
 .east {
   position: relative;
+  z-index: 4;
   overflow: visible;
 }
 .north .seat-label { order: 0; text-align: center; margin-bottom: 3px; z-index: 3; }
