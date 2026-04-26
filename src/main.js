@@ -5505,7 +5505,7 @@ function renderHome(){
   const aiFieldRight=`<label class="field field-ai field-ai-right"><span>${t('ai')}</span>${difficultySliderHtml('difficulty-slider-right',state.home.aiDifficulty,t)}</label>`;
   const roomErrorHtml=state.room.error?`<div class="hint room-error">${esc(state.room.error)}</div>`:'';
   const loginHint=t('loginToStart');
-  const roomLobbyBtnCore=inRoom?'':`<button id="room-lobby-open" class="secondary royal-room-btn" ${signedIn?'':'disabled'}>${t('roomEnter')}</button>`;
+  const roomLobbyBtnCore=inRoom?'':`<button id="room-lobby-open" class="secondary royal-room-btn" ${signedIn?'':'disabled'}><span class="home-btn-main">${t('roomEnter')}</span><span class="home-btn-subtitle">${esc(t('roomEnterSubtitle'))}</span></button>`;
   const roomButtonsHtml=roomLobbyBtnCore
     ?roomLobbyBtnCore
     :'';
