@@ -113,80 +113,86 @@ export function createFooterMenuHelpers(deps){
               ?'データは第三者マーケティング目的で販売せず、必要な期間のみ保持します。Cookieはブラウザで管理できますが、無効化するとログインや設定保存に影響する場合があります。お問い合わせや訂正・削除は連絡先からお願いします。'
               :'We do not sell your data for third‑party marketing and retain it only as needed before cleanup. You can manage cookies in your browser; disabling them may affect sign-in or preferences. For questions or correction/removal requests, contact us.';
     const aboutIntro=zh
-      ?'《鋤大D（Big Two）》網頁版，專注提供簡潔、順手、跨裝置一致的對局體驗。'
+      ?'《鋤大D（Big Two）》是一款以行動裝置與桌面體驗為核心的跨平台卡牌遊戲，同時提供網頁版存取。'
       :fr
-        ?'Cette version web de Big Two vise une expérience cohérente sur tous les appareils.'
+        ?'Big Two est un jeu de cartes multiplateforme, pensé d’abord pour le mobile et le desktop, avec un accès web en complément.'
         :de
-          ?'Diese Browser‑Version von Big Two fokussiert auf eine konsistente Geräte‑Erfahrung.'
+          ?'Big Two ist ein plattformübergreifendes Kartenspiel mit Fokus auf Mobile und Desktop und zusätzlichem Web-Zugang.'
           :es
-            ?'Esta versión web de Big Two se centra en una experiencia consistente entre dispositivos.'
+            ?'Big Two es un juego de cartas multiplataforma, diseñado primero para móvil y escritorio, con acceso web adicional.'
             :ja
-              ?'このBig Twoのウェブ版は、デバイス間で一貫した体験を重視しています。'
-              :'This browser-based Big Two focuses on consistent play across devices.';
+              ?'Big Two は、モバイルとデスクトップ体験を重視したクロスプラットフォームのカードゲームで、Web からも利用できます。'
+              :'Big Two is a cross-platform card game built first for mobile and desktop, with web access as an additional option.';
     const aboutList=zh
       ?[
-        '支援手機、平板與桌面，開局即玩',
+        '支援手機、平板與桌面，並提供網頁版',
+        '支援多語言介面，方便不同地區玩家快速上手',
         '提供單人對戰與房間對戰',
         '排行榜、個人設定與成績追蹤',
+        '內建報牌與語音提示，讓節奏更清晰',
         '清晰出牌提示、即時狀態與計分明細',
-        '房間代碼分享、等待室與即時通知',
-        '支援橫向與直向版面，操作一致'
+        '房間代碼分享、等待室與即時通知'
       ]
       :fr
         ?[
-          'Démarrage rapide sur mobile, tablette et desktop',
+          'Compatible mobile, tablette, desktop et web',
+          'Interface multilingue pour une prise en main rapide',
           'Solo et parties en salon',
           'Classement, paramètres personnels, suivi des performances',
+          'Annonces intégrées et indications vocales pour un rythme plus clair',
           'Indications claires, état en direct et détails de score',
-          'Notifications d’objets, effets d’emote et alertes en direct',
-          'Disposition responsive en portrait et paysage'
+          'Partage de code de salle, salon d’attente et notifications en direct'
         ]
         :de
           ?[
-            'Schnellstart auf Handy, Tablet und Desktop',
+            'Unterstützt Mobile, Tablet, Desktop und Web',
+            'Mehrsprachige Oberfläche für schnellen Einstieg',
             'Solo‑ und Raumspiele',
             'Rangliste, persönliche Einstellungen, Leistungs‑Tracking',
+            'Integrierte Callouts und Sprachausgabe für klaren Spielrhythmus',
             'Klare Hinweise, Live‑Status und Punktedetails',
-            'Food‑Hinweise, Emote‑Effekte und Live‑Meldungen',
-            'Responsive Darstellung im Hoch‑ und Querformat'
+            'Raumcode‑Freigabe, Wartelobby und Live‑Benachrichtigungen'
           ]
           :es
             ?[
-              'Inicio rápido en móvil, tableta y escritorio',
+              'Compatible con móvil, tableta, escritorio y web',
+              'Interfaz multilingüe para empezar sin fricción',
               'Partidas en solitario y en sala',
               'Clasificación, ajustes personales, seguimiento de resultados',
+              'Callouts integrados y avisos de voz para un ritmo de juego más claro',
               'Indicaciones claras, estado en vivo y detalles de puntuación',
-              'Avisos de comida, efectos de emote y notificaciones en vivo',
-              'Diseño adaptable en vertical y horizontal'
+              'Compartir código de sala, sala de espera y notificaciones en vivo'
             ]
             :ja
               ?[
-                'スマホ・タブレット・PCで素早く開始',
+                'モバイル、タブレット、デスクトップ、Web に対応',
+                '多言語インターフェースでスムーズに開始',
                 'ソロ対戦とルーム対戦',
                 'ランキング、個人設定、成績管理',
+                '内蔵コールアウトと音声ガイドでテンポを明確に',
                 '明確な出牌ガイド、リアルタイム状況、計分詳細',
-                'フード通知、表情エフェクト、ライブ通知',
-                '縦横両対応のレスポンシブレイアウト'
+                'ルームコード共有、待機室、ライブ通知'
               ]
               :[
-                'Fast start on phone, tablet, and desktop',
+                'Built for mobile, tablet, desktop, and web access',
+                'Multilingual interface for a smoother start',
                 'Solo and room matches',
                 'Leaderboard, personal settings, performance tracking',
+                'Built-in callouts and voice cues to keep the pace clear',
                 'Clear play cues, live status, and scoring details',
-                'Food callouts, emote effects, and live notifications',
-                'Responsive portrait and landscape layouts'
+                'Room code sharing, waiting lobby, and live notifications'
               ];
     const aboutNotes=zh
-      ?'我們持續優化效能、互動手感、版面適配與穩定性，並根據玩家回饋調整細節。'
+      ?'我們持續優化效能、互動手感、語言體驗、版面適配與穩定性，並根據玩家回饋調整細節。'
       :fr
-        ?'Nous améliorons en continu les performances, le feedback, l’interface et la stabilité selon les retours.'
+        ?'Nous améliorons en continu les performances, l’ergonomie, l’expérience linguistique, l’interface et la stabilité selon les retours.'
         :de
-          ?'Wir verbessern fortlaufend Performance, Feedback, Layout und Stabilität basierend auf Rückmeldungen.'
+          ?'Wir verbessern fortlaufend Performance, Bedienung, Spracherlebnis, Layout und Stabilität auf Basis von Feedback.'
           :es
-            ?'Mejoramos continuamente el rendimiento, la respuesta, el diseño y la estabilidad según comentarios.'
+            ?'Mejoramos continuamente el rendimiento, la usabilidad, la experiencia lingüística, el diseño y la estabilidad según comentarios.'
             :ja
-              ?'パフォーマンス、操作感、レイアウト、安定性を継続的に改善しています。'
-              :'We continuously improve performance, interaction feedback, responsive layout, and stability based on player feedback.';
+              ?'パフォーマンス、操作性、言語体験、レイアウト、安定性を継続的に改善しています。'
+              :'We continuously improve performance, usability, language experience, layout, and stability based on player feedback.';
     const termsIntro=zh
       ?'使用本網站即表示你同意：'
       :fr

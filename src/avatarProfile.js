@@ -11,7 +11,7 @@ import {
 } from './avatarProfileData.js';
 import {AVATAR_IMAGE_BY_BOT_NAME} from './botAvatarProfileData.js';
 
-const BOT_AVATAR_ASSET_VERSION='20260423';
+const BOT_AVATAR_ASSET_VERSION='20260426';
 
 export function resolveAvatarSrc({
   picture,
@@ -22,6 +22,9 @@ export function resolveAvatarSrc({
   authPictureUrlFrom,
   avatarDataUri
 }){
+  if(isBot){
+    return avatarDataUri(name,color,gender,true);
+  }
   const pic=String(picture??'').trim();
   return pic
     ?authPictureUrlFrom(pic)

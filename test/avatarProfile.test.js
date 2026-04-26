@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import {botAvatarUrl, createAvatarProfileHelpers} from '../src/avatarProfile.js';
+import {botAvatarUrl, createAvatarProfileHelpers, resolveAvatarSrc} from '../src/avatarProfile.js';
 
 function createHelpers({
   googlePicture='',
@@ -52,11 +52,23 @@ test('avatarGenderClass maps female and defaults male', ()=>{
 
 test('avatarDataUri uses bot override image when available', ()=>{
   const helpers=createHelpers();
-  assert.equal(helpers.avatarDataUri('志明','#7aaed8','male',true),'/base/avatars/avatar-bot-志明.png?v=20260423');
+  assert.equal(helpers.avatarDataUri('志明','#7aaed8','male',true),'/base/avatars/avatar-bot-志明.png?v=20260426');
 });
 
 test('botAvatarUrl returns cache-busted bot asset path', ()=>{
-  assert.equal(botAvatarUrl('志明',(value)=>`/base/${value}`),'/base/avatars/avatar-bot-志明.png?v=20260423');
+  assert.equal(botAvatarUrl('志明',(value)=>`/base/${value}`),'/base/avatars/avatar-bot-志明.png?v=20260426');
+});
+
+test('resolveAvatarSrc ignores stale bot picture fields', ()=>{
+  assert.equal(resolveAvatarSrc({
+    picture:'https://example.com/old-bot.png',
+    name:'志明',
+    color:'#7aaed8',
+    gender:'male',
+    isBot:true,
+    authPictureUrlFrom:(value)=>`auth:${value}`,
+    avatarDataUri:(name)=>`avatar:${name}`
+  }), 'avatar:志明');
 });
 
 test('avatarDataUri builds dicebear url for non-bot avatars', ()=>{

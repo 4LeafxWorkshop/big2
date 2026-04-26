@@ -32,7 +32,9 @@ export function renderRoomSeatMiniHtml(params){
   const gender=String(entry.gender||'male')==='female'?'female':'male';
   const picture=String(entry.picture||'').trim();
   const isBot=!isRoomPlayerHuman(entry);
-  const src=picture?authPictureUrlFrom(picture):avatarDataUri(name,'#7aaed8',gender,isBot);
+  const src=isBot
+    ?avatarDataUri(name,'#7aaed8',gender,true)
+    :picture?authPictureUrlFrom(picture):avatarDataUri(name,'#7aaed8',gender,false);
   return`<span class="room-seat-mini filled" title="${esc(name)}"><img src="${src}" alt="${esc(name)}"/></span>`;
 }
 

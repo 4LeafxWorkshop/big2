@@ -67,6 +67,16 @@ export function createRoomActionsController(deps){
         if(!roomDb)continue;
         const now=Date.now();
         const ref=roomDb.collection(deps.FIRESTORE_ROOMS_COLLECTION).doc();
+        const gate=await deps.gateUserRoomAccess(ref.id);
+        const gateGuest=await deps.gateGuestRoomAccess(ref.id);
+        if(!gateGuest.ok||!gate.ok){
+          if(gate.claimed){
+            await deps.updateActiveRoomPointer('');
+          }
+          deps.setRoomError(deps.t('roomAlreadyIn'));
+          return;
+        }
+        const claimedRoomPointer=Boolean(gate.claimed);
         const data={
           hostId:uid,
           hostName:name,
@@ -98,6 +108,9 @@ export function createRoomActionsController(deps){
           created=true;
           break;
         }catch(err){
+          if(claimedRoomPointer){
+            await deps.updateActiveRoomPointer('');
+          }
           lastError=err;
           console.error('create room shard attempt failed',firebaseInstanceId,err);
         }
@@ -124,6 +137,7 @@ export function createRoomActionsController(deps){
     const code=String(codeRaw??'').trim().toUpperCase();
     if(!code)return;
     deps.setRoomError('');
+    let claimedRoomPointer=false;
     try{
       const doc=await deps.findRoomByCode(code);
       if(!doc){
@@ -187,6 +201,7 @@ export function createRoomActionsController(deps){
         deps.render();
         return;
       }
+      claimedRoomPointer=Boolean(gate.claimed);
       const uid=deps.baseRoomPlayerId();
       const email=String(deps.currentUserEmail?.()||'').trim().toLowerCase();
       state.room.playerId=uid;
@@ -291,6 +306,9 @@ export function createRoomActionsController(deps){
       state.room.joinOpen=false;
       deps.render();
     }catch(err){
+      if(claimedRoomPointer){
+        await deps.updateActiveRoomPointer('');
+      }
       console.error('join room failed',err);
       if(String(err?.message??'').includes('full'))deps.setRoomError(deps.t('roomFull'));
       else if(String(err?.message??'').includes('closed'))deps.setRoomError(deps.t('roomClosed'));

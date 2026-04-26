@@ -2133,12 +2133,32 @@ async function gateUserRoomAccess(targetRoomId=''){
   if(!uid||!firebaseDb)return{ok:true};
   try{
     const ref=firebaseDb.collection(FIRESTORE_USERS_COLLECTION).doc(uid);
+    const desiredRoomId=String(targetRoomId||'').trim();
     const snap=await ref.get();
-    if(!snap.exists)return{ok:true};
+    if(!snap.exists){
+      if(!desiredRoomId)return{ok:true};
+      let result={ok:true};
+      await firebaseDb.runTransaction(async(tx)=>{
+        const claimSnap=await tx.get(ref);
+        const claimData=claimSnap.data()??{};
+        const active=String(claimData.currentRoomId??'').trim();
+        if(active){
+          if(active===desiredRoomId){
+            result={ok:true,already:true};
+          }else{
+            result={ok:false,roomId:active};
+          }
+          return;
+        }
+        tx.set(ref,{currentRoomId:desiredRoomId,updatedAt:Date.now()},{merge:true});
+        result={ok:true,claimed:true};
+      });
+      return result;
+    }
     const data=snap.data()??{};
     const active=String(data.currentRoomId??'').trim();
     if(!active)return{ok:true};
-    if(targetRoomId&&active===String(targetRoomId))return{ok:true,already:true};
+    if(desiredRoomId&&active===desiredRoomId)return{ok:true,already:true};
     const resolved=await resolveRoomDocByDirectory(active,'');
     if(!resolved){
       await ref.set({currentRoomId:'',updatedAt:Date.now()},{merge:true});

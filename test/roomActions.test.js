@@ -53,3 +53,33 @@ test('joinRoomByCode reports when firebase is unavailable', async()=>{
   await controller.joinRoomByCode('room1');
   assert.equal(calls.errors[0],'roomJoinFail');
 });
+
+test('joinRoomByCode clears a claimed pointer if the room write fails', async()=>{
+  const pointerUpdates=[];
+  const roomDb={
+    runTransaction:async()=>{
+      throw new Error('room full');
+    }
+  };
+  const {calls,controller}=createController({
+    signedInForPlay:()=>true,
+    initFirebaseIfReady:()=>true,
+    findRoomByCode:async()=>({
+      id:'room-1',
+      instanceId:'instance-1',
+      data:()=>({
+        status:'lobby',
+        players:[],
+        maxPlayers:4
+      }),
+      ref:{firestore:roomDb}
+    }),
+    getFirebaseDbForInstanceId:async()=>roomDb,
+    gateUserRoomAccess:async()=>({ok:true,claimed:true}),
+    gateGuestRoomAccess:async()=>({ok:true}),
+    updateActiveRoomPointer:async(value)=>{pointerUpdates.push(value);}
+  });
+  await controller.joinRoomByCode('room1');
+  assert.deepEqual(pointerUpdates,['']);
+  assert.equal(calls.errors.at(-1),'roomFull');
+});

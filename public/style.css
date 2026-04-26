@@ -9567,6 +9567,11 @@ body[data-screen='game'] .action-strip .control-row .game-cta-btn {
     border-color 160ms ease,
     filter 160ms ease;
 }
+body[data-screen='game'] .action-strip .control-row #play-btn.game-cta-btn,
+body[data-screen='game'] .action-strip .control-row #pass-btn.game-cta-btn,
+body[data-screen='game'] .action-strip .control-row #suggest-btn.game-cta-btn {
+  gap: 0;
+}
 body[data-screen='game'] .action-strip .control-row .game-cta-btn::before { content: none; }
 body[data-screen='game'] .action-strip .control-row .game-cta-btn:hover,
 body[data-screen='game'] .action-strip .control-row .game-cta-btn:focus-visible {
@@ -10222,19 +10227,21 @@ body[data-screen='game'] .action-strip {
   }
   /* Mobile portrait: keep action buttons compact in one row. */
   body[data-screen='game'] .topbar-right .control-row {
-    flex-wrap: wrap !important;
-    gap: 3px !important;
+    flex-wrap: nowrap !important;
+    gap: 2px !important;
     width: 100% !important;
+    overflow-x: auto !important;
+    overflow-y: visible !important;
   }
   body[data-screen='game'] .topbar-right .control-row button {
     flex: 0 0 auto;
     min-width: 0;
-    padding: 3px 6px !important;
-    font-size: clamp(.62rem, 2.4vw, .74rem) !important;
-    min-height: 30px !important;
+    padding: 2px 5px !important;
+    font-size: clamp(.56rem, 2vw, .68rem) !important;
+    min-height: 26px !important;
     display: inline-flex !important;
     align-items: center !important;
-    line-height: 1.2 !important;
+    line-height: 1.05 !important;
     white-space: nowrap !important;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -10281,12 +10288,12 @@ body[data-screen='game'] .action-strip {
 }
 @media (max-width: 420px) and (orientation: portrait) {
   body[data-screen='game'] .topbar-right .control-row {
-    gap: 2px !important;
+    gap: 1px !important;
   }
   body[data-screen='game'] .topbar-right .control-row button {
-    padding: 2px 4px !important;
-    font-size: .62rem !important;
-    min-height: 28px !important;
+    padding: 2px 3px !important;
+    font-size: .58rem !important;
+    min-height: 24px !important;
   }
 }
 
