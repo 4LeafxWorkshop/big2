@@ -3212,6 +3212,7 @@ function syncWebViewportGuardAttrs(){
   document.body.setAttribute('data-web-too-small',tooSmall?'1':'0');
   document.body.setAttribute('data-webview',(isMobilePointer()||isWebView())?'1':'0');
   document.body.setAttribute('data-webapp',isStandaloneWebApp()?'1':'0');
+  document.body.setAttribute('data-native-android',isNativeAndroidApp()?'1':'0');
   const msg=t('webTooSmall')
     .replace('{{w}}',String(w))
     .replace('{{h}}',String(h))
@@ -6280,6 +6281,7 @@ function render(){
   document.body.setAttribute('data-game-mode',state.home.mode==='room'?'room':'solo');
   document.body.setAttribute('data-ios',isIOSDevice()?'1':'0');
   document.body.setAttribute('data-is-mobile',isMobilePointer()?'1':'0');
+  document.body.setAttribute('data-native-android',isNativeAndroidApp()?'1':'0');
   const blockLandscapeMobile=shouldBlockLandscapeMobile();
   if(state.screen!=='game'||blockLandscapeMobile){
     serviceBellController.sync({active:false,portraitMode:isPortraitMode()});
