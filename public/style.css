@@ -3397,7 +3397,7 @@ body[data-screen='home'] .home-wrap {
 .cardback-combo .combo-back-preview {
   width: clamp(44px, 10vw, 64px);
   height: clamp(62px, 14vw, 90px);
-  border-radius: 10px;
+  border-radius: 6px;
   -webkit-user-drag: none;
   user-select: none;
   transition: transform 120ms ease;
@@ -3423,7 +3423,7 @@ body[data-screen='home'] .home-wrap {
 }
 .cardback-combo .combo-btn.active .combo-back-preview {
   box-shadow: 0 0 0 2px rgba(255, 209, 102, .55);
-  border-radius: 10px;
+  border-radius: 6px;
   transform: scale(1.15);
   transform-origin: center;
 }
