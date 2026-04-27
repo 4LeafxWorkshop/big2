@@ -13,12 +13,14 @@ export function renderGameSideZone(params){
   const {
     portraitMode,
     logToggleStateText,
+    logStatusHtml,
     historyHtml,
     t,
     esc
   }=params;
   if(portraitMode)return'';
-  return`<aside class="side-zone"><section class="side-card log-side-card"><h3 class="log-toggle-title title-with-icon" aria-label="${esc(logToggleStateText)}"><span class="title-icon title-icon-log" aria-hidden="true"></span><span>${t('log')}</span></h3><div class="history-list">${historyHtml}</div></section></aside>`;
+  const statusLine=logStatusHtml?`<div class="log-status log-status-inline"><span class="log-status-separator" aria-hidden="true">|</span><span class="log-status-copy"><span class="game-log-fab-status">${logStatusHtml}</span></span></div>`:'';
+  return`<aside class="side-zone"><section class="side-card log-side-card"><h3 class="log-toggle-title title-with-icon" aria-label="${esc(logToggleStateText)}"><span class="title-icon title-icon-log" aria-hidden="true"></span><span class="log-toggle-text">${t('log')}</span>${statusLine}</h3><div class="history-list">${historyHtml}</div></section></aside>`;
 }
 
 export function renderGameLogSheet(params){
@@ -29,7 +31,7 @@ export function renderGameLogSheet(params){
     t
   }=params;
   if(!logSheetOpen)return'';
-  return`<div class="log-sheet" id="log-sheet"><button class="log-sheet-backdrop" id="log-sheet-backdrop" aria-label="${t('close')}"></button><section class="log-sheet-panel side-card log-side-card"><header class="log-sheet-head"><h3 class="log-toggle-title title-with-icon"><span class="title-icon title-icon-log" aria-hidden="true"></span><span>${t('log')}</span></h3><button id="log-sheet-close" class="secondary">${closeLabel}</button></header><div class="history-list">${historyHtml}</div></section></div>`;
+  return`<div class="log-sheet" id="log-sheet"><button class="log-sheet-backdrop" id="log-sheet-backdrop" aria-label="${t('close')}"></button><section class="log-sheet-panel side-card log-side-card"><header class="log-sheet-head"><h3 class="log-toggle-title title-with-icon"><span class="title-icon title-icon-log" aria-hidden="true"></span><span class="log-toggle-text">${t('log')}</span></h3><button id="log-sheet-close" class="secondary">${closeLabel}</button></header><div class="history-list">${historyHtml}</div></section></div>`;
 }
 
 export function renderGameSelfTagHtml(params){

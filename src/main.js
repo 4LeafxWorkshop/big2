@@ -1149,11 +1149,16 @@ function deriveZhHkComposedClipKeys(variantClipKey='',clipKey=''){
   return[baseClip,tailKey];
 }
 const kindLabel=(k)=> (KIND[state.language]??KIND.en??KIND['zh-HK'])?.[k] ?? k;
-function setSoloStatus(message,{appendLog=true}={}){
+function setSoloStatus(message,{appendLog=true,meta=null}={}){
   const g=state.solo;
   if(!g)return;
   const text=String(message??'').trim();
   g.status=text;
+  if(meta&&typeof meta==='object'){
+    g.statusMeta={...meta,ts:Date.now()};
+  }else{
+    g.statusMeta=null;
+  }
   if(!appendLog||!text)return;
   if(!Array.isArray(g.systemLog))g.systemLog=[];
   const last=g.systemLog[g.systemLog.length-1];
@@ -3284,6 +3289,40 @@ function uiStatus(msg,meta){
   if(!s)return'';
   return s;
 }
+function resolveLogStatusParticipant(v,arr){
+  const list=Array.isArray(arr)?arr:[];
+  const metaSeat=Number(v?.statusMeta?.seat);
+  if(Number.isInteger(metaSeat)){
+    const bySeat=list.find((p)=>Number(p?.seat)===metaSeat);
+    if(bySeat)return bySeat;
+  }
+  const metaName=String(v?.statusMeta?.name??'').trim();
+  if(metaName){
+    const byName=list.find((p)=>String(p?.rawName||p?.name||'')===metaName||String(p?.name||'')===metaName);
+    if(byName)return byName;
+  }
+  const lastMoveType=String(v?.lastMove?.type??'');
+  const lastMoveSeat=Number(v?.lastMove?.seat);
+  if((lastMoveType==='play'||lastMoveType==='pass'||lastMoveType==='win')&&Number.isInteger(lastMoveSeat)){
+    const bySeat=list.find((p)=>Number(p?.seat)===lastMoveSeat);
+    if(bySeat)return bySeat;
+  }
+  const currentSeat=Number(v?.currentSeat);
+  if(Number.isInteger(currentSeat)){
+    const byCurrentSeat=list.find((p)=>Number(p?.seat)===currentSeat);
+    if(byCurrentSeat)return byCurrentSeat;
+  }
+  return null;
+}
+function buildLogFabStatusHtml(v,arr){
+  const statusText=uiStatus(v.status,v.statusMeta);
+  if(!statusText)return'';
+  const participant=resolveLogStatusParticipant(v,arr);
+  const color=participant?playerColorByViewClass(participant.cls):'var(--player-color, #7aaed8)';
+  const imgSrc=String(participant?.avatarSrc||participant?.picture||'').trim();
+  if(!imgSrc)return`<span class="game-log-fab-status-badge" style="--player-color:${color};"><span class="game-log-fab-status-chip" aria-hidden="true"></span></span><span class="game-log-fab-status-text">${esc(statusText)}</span>`;
+  return`<span class="game-log-fab-status-badge" style="--player-color:${color};"><img class="game-log-fab-status-avatar" src="${esc(imgSrc)}" alt="" aria-hidden="true"/></span><span class="game-log-fab-status-text">${esc(statusText)}</span>`;
+}
 const esc=(s)=>String(s??'').replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const colorizeSuitText=(s)=>esc(s)
   .replaceAll('♦️','<span class="suit-red">♦️</span>')
@@ -4286,7 +4325,7 @@ function triggerMust3LeadCallout(game,selfSeat=0){
   scheduleCalloutExpiry(must3CallState.until);
   speakCallout(text,pick.player?.gender??'male',{seat:pick.seat,force:true,clipKey:'line-must3'});
 }
-function startSoloGame(options={}){randomizeNpcColors();const preserveOpponents=options?.preserveOpponents!==false;const resetRoundWins=options?.resetRoundWins===true;const resetTotals=options?.resetTotals===true;const storedBotProfiles=Array.isArray(state.solo.botProfiles)&&state.solo.botProfiles.length===3?state.solo.botProfiles.map((bp)=>({name:String(bp?.name||''),gender:String(bp?.gender||'male')})):null;const botProfiles=preserveOpponents&&storedBotProfiles&&storedBotProfiles.every((bp)=>bp.name)?storedBotProfiles:randomBotProfiles();const p=[{name:state.home.name||t('name'),gender:state.home.gender==='female'?'female':'male',hand:[],isHuman:true},{name:botProfiles[0].name,gender:botProfiles[0].gender,hand:[],isHuman:false},{name:botProfiles[1].name,gender:botProfiles[1].gender,hand:[],isHuman:false},{name:botProfiles[2].name,gender:botProfiles[2].gender,hand:[],isHuman:false}];const deck=shuffle(createDeck());p.forEach((x)=>{x.hand=deck.splice(0,13).sort(cmpCard);});const start=p.findIndex((x)=>x.hand.some((c)=>c.rank===0&&c.suit===0));const totals=resetTotals?soloStartingTotals(p):getNextSoloTotals(state.solo.totals,{resetTotals});const roundWins=getNextSoloRoundWins(state.solo.roundWins,{resetTotals,resetRoundWins});state.solo={players:p,botProfiles:botProfiles.map((bp)=>({name:bp.name,gender:bp.gender})),botNames:botProfiles.map((bp)=>bp.name),totals,roundWins,currentSeat:start,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',systemLog:[],history:[],aiDifficulty:state.home.aiDifficulty,lastCardBreach:null,roundSummary:null};setSoloStatus(`${p[start].name} ${t('start')}`);state.selected.clear();state.recommendation=null;state.logTouched=false;state.showLog=false;state.showLogSheet=false;state.screen='game';state.home.mode='solo';state.home.showIntro=false;state.home.showLeaderboard=false;state.showScoreGuide=false;calloutGateUntilPlay=true;playSound('start');triggerMust3LeadCallout(state.solo,0);render();maybeRunSoloAi();}
+function startSoloGame(options={}){randomizeNpcColors();const preserveOpponents=options?.preserveOpponents!==false;const resetRoundWins=options?.resetRoundWins===true;const resetTotals=options?.resetTotals===true;const storedBotProfiles=Array.isArray(state.solo.botProfiles)&&state.solo.botProfiles.length===3?state.solo.botProfiles.map((bp)=>({name:String(bp?.name||''),gender:String(bp?.gender||'male')})):null;const botProfiles=preserveOpponents&&storedBotProfiles&&storedBotProfiles.every((bp)=>bp.name)?storedBotProfiles:randomBotProfiles();const p=[{name:state.home.name||t('name'),gender:state.home.gender==='female'?'female':'male',hand:[],isHuman:true},{name:botProfiles[0].name,gender:botProfiles[0].gender,hand:[],isHuman:false},{name:botProfiles[1].name,gender:botProfiles[1].gender,hand:[],isHuman:false},{name:botProfiles[2].name,gender:botProfiles[2].gender,hand:[],isHuman:false}];const deck=shuffle(createDeck());p.forEach((x)=>{x.hand=deck.splice(0,13).sort(cmpCard);});const start=p.findIndex((x)=>x.hand.some((c)=>c.rank===0&&c.suit===0));const totals=resetTotals?soloStartingTotals(p):getNextSoloTotals(state.solo.totals,{resetTotals});const roundWins=getNextSoloRoundWins(state.solo.roundWins,{resetTotals,resetRoundWins});state.solo={players:p,botProfiles:botProfiles.map((bp)=>({name:bp.name,gender:bp.gender})),botNames:botProfiles.map((bp)=>bp.name),totals,roundWins,currentSeat:start,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',statusMeta:null,systemLog:[],history:[],aiDifficulty:state.home.aiDifficulty,lastCardBreach:null,roundSummary:null};setSoloStatus(`${p[start].name} ${t('start')}`,{meta:{seat:start,name:p[start].name,key:'start'}});state.selected.clear();state.recommendation=null;state.logTouched=false;state.showLog=false;state.showLogSheet=false;state.screen='game';state.home.mode='solo';state.home.showIntro=false;state.home.showLeaderboard=false;state.showScoreGuide=false;calloutGateUntilPlay=true;playSound('start');triggerMust3LeadCallout(state.solo,0);render();maybeRunSoloAi();}
 function soloApplyPlay(seat,cards){const g=state.solo;const ev=evaluatePlay(cards);if(!ev.valid){if(seat===0)setSoloStatus(ev.reason);return false;}if(g.isFirstTrick&&!has3d(cards)){if(seat===0)setSoloStatus(t('must3'));return false;}if(g.lastPlay&&!canBeat(ev,g.lastPlay.eval)){if(seat===0)setSoloStatus(t('beat'));return false;}
   if(shouldForceMaxAgainstLastCard(g,seat)){
     const legal=legalTurnPlays(g.players[seat].hand,g).sort(cmpStrongPlayDesc);
@@ -4312,7 +4351,7 @@ function soloApplyPlay(seat,cards){const g=state.solo;const ev=evaluatePlay(card
   g.roundWins=(Array.isArray(g.roundWins)&&g.roundWins.length===4?g.roundWins:[0,0,0,0]).map((v,i)=>i===seat?(Number(v)||0)+1:(Number(v)||0));
   g.totals=(g.totals??[5000,5000,5000,5000]).map((s,i)=>s+(i===seat?winnerGain:-deductions[i]));
   const remain=g.players.map((p,i)=>({p,i})).filter((x)=>x.i!==seat).map((x)=>`${x.p.name}:${deductions[x.i]}`).join(' / ');
-  setSoloStatus(`${g.players[seat].name} ${t('wins')} ${t('penalty')}:${remain}`);
+  setSoloStatus(`${g.players[seat].name} ${t('wins')} ${t('penalty')}:${remain}`,{meta:{seat,name:g.players[seat].name,key:'custom'}});
   const deltas=g.players.map((_,i)=>i===seat?winnerGain:-deductions[i]);
   g.players.forEach((p,i)=>{
     const identity=p.isHuman?currentLeaderboardIdentity():botLeaderboardIdentity(p.name,p.gender);
@@ -4324,11 +4363,11 @@ function soloApplyPlay(seat,cards){const g=state.solo;const ev=evaluatePlay(card
   }
   if(g.lastCardBreach&&seat===g.lastCardBreach.threatenedSeat)g.lastCardBreach=null;
   lockTurnProgress(900);
-  g.currentSeat=(seat+1)%4;setSoloStatus(`${g.players[seat].name} ${t('played')} ${kindLabel(ev.kind)}.`,{appendLog:false});playSound('play');
+  g.currentSeat=(seat+1)%4;setSoloStatus(`${g.players[seat].name} ${t('played')} ${kindLabel(ev.kind)}.`,{appendLog:false,meta:{seat,name:g.players[seat].name,key:'played',kind:ev.kind}});playSound('play');
   const reaction=pickBotReaction(g,seat,'play',{cards:ev.sorted,eval:ev});
   if(reaction)triggerBotEmoteLocal(reaction.seat,reaction.id);
   return true;}
-function soloPass(seat){const g=state.solo;if(!g.lastPlay){if(seat===0)setSoloStatus(t('cantPass'));return false;}g.passStreak+=1;g.history.push({action:'pass',seat,name:g.players[seat].name,ts:Date.now()});if(g.lastCardBreach&&seat===g.lastCardBreach.threatenedSeat)g.lastCardBreach=null;lockTurnProgress(850);if(g.passStreak>=3){const lead=g.lastPlay.seat;g.currentSeat=lead;g.lastPlay=null;g.passStreak=0;setSoloStatus(`${g.players[lead].name} ${t('retake')}`);playSound('pass');return true;}g.currentSeat=(seat+1)%4;setSoloStatus(`${g.players[seat].name} ${t('pass')}.`,{appendLog:false});playSound('pass');const reaction=pickBotReaction(g,seat,'pass',null);if(reaction)triggerBotEmoteLocal(reaction.seat,reaction.id);return true;}
+function soloPass(seat){const g=state.solo;if(!g.lastPlay){if(seat===0)setSoloStatus(t('cantPass'));return false;}g.passStreak+=1;g.history.push({action:'pass',seat,name:g.players[seat].name,ts:Date.now()});if(g.lastCardBreach&&seat===g.lastCardBreach.threatenedSeat)g.lastCardBreach=null;lockTurnProgress(850);if(g.passStreak>=3){const lead=g.lastPlay.seat;g.currentSeat=lead;g.lastPlay=null;g.passStreak=0;setSoloStatus(`${g.players[lead].name} ${t('retake')}`,{meta:{seat:lead,name:g.players[lead].name,key:'retake'}});playSound('pass');return true;}g.currentSeat=(seat+1)%4;setSoloStatus(`${g.players[seat].name} ${t('pass')}.`,{appendLog:false,meta:{seat,name:g.players[seat].name,key:'pass'}});playSound('pass');const reaction=pickBotReaction(g,seat,'pass',null);if(reaction)triggerBotEmoteLocal(reaction.seat,reaction.id);return true;}
 function maybeRunSoloAi(){
   if(aiTimer){clearTimeout(aiTimer);aiTimer=null;}
   if(state.home.mode!=='solo')return;
@@ -4631,12 +4670,39 @@ function buildView(){
     mode,
     currentSeat:g.currentSeat,
     lastPlay:g.lastPlay,
+    lastMove:g.lastMove??null,
     gameOver:g.gameOver,
     isFirstTrick:g.isFirstTrick,
     status:g.status,
     statusMeta:g.statusMeta??null,
     systemLog:g.systemLog??[],
-    participants:g.players.map((p,seat)=>({seat,name:p.name,gender:p.gender??'male',picture:p.picture??'',isBot:!p.isHuman,count:p.hand.length,score:(!p.isHuman&&String(p.uid??'')===currentRoomPlayerId())?currentHumanScoreValue():(g.totals?.[seat]??0)})),
+    participants:g.players.map((p,seat)=>{
+      const gender=p.gender??'male';
+      const picture=String(p.picture??'').trim();
+      const isBot=!p.isHuman;
+      const color=isBot?playerColorByViewClass(seatCls[seat]||'south'):'#7aaed8';
+      const avatarSrc=(!isBot&&seat===seatIndex)
+        ?selfAvatarDataUri(p.name,color,gender)
+        :resolveAvatarSrc({
+            picture,
+            name:p.name,
+            color,
+            gender,
+            isBot,
+            authPictureUrlFrom,
+            avatarDataUri
+          });
+      return{
+        seat,
+        name:p.name,
+        gender,
+        picture,
+        avatarSrc,
+        isBot,
+        count:p.hand.length,
+        score:(!p.isHuman&&String(p.uid??'')===currentRoomPlayerId())?currentHumanScoreValue():(g.totals?.[seat]??0)
+      };
+    }),
     hand:selfPlayer?.hand??[],
     history:g.history,
     selfSeat:seatIndex,
@@ -5924,6 +5990,7 @@ function renderGame(){
   const showMust3Highlight=Boolean(v.canControl&&v.isFirstTrick&&!v.lastPlay&&has3d(v.hand)&&!has3d(selected));
   const self=arr.find((p)=>p.viewIndex===0);
   const youWin=Boolean(v.gameOver&&self&&self.count===0);
+  const logStatusHtml=buildLogFabStatusHtml(v,arr);
   const roomTopMetaTable=buildRoomMetaTableHtml({
     v,
     state,
@@ -6045,6 +6112,7 @@ function renderGame(){
     esc,
     withBase,
     historyHtml,
+    logStatusHtml,
     isPortraitMode,
     EMOTE_STICKERS,
     renderHandCard,
@@ -6061,6 +6129,7 @@ function renderGame(){
   const sideZoneHtml=renderGameSideZone({
     portraitMode,
     logToggleStateText,
+    logStatusHtml,
     historyHtml:gameHistoryHtml,
     t,
     esc
@@ -6124,9 +6193,11 @@ function renderGame(){
     app,
     state,
     t,
+    esc,
     v,
     arr,
     portraitMode,
+    logFabStatusHtml:portraitMode?logStatusHtml:'',
     logSheetOpen,
     logSheetHtml,
     bindGameEvents,
