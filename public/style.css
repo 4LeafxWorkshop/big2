@@ -9736,7 +9736,7 @@ body[data-screen='game'] .result-avatar {
 }
 body[data-screen='game'] .result-avatar-wrap .lobby-seat-host-badge-text,
 body[data-screen='game'] .player-avatar-wrap .lobby-seat-host-badge-text {
-  left: -24px;
+  left: -14px;
   right: auto;
   bottom: -2px;
   top: auto;
@@ -9746,6 +9746,8 @@ body[data-screen='game'] .player-avatar-wrap .lobby-seat-host-badge-text {
   min-height: 16px;
   padding: 0 6px;
   font-size: .58rem;
+  justify-content: flex-end;
+  text-align: right;
   text-shadow: 0 1px 3px rgba(0,0,0,.55);
   z-index: 4;
 }
