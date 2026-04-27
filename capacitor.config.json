@@ -9,6 +9,7 @@
   "plugins": {
     "GoogleAuth": {
       "clientId": "1029664741170-fp23lh13vgpjpg6omci855j2ofag4khc.apps.googleusercontent.com",
+      "iosClientId": "1029664741170-fp23lh13vgpjpg6omci855j2ofag4khc.apps.googleusercontent.com",
       "androidClientId": "1029664741170-fp23lh13vgpjpg6omci855j2ofag4khc.apps.googleusercontent.com",
       "scopes": ["profile", "email"],
       "serverClientId": "1029664741170-fp23lh13vgpjpg6omci855j2ofag4khc.apps.googleusercontent.com",
