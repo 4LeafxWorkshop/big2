@@ -1725,7 +1725,7 @@ const googleIdentityController=createGoogleIdentityController({
   getRender:()=>render,
   signedInWithEmail,
   clearGoogleSession,
-  useNativeGoogleAuth:()=>isNativeAndroidApp(),
+  useNativeGoogleAuth:()=>isNativeAndroidApp()||isNativeIosApp(),
   nativeGoogleSignIn:async()=>{
     const user=await GoogleAuth.signIn();
     await handleNativeGoogleUser(user);
@@ -3180,8 +3180,12 @@ function isNativeAndroidApp(){
   const cap=window.Capacitor;
   return Boolean(cap?.isNativePlatform?.()&&nativePlatform()==='android');
 }
+function isNativeIosApp(){
+  const cap=window.Capacitor;
+  return Boolean(cap?.isNativePlatform?.()&&nativePlatform()==='ios');
+}
 function initNativeGoogleAuth(){
-  if(!isNativeAndroidApp())return;
+  if(!isNativeAndroidApp()&&!isNativeIosApp())return;
   try{
     GoogleAuth.initialize();
   }catch(err){
