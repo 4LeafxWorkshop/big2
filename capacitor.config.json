@@ -2,10 +2,6 @@
   "appId": "com.fourleafx.big2",
   "appName": "港式鋤大D Big2",
   "webDir": "dist",
-  "server": {
-    "url": "https://4leafx.com/big2",
-    "cleartext": true
-  },
   "plugins": {
     "GoogleAuth": {
       "clientId": "1029664741170-fp23lh13vgpjpg6omci855j2ofag4khc.apps.googleusercontent.com",

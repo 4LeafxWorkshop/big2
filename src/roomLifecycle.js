@@ -107,11 +107,11 @@ export function createRoomLifecycleController(deps){
             const actor=game.players[seat];
             if(actor&&Array.isArray(actor.hand)){
               const aiChoice=deps.chooseAiPlay?.(actor.hand,game,game.aiDifficulty);
-              const played=aiChoice?deps.applyRoomPlayToGame?.(game,seat,aiChoice.cards,now):null;
+              const played=aiChoice?deps.applyPlayToGame?.(game,seat,aiChoice.cards,now):null;
               if(played?.ok&&played.game){
                 game=played.game;
               }else if(game.lastPlay){
-                const passed=deps.applyRoomPassToGame?.(game,seat,now);
+                const passed=deps.applyPassToGame?.(game,seat,now);
                 if(passed?.ok&&passed.game)game=passed.game;
               }
             }
