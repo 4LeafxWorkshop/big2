@@ -13635,10 +13635,15 @@ body[data-screen='game'] :is(.play-type-call, .last-card-call, .emote-callout, .
     align-items: center !important;
   }
   body[data-screen='game'] .topbar-right {
-    max-width: calc(100vw - 122px) !important;
+    flex: 1 1 auto !important;
+    width: auto !important;
+    max-width: none !important;
     min-width: 0 !important;
+    justify-items: stretch !important;
   }
   body[data-screen='game'] .topbar-right .control-row {
+    width: 100% !important;
+    justify-content: flex-end !important;
     gap: 4px !important;
     flex-wrap: nowrap !important;
     overflow-x: auto !important;
