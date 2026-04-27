@@ -474,7 +474,22 @@ function syncPendingRoomInviteFromLocation(){
   if(!code)return false;
   state.room.pendingInviteCode=code;
   state.room.joinOpen=true;
+  try{
+    window.sessionStorage?.setItem('big2:pendingRoomInviteCode',code);
+  }catch{}
   return true;
+}
+function restorePendingRoomInviteFromStorage(){
+  if(state.room.pendingInviteCode)return false;
+  try{
+    const code=normalizeRoomInviteCode(window.sessionStorage?.getItem('big2:pendingRoomInviteCode')||'');
+    if(!code)return false;
+    state.room.pendingInviteCode=code;
+    state.room.joinOpen=true;
+    return true;
+  }catch{
+    return false;
+  }
 }
 async function refreshRoomInviteQrDataUrl(force=false){
   const roomCode=normalizeRoomInviteCode(state.room.code||state.room.pendingInviteCode||'');
@@ -524,12 +539,19 @@ async function maybeAutoJoinPendingRoomInvite(){
   if(roomInviteJoinInFlight)return false;
   if(!signedInForPlay())return false;
   if(state.room.id)return false;
+  syncPendingRoomInviteFromLocation();
+  restorePendingRoomInviteFromStorage();
   const code=normalizeRoomInviteCode(state.room.pendingInviteCode||'');
   if(!code)return false;
   roomInviteJoinInFlight=true;
   try{
     const joined=await joinRoomByCode(code);
-    if(joined)state.room.pendingInviteCode='';
+    if(joined){
+      state.room.pendingInviteCode='';
+      try{
+        window.sessionStorage?.removeItem('big2:pendingRoomInviteCode');
+      }catch{}
+    }
     return joined;
   }finally{
     roomInviteJoinInFlight=false;
@@ -1704,8 +1726,8 @@ const googleSessionHelpers=createGoogleSessionHelpers({
   loadActiveRoomPointer,
   refreshLeaderboard,
   render,
-  afterSuccessfulSignIn:()=>{void maybeAutoJoinPendingRoomInvite();},
-  afterSessionReady:()=>{void maybeAutoJoinPendingRoomInvite();}
+  afterSuccessfulSignIn:()=>{syncPendingRoomInviteFromLocation();restorePendingRoomInviteFromStorage();void maybeAutoJoinPendingRoomInvite();},
+  afterSessionReady:()=>{syncPendingRoomInviteFromLocation();restorePendingRoomInviteFromStorage();void maybeAutoJoinPendingRoomInvite();}
 });
 const {
   clearGoogleSession,
@@ -6419,6 +6441,16 @@ document.addEventListener('visibilitychange',()=>{
   }
 });
 syncPendingRoomInviteFromLocation();
+window.addEventListener('pageshow',()=>{
+  syncPendingRoomInviteFromLocation();
+  restorePendingRoomInviteFromStorage();
+  void maybeAutoJoinPendingRoomInvite();
+});
+window.addEventListener('popstate',()=>{
+  syncPendingRoomInviteFromLocation();
+  restorePendingRoomInviteFromStorage();
+  void maybeAutoJoinPendingRoomInvite();
+});
 window.addEventListener('load',()=>{if(state.screen==='home')onGoogleScriptLoaded(renderGoogleInline);},{once:true});
 initNativeGoogleAuth();
 loadGoogleSession();bootFirebase();syncViewport();render();

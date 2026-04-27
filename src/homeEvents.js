@@ -361,8 +361,7 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       try{
         await navigator.share({
           title:t('roomInviteTitle'),
-          text:roomInviteShareTextFromCode(code),
-          url:roomInviteUrlFromCode(code)
+          text:roomInviteShareTextFromCode(code)
         });
         return true;
       }catch{}
@@ -436,8 +435,7 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
         try{
           await navigator.share({
             title:t('roomInviteTitle'),
-            text:roomInviteShareTextFromCode(code),
-            url:roomInviteUrlFromCode(code)
+            text:roomInviteShareTextFromCode(code)
           });
           return;
         }catch{}
