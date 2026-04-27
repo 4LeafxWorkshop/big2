@@ -31,7 +31,7 @@ export function runGamePostRender(params){
       btn.type='button';
       btn.className='game-log-fab';
       btn.setAttribute('aria-label',t('log'));
-      btn.innerHTML=`<span class="title-icon title-icon-log" aria-hidden="true"></span><span class="game-log-fab-copy"><span class="game-log-fab-text">${t('log')}</span>${logFabStatusHtml?`<span class="game-log-fab-status">${logFabStatusHtml}</span>`:''}</span>`;
+      btn.innerHTML=`<span class="title-icon title-icon-log" aria-hidden="true"></span><span class="game-log-fab-copy"><span class="game-log-fab-text">${t('log')}</span>${logFabStatusHtml?`<span class="game-log-fab-divider" aria-hidden="true"></span><span class="game-log-fab-status">${logFabStatusHtml}</span>`:''}</span>`;
       btn.setAttribute('data-ignore-click','0');
       logFabHost.appendChild(btn);
       logFab=btn;
@@ -41,9 +41,10 @@ export function runGamePostRender(params){
     const statusNode=logFab.querySelector('.game-log-fab-status');
     if(logFabStatusHtml){
       if(statusNode)statusNode.innerHTML=logFabStatusHtml;
-      else logFab.querySelector('.game-log-fab-copy')?.insertAdjacentHTML('beforeend',`<span class="game-log-fab-status">${logFabStatusHtml}</span>`);
+      else logFab.querySelector('.game-log-fab-copy')?.insertAdjacentHTML('beforeend',`<span class="game-log-fab-divider" aria-hidden="true"></span><span class="game-log-fab-status">${logFabStatusHtml}</span>`);
     }else{
       statusNode?.remove();
+      logFab.querySelector('.game-log-fab-divider')?.remove();
     }
     const existingSheet=appEl.querySelector('#log-sheet');
     if(existingSheet)existingSheet.remove();
