@@ -3330,8 +3330,8 @@ function buildLogFabStatusHtml(v,arr){
   const participant=resolveLogStatusParticipant(v,arr);
   const color=participant?playerColorByViewClass(participant.cls):'var(--player-color, #7aaed8)';
   const imgSrc=String(participant?.avatarSrc||participant?.picture||'').trim();
-  if(!imgSrc)return`<span class="game-log-fab-status-text">${esc(statusText)}</span><span class="game-log-fab-status-badge" style="--player-color:${color};"><span class="game-log-fab-status-chip" aria-hidden="true"></span></span>`;
-  return`<span class="game-log-fab-status-text">${esc(statusText)}</span><span class="game-log-fab-status-badge" style="--player-color:${color};"><img class="game-log-fab-status-avatar" src="${esc(imgSrc)}" alt="" aria-hidden="true"/></span>`;
+  if(!imgSrc)return`<span class="game-log-fab-status-badge" style="--player-color:${color};"><span class="game-log-fab-status-chip" aria-hidden="true"></span></span><span class="game-log-fab-status-text">${esc(statusText)}</span>`;
+  return`<span class="game-log-fab-status-badge" style="--player-color:${color};"><img class="game-log-fab-status-avatar" src="${esc(imgSrc)}" alt="" aria-hidden="true"/></span><span class="game-log-fab-status-text">${esc(statusText)}</span>`;
 }
 const esc=(s)=>String(s??'').replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const colorizeSuitText=(s)=>esc(s)

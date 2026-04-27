@@ -2,10 +2,15 @@
   "appId": "com.fourleafx.big2",
   "appName": "港式鋤大D Big2",
   "webDir": "dist",
+  "server": {
+    "url": "https://4leafx.com/big2",
+    "cleartext": true
+  },
   "plugins": {
     "GoogleAuth": {
       "clientId": "1029664741170-fp23lh13vgpjpg6omci855j2ofag4khc.apps.googleusercontent.com",
       "androidClientId": "1029664741170-fp23lh13vgpjpg6omci855j2ofag4khc.apps.googleusercontent.com",
+      "iosClientId": "1029664741170-hq85mojpc3md3pl1dtsth9j59rkamlka.apps.googleusercontent.com",
       "scopes": ["profile", "email"],
       "serverClientId": "1029664741170-fp23lh13vgpjpg6omci855j2ofag4khc.apps.googleusercontent.com",
       "forceCodeForRefreshToken": true
