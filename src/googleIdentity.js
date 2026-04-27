@@ -10,6 +10,7 @@ export function createGoogleIdentityController({
   nativeGoogleSignIn=async()=>false,
   nativeGoogleSignOut=async()=>false,
   useNativeGoogleAuth=()=>false,
+  useWebGoogleFallbackButton=()=>false,
   handleCredentialResponse,
   authProviderBadgeHtml
 }){
@@ -111,6 +112,18 @@ export function createGoogleIdentityController({
     }
     slot.classList.remove('signed-in');
     nameRow?.classList.remove('signed-in-auth');
+    if(useWebGoogleFallbackButton()){
+      slot.innerHTML=`<button id="google-web-signin" class="auth-btn auth-btn-google">Google</button><div id="google-login-slot"></div>`;
+      doc.getElementById('google-web-signin')?.addEventListener('click',()=>{
+        const hasGsi=Boolean(getWindow().google?.accounts?.id&&ensureGoogleIdentityInitialized());
+        if(hasGsi){
+          promptGoogleIdentityIfNeeded();
+          return;
+        }
+        reloadGoogleScriptForLocale();
+      });
+      return;
+    }
     if(useNativeGoogleAuth()){
       slot.innerHTML=`<button id="google-native-signin" class="auth-btn auth-btn-google">Google</button>`;
       doc.getElementById('google-native-signin')?.addEventListener('click',()=>{
@@ -147,7 +160,7 @@ export function createGoogleIdentityController({
     googleIdentityPrompted=false;
   }
 
-  return{
+    return{
     ensureGoogleIdentityInitialized,
     onGoogleScriptLoaded,
     promptGoogleIdentityIfNeeded,

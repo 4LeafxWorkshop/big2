@@ -25,6 +25,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@capacitor/clipboard": "^7.0.4",
     "@capacitor/core": "^7.6.2",
     "@capacitor/haptics": "^7.0.5",
     "@codetrix-studio/capacitor-google-auth": "^3.4.0-rc.4",

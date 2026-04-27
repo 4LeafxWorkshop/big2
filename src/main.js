@@ -1725,7 +1725,8 @@ const googleIdentityController=createGoogleIdentityController({
   getRender:()=>render,
   signedInWithEmail,
   clearGoogleSession,
-  useNativeGoogleAuth:()=>isNativeAndroidApp()||isNativeIosApp(),
+  useNativeGoogleAuth:()=>isNativeAndroidApp(),
+  useWebGoogleFallbackButton:()=>isNativeIosApp(),
   nativeGoogleSignIn:async()=>{
     const user=await GoogleAuth.signIn();
     await handleNativeGoogleUser(user);
@@ -3185,7 +3186,7 @@ function isNativeIosApp(){
   return Boolean(cap?.isNativePlatform?.()&&nativePlatform()==='ios');
 }
 function initNativeGoogleAuth(){
-  if(!isNativeAndroidApp()&&!isNativeIosApp())return;
+  if(!isNativeAndroidApp())return;
   try{
     GoogleAuth.initialize();
   }catch(err){
@@ -5569,6 +5570,14 @@ function renderHome(){
   const roomTitle=t('roomTableTitle');
   const roomLobbyCountdown=(inRoom&&roomStatus!=='playing'&&state.room.data)?roomCountdownText(state.room.data):'';
   const roomInviteCode=normalizeRoomInviteCode(state.room.code||state.room.pendingInviteCode||'');
+  if(roomInviteCode){
+    try{
+      window.localStorage?.setItem('big2:lastRoomCodeCopy',roomInviteCode);
+    }catch{}
+    try{
+      window.sessionStorage?.setItem('big2:lastRoomCodeCopy',roomInviteCode);
+    }catch{}
+  }
   const roomInviteUrl=roomInviteUrlFromCode(roomInviteCode);
   const roomInviteMessage=roomInviteShareTextFromCode(roomInviteCode);
   const roomLobbyHtml=renderRoomLobbyOverlay({

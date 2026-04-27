@@ -1,3 +1,5 @@
+import {Clipboard} from '@capacitor/clipboard';
+
 export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>window}={}){
   return function bindHomeEvents({
     state,
@@ -56,6 +58,80 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       const legalModal=doc.getElementById('legal-modal');
       legalModal?.classList.remove('open');
       doc.querySelectorAll('.legal-mini-link').forEach((btn)=>btn.classList.remove('active'));
+    };
+    const normalizeRoomCodePaste=(raw)=>{
+      const text=String(raw??'').trim();
+      if(!text)return'';
+      const urlMatch=text.match(/(?:join\/|room\/|code=)([a-z0-9]+)/i);
+      if(urlMatch?.[1])return String(urlMatch[1]).toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);
+      return text.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);
+    };
+    const readClipboardText=async()=>{
+      try{
+        const value=String(await navigator.clipboard?.readText?.()??'').trim();
+        if(value)return value;
+      }catch{
+      }
+      try{
+        const res=await Clipboard.read();
+        return String(res?.value??res?.text??'').trim();
+      }catch{
+        return'';
+      }
+    };
+    const writeClipboardText=async(value)=>{
+      const text=String(value??'').trim();
+      if(!text)return false;
+      try{
+        await navigator.clipboard?.writeText?.(text);
+        return true;
+      }catch{
+      }
+      try{
+        await Clipboard.write({string:text});
+        return true;
+      }catch{
+        return false;
+      }
+    };
+    const LAST_ROOM_CODE_COPY_KEY='big2:lastRoomCodeCopy';
+    const cacheLastRoomCodeCopy=(code)=>{
+      const text=String(code??'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);
+      if(!text)return;
+      try{
+        window.localStorage?.setItem(LAST_ROOM_CODE_COPY_KEY,text);
+        return;
+      }catch{}
+      try{
+        window.sessionStorage?.setItem(LAST_ROOM_CODE_COPY_KEY,text);
+      }catch{}
+    };
+    const readLastRoomCodeCopy=()=>{
+      try{
+        const value=String(window.localStorage?.getItem(LAST_ROOM_CODE_COPY_KEY)??'').trim();
+        if(value)return value;
+      }catch{}
+      try{
+        return String(window.sessionStorage?.getItem(LAST_ROOM_CODE_COPY_KEY)??'').trim();
+      }catch{
+        return'';
+      }
+    };
+    const applyRoomCodeToInput=(code)=>{
+      const normalized=normalizeRoomCodePaste(code);
+      if(!normalized)return false;
+      const input=doc.getElementById('room-code-input');
+      if(!input)return false;
+      input.value=normalized;
+      state.room.pendingInviteCode=normalized;
+      input.dispatchEvent(new Event('input',{bubbles:true}));
+      input.focus?.();
+      input.setSelectionRange?.(normalized.length,normalized.length);
+      state.room.error='';
+      return true;
+    };
+    const getRoomCodeFromBoxes=()=>{
+      return String(doc.getElementById('room-code-input')?.value||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);
     };
 
     doc.getElementById('home-intro-toggle')?.addEventListener('click',()=>{
@@ -218,22 +294,50 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       render();
     });
     doc.getElementById('room-join-confirm')?.addEventListener('click',async()=>{
-      const code=doc.getElementById('room-code-input')?.value??'';
+      const code=getRoomCodeFromBoxes();
       await joinRoomByCode(code);
     });
-    doc.getElementById('room-code-input')?.addEventListener('input',()=>{
-      const input=doc.getElementById('room-code-input');
-      if(!input)return;
-      const next=String(input.value||'').toUpperCase();
-      if(input.value!==next)input.value=next;
-      const boxes=doc.querySelectorAll('.room-code-box');
-      const value=next.slice(0,boxes.length);
-      boxes.forEach((box,idx)=>{
-        const ch=value[idx]||'';
+    const handleRoomPasteCode=async(e)=>{
+      e?.preventDefault?.();
+      e?.stopPropagation?.();
+      const raw=await readClipboardText();
+      if(applyRoomCodeToInput(raw))return;
+      applyRoomCodeToInput(readLastRoomCodeCopy());
+    };
+    doc.getElementById('room-paste-code')?.addEventListener('pointerdown',handleRoomPasteCode,true);
+    doc.getElementById('room-paste-code')?.addEventListener('click',handleRoomPasteCode);
+    const roomCodeInput=doc.getElementById('room-code-input');
+    const syncRoomCodeDisplay=()=>{
+      const next=String(roomCodeInput?.value||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);
+      if(roomCodeInput&&roomCodeInput.value!==next)roomCodeInput.value=next;
+      doc.querySelectorAll('[data-room-code-box]').forEach((box,idx)=>{
+        const ch=next[idx]||'';
         box.textContent=ch;
         box.classList.toggle('filled',Boolean(ch));
       });
+    };
+    roomCodeInput?.addEventListener('input',()=>{
+      syncRoomCodeDisplay();
+      state.room.pendingInviteCode=String(roomCodeInput.value||'').toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);
+      state.room.error='';
     });
+    roomCodeInput?.addEventListener('paste',(e)=>{
+      const pasted=String(e.clipboardData?.getData('text')||'').trim();
+      if(!pasted)return;
+      e.preventDefault();
+      applyRoomCodeToInput(pasted);
+    });
+    const focusRoomCodeInput=()=>{
+      roomCodeInput?.focus?.({preventScroll:true});
+      roomCodeInput?.select?.();
+    };
+    doc.querySelectorAll('[data-room-code-focus], [data-room-code-box]').forEach((el)=>el.addEventListener('pointerdown',(e)=>{
+      e.preventDefault();
+      focusRoomCodeInput();
+    }));
+    doc.querySelectorAll('[data-room-code-focus], [data-room-code-box]').forEach((el)=>el.addEventListener('click',()=>{
+      focusRoomCodeInput();
+    }));
     doc.getElementById('room-active-refresh')?.addEventListener('click',async()=>{
       await loadActiveRooms();
     });
@@ -241,23 +345,16 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       if(card.hasAttribute('disabled')||card.getAttribute('data-private')==='1')return;
       const code=String(card.getAttribute('data-code')||'');
       if(!code)return;
-      const input=doc.getElementById('room-code-input');
-      if(input)input.value=code;
+      applyRoomCodeToInput(code);
       doc.querySelectorAll('.room-active-card').forEach((el)=>el.classList.toggle('active',el===card));
     }));
     doc.querySelectorAll('.room-card-join-btn').forEach((btn)=>btn.addEventListener('click',async(e)=>{
       e.stopPropagation();
       const code=String(btn.getAttribute('data-code')||'');
       if(!code||btn.hasAttribute('disabled'))return;
-      const input=doc.getElementById('room-code-input');
-      if(input)input.value=code;
+      applyRoomCodeToInput(code);
       await joinRoomByCode(code);
     }));
-    doc.getElementById('room-code-input')?.addEventListener('keydown',async(e)=>{
-      if(e.key!=='Enter')return;
-      const code=doc.getElementById('room-code-input')?.value??'';
-      await joinRoomByCode(code);
-    });
 
     const shareRoomInviteWithQr=async(code)=>{
       if(!navigator.share)return false;
@@ -276,9 +373,7 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       const inviteUrl=String(state.room.inviteUrl||roomInviteUrlFromCode(String(state.room.code||state.room.pendingInviteCode||'').trim())||'').trim();
       if(!dataUrl){
         if(inviteUrl){
-          try{
-            await navigator.clipboard?.writeText?.(inviteUrl);
-          }catch{}
+          await writeClipboardText(inviteUrl);
         }
         return;
       }
@@ -290,31 +385,29 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
         }
       }catch{}
       if(inviteUrl){
-        try{
-          await navigator.clipboard?.writeText?.(inviteUrl);
-        }catch{}
+        await writeClipboardText(inviteUrl);
       }
     };
     doc.getElementById('room-copy')?.addEventListener('click',async()=>{
-      try{await navigator.clipboard?.writeText?.(String(state.room.code||''));}catch{}
+      const code=String(state.room.code||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,6);
+      if(!code)return;
+      cacheLastRoomCodeCopy(code);
+      await writeClipboardText(code);
     });
     const shareRoomInvite=async()=>{
       const code=String(state.room.code||state.room.pendingInviteCode||'').trim();
       if(!code)return;
       if(await shareRoomInviteWithQr(code))return;
       const inviteMessage=roomInviteShareTextFromCode(code);
-      try{
-        await navigator.clipboard?.writeText?.(inviteMessage);
-      }catch{}
+      await writeClipboardText(inviteMessage);
     };
     doc.getElementById('room-share-send')?.addEventListener('click',shareRoomInvite);
     doc.querySelectorAll('[data-room-share-send]').forEach((btn)=>btn.addEventListener('click',shareRoomInvite));
     const copyRoomInviteCode=async()=>{
       const code=String(state.room.code||state.room.pendingInviteCode||'').trim();
       if(!code)return;
-      try{
-        await navigator.clipboard?.writeText?.(code);
-      }catch{}
+      cacheLastRoomCodeCopy(code);
+      await writeClipboardText(code);
     };
     doc.getElementById('room-copy-qr')?.addEventListener('click',copyRoomInviteQr);
     doc.getElementById('room-share-code-copy')?.addEventListener('click',copyRoomInviteCode);
@@ -334,9 +427,7 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
           return;
         }catch{}
       }
-      try{
-        await navigator.clipboard?.writeText?.(inviteMessage);
-      }catch{}
+      await writeClipboardText(inviteMessage);
     });
     doc.getElementById('room-share-wechat')?.addEventListener('click',async()=>{
       const code=String(state.room.code||state.room.pendingInviteCode||'').trim();
@@ -351,17 +442,13 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
           return;
         }catch{}
       }
-      try{
-        await navigator.clipboard?.writeText?.(roomInviteShareTextFromCode(code));
-      }catch{}
+      await writeClipboardText(roomInviteShareTextFromCode(code));
     });
     doc.getElementById('room-share-download')?.addEventListener('click',async()=>{
       const code=String(state.room.code||state.room.pendingInviteCode||'').trim();
       if(!code)return;
       const inviteMessage=roomInviteShareTextFromCode(code);
-      try{
-        await navigator.clipboard?.writeText?.(inviteMessage);
-      }catch{}
+      await writeClipboardText(inviteMessage);
     });
     doc.querySelectorAll('[data-room-expiry-reset]').forEach((btn)=>btn.addEventListener('click',async()=>{
       await resetRoomExpiryTo60s();

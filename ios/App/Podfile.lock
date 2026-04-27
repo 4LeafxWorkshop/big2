@@ -7,6 +7,8 @@ PODS:
     - AppAuth/Core
   - Capacitor (7.6.1):
     - CapacitorCordova
+  - CapacitorClipboard (7.0.4):
+    - Capacitor
   - CapacitorCordova (7.6.1)
   - CapacitorHaptics (7.0.5):
     - Capacitor
@@ -24,6 +26,7 @@ PODS:
 
 DEPENDENCIES:
   - "Capacitor (from `../../node_modules/@capacitor/ios`)"
+  - "CapacitorClipboard (from `../../node_modules/@capacitor/clipboard`)"
   - "CapacitorCordova (from `../../node_modules/@capacitor/ios`)"
   - "CapacitorHaptics (from `../../node_modules/@capacitor/haptics`)"
   - "CodetrixStudioCapacitorGoogleAuth (from `../../node_modules/@codetrix-studio/capacitor-google-auth`)"
@@ -38,6 +41,8 @@ SPEC REPOS:
 EXTERNAL SOURCES:
   Capacitor:
     :path: "../../node_modules/@capacitor/ios"
+  CapacitorClipboard:
+    :path: "../../node_modules/@capacitor/clipboard"
   CapacitorCordova:
     :path: "../../node_modules/@capacitor/ios"
   CapacitorHaptics:
@@ -48,6 +53,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   AppAuth: d4f13a8fe0baf391b2108511793e4b479691fb73
   Capacitor: b8dd0e1151c953171b0e02d04aa57f3389edcd97
+  CapacitorClipboard: d1f123674cf413125db816a45e8f70e8770972fc
   CapacitorCordova: 6ab7337f25a2c9ce7a3fdc2f249c480f447853e0
   CapacitorHaptics: 1b145fa83c622e5383a3bac04ea81e2514f0b0f5
   CodetrixStudioCapacitorGoogleAuth: 9dcfabfb7dd804ad6231a1513bc6e81e620cbec6
@@ -55,6 +61,6 @@ SPEC CHECKSUMS:
   GTMAppAuth: 0ff230db599948a9ad7470ca667337803b3fc4dd
   GTMSessionFetcher: 3a63d75eecd6aa32c2fc79f578064e1214dfdec2
 
-PODFILE CHECKSUM: 7a59e9bf318f0ae76fd3df47ec5c746605224671
+PODFILE CHECKSUM: 13df6c1ee143a8f185486d5369d4b7290cc0cb18
 
 COCOAPODS: 1.16.2
