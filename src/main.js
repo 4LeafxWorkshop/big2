@@ -6395,6 +6395,7 @@ function render(){
   document.title=t('title');
   document.body.setAttribute('data-screen',state.screen);
   document.body.setAttribute('data-game-mode',state.home.mode==='room'?'room':'solo');
+  document.body.setAttribute('data-language',state.language);
   document.body.setAttribute('data-ios',isIOSDevice()?'1':'0');
   document.body.setAttribute('data-is-mobile',isMobilePointer()?'1':'0');
   document.body.setAttribute('data-native-android',isNativeAndroidApp()?'1':'0');

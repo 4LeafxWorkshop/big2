@@ -2155,8 +2155,8 @@ body[data-screen='home'] .home-wrap {
 }
 .lobby-seat-host-badge-text {
   position: absolute;
-  left: 1px;
-  bottom: -2px;
+  left: 0;
+  bottom: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -9736,7 +9736,7 @@ body[data-screen='game'] .result-avatar {
 }
 body[data-screen='game'] .result-avatar-wrap .lobby-seat-host-badge-text,
 body[data-screen='game'] .player-avatar-wrap .lobby-seat-host-badge-text {
-  left: -14px;
+  left: -24px;
   right: auto;
   bottom: -2px;
   top: auto;
@@ -9750,6 +9750,10 @@ body[data-screen='game'] .player-avatar-wrap .lobby-seat-host-badge-text {
   text-align: right;
   text-shadow: 0 1px 3px rgba(0,0,0,.55);
   z-index: 4;
+}
+body[data-screen='game'][data-language='zh-HK'] .result-avatar-wrap .lobby-seat-host-badge-text,
+body[data-screen='game'][data-language='zh-HK'] .player-avatar-wrap .lobby-seat-host-badge-text {
+  left: -16px;
 }
 body[data-screen='game'] .player-avatar {
   width: 34px !important;
