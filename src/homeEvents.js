@@ -360,7 +360,6 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       if(!navigator.share)return false;
       try{
         await navigator.share({
-          title:t('roomInviteTitle'),
           text:roomInviteShareTextFromCode(code)
         });
         return true;
@@ -434,7 +433,6 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       if(navigator.share){
         try{
           await navigator.share({
-            title:t('roomInviteTitle'),
             text:roomInviteShareTextFromCode(code)
           });
           return;
