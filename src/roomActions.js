@@ -151,7 +151,26 @@ export function createRoomActionsController(deps){
         return;
       }
       const status=String(data.status||'');
+      const players=Array.isArray(data.players)?data.players:[];
+      const currentEmail=String(deps.currentUserEmail?.()||'').trim().toLowerCase();
+      const selfUid=String(deps.baseRoomPlayerId?.()||'').trim();
+      const selfEntry=players.find((p)=>{
+        const entryEmail=String(p?.email||'').trim().toLowerCase();
+        if(currentEmail&&entryEmail===currentEmail)return true;
+        return String(p?.uid||'').trim()===selfUid;
+      })||null;
       if(status==='playing'){
+        if(selfEntry){
+          const state=deps.getState();
+          state.room.code=code;
+          state.room.pendingInviteCode='';
+          state.room.inviteOpen=false;
+          deps.subscribeRoom(doc.id,code,doc.instanceId,roomDb);
+          void deps.updateActiveRoomPointer(doc.id,doc.instanceId||'');
+          state.room.joinOpen=false;
+          deps.render();
+          return;
+        }
         deps.setRoomError(deps.t('roomStatusPlaying'));
         return;
       }

@@ -544,13 +544,20 @@ async function maybeAutoJoinPendingRoomInvite(){
   const code=normalizeRoomInviteCode(state.room.pendingInviteCode||'');
   if(!code)return false;
   roomInviteJoinInFlight=true;
+  const wasJoinOpen=Boolean(state.room.joinOpen);
   try{
+    state.room.joinOpen=false;
+    state.room.inviteOpen=false;
+    render();
     const joined=await joinRoomByCode(code);
     if(joined){
       state.room.pendingInviteCode='';
       try{
         window.sessionStorage?.removeItem('big2:pendingRoomInviteCode');
       }catch{}
+    }else if(wasJoinOpen&&!state.room.id){
+      state.room.joinOpen=true;
+      render();
     }
     return joined;
   }finally{
@@ -1791,9 +1798,12 @@ const roomLifecycleController=createRoomLifecycleController({
   botProfileForSeat,
   clearRoomStartPending,
   cloneRoomGame,
+  chooseAiPlay,
   currentRoomDb,
   currentRoomPlayerId,
   deleteRoomDirectory,
+  applyRoomPlayToGame,
+  applyRoomPassToGame,
   getRoomPresenceTimer:()=>roomPresenceTimer,
   getState:()=>state,
   isRoomPlayerActive,
@@ -3320,8 +3330,8 @@ function buildLogFabStatusHtml(v,arr){
   const participant=resolveLogStatusParticipant(v,arr);
   const color=participant?playerColorByViewClass(participant.cls):'var(--player-color, #7aaed8)';
   const imgSrc=String(participant?.avatarSrc||participant?.picture||'').trim();
-  if(!imgSrc)return`<span class="game-log-fab-status-badge" style="--player-color:${color};"><span class="game-log-fab-status-chip" aria-hidden="true"></span></span><span class="game-log-fab-status-text">${esc(statusText)}</span>`;
-  return`<span class="game-log-fab-status-badge" style="--player-color:${color};"><img class="game-log-fab-status-avatar" src="${esc(imgSrc)}" alt="" aria-hidden="true"/></span><span class="game-log-fab-status-text">${esc(statusText)}</span>`;
+  if(!imgSrc)return`<span class="game-log-fab-status-text">${esc(statusText)}</span><span class="game-log-fab-status-badge" style="--player-color:${color};"><span class="game-log-fab-status-chip" aria-hidden="true"></span></span>`;
+  return`<span class="game-log-fab-status-text">${esc(statusText)}</span><span class="game-log-fab-status-badge" style="--player-color:${color};"><img class="game-log-fab-status-avatar" src="${esc(imgSrc)}" alt="" aria-hidden="true"/></span>`;
 }
 const esc=(s)=>String(s??'').replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const colorizeSuitText=(s)=>esc(s)

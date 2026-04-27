@@ -91,8 +91,9 @@ export function createRoomLifecycleController(deps){
         }
         const hostUpdate=hostLeaving?{hostId:String(remainingHumans[0]?.uid??remaining[0]?.uid??''),hostName:String(remainingHumans[0]?.name??remaining[0]?.name??'')}:{}; 
         if(status==='playing'&&data.game&&leaving&&Number.isFinite(Number(leaving.seat))){
-          const game=deps.cloneRoomGame(data.game);
+          let game=deps.cloneRoomGame(data.game);
           const seat=Number(leaving.seat);
+          const wasActiveTurn=Number(game?.currentSeat)===seat;
           if(game&&game.players&&game.players[seat]){
             const bp=deps.botProfileForSeat(seat);
             const target=game.players[seat];
@@ -101,6 +102,19 @@ export function createRoomLifecycleController(deps){
             target.name=bp.name;
             target.gender=bp.gender;
             target.picture='';
+          }
+          if(wasActiveTurn&&game){
+            const actor=game.players[seat];
+            if(actor&&Array.isArray(actor.hand)){
+              const aiChoice=deps.chooseAiPlay?.(actor.hand,game,game.aiDifficulty);
+              const played=aiChoice?deps.applyRoomPlayToGame?.(game,seat,aiChoice.cards,now):null;
+              if(played?.ok&&played.game){
+                game=played.game;
+              }else if(game.lastPlay){
+                const passed=deps.applyRoomPassToGame?.(game,seat,now);
+                if(passed?.ok&&passed.game)game=passed.game;
+              }
+            }
           }
           if(game){
             const text=deps.roomLeaveLogText(String(leaving.name||''));
