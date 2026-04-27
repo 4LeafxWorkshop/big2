@@ -4156,6 +4156,12 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   background-size: contain;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237ec0ff' stroke-width='2.05' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='8' r='4'/%3E%3Cpath d='M4 20c1.6-4 6.4-6 8-6s6.4 2 8 6'/%3E%3C/svg%3E");
 }
+.title-icon-namecard {
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237ec0ff' stroke-width='2.05' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3.5' y='5' width='17' height='14' rx='2.2'/%3E%3Cpath d='M8 9h4.5M8 12h7M8 15h5'/%3E%3Cpath d='M17.2 10.5c1.15 0 2.1.93 2.1 2.08s-.95 2.08-2.1 2.08-2.1-.93-2.1-2.08.95-2.08 2.1-2.08Z'/%3E%3C/svg%3E");
+}
 .title-icon-result {
   background-repeat: no-repeat;
   background-position: center;
@@ -10801,16 +10807,6 @@ body[data-screen='game'] .action-strip {
   }
 }
 
-/* Only shrink top-bar buttons when width is still too tight after wrapping. */
-@media (max-width: 1120px) {
-  body[data-screen='game'] .topbar-right .control-row button {
-    min-height: 32px !important;
-    padding: 4px 7px !important;
-    font-size: .74rem !important;
-    line-height: 1.15 !important;
-  }
-}
-
 /* Tablet landscape: keep topbar buttons in one row like web view. */
 @media (min-width: 861px) and (max-width: 1500px) and (orientation: landscape) {
   body[data-screen='game'] .topbar {
@@ -11020,8 +11016,8 @@ body[data-screen='game'][data-log-open='0'] .side-zone.log-collapsed .log-toggle
     flex: 0 0 auto !important;
     min-width: max-content !important;
     white-space: nowrap !important;
-    min-height: 30px !important;
-    padding: 4px 8px !important;
+    min-height: 34px !important;
+    padding: 5px 9px !important;
   }
   body[data-screen='game'] .action-strip .player-tag {
     position: absolute !important;
@@ -13633,21 +13629,18 @@ body[data-screen='game'] :is(.play-type-call, .last-card-call, .emote-callout, .
   }
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 860px) {
   body[data-screen='game'] .topbar {
-    padding: 7px 8px !important;
-    gap: 6px !important;
+    flex-wrap: nowrap !important;
     align-items: center !important;
   }
   body[data-screen='game'] .topbar-right {
+    max-width: calc(100vw - 122px) !important;
     min-width: 0 !important;
-    max-width: calc(100vw - 130px) !important;
   }
   body[data-screen='game'] .topbar-right .control-row {
-    display: flex !important;
+    gap: 4px !important;
     flex-wrap: nowrap !important;
-    align-items: center !important;
-    gap: 3px !important;
     overflow-x: auto !important;
     overflow-y: hidden !important;
     scrollbar-width: none !important;
@@ -13656,38 +13649,10 @@ body[data-screen='game'] :is(.play-type-call, .last-card-call, .emote-callout, .
   body[data-screen='game'] .topbar-right .control-row::-webkit-scrollbar {
     display: none;
   }
-  body[data-screen='game'] .topbar-right .control-row button {
-    flex: 0 0 auto !important;
-    min-width: 0 !important;
-    min-height: 26px !important;
-    padding: 2px 6px !important;
-    border-radius: 9px !important;
-    font-size: clamp(.54rem, 1.6vw, .72rem) !important;
-    line-height: 1 !important;
-    white-space: nowrap !important;
-  }
-  body[data-screen='game'] .topbar-right .lang-menu-trigger {
-    min-height: 26px !important;
-    padding: 2px 6px !important;
-    font-size: clamp(.54rem, 1.6vw, .72rem) !important;
-  }
-}
-
-@media (max-width: 860px) {
-  body[data-screen='game'] .topbar {
-    flex-wrap: nowrap !important;
-    align-items: center !important;
-  }
-  body[data-screen='game'] .topbar-right {
-    max-width: calc(100vw - 122px) !important;
-  }
-  body[data-screen='game'] .topbar-right .control-row {
-    gap: 2px !important;
-  }
   body[data-screen='game'] .topbar-right .control-row button,
   body[data-screen='game'] .topbar-right .lang-menu-trigger {
-    min-height: 24px !important;
-    padding: 1px 5px !important;
-    font-size: clamp(.5rem, 1.5vw, .66rem) !important;
+    min-height: 30px !important;
+    padding: 3px 8px !important;
+    font-size: clamp(.66rem, 1.9vw, .78rem) !important;
   }
 }

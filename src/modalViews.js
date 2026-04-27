@@ -151,7 +151,7 @@ export function renderOpponentProfileModal(params){
     <section class="intro-sheet opponent-profile-sheet">
       <header class="intro-head">
         <div>
-          <h3 class="title-with-icon"><span class="title-icon-emoji" aria-hidden="true">👤</span><span>${esc(name)}</span><span class="opponent-gender-icon ${genderClass}" aria-label="${esc(genderLabel)}" title="${esc(genderLabel)}">${renderGenderIconSvg(genderClass)}</span></h3>
+          <h3 class="title-with-icon"><span class="title-icon title-icon-namecard" aria-hidden="true"></span><span>${esc(name)}</span><span class="opponent-gender-icon ${genderClass}" aria-label="${esc(genderLabel)}" title="${esc(genderLabel)}">${renderGenderIconSvg(genderClass)}</span></h3>
         </div>
         <button id="opponent-profile-close" class="secondary">${closeLabel}</button>
       </header>
