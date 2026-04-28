@@ -42,6 +42,18 @@ export function runGamePostRender(params){
     }else if(logFab.parentElement!==logFabHost){
       logFabHost.appendChild(logFab);
     }
+    if(logSheetOpen){
+      logFab.remove();
+      const existingSheet=appEl.querySelector('#log-sheet');
+      if(existingSheet)existingSheet.remove();
+      appEl.insertAdjacentHTML('beforeend',logSheetHtml);
+      const southTag=appEl.querySelector('.action-strip .player-tag');
+      const tableHost=appEl.querySelector('.table');
+      if(isMobilePortrait&&southTag instanceof HTMLElement&&tableHost instanceof HTMLElement&&southTag.parentElement!==tableHost){
+        tableHost.appendChild(southTag);
+      }
+      return;
+    }
     const statusNode=logFab.querySelector('.game-log-fab-status');
     if(logFabStatusHtml){
       if(statusNode)statusNode.innerHTML=logFabStatusHtml;
@@ -49,11 +61,6 @@ export function runGamePostRender(params){
     }else{
       statusNode?.remove();
       logFab.querySelector('.game-log-fab-divider')?.remove();
-    }
-    const existingSheet=appEl.querySelector('#log-sheet');
-    if(existingSheet)existingSheet.remove();
-    if(logSheetOpen){
-      appEl.insertAdjacentHTML('beforeend',logSheetHtml);
     }
     if(logFab instanceof HTMLElement){
       if(portraitMode){
