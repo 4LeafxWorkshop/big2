@@ -13200,6 +13200,10 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
     min-height: calc(var(--card-h) * 1.14 + 18px) !important;
     padding-bottom: 2px !important;
   }
+  body[data-screen='game'][data-ios='1'] .action-zone {
+    background:
+      linear-gradient(180deg, rgba(0,0,0,0) calc(100% - 16px), rgba(15, 40, 24, .34) 100%) !important;
+  }
   body[data-native-android='1'] {
     min-height: var(--app-vh, 100svh) !important;
   }
@@ -13283,7 +13287,6 @@ body[data-screen='game'] .action-strip .control-row .room-top-meta {
 }
 body[data-screen='game'][data-ios='1'] #app,
 body[data-screen='game'][data-ios='1'] .main-zone,
-body[data-screen='game'][data-ios='1'] .action-zone,
 body[data-screen='game'][data-ios='1'] .action-strip {
   background: transparent !important;
 }
