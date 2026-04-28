@@ -12928,6 +12928,11 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
     bottom: auto !important;
     transform: translateX(-50%) !important;
   }
+  body[data-screen='game'][data-ios='1'] .action-strip .game-log-fab {
+    top: 6px !important;
+    right: 8px !important;
+    bottom: auto !important;
+  }
 }
 
 @media (orientation: landscape) {
