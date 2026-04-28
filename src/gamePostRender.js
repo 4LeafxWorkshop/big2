@@ -52,54 +52,55 @@ export function runGamePostRender(params){
       if(isMobilePortrait&&southTag instanceof HTMLElement&&tableHost instanceof HTMLElement&&southTag.parentElement!==tableHost){
         tableHost.appendChild(southTag);
       }
-      return;
-    }
-    const statusNode=logFab.querySelector('.game-log-fab-status');
-    if(logFabStatusHtml){
-      if(statusNode)statusNode.innerHTML=logFabStatusHtml;
-      else logFab.querySelector('.game-log-fab-copy')?.insertAdjacentHTML('beforeend',`<span class="game-log-fab-divider" aria-hidden="true"></span><span class="game-log-fab-status">${logFabStatusHtml}</span>`);
     }else{
-      statusNode?.remove();
-      logFab.querySelector('.game-log-fab-divider')?.remove();
-    }
-    if(logFab instanceof HTMLElement){
-      if(portraitMode){
-        logFab.style.removeProperty('left');
-        logFab.style.removeProperty('top');
-        logFab.style.removeProperty('right');
-        logFab.style.removeProperty('bottom');
-      }else{
-        let x=state.logFab?.x;
-        let y=state.logFab?.y;
-        const pad=8;
-        const viewW=Math.max(0,window.innerWidth||0);
-        const viewH=Math.max(0,window.innerHeight||0);
-        const lastW=Number(state.logFab?.vw||0);
-        const lastH=Number(state.logFab?.vh||0);
-        if(Number.isFinite(x)&&Number.isFinite(y)&&lastW>0&&lastH>0&&(lastW!==viewW||lastH!==viewH)){
-          x=(x/lastW)*viewW;
-          y=(y/lastH)*viewH;
-        }
-        const fabW=Math.max(0,logFab.offsetWidth||0);
-        const fabH=Math.max(0,logFab.offsetHeight||0);
-        const maxX=Math.max(0,viewW-fabW-pad);
-        const maxY=Math.max(0,viewH-fabH-pad);
-        if(Number.isFinite(x)&&Number.isFinite(y)){
-          const nx=Math.max(pad,Math.min(x,maxX));
-          const ny=Math.max(pad,Math.min(y,maxY));
-          state.logFab.x=nx;
-          state.logFab.y=ny;
-          state.logFab.vw=viewW;
-          state.logFab.vh=viewH;
-          logFab.style.left=`${nx}px`;
-          logFab.style.top=`${ny}px`;
-          logFab.style.right='auto';
-          logFab.style.bottom='auto';
-        }else{
+      const statusNode=logFab.querySelector('.game-log-fab-status');
+      if(logFabStatusHtml){
+        if(statusNode)statusNode.innerHTML=logFabStatusHtml;
+        else logFab.querySelector('.game-log-fab-copy')?.insertAdjacentHTML('beforeend',`<span class="game-log-fab-divider" aria-hidden="true"></span><span class="game-log-fab-status">${logFabStatusHtml}</span>`);
+      }
+      else{
+        statusNode?.remove();
+        logFab.querySelector('.game-log-fab-divider')?.remove();
+      }
+      if(logFab instanceof HTMLElement){
+        if(portraitMode){
           logFab.style.removeProperty('left');
           logFab.style.removeProperty('top');
           logFab.style.removeProperty('right');
           logFab.style.removeProperty('bottom');
+        }else{
+          let x=state.logFab?.x;
+          let y=state.logFab?.y;
+          const pad=8;
+          const viewW=Math.max(0,window.innerWidth||0);
+          const viewH=Math.max(0,window.innerHeight||0);
+          const lastW=Number(state.logFab?.vw||0);
+          const lastH=Number(state.logFab?.vh||0);
+          if(Number.isFinite(x)&&Number.isFinite(y)&&lastW>0&&lastH>0&&(lastW!==viewW||lastH!==viewH)){
+            x=(x/lastW)*viewW;
+            y=(y/lastH)*viewH;
+          }
+          const fabW=Math.max(0,logFab.offsetWidth||0);
+          const fabH=Math.max(0,logFab.offsetHeight||0);
+          const maxX=Math.max(0,viewW-fabW-pad);
+          const maxY=Math.max(0,viewH-fabH-pad);
+          if(Number.isFinite(x)&&Number.isFinite(y)){
+            const nx=Math.max(pad,Math.min(x,maxX));
+            const ny=Math.max(pad,Math.min(y,maxY));
+            state.logFab.x=nx;
+            state.logFab.y=ny;
+            state.logFab.vw=viewW;
+            state.logFab.vh=viewH;
+            logFab.style.left=`${nx}px`;
+            logFab.style.top=`${ny}px`;
+            logFab.style.right='auto';
+            logFab.style.bottom='auto';
+          }else{
+            logFab.style.removeProperty('left');
+            logFab.style.removeProperty('top');
+            logFab.style.removeProperty('right');
+            logFab.style.removeProperty('bottom');
+          }
         }
       }
     }
