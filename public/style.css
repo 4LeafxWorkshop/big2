@@ -7057,12 +7057,11 @@ body[data-screen='game'][data-ios='1'][data-orientation='portrait'] #game-log-fa
   z-index: 12050 !important;
   touch-action: auto !important;
 }
-body[data-screen='game'][data-ios='1'][data-orientation='portrait'] #game-log-fab .game-log-fab-status,
-body[data-screen='game'][data-ios='1'][data-orientation='portrait'] #game-log-fab .game-log-fab-divider {
-  display: none !important;
-}
 body[data-screen='game'][data-ios='1'][data-orientation='portrait'] #game-log-fab .game-log-fab-copy {
-  gap: 0 !important;
+  gap: 6px !important;
+}
+body[data-screen='game'][data-log-sheet='1'] #game-log-fab {
+  display: none !important;
 }
 body[data-screen='game'][data-orientation='portrait'] .action-strip .game-log-fab .game-log-fab-status { max-width: min(64vw, 260px); }
 body[data-screen='game'][data-orientation='portrait'] .action-strip .game-log-fab-divider {
