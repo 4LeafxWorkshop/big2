@@ -12343,14 +12343,14 @@ body[data-screen='game'] .seat.east {
   }
   body[data-screen='game'] .seat.west > .seat-name-fixed,
   body[data-screen='game'] .seat.east > .seat-name-fixed {
-    top: 38% !important;
+    top: var(--opp-side-avatar-top, calc(38% + var(--opp-side-station-drop, 0px))) !important;
     left: 50% !important;
     right: auto !important;
     transform: translate(-50%, -50%) !important;
   }
   body[data-screen='game'] .seat.west .opponent-fan,
   body[data-screen='game'] .seat.east .opponent-fan {
-    top: calc(38% + var(--opp-side-fan-offset, 32px)) !important;
+    top: calc(var(--opp-side-avatar-top, calc(38% + var(--opp-side-station-drop, 0px))) + var(--opp-side-fan-offset, 32px)) !important;
     left: 50% !important;
     right: auto !important;
     transform: translateX(-50%) scale(.72) !important;
@@ -12451,7 +12451,7 @@ body[data-screen='game'] .seat.east {
   body[data-screen='game'] .seat.west .opponent-fan,
   body[data-screen='game'] .seat.east .opponent-fan {
     position: absolute !important;
-    top: calc(50% + 34px) !important;
+    top: calc(var(--opp-side-avatar-top, calc(38% + var(--opp-side-station-drop, 0px))) + var(--opp-side-fan-offset, 32px)) !important;
     left: 50% !important;
     right: auto !important;
     transform: translateX(-50%) !important;
@@ -13433,7 +13433,7 @@ body[data-screen='game'] :is(.seat.west, .seat.east) .side-station-stack .oppone
 @media (max-width: 860px) and (orientation: portrait) {
   body[data-screen='game'][data-orientation='portrait'] {
     --opp-side-station-drop: clamp(0px, calc((var(--app-vh, 100svh) - 700px) * 0.08), 16px);
-    --opp-side-avatar-top: calc(34% + var(--opp-side-station-drop));
+    --opp-side-avatar-top: calc(38% + var(--opp-side-station-drop));
     --opp-side-fan-offset: 40px;
     --opp-closed-gap: clamp(22px, 3vmin, 28px);
     --opp-open-gap: clamp(62px, 7.8vmin, 78px);
@@ -13468,7 +13468,7 @@ body[data-screen='game'] :is(.seat.west, .seat.east) .side-station-stack .oppone
     align-content: center !important;
   }
   body[data-screen='game'][data-orientation='portrait'] {
-    --opp-side-pack-pad-top: 64%;
+    --opp-side-pack-pad-top: calc(64% + var(--opp-side-station-drop));
   }
   body[data-screen='game'][data-orientation='portrait'] .seat.west .seat-pack,
   body[data-screen='game'][data-orientation='portrait'] .seat.east .seat-pack {
