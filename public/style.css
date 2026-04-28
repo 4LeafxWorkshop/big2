@@ -7261,6 +7261,25 @@ body[data-screen='game'] .log-side-card .log-status {
   margin-right: 3px;
   transform: translateY(-.5px);
 }
+.history-avatar-badge {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 14px;
+  height: 14px;
+  margin-right: 4px;
+  border-radius: 999px;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--player-color, #7aaed8) 42%, rgba(255,255,255,.2)) inset;
+  overflow: hidden;
+}
+.history-avatar-badge .history-avatar {
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 1px solid color-mix(in srgb, var(--player-color, #7aaed8) 58%, rgba(255,255,255,.28));
+}
 .history-cards { display: flex; gap: 0; flex-wrap: nowrap; overflow-x: auto; min-width: 0; max-width: 100%; }
 .history-cards .card.mini {
   width: var(--guide-card-w, clamp(36px, 5.7vw, 58px));

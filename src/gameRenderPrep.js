@@ -98,7 +98,7 @@ export function buildGameAuxRenderState(params){
   const portraitMode=isPortraitMode();
   const logSheetOpen=portraitMode&&state.showLogSheet;
   const logToggleStateText=t('log');
-  const gameHistoryHtml=historyHtml(v.history,v.selfSeat,v.systemLog);
+  const gameHistoryHtml=historyHtml(v.history,v.selfSeat,v.participants,v.systemLog);
   const closeLabel=t('close');
   const isRecPass=state.recommendHint===t('recPass');
   const isRecEmpty=state.recommendHint===t('noSuggest');

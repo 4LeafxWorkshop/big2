@@ -3324,14 +3324,45 @@ function resolveLogStatusParticipant(v,arr){
   }
   return null;
 }
+function resolveLogStatusParticipantFromText(statusText,arr){
+  const list=Array.isArray(arr)?arr:[];
+  const text=String(statusText??'').trim();
+  if(!text)return null;
+  const candidates=list
+    .filter((p)=>{
+      const rawName=String(p?.rawName??'').trim();
+      const displayName=String(p?.name??'').trim();
+      return rawName||displayName;
+    })
+    .sort((a,b)=>String(b?.rawName??b?.name??'').length-String(a?.rawName??a?.name??'').length);
+  return candidates.find((p)=>{
+    const rawName=String(p?.rawName??'').trim();
+    const displayName=String(p?.name??'').trim();
+    return (rawName&&text.startsWith(rawName))||(displayName&&text.startsWith(displayName));
+  })??null;
+}
 function buildLogFabStatusHtml(v,arr){
   const statusText=uiStatus(v.status,v.statusMeta);
   if(!statusText)return'';
-  const participant=resolveLogStatusParticipant(v,arr);
+  const participant=resolveLogStatusParticipant(v,arr)??resolveLogStatusParticipantFromText(statusText,arr);
   const color=participant?playerColorByViewClass(participant.cls):'var(--player-color, #7aaed8)';
   const imgSrc=String(participant?.avatarSrc||participant?.picture||'').trim();
   if(!imgSrc)return`<span class="game-log-fab-status-badge" style="--player-color:${color};"><span class="game-log-fab-status-chip" aria-hidden="true"></span></span><span class="game-log-fab-status-text">${esc(statusText)}</span>`;
   return`<span class="game-log-fab-status-badge" style="--player-color:${color};"><img class="game-log-fab-status-avatar" src="${esc(imgSrc)}" alt="" aria-hidden="true"/></span><span class="game-log-fab-status-text">${esc(statusText)}</span>`;
+}
+function resolveHistoryLogParticipant(entry,participants){
+  const list=Array.isArray(participants)?participants:[];
+  const seat=Number(entry?.seat);
+  if(Number.isInteger(seat)){
+    const bySeat=list.find((p)=>Number(p?.seat)===seat);
+    if(bySeat)return bySeat;
+  }
+  const name=String(entry?.name??'').trim();
+  if(name){
+    const byName=list.find((p)=>String(p?.name??'').trim()===name||String(p?.rawName??'').trim()===name);
+    if(byName)return byName;
+  }
+  return null;
 }
 const esc=(s)=>String(s??'').replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const colorizeSuitText=(s)=>esc(s)
@@ -4784,16 +4815,21 @@ function gameLogDetailText(e){
   if(lang==='zh-HK')return`${copy.played}${kind}(${cards.length}${copy.card})${cardText?`(${cardText})`:''}`;
   return`${copy.played} ${kind} (${cards.length} ${copy.card})${cardText?` (${cardText})`:''}`;
 }
-function historyHtml(h,self,systemLog=[]){
+function historyHtml(h,self,participants=[],systemLog=[]){
   const items=[];
+  const participantList=Array.isArray(participants)?participants:[];
   let seq=0;
   for(const e of (h??[])){
     const vIdx=seatView(e.seat,self);
     const cls=seatCls[vIdx]||'south';
     const color=playerColorByViewClass(cls);
+    const participant=resolveHistoryLogParticipant(e,participantList);
+    const avatarSrc=String(participant?.avatarSrc||participant?.picture||'').trim();
     const timeText=formatGameLogDateTime(e.ts);
     const detail=gameLogDetailText(e);
-    const tag=`<span class="player-color-chip" style="--player-color:${color};"></span><span class="history-name">${esc(e.name)}</span>`;
+    const tag=avatarSrc
+      ?`<span class="history-avatar-badge" style="--player-color:${color};"><img class="game-log-fab-status-avatar history-avatar" src="${esc(avatarSrc)}" alt="" aria-hidden="true"/></span><span class="history-name">${esc(e.name)}</span>`
+      :`<span class="player-color-chip" style="--player-color:${color};"></span><span class="history-name">${esc(e.name)}</span>`;
     if(e.action==='pass'){
       items.push({ts:Number(e.ts)||0,seq:seq++,html:`<div class="history-item"><div class="history-head"><div class="history-title">${tag}</div>${timeText?`<div class="history-time">${esc(timeText)}</div>`:''}</div><div class="history-detail">${esc(detail)}</div></div>`});
       continue;
@@ -4804,7 +4840,13 @@ function historyHtml(h,self,systemLog=[]){
   const sysEntries=(systemLog??[]).map((x)=>typeof x==='string'?{text:x,ts:0}:{text:String(x?.text??''),ts:Number(x?.ts)||0}).filter((x)=>x.text.trim());
   for(const s of sysEntries){
     const timeText=formatSystemLogDateTime(s.ts);
-    items.push({ts:Number(s.ts)||0,seq:seq++,html:`<div class="history-item"><div class="history-head"><div class="history-meta history-system-line">${esc(s.text)}</div>${timeText?`<div class="history-time">${esc(timeText)}</div>`:''}</div></div>`});
+    const participant=resolveLogStatusParticipantFromText(s.text,participantList);
+    const color=participant?playerColorByViewClass(participant.cls):'var(--player-color, #7aaed8)';
+    const avatarSrc=String(participant?.avatarSrc||participant?.picture||'').trim();
+    const systemLine=avatarSrc
+      ?`<div class="history-meta history-system-line" style="--player-color:${color};"><span class="history-avatar-badge" style="--player-color:${color};"><img class="game-log-fab-status-avatar history-avatar" src="${esc(avatarSrc)}" alt="" aria-hidden="true"/></span><span>${esc(s.text)}</span></div>`
+      :`<div class="history-meta history-system-line">${esc(s.text)}</div>`;
+    items.push({ts:Number(s.ts)||0,seq:seq++,html:`<div class="history-item"><div class="history-head">${systemLine}${timeText?`<div class="history-time">${esc(timeText)}</div>`:''}</div></div>`});
   }
   const entries=items.sort((a,b)=>(b.ts-a.ts)||(b.seq-a.seq)).map((x)=>x.html);
   if(!entries.length)return`<div class="hint">${t('nolog')}</div>`;
