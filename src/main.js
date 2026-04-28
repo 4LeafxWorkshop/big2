@@ -84,6 +84,8 @@ const FOOD_CALLOUT_META={
   pineapplebun:{file:'pineapplebun.png',width:72},
   eggtart:{file:'eggtart.png',width:54},
   milktea:{file:'milktea.png',width:81},
+  cocktailbun:{file:'cocktailbun.png',width:79},
+  icedmilktea:{file:'icedmilktea.png',width:45},
   sausagebun:{file:'sausagebun.png',width:78},
   redbeanice:{file:'redbeanice.png',width:43},
   frenchtoast:{file:'frenchtoast.png',width:84}

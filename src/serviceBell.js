@@ -4,6 +4,8 @@ const SERVICE_BELL_FOODS=[
   {id:'pineapplebun',file:'pineapplebun.png',voice:'pineapplebun_voice.mp3',width:160,height:109},
   {id:'eggtart',file:'eggtart.png',voice:'eggtart_voice.mp3',width:120,height:78},
   {id:'milktea',file:'milktea.png',voice:'milktea_voice.mp3',width:180,height:140},
+  {id:'cocktailbun',file:'cocktailbun.png',voice:'cocktailbun_voice.mp3',width:176,height:102},
+  {id:'icedmilktea',file:'icedmilktea.png',voice:'icedmilktea_voice.mp3',width:100,height:174},
   {id:'sausagebun',file:'sausagebun.png',voice:'sausagebun_voice.mp3',width:172,height:115},
   {id:'redbeanice',file:'redbeanice.png',voice:'redbeanice_voice.mp3',width:96,height:197},
   {id:'frenchtoast',file:'frenchtoast.png',voice:'frenchtoast_voice.mp3',width:186,height:118}
