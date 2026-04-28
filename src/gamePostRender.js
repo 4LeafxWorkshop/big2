@@ -28,7 +28,7 @@ export function runGamePostRender(params){
     const logFabHost=isIOSMobilePortrait
       ?document.body
       :(portraitMode?(appEl.querySelector('.action-strip')||appEl):appEl);
-    let logFab=appEl.querySelector('#game-log-fab');
+    let logFab=document.getElementById('game-log-fab');
     if(!logFab){
       const btn=document.createElement('button');
       btn.id='game-log-fab';
