@@ -13510,7 +13510,7 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] :is(.name, .seat-i
   z-index: 13000 !important;
 }
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout {
-  z-index: 17002 !important;
+  z-index: 30002 !important;
 }
 body[data-screen='game'] .seat[data-seat-emote-active='1'] :is(.seat-name-fixed[data-opponent-name], .seat-name-fixed[data-opponent-name] .name) {
   z-index: 18020 !important;
@@ -13521,7 +13521,7 @@ body[data-screen='game'] .service-bell-food {
   z-index: 12000 !important;
 }
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .food-callout-seat {
-  z-index: 14020 !important;
+  z-index: 30001 !important;
 }
 body[data-screen='game'] :is(.table-center-stack, .center-last, .center-last-north, .center-last-west, .center-last-east, .center-last-south) {
   z-index: 11000 !important;
@@ -13558,7 +13558,9 @@ body[data-screen='game'] :is(
   .mobile-opponent-name[data-opponent-name],
   .seat-name-fixed.player-tag
 ) {
-  z-index: 14000 !important;
+  position: relative !important;
+  z-index: 30000 !important;
+  isolation: isolate !important;
 }
 body[data-screen='game'] :is(
   .play-type-call,
@@ -13568,7 +13570,7 @@ body[data-screen='game'] :is(
   .self-table-emote,
   .table-emote
 ) {
-  z-index: 17000 !important;
+  z-index: 30010 !important;
 }
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] :is(
   .play-type-call-seat,
@@ -13577,7 +13579,7 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] :is(
   .food-callout-seat,
   .seat-motto-callout
 ) {
-  z-index: 17001 !important;
+  z-index: 30011 !important;
 }
 body[data-screen='game'][data-orientation='landscape'] .seat.north .seat-pack > .seat-name-fixed,
 body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-pack > .seat-name-fixed,
