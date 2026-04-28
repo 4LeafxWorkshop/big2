@@ -12049,7 +12049,8 @@ body[data-screen='game'][data-orientation='landscape'] .seat.north > .seat-name-
 
 /* Single-source station float layout (web/mobile + portrait/landscape). */
 body[data-screen='game'] {
-  --opp-side-avatar-top: 50%;
+  --opp-side-station-drop: 0px;
+  --opp-side-avatar-top: calc(50% + var(--opp-side-station-drop));
   --opp-closed-gap: clamp(56px, 7.2vmin, 74px);
   --opp-open-gap: clamp(70px, 8.8vmin, 96px);
   --opp-side-fan-top: calc(var(--opp-side-avatar-top) + var(--opp-closed-gap));
@@ -12074,6 +12075,11 @@ body[data-screen='game'] {
   --opp-closed-scale: .72;
   --opp-side-open-scale: 1;
   --opp-played-pair-overlap: -0.82;
+}
+@media (max-width: 860px) {
+  body[data-screen='game'] {
+    --opp-side-station-drop: clamp(8px, calc((780px - var(--app-vh, 100svh)) * 0.12), 28px);
+  }
 }
 body[data-screen='game'] .seat.west,
 body[data-screen='game'] .seat.east,
