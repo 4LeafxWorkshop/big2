@@ -2556,7 +2556,7 @@ function applyRoomGameSnapshot(roomData){
       if(Number(move.ts)&&now-Number(move.ts)<=1000){
         if(move.type==='play')playSound('play');
         if(move.type==='pass')playSound('pass');
-        if(move.type==='win')playSound('win');
+        if(move.type==='win')playWinFeedback();
       }
       state.room.lastMoveKey=key;
     }
@@ -4367,7 +4367,7 @@ function soloApplyPlay(seat,cards){const g=state.solo;const ev=evaluatePlay(card
     const identity=p.isHuman?currentLeaderboardIdentity():botLeaderboardIdentity(p.name,p.gender);
     void recordLeaderboardRound(identity,deltas[i],i===seat);
   });
-  playSound('win');
+  playWinFeedback();
   {const wc=buildWinnerCalloutForSeat(g,seat);playWinSfxThen(()=>{void playWinnerCallout(wc,g.players[seat]?.gender??'male',seat);},2200);}
   return true;
   }
@@ -4548,6 +4548,10 @@ function playSound(kind){
     playTone(1175,0.28,'triangle',0.044,0.46);
   }
   if(kind==='win'){playTone(392,0.13,'triangle',0.03);playTone(523,0.14,'triangle',0.03,0.06);playTone(659,0.2,'triangle',0.03,0.12);}
+}
+function playWinFeedback(){
+  playSound('win');
+  triggerVibration([90,45,90]);
 }
 const serviceBellController=createServiceBellController({
   documentRef:()=>document,
