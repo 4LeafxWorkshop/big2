@@ -11283,7 +11283,7 @@ body[data-screen='game'][data-log-open='0'] .side-zone.log-collapsed .log-side-c
   }
   body[data-screen='game'][data-ios='1'][data-log-open='0'] .action-zone,
   body[data-screen='game'][data-ios='1'][data-log-open='1'] .action-zone {
-    padding-bottom: 0 !important;
+    padding-bottom: max(10px, env(safe-area-inset-bottom)) !important;
   }
   body[data-screen='game'][data-log-open='0'] .side-zone,
   body[data-screen='game'][data-log-open='1'] .side-zone,
@@ -12903,11 +12903,16 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
   body[data-screen='game'][data-ios='1'] .action-strip {
     padding-bottom: 0 !important;
   }
+  body[data-screen='game'][data-ios='1'] .action-zone {
+    padding-bottom: max(10px, env(safe-area-inset-bottom)) !important;
+  }
   body[data-screen='game'][data-ios='1'] #app {
     padding: max(6px, env(safe-area-inset-top)) 5px 0 !important;
   }
   body[data-screen='game'][data-ios='1'][data-log-open='0'] .action-zone,
-  body[data-screen='game'][data-ios='1'][data-log-open='1'] .action-zone,
+  body[data-screen='game'][data-ios='1'][data-log-open='1'] .action-zone {
+    padding-bottom: max(10px, env(safe-area-inset-bottom)) !important;
+  }
   body[data-screen='game'][data-ios='1'][data-log-open='0'] .action-strip,
   body[data-screen='game'][data-ios='1'][data-log-open='1'] .action-strip {
     padding-bottom: 0 !important;
@@ -13186,6 +13191,9 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
   body[data-screen='game'][data-ios='1'] .action-strip .hand {
     overflow: visible !important;
     padding-bottom: 0 !important;
+  }
+  body[data-screen='game'][data-ios='1'] .action-zone {
+    padding-bottom: max(10px, env(safe-area-inset-bottom)) !important;
   }
   body[data-screen='game'][data-ios='1'] .action-strip .hand {
     overflow: hidden !important;
