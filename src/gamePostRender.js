@@ -24,7 +24,10 @@ export function runGamePostRender(params){
   const appEl=app;
   if(appEl){
     const isMobilePortrait=portraitMode&&document.body.dataset.isMobile==='1';
-    const logFabHost=portraitMode?(appEl.querySelector('.action-strip')||appEl):appEl;
+    const isIOSMobilePortrait=isMobilePortrait&&document.body.dataset.ios==='1';
+    const logFabHost=isIOSMobilePortrait
+      ?document.body
+      :(portraitMode?(appEl.querySelector('.action-strip')||appEl):appEl);
     let logFab=appEl.querySelector('#game-log-fab');
     if(!logFab){
       const btn=document.createElement('button');

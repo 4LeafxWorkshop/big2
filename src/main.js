@@ -6404,6 +6404,13 @@ function isPortraitLogSheetOpen(){
 function syncLogFabPosition(){
   const logFab=document.getElementById('game-log-fab');
   if(!(logFab instanceof HTMLElement))return;
+  if(isPortraitMode()){
+    logFab.style.removeProperty('left');
+    logFab.style.removeProperty('top');
+    logFab.style.removeProperty('right');
+    logFab.style.removeProperty('bottom');
+    return;
+  }
   let x=state.logFab?.x;
   let y=state.logFab?.y;
   if(!Number.isFinite(x)||!Number.isFinite(y))return;
