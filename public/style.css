@@ -12081,6 +12081,7 @@ body[data-screen='game'] {
   body[data-screen='game'] {
     --opp-side-station-drop: clamp(8px, calc((780px - var(--app-vh, 100svh)) * 0.12), 28px);
     --opp-side-fan-offset: 38px;
+    --opp-side-pack-pad-top: clamp(18px, calc((780px - var(--app-vh, 100svh)) * 0.16), 64px);
   }
 }
 body[data-screen='game'] .seat.west,
@@ -12349,7 +12350,7 @@ body[data-screen='game'] .seat.east {
   }
   body[data-screen='game'] .seat.west .opponent-fan,
   body[data-screen='game'] .seat.east .opponent-fan {
-    top: calc(38% + 32px) !important;
+    top: calc(38% + var(--opp-side-fan-offset, 32px)) !important;
     left: 50% !important;
     right: auto !important;
     transform: translateX(-50%) scale(.72) !important;
@@ -12397,14 +12398,14 @@ body[data-screen='game'] .seat.east {
     align-content: start !important;
     justify-items: center !important;
     gap: 0 !important;
-    padding-top: 50% !important;
+    padding-top: var(--opp-side-pack-pad-top, 50%) !important;
   }
   body[data-screen='game'] .seat.north .seat-pack {
     padding-top: 0 !important;
   }
   body[data-screen='game'] .seat.west .seat-pack,
   body[data-screen='game'] .seat.east .seat-pack {
-    padding-top: 58% !important;
+    padding-top: max(var(--opp-side-pack-pad-top, 58%), 58%) !important;
   }
   body[data-screen='game'] .seat.north .seat-pack > .seat-name-fixed,
   body[data-screen='game'] .seat.west .seat-pack > .seat-name-fixed,
@@ -12947,7 +12948,7 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
     position: relative !important;
     width: 100% !important;
     height: 100% !important;
-    padding-top: 0 !important;
+    padding-top: var(--opp-side-pack-pad-top, 0px) !important;
     align-content: stretch !important;
     justify-items: stretch !important;
   }
