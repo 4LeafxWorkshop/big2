@@ -23,6 +23,7 @@ export function runGamePostRender(params){
   }=params;
   const appEl=app;
   if(appEl){
+    const isMobilePortrait=portraitMode&&document.body.dataset.isMobile==='1';
     const logFabHost=portraitMode?(appEl.querySelector('.action-strip')||appEl):appEl;
     let logFab=appEl.querySelector('#game-log-fab');
     if(!logFab){
@@ -91,6 +92,11 @@ export function runGamePostRender(params){
           logFab.style.removeProperty('bottom');
         }
       }
+    }
+    const southTag=appEl.querySelector('.action-strip .player-tag');
+    const tableHost=appEl.querySelector('.table');
+    if(isMobilePortrait&&southTag instanceof HTMLElement&&tableHost instanceof HTMLElement&&southTag.parentElement!==tableHost){
+      tableHost.appendChild(southTag);
     }
   }
   positionRoomTopMeta();

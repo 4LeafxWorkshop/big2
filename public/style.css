@@ -12921,13 +12921,18 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
     padding-top: 10px !important;
     padding-bottom: 0 !important;
   }
-  body[data-screen='game'][data-ios='1'] .action-strip .player-tag {
+  body[data-screen='game'][data-orientation='portrait'][data-is-mobile='1'] .action-strip .player-tag {
+    display: none !important;
+  }
+  body[data-screen='game'][data-orientation='portrait'][data-is-mobile='1'] .table > .player-tag {
+    display: inline-flex !important;
+    position: absolute !important;
     left: 10px !important;
     right: auto !important;
+    bottom: 12px !important;
     top: auto !important;
-    bottom: calc(100% + 15px) !important;
     transform: none !important;
-    z-index: 12 !important;
+    z-index: 14000 !important;
     margin: 0 !important;
   }
   body[data-screen='game'][data-ios='1'] .action-strip .game-log-fab {
