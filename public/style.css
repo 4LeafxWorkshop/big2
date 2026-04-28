@@ -13404,10 +13404,11 @@ body[data-screen='game'] :is(.seat.west, .seat.east) .side-station-stack .oppone
 
 @media (max-width: 860px) and (orientation: portrait) {
   body[data-screen='game'][data-orientation='portrait'] {
-    --opp-side-avatar-top: 34%;
+    --opp-side-station-drop: clamp(0px, calc((var(--app-vh, 100svh) - 700px) * 0.08), 16px);
+    --opp-side-avatar-top: calc(34% + var(--opp-side-station-drop));
     --opp-closed-gap: clamp(22px, 3vmin, 28px);
     --opp-open-gap: clamp(62px, 7.8vmin, 78px);
-    --opp-side-section-pad-top: 54px;
+    --opp-side-section-pad-top: calc(54px + var(--opp-side-station-drop));
     --opp-north-fan-top: clamp(44px, 5vmin, 52px);
     --opp-north-open-gap: clamp(50px, 5.8vmin, 62px);
     --opp-fan-closed-mini-scale: .72;
