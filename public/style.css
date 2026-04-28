@@ -13437,9 +13437,9 @@ body[data-screen='game'] :is(.seat.west, .seat.east) .side-station-stack .oppone
 
 @media (max-width: 860px) and (orientation: portrait) {
   body[data-screen='game'][data-orientation='portrait'] {
-    --opp-side-station-drop: clamp(10px, calc((var(--app-vh, 100svh) - 680px) * 0.1 + env(safe-area-inset-top) * .45), 36px);
+    --opp-side-station-drop: clamp(14px, calc((var(--app-vh, 100svh) - 680px) * 0.1 + env(safe-area-inset-top) * .45), 38px);
     --opp-side-avatar-top: calc(38% + var(--opp-side-station-drop));
-    --opp-side-fan-offset: 44px;
+    --opp-side-fan-offset: 48px;
     --opp-closed-gap: clamp(22px, 3vmin, 28px);
     --opp-open-gap: clamp(62px, 7.8vmin, 78px);
     --opp-side-section-pad-top: calc(54px + var(--opp-side-station-drop));
