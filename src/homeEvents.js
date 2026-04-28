@@ -457,7 +457,7 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       const desired=btn.getAttribute('data-private')==='1';
       await setRoomPrivacy(desired);
     }));
-    doc.getElementById('room-start')?.addEventListener('click',async()=>{
+    const handleRoomStart=async()=>{
       if(state.room.pendingStart)return;
       state.room.pendingStart=true;
       const activeTimer=pendingStartTimerRef.get?.();
@@ -474,7 +474,14 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
         if(!synced)await waitMs(250);
       }
       await startRoom();
-    });
+    };
+    const roomStartBtn=doc.getElementById('room-start');
+    roomStartBtn?.addEventListener('click',handleRoomStart);
+    roomStartBtn?.addEventListener('touchend',(ev)=>{
+      if(state.room.pendingStart)return;
+      ev.preventDefault();
+      void handleRoomStart();
+    },{passive:false});
 
     const legal=legalMiniCopy();
     const legalModal=doc.getElementById('legal-modal');
