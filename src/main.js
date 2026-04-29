@@ -6439,6 +6439,10 @@ function syncLogFabPosition(){
   logFab.style.right='auto';
   logFab.style.bottom='auto';
 }
+function clearGameLogUi(){
+  document.getElementById('game-log-fab')?.remove();
+  document.getElementById('log-sheet')?.remove();
+}
 function render(){
   if(state.screen!=='home'){
     clearHomeCardbackZoom();
@@ -6465,6 +6469,11 @@ function render(){
   document.body.setAttribute('data-log-sheet',isPortraitLogSheetOpen()?'1':'0');
   syncWebViewportGuardAttrs();
   syncRoomCountdownTicker();
+  if(state.screen!=='game'){
+    state.showLog=false;
+    state.showLogSheet=false;
+    clearGameLogUi();
+  }
   if(blockLandscapeMobile){
     app.innerHTML=`<section class="orientation-block"><div class="orientation-card"><div class="orientation-hero" aria-hidden="true"><span class="orientation-phone">📱</span><span class="orientation-rotate">↻</span></div><h2>${esc(t('portraitTitle'))}</h2><p>${esc(t('portraitBody'))}</p></div></section>`;
     return;

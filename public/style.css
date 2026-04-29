@@ -7039,14 +7039,7 @@ body[data-screen='game'][data-orientation='portrait'] .side-zone { display: none
 }
 body[data-screen='game'][data-orientation='landscape'] .game-log-fab { display: none; }
 body[data-screen='game'][data-orientation='portrait'] .game-log-fab { display: inline-flex; }
-body[data-screen='game'][data-orientation='portrait'] .action-strip .game-log-fab {
-  position: absolute;
-  right: 8px;
-  bottom: 6px;
-  z-index: 25;
-  touch-action: auto;
-}
-body[data-screen='game'][data-ios='1'][data-orientation='portrait'] #game-log-fab {
+body[data-screen='game'][data-orientation='portrait'] #game-log-fab {
   display: inline-flex !important;
   position: fixed !important;
   right: 8px !important;
@@ -7057,7 +7050,7 @@ body[data-screen='game'][data-ios='1'][data-orientation='portrait'] #game-log-fa
   z-index: 12050 !important;
   touch-action: auto !important;
 }
-body[data-screen='game'][data-ios='1'][data-orientation='portrait'] #game-log-fab .game-log-fab-copy {
+body[data-screen='game'][data-orientation='portrait'] #game-log-fab .game-log-fab-copy {
   gap: 6px !important;
 }
 body[data-screen='game'][data-log-sheet='1'] #game-log-fab {
