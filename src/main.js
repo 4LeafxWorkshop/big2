@@ -6490,10 +6490,7 @@ function syncViewport(){
   const viewportH=Math.max(0,Math.round(window.visualViewport?.height||window.innerHeight||0));
   const coarse=isCoarsePointer();
   const portrait=isPortraitMode();
-  const webApp=isStandaloneWebApp();
-  const appViewportH=viewportH&&webApp&&coarse
-    ?Math.max(0,viewportH-44)
-    :viewportH;
+  const appViewportH=viewportH;
   const scale=coarse
     ?Math.max(0.74,Math.min(1.1,short/520))
     :1;
