@@ -326,6 +326,7 @@ body[data-screen='game'] .topbar {
 }
 body[data-screen='game'][data-ios='1'] #app {
   padding-bottom: 0 !important;
+  padding-top: 0 !important;
 }
 body[data-screen='game'][data-ios='1'] .action-strip {
   padding-bottom: 0 !important;
@@ -7973,7 +7974,7 @@ body[data-screen='game'] .log-side-card .log-status {
 }
 @media (max-width: 600px) {
   #app { padding: 5px; }
-  body[data-screen='game'] #app { padding: max(6px, env(safe-area-inset-top)) 5px 0 !important; }
+  body[data-screen='game'] #app { padding: 0 5px 0 !important; }
   body[data-screen='home'] #app { padding: 0 5px max(14px, env(safe-area-inset-bottom)) !important; }
   body[data-screen='home'] .royal-home-wrap {
     margin-top: 0 !important;
@@ -12897,7 +12898,7 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
     padding-bottom: 0 !important;
   }
   body[data-screen='game'][data-ios='1'] #app {
-    padding: max(6px, env(safe-area-inset-top)) 5px 0 !important;
+    padding: 0 5px 0 !important;
   }
   body[data-screen='game'][data-ios='1'][data-log-open='0'] .action-zone,
   body[data-screen='game'][data-ios='1'][data-log-open='1'] .action-zone,
@@ -13166,7 +13167,7 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
     max-height: var(--app-vh, 100svh) !important;
     min-height: var(--app-vh, 100svh) !important;
     overflow: hidden !important;
-    padding-bottom: 0 !important;
+    padding: 0 5px 0 !important;
   }
   body[data-screen='game'][data-ios='1'] .game-shell,
   body[data-screen='game'][data-ios='1'] .main-zone {
@@ -13473,7 +13474,7 @@ body[data-screen='game'] :is(.seat.west, .seat.east) .side-station-stack .oppone
 
 @media (max-width: 860px) and (orientation: portrait) {
   body[data-screen='game'][data-orientation='portrait'] {
-    --opp-side-station-drop: clamp(14px, calc((var(--app-vh, 100svh) - 680px) * 0.1 + env(safe-area-inset-top) * .45), 38px);
+    --opp-side-station-drop: clamp(12px, calc((var(--app-vh, 100svh) - 680px) * 0.1), 30px);
     --opp-side-avatar-top: calc(38% + var(--opp-side-station-drop));
     --opp-side-fan-offset: 48px;
     --opp-closed-gap: clamp(22px, 3vmin, 28px);
