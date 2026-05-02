@@ -12895,41 +12895,56 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
 
 @media (max-width: 860px) {
   body[data-screen='game'][data-native-ios='1'] #app,
+  body[data-screen='game'][data-ios='1'][data-webapp='1'] #app,
   body[data-screen='game'][data-native-ios='1'] .action-zone,
-  body[data-screen='game'][data-native-ios='1'] .action-strip {
+  body[data-screen='game'][data-ios='1'][data-webapp='1'] .action-zone,
+  body[data-screen='game'][data-native-ios='1'] .action-strip,
+  body[data-screen='game'][data-ios='1'][data-webapp='1'] .action-strip {
     padding-bottom: 0 !important;
   }
-  body[data-screen='game'][data-native-ios='1'] #app {
+  body[data-screen='game'][data-native-ios='1'] #app,
+  body[data-screen='game'][data-ios='1'][data-webapp='1'] #app {
     padding: 0 5px 0 !important;
   }
   body[data-screen='game'][data-native-ios='1'][data-log-open='0'] .action-zone,
   body[data-screen='game'][data-native-ios='1'][data-log-open='1'] .action-zone,
+  body[data-screen='game'][data-ios='1'][data-webapp='1'][data-log-open='0'] .action-zone,
+  body[data-screen='game'][data-ios='1'][data-webapp='1'][data-log-open='1'] .action-zone,
   body[data-screen='game'][data-native-ios='1'][data-log-open='0'] .action-strip,
-  body[data-screen='game'][data-native-ios='1'][data-log-open='1'] .action-strip {
+  body[data-screen='game'][data-native-ios='1'][data-log-open='1'] .action-strip,
+  body[data-screen='game'][data-ios='1'][data-webapp='1'][data-log-open='0'] .action-strip,
+  body[data-screen='game'][data-ios='1'][data-webapp='1'][data-log-open='1'] .action-strip {
     padding-bottom: 0 !important;
   }
-  body[data-screen='game'][data-native-ios='1'] .action-zone {
+  body[data-screen='game'][data-native-ios='1'] .action-zone,
+  body[data-screen='game'][data-ios='1'][data-webapp='1'] .action-zone {
     gap: 4px !important;
   }
-  body[data-screen='game'][data-native-ios='1'] .action-strip {
+  body[data-screen='game'][data-native-ios='1'] .action-strip,
+  body[data-screen='game'][data-ios='1'][data-webapp='1'] .action-strip {
     padding-top: 4px !important;
   }
-  body[data-screen='game'][data-native-ios='1'] .action-strip .control-row {
+  body[data-screen='game'][data-native-ios='1'] .action-strip .control-row,
+  body[data-screen='game'][data-ios='1'][data-webapp='1'] .action-strip .control-row {
     padding-top: 4px !important;
     gap: 4px !important;
     row-gap: 4px !important;
   }
-  body[data-screen='game'][data-native-ios='1'] .action-strip .control-row .game-cta-btn {
+  body[data-screen='game'][data-native-ios='1'] .action-strip .control-row .game-cta-btn,
+  body[data-screen='game'][data-ios='1'][data-webapp='1'] .action-strip .control-row .game-cta-btn {
     min-height: 30px !important;
     padding: 3px 8px !important;
   }
   body[data-screen='game'][data-native-ios='1'] .action-strip .control-row .game-icon-btn,
-  body[data-screen='game'][data-native-ios='1'] .action-strip .control-row #auto-sort-btn.game-cta-btn {
+  body[data-screen='game'][data-native-ios='1'] .action-strip .control-row #auto-sort-btn.game-cta-btn,
+  body[data-screen='game'][data-ios='1'][data-webapp='1'] .action-strip .control-row .game-icon-btn,
+  body[data-screen='game'][data-ios='1'][data-webapp='1'] .action-strip .control-row #auto-sort-btn.game-cta-btn {
     min-width: 32px !important;
     min-height: 30px !important;
     padding: 3px 7px !important;
   }
-  body[data-screen='game'][data-native-ios='1'] .action-strip .hand {
+  body[data-screen='game'][data-native-ios='1'] .action-strip .hand,
+  body[data-screen='game'][data-ios='1'][data-webapp='1'] .action-strip .hand {
     min-height: calc(var(--card-h) * 1.18 + 18px) !important;
     padding-top: 10px !important;
     padding-bottom: 0 !important;
@@ -13198,7 +13213,7 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
   body[data-screen='game'][data-native-ios='1'] .main-zone,
   body[data-screen='game'][data-ios='1'][data-webapp='1'] .main-zone {
     align-content: start !important;
-    grid-template-rows: auto minmax(0, clamp(380px, calc(var(--app-vh, 100svh) - 280px), 560px)) auto !important;
+    grid-template-rows: auto minmax(0, clamp(320px, calc(var(--app-vh, 100svh) - 340px), 500px)) auto !important;
   }
   body[data-native-android='1'] {
     min-height: var(--app-vh, 100svh) !important;
