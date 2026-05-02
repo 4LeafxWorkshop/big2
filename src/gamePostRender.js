@@ -17,6 +17,7 @@ export function runGamePostRender(params){
     syncConfettiCanvases,
     syncLandscapeGameHandSizing,
     syncDiscardSizeFromHand,
+    syncGamePortraitLayout,
     syncHandStackMode,
     retargetCalloutTails,
     maybeRunRoomAi
@@ -133,6 +134,7 @@ export function runGamePostRender(params){
     positionRoomTopMeta();
     syncLandscapeGameHandSizing();
     syncDiscardSizeFromHand();
+    syncGamePortraitLayout();
     syncHandStackMode();
     retargetCalloutTails();
     setTimeout(()=>{

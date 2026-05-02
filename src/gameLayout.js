@@ -216,6 +216,52 @@ export function syncLandscapeGameHandSizing({
   });
 }
 
+export function syncGamePortraitLayout({
+  documentRef=()=>document,
+  windowRef=()=>window
+}={}){
+  const doc=documentRef();
+  const win=windowRef();
+  const body=doc.body;
+  const app=doc.getElementById('app');
+  const mainZone=doc.querySelector('.main-zone');
+  const topbar=doc.querySelector('.main-zone .topbar');
+  const actionZone=doc.querySelector('.action-zone');
+  const table=doc.querySelector('.table');
+  const active=
+    body instanceof HTMLElement&&
+    body.dataset.screen==='game'&&
+    body.dataset.orientation==='portrait'&&
+    app instanceof HTMLElement&&
+    mainZone instanceof HTMLElement&&
+    topbar instanceof HTMLElement&&
+    actionZone instanceof HTMLElement&&
+    table instanceof HTMLElement;
+  if(!active){
+    body?.style.removeProperty('--game-shell-inner-h');
+    body?.style.removeProperty('--game-topbar-h');
+    body?.style.removeProperty('--game-action-h');
+    body?.style.removeProperty('--game-table-h');
+    return;
+  }
+
+  const appRect=app.getBoundingClientRect();
+  const appStyle=win.getComputedStyle(app);
+  const appPadTop=Number.parseFloat(appStyle.paddingTop||'0')||0;
+  const appPadBottom=Number.parseFloat(appStyle.paddingBottom||'0')||0;
+  const mainStyle=win.getComputedStyle(mainZone);
+  const mainGap=Number.parseFloat(mainStyle.rowGap||mainStyle.gap||'0')||0;
+  const shellInnerH=Math.max(0,appRect.height-appPadTop-appPadBottom);
+  const topbarH=Math.max(0,topbar.getBoundingClientRect().height);
+  const actionH=Math.max(0,actionZone.getBoundingClientRect().height);
+  const tableH=Math.max(0,shellInnerH-topbarH-actionH-(mainGap*2));
+
+  body.style.setProperty('--game-shell-inner-h',`${shellInnerH.toFixed(2)}px`);
+  body.style.setProperty('--game-topbar-h',`${topbarH.toFixed(2)}px`);
+  body.style.setProperty('--game-action-h',`${actionH.toFixed(2)}px`);
+  body.style.setProperty('--game-table-h',`${tableH.toFixed(2)}px`);
+}
+
 export function positionRoomTopMeta({documentRef=()=>document}={}){
   const doc=documentRef();
   const meta=doc.querySelector('.room-top-meta.room-top-meta-inline');

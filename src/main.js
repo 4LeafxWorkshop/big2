@@ -10,6 +10,7 @@ import {
   positionLandscapeSideStations as positionLandscapeSideStationsDom,
   positionRoomTopMeta as positionRoomTopMetaDom,
   retargetCalloutTails as retargetCalloutTailsDom,
+  syncGamePortraitLayout as syncGamePortraitLayoutDom,
   syncDiscardSizeFromHand as syncDiscardSizeFromHandDom,
   syncHandStackMode as syncHandStackModeDom,
   syncLandscapeGameHandSizing as syncLandscapeGameHandSizingDom
@@ -5192,18 +5193,22 @@ const positionRoomTopMeta=()=>{
 const bindRoomTopMetaLayout=()=>bindRoomTopMetaLayoutDom(positionRoomTopMeta);
 const syncDiscardSizeFromHand=()=>syncDiscardSizeFromHandDom({state});
 const syncLandscapeGameHandSizing=()=>syncLandscapeGameHandSizingDom();
+const syncGamePortraitLayout=()=>syncGamePortraitLayoutDom();
 const observeDiscardSize=()=>{
   const hand=document.querySelector('.action-strip .hand');
   if(!(hand instanceof HTMLElement))return;
   discardSizeObserverDom.observe(hand,()=>{
     syncLandscapeGameHandSizing();
     syncDiscardSizeFromHand();
+    syncGamePortraitLayout();
   });
   syncLandscapeGameHandSizing();
   syncDiscardSizeFromHand();
+  syncGamePortraitLayout();
   window.setTimeout(()=>{
     syncLandscapeGameHandSizing();
     syncDiscardSizeFromHand();
+    syncGamePortraitLayout();
   },180);
 };
 function handleGameTopbarClick(ev){
@@ -6265,6 +6270,7 @@ function renderGame(){
     syncConfettiCanvases,
     syncLandscapeGameHandSizing,
     syncDiscardSizeFromHand,
+    syncGamePortraitLayout,
     syncHandStackMode,
     retargetCalloutTails,
     maybeRunRoomAi
@@ -6520,6 +6526,7 @@ function syncViewport(){
   }
   requestAnimationFrame(syncDiscardSizeFromHand);
   requestAnimationFrame(syncLandscapeGameHandSizing);
+  requestAnimationFrame(syncGamePortraitLayout);
   requestAnimationFrame(syncHandStackMode);
 }
 
@@ -6537,11 +6544,13 @@ function scheduleViewportRecovery(delayMs=0){
         render();
         window.requestAnimationFrame(syncDiscardSizeFromHand);
         window.requestAnimationFrame(syncLandscapeGameHandSizing);
+        window.requestAnimationFrame(syncGamePortraitLayout);
         window.requestAnimationFrame(syncHandStackMode);
         window.setTimeout(()=>{
           syncViewport();
           syncLandscapeGameHandSizing();
           syncDiscardSizeFromHand();
+          syncGamePortraitLayout();
           syncHandStackMode();
         },180);
       }
