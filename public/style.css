@@ -7054,6 +7054,9 @@ body[data-screen='game'][data-orientation='portrait'] #game-log-fab {
   z-index: 12050 !important;
   touch-action: auto !important;
 }
+body[data-screen='game'][data-native-android='1'][data-orientation='portrait'] #game-log-fab {
+  bottom: max(6px, env(safe-area-inset-bottom)) !important;
+}
 body[data-screen='game'][data-orientation='portrait'] #game-log-fab .game-log-fab-copy {
   gap: 6px !important;
 }
@@ -12906,6 +12909,9 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
   }
   body[data-screen='game'][data-native-ios='1'][data-orientation='portrait'] #app,
   body[data-screen='game'][data-ios='1'][data-webapp='1'][data-orientation='portrait'] #app {
+    padding: max(6px, env(safe-area-inset-top)) 5px max(6px, env(safe-area-inset-bottom)) !important;
+  }
+  body[data-screen='game'][data-native-android='1'][data-orientation='portrait'] #app {
     padding: max(6px, env(safe-area-inset-top)) 5px max(6px, env(safe-area-inset-bottom)) !important;
   }
   body[data-screen='game'][data-orientation='portrait'][data-log-open='0'] .action-zone,
