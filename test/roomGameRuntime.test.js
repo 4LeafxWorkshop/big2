@@ -167,3 +167,60 @@ test('applyPassToGame retakes lead after three passes', ()=>{
   assert.equal(result.game.lastPlay,null);
   assert.equal(result.game.passStreak,0);
 });
+
+test('applyPlayToGame rejects non-strongest last-card block in room game', ()=>{
+  const controller=createController({
+    shouldForceMaxAgainstLastCard(){
+      return true;
+    }
+  });
+  const first=controller.applyPlayToGame({
+    players:[
+      {uid:'uid:1',name:'Alice',hand:[card(1,0),card(9,0)]},
+      {uid:'uid:2',name:'Bob',hand:[card(2,1)]},
+      {uid:'uid:3',name:'Cara',hand:[card(3,2),card(4,2)]},
+      {uid:'uid:4',name:'Dan',hand:[card(5,3),card(6,3),card(7,3)]}
+    ],
+    currentSeat:0,
+    lastPlay:null,
+    passStreak:0,
+    isFirstTrick:false,
+    gameOver:false,
+    history:[],
+    playerActionLog:[null,null,null,null],
+    handCount:[2,1,2,3],
+    totals:[5000,5000,5000,5000],
+    roundWins:[0,0,0,0]
+  },0,[card(1,0)],100);
+  assert.equal(first.ok,false);
+  assert.equal(first.reason,'lastCardCall');
+});
+
+test('applyPlayToGame accepts strongest last-card block in room game', ()=>{
+  const controller=createController({
+    shouldForceMaxAgainstLastCard(){
+      return true;
+    }
+  });
+  const result=controller.applyPlayToGame({
+    players:[
+      {uid:'uid:1',name:'Alice',hand:[card(1,0),card(9,0)]},
+      {uid:'uid:2',name:'Bob',hand:[card(2,1)]},
+      {uid:'uid:3',name:'Cara',hand:[card(3,2),card(4,2)]},
+      {uid:'uid:4',name:'Dan',hand:[card(5,3),card(6,3),card(7,3)]}
+    ],
+    currentSeat:0,
+    lastPlay:null,
+    passStreak:0,
+    isFirstTrick:false,
+    gameOver:false,
+    history:[],
+    playerActionLog:[null,null,null,null],
+    handCount:[2,1,2,3],
+    totals:[5000,5000,5000,5000],
+    roundWins:[0,0,0,0]
+  },0,[card(9,0)],100);
+  assert.equal(result.ok,true);
+  assert.equal(result.game.lastCardBreach,undefined);
+  assert.equal(result.game.players[0].hand.length,1);
+});

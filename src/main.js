@@ -1801,7 +1801,7 @@ const roomLifecycleController=createRoomLifecycleController({
   botProfileForSeat,
   clearRoomStartPending,
   cloneRoomGame,
-  chooseAiPlay,
+  chooseAiPlay:chooseRoomAiPlay,
   currentRoomDb,
   currentRoomPlayerId,
   deleteRoomDirectory,
@@ -2862,8 +2862,9 @@ function maybeRunRoomAi(){
       }else{
         const legal=legalTurnPlays(current.hand,g);
         if(legal.length){
-          legal.sort((a,b)=>comparePower(a.eval.power,b.eval.power));
-          void roomSubmitPlay(legal[0].cards,g.currentSeat);
+          const forced=strongestLastCardBlockPlay(current.hand,g,g.currentSeat);
+          const play=forced??[...legal].sort((a,b)=>comparePower(a.eval.power,b.eval.power))[0];
+          void roomSubmitPlay(play.cards,g.currentSeat);
         }
       }
     }else{
@@ -2880,7 +2881,7 @@ function maybeRunRoomAi(){
     if(!roomIsHost())return;
     const actor=live.players?.[live.currentSeat];
     if(!actor||actor.isHuman)return;
-    const ch=chooseAiPlay(actor.hand,live,live.aiDifficulty);
+    const ch=chooseRoomAiPlay(actor.hand,live,live.aiDifficulty);
     if(!ch)await roomSubmitPass(live.currentSeat);
     else await roomSubmitPlay(ch.cards,live.currentSeat);
     window.setTimeout(()=>{maybeRunRoomAi();},420);
@@ -3572,7 +3573,13 @@ function cmpStrongPlayDesc(a,b){
   return comparePower(b.eval.power,a.eval.power);
 }
 function shouldForceMaxAgainstLastCard(game,seat){
-  return !game.gameOver&&(minOpponentCardCount(game,seat)===1);
+  if(!game||game.gameOver||!Array.isArray(game.players)||!game.players.length)return false;
+  const next=(seat+1)%game.players.length;
+  const nextHand=game.players[next]?.hand;
+  const nextCount=Array.isArray(nextHand)
+    ?nextHand.length
+    :Number(game.handCount?.[next]);
+  return nextCount===1;
 }
 function removeCardsFromHand(hand,cards){
   const drop=new Set((cards??[]).map(cardId));
@@ -3915,6 +3922,15 @@ function shouldRecommendPass(hand,lastPlay,isFirstTrick,canPass,game){
   if(minOpponentCardCount(sim,seat)<=2)return false;
   // Be conservative with pass hints when a legal play exists.
   return passScore>playScore+15;
+}
+function strongestLastCardBlockPlay(hand,game,seat=game?.currentSeat){
+  if(!shouldForceMaxAgainstLastCard(game,seat))return null;
+  const legal=legalTurnPlays(hand,game);
+  if(!legal.length)return null;
+  return [...legal].sort(cmpStrongPlayDesc)[0]??null;
+}
+function chooseRoomAiPlay(hand,game,diff){
+  return strongestLastCardBlockPlay(hand,game,game?.currentSeat)??chooseAiPlay(hand,game,diff);
 }
 function chooseAiPlay(hand,game,diff){
   let legal=legalTurnPlays(hand,game);

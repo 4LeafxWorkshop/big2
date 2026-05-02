@@ -70,7 +70,7 @@ export function createRoomGameRuntimeController(deps){
       const strongest=legal[0];
       const chosen=legal.find((x)=>x.eval.count===ev.count&&x.eval.kind===ev.kind&&deps.comparePower(x.eval.power,ev.power)===0);
       if(chosen&&strongest&&deps.comparePower(chosen.eval.power,strongest.eval.power)!==0){
-        g.lastCardBreach={seat,threatenedSeat:(seat+1)%4};
+        return{ok:false,reason:deps.t('lastCardCall')};
       }
     }
     const ids=new Set(cards.map(deps.cardId));

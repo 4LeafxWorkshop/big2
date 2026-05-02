@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import {buildCalloutRenderState, buildOpponentSeatsHtml} from '../src/gameRenderPrep.js';
+import {buildCalloutRenderState, buildOpponentSeatsHtml, buildResultScreenHtml} from '../src/gameRenderPrep.js';
 import {renderOpponentSeat, renderOpponentStationFlow} from '../src/gameView.js';
 
 test('buildCalloutRenderState keeps opponent emote callouts visible with matching seat callouts', ()=>{
@@ -163,4 +163,58 @@ test('buildOpponentSeatsHtml keeps station identity separate from card layers', 
   assert.match(html,/side-station-stack/);
   assert.ok(html.indexOf('data-opponent-name="North"')<html.indexOf('opponent-fan-wrap'));
   assert.ok(html.indexOf('opponent-fan-wrap')<html.indexOf('seat-open-play'));
+});
+
+test('buildResultScreenHtml displays transferred last-card deductions instead of original per-player deductions', ()=>{
+  const html=buildResultScreenHtml({
+    v:{
+      mode:'solo',
+      gameOver:true,
+      selfSeat:1,
+      status:'',
+      statusMeta:null,
+      history:[{action:'play',seat:1,cards:[{rank:2,suit:1}]}],
+      revealedHands:[
+        [{rank:9,suit:0}],
+        [],
+        [{rank:3,suit:2},{rank:4,suit:2}],
+        [{rank:5,suit:3},{rank:6,suit:3},{rank:7,suit:3}]
+      ],
+      roundSummary:{
+        winnerSeat:1,
+        deductions:[6,0,0,0],
+        winnerGain:6,
+        details:[
+          {remain:1,base:1,multiplier:1,deduction:1,anyTwo:false,topTwo:false,chaoMultiplier:1,chaoKey:''},
+          {remain:0,base:0,multiplier:1,deduction:0,anyTwo:false,topTwo:false,chaoMultiplier:1,chaoKey:''},
+          {remain:2,base:2,multiplier:1,deduction:2,anyTwo:false,topTwo:false,chaoMultiplier:1,chaoKey:''},
+          {remain:3,base:3,multiplier:1,deduction:3,anyTwo:false,topTwo:false,chaoMultiplier:1,chaoKey:''}
+        ],
+        lastCardBreach:{seat:0,threatenedSeat:1}
+      }
+    },
+    arr:[
+      {seat:0,cls:'south',name:'Alice',gender:'female',count:1,score:4994,isBot:false,picture:''},
+      {seat:1,cls:'east',name:'Bob',gender:'male',count:0,score:5006,isBot:false,picture:''},
+      {seat:2,cls:'north',name:'Cara',gender:'female',count:2,score:5000,isBot:false,picture:''},
+      {seat:3,cls:'west',name:'Dan',gender:'male',count:3,score:5000,isBot:false,picture:''}
+    ],
+    state:{home:{mode:'solo'},room:{data:null,lastResultPlayers:null}},
+    t:(key)=>key,
+    esc:(value)=>String(value),
+    roomIsHost:()=>false,
+    roomResultExpired:()=>false,
+    roomCountdownText:()=>'-',
+    uiStatus:()=> '',
+    playerColorByViewClass:()=>'#123456',
+    calcPenaltyDetail:(hand)=>({remain:hand.length,base:hand.length,multiplier:1,deduction:hand.length,anyTwo:false,topTwo:false,chaoMultiplier:1,chaoKey:''}),
+    renderStaticCard:()=>'<span class="card"></span>',
+    authPictureUrl:()=>'',
+    authPictureUrlFrom:()=>null,
+    avatarDataUri:()=>'avatar'
+  });
+
+  assert.match(html,/Alice[\s\S]*resultDelta: -6[\s\S]*scoreDeduct 6/);
+  assert.match(html,/Cara[\s\S]*resultDelta: 0[\s\S]*scoreDeduct 0/);
+  assert.match(html,/Dan[\s\S]*resultDelta: 0[\s\S]*scoreDeduct 0/);
 });
