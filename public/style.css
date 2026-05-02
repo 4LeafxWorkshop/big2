@@ -324,11 +324,13 @@ body[data-screen='game'] .main-zone,
 body[data-screen='game'] .topbar {
   margin-top: 0 !important;
 }
-body[data-screen='game'][data-native-ios='1'] #app {
+body[data-screen='game'][data-native-ios='1'] #app,
+body[data-screen='game'][data-ios='1'][data-webapp='1'] #app {
   padding-bottom: 0 !important;
   padding-top: 0 !important;
 }
-body[data-screen='game'][data-native-ios='1'] .action-strip {
+body[data-screen='game'][data-native-ios='1'] .action-strip,
+body[data-screen='game'][data-ios='1'][data-webapp='1'] .action-strip {
   padding-bottom: 0 !important;
 }
 /* Collapsed game log: lock layout to viewport height to avoid page overflow scrollbar. */
@@ -13162,7 +13164,8 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
   body[data-ios='1'] #app {
     min-height: var(--app-vh, 100svh) !important;
   }
-  body[data-screen='game'][data-native-ios='1'] #app {
+  body[data-screen='game'][data-native-ios='1'] #app,
+  body[data-screen='game'][data-ios='1'][data-webapp='1'] #app {
     height: var(--app-vh, 100svh) !important;
     max-height: var(--app-vh, 100svh) !important;
     min-height: var(--app-vh, 100svh) !important;
@@ -13170,21 +13173,32 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
     padding: 0 5px 0 !important;
   }
   body[data-screen='game'][data-native-ios='1'] .game-shell,
-  body[data-screen='game'][data-native-ios='1'] .main-zone {
+  body[data-screen='game'][data-native-ios='1'] .main-zone,
+  body[data-screen='game'][data-ios='1'][data-webapp='1'] .game-shell,
+  body[data-screen='game'][data-ios='1'][data-webapp='1'] .main-zone {
     height: 100% !important;
     min-height: 0 !important;
     overflow: hidden !important;
   }
   body[data-screen='game'][data-native-ios='1'] .action-zone,
   body[data-screen='game'][data-native-ios='1'] .action-strip,
-  body[data-screen='game'][data-native-ios='1'] .action-strip .hand {
+  body[data-screen='game'][data-native-ios='1'] .action-strip .hand,
+  body[data-screen='game'][data-ios='1'][data-webapp='1'] .action-zone,
+  body[data-screen='game'][data-ios='1'][data-webapp='1'] .action-strip,
+  body[data-screen='game'][data-ios='1'][data-webapp='1'] .action-strip .hand {
     overflow: visible !important;
     padding-bottom: 0 !important;
   }
-  body[data-screen='game'][data-native-ios='1'] .action-strip .hand {
+  body[data-screen='game'][data-native-ios='1'] .action-strip .hand,
+  body[data-screen='game'][data-ios='1'][data-webapp='1'] .action-strip .hand {
     overflow: hidden !important;
     min-height: calc(var(--card-h) * 1.14 + 18px) !important;
     padding-bottom: 2px !important;
+  }
+  body[data-screen='game'][data-native-ios='1'] .main-zone,
+  body[data-screen='game'][data-ios='1'][data-webapp='1'] .main-zone {
+    align-content: start !important;
+    grid-template-rows: auto minmax(0, clamp(380px, calc(var(--app-vh, 100svh) - 280px), 560px)) auto !important;
   }
   body[data-native-android='1'] {
     min-height: var(--app-vh, 100svh) !important;
@@ -13489,7 +13503,7 @@ body[data-screen='game'] :is(.seat.west, .seat.east) .side-station-stack .oppone
     --opp-closed-scale: .72;
     --opp-side-open-scale: 1;
   }
-  body[data-screen='game'][data-ios='1']:not([data-native-ios='1']) {
+  body[data-screen='game'][data-ios='1']:not([data-native-ios='1']):not([data-webapp='1']) {
     --opp-side-station-drop: clamp(14px, calc((var(--app-vh, 100svh) - 680px) * 0.1 + env(safe-area-inset-top) * .45), 38px);
     --opp-side-avatar-top: calc(38% + var(--opp-side-station-drop));
     --opp-side-section-pad-top: calc(54px + var(--opp-side-station-drop));
