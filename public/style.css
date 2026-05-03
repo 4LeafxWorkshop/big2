@@ -303,16 +303,6 @@ body[data-screen='game'] {
   background-position: center, center, center;
   background-repeat: no-repeat, no-repeat, no-repeat;
 }
-body[data-screen='game'][data-ios='1'] {
-  background:
-    radial-gradient(circle at top, rgba(20, 55, 68, .42), transparent 38%),
-    linear-gradient(rgba(6, 20, 32, .82), rgba(11, 34, 49, .9)),
-    url('./backup/images/home-bg-mobile.jpg');
-  background-color: #061420;
-  background-size: auto, auto, cover;
-  background-position: center, center, center;
-  background-repeat: no-repeat, no-repeat, no-repeat;
-}
 body[data-screen='game'] #app {
   height: 100dvh;
   max-height: 100dvh;
@@ -323,16 +313,6 @@ body[data-screen='game'] .game-shell,
 body[data-screen='game'] .main-zone,
 body[data-screen='game'] .topbar {
   margin-top: 0 !important;
-}
-body[data-screen='game'][data-native-ios='1'] #app,
-body[data-screen='game'][data-ios='1'][data-webapp='1'] #app {
-  box-sizing: border-box;
-  padding-top: max(6px, env(safe-area-inset-top)) !important;
-  padding-bottom: max(6px, env(safe-area-inset-bottom)) !important;
-}
-body[data-screen='game'][data-native-ios='1'] .action-strip,
-body[data-screen='game'][data-ios='1'][data-webapp='1'] .action-strip {
-  padding-bottom: 0 !important;
 }
 /* Collapsed game log: lock layout to viewport height to avoid page overflow scrollbar. */
 body[data-screen='game'][data-log-open='0'] {
@@ -4815,63 +4795,6 @@ body[data-screen='game'] .topbar-right .control-row,
 body[data-screen='game'] .topbar-right .control-row button {
   overflow: visible !important;
 }
-body[data-screen='game'] .topbar {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  flex-wrap: wrap !important;
-  align-items: flex-start !important;
-  pointer-events: auto;
-  isolation: isolate;
-  background: transparent !important;
-  border: 1px solid rgba(255,255,255,.16) !important;
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.06) !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-body[data-screen='game'] .topbar > div:first-child,
-body[data-screen='game'] .topbar-right,
-body[data-screen='game'] .topbar-right .control-row,
-body[data-screen='game'] .game-title-wrap {
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-}
-body[data-screen='game'] .topbar-right,
-body[data-screen='game'] .topbar-right .control-row,
-body[data-screen='game'] .topbar-right .control-row button {
-  pointer-events: auto;
-  position: relative;
-  z-index: 10001;
-}
-body[data-screen='game'] .topbar-right .control-row {
-  position: relative;
-  z-index: 10000;
-}
-body[data-screen='game'] .topbar,
-body[data-screen='game'] .topbar * {
-  pointer-events: auto;
-}
-body[data-screen='game'] .table {
-  z-index: 0;
-}
-body[data-screen='game'] .topbar > div:first-child,
-body[data-screen='game'] .game-title-wrap {
-  pointer-events: none;
-}
-body[data-screen='game'] .main-zone {
-  position: relative;
-  z-index: 1500;
-}
-body[data-screen='game'] .table,
-body[data-screen='game'] .table-center-stack {
-  z-index: 1;
-}
-body[data-screen='game'] .table-center-stack {
-  pointer-events: none;
-}
 .topbar {
   padding: 6px 10px;
   border-radius: 12px;
@@ -7054,9 +6977,6 @@ body[data-screen='game'][data-orientation='portrait'] #game-log-fab {
   z-index: 12050 !important;
   touch-action: auto !important;
 }
-body[data-screen='game'][data-native-android='1'][data-orientation='portrait'] #game-log-fab {
-  bottom: max(6px, env(safe-area-inset-bottom)) !important;
-}
 body[data-screen='game'][data-orientation='portrait'] #game-log-fab .game-log-fab-copy {
   gap: 6px !important;
 }
@@ -7752,23 +7672,6 @@ body[data-screen='game'] .log-side-card .log-status {
     max-height: 30vh;
     margin-bottom: 4px;
   }
-  body[data-ios='1'] .mobile-discard-panel {
-    position: relative;
-    background: transparent !important;
-  }
-  body[data-ios='1'] .mobile-discard-panel::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    background: var(--ui-card-grad);
-    pointer-events: none;
-    z-index: 0;
-  }
-  body[data-ios='1'] .mobile-discard-panel > * {
-    position: relative;
-    z-index: 1;
-  }
   .mobile-discard-title {
     display: inline-flex;
     align-items: center;
@@ -7946,7 +7849,7 @@ body[data-screen='game'] .log-side-card .log-status {
     font-size: .56rem;
   }
 }
-@media (max-width: 1220px) {
+@media (max-width: 1220px) and (orientation: portrait) {
   body[data-screen='game'] .topbar {
     flex-wrap: wrap;
     align-items: flex-start;
@@ -10599,7 +10502,7 @@ body[data-screen='game'] .east .seat-open-play .opponent-open-scale {
     --center-discard-scale: 1.24;
   }
 }
-@media (max-width: 860px) {
+@media (max-width: 860px) and (orientation: portrait) {
   body[data-screen='game'] {
     --card-w: clamp(46px, 8.6vh, 64px);
   }
@@ -10652,23 +10555,6 @@ body[data-screen='game'] .action-strip {
     overflow-x: visible !important;
     overflow-y: visible !important;
     gap: 3px !important;
-  }
-  body[data-screen='game'][data-ios='1'] .action-strip,
-  body[data-screen='game'][data-ios='1'] .action-strip .hand {
-    overflow: hidden !important;
-  }
-  body[data-screen='game'][data-ios='1'] .action-zone {
-    padding-bottom: 0 !important;
-  }
-  body[data-screen='game'][data-ios='1'] .action-strip .hand {
-    padding-top: 16px !important;
-    min-height: calc(var(--card-h) * 1.34 + 34px) !important;
-  }
-  body[data-screen='game'][data-ios='1'] .action-strip .control-row {
-    overflow-y: visible !important;
-  }
-  body[data-screen='game'][data-ios='1'] .hand-card.selected {
-    transform: translateY(-6px) !important;
   }
   body[data-screen='game'] .north > .seat-name-fixed,
   body[data-screen='game'] .east > .seat-name-fixed,
@@ -11005,7 +10891,7 @@ body[data-screen='game'] .action-strip {
 }
 
 /* Tablet game page: keep topbar controls on one line (no wrap to second row). */
-@media (min-width: 861px) and (max-width: 1200px) {
+@media (min-width: 861px) and (max-width: 1200px) and (orientation: portrait) {
   body[data-screen='game'] .topbar {
     display: flex !important;
     flex-direction: row !important;
@@ -11279,10 +11165,6 @@ body[data-screen='game'][data-log-open='0'] .side-zone.log-collapsed .log-side-c
   body[data-screen='game'][data-log-open='0'] .action-strip,
   body[data-screen='game'][data-log-open='1'] .action-strip {
     margin-bottom: 0 !important;
-    padding-bottom: 0 !important;
-  }
-  body[data-screen='game'][data-ios='1'][data-log-open='0'] .action-zone,
-  body[data-screen='game'][data-ios='1'][data-log-open='1'] .action-zone {
     padding-bottom: 0 !important;
   }
   body[data-screen='game'][data-log-open='0'] .side-zone,
@@ -12789,27 +12671,6 @@ body[data-screen='game'] .seat.north.active .seat-section {
 }
 
 @media (max-width: 860px) {
-  body[data-screen='game'][data-ios='1'] .center-last-south .seat-played-pass {
-    padding: 3px 5px !important;
-  }
-  body[data-screen='game'][data-ios='1'] .center-last-south .seat-pass-label {
-    padding: 4px 8px !important;
-    gap: 5px !important;
-    font-size: .8rem !important;
-    white-space: nowrap !important;
-    flex-wrap: nowrap !important;
-  }
-  body[data-screen='game'][data-ios='1'] .center-last-south .seat-pass-icon {
-    width: .86rem !important;
-    height: .86rem !important;
-  }
-  body[data-screen='game'][data-ios='1'] .action-zone {
-    padding-bottom: 0 !important;
-  }
-  body[data-screen='game'][data-ios='1'][data-log-open='0'] .action-zone,
-  body[data-screen='game'][data-ios='1'][data-log-open='1'] .action-zone {
-    padding-bottom: 0 !important;
-  }
 }
 
 @media (max-width: 860px) and (orientation: portrait) {
@@ -12909,10 +12770,14 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
   }
   body[data-screen='game'][data-native-ios='1'][data-orientation='portrait'] #app,
   body[data-screen='game'][data-ios='1'][data-webapp='1'][data-orientation='portrait'] #app {
-    padding: max(6px, env(safe-area-inset-top)) 5px max(6px, env(safe-area-inset-bottom)) !important;
+    box-sizing: border-box;
+    padding-top: max(6px, env(safe-area-inset-top)) !important;
+    padding-bottom: 0 !important;
   }
   body[data-screen='game'][data-native-android='1'][data-orientation='portrait'] #app {
-    padding: max(6px, env(safe-area-inset-top)) 5px max(6px, env(safe-area-inset-bottom)) !important;
+    box-sizing: border-box;
+    padding-top: max(6px, env(safe-area-inset-top)) !important;
+    padding-bottom: max(6px, env(safe-area-inset-bottom)) !important;
   }
   body[data-screen='game'][data-orientation='portrait'][data-log-open='0'] .action-zone,
   body[data-screen='game'][data-orientation='portrait'][data-log-open='1'] .action-zone,
@@ -13170,12 +13035,6 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
 }
 
 @media (max-width: 860px) {
-  body[data-ios='1'] {
-    min-height: var(--app-vh, 100svh) !important;
-  }
-  body[data-ios='1'] #app {
-    min-height: var(--app-vh, 100svh) !important;
-  }
   body[data-screen='game'][data-orientation='portrait'] #app {
     height: var(--app-vh, 100svh) !important;
     max-height: var(--app-vh, 100svh) !important;
@@ -13249,12 +13108,6 @@ body[data-screen='game'] .room-center-meta {
 body[data-screen='game'] .game-title-wrap .room-top-meta,
 body[data-screen='game'] .action-strip .control-row .room-top-meta {
   display: none !important;
-}
-body[data-screen='game'][data-ios='1'] #app,
-body[data-screen='game'][data-ios='1'] .main-zone,
-body[data-screen='game'][data-ios='1'] .action-zone,
-body[data-screen='game'][data-ios='1'] .action-strip {
-  background: transparent !important;
 }
 body[data-screen='game'] .seat-name-fixed[data-opponent-name],
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] :is(.play-type-call-seat, .last-card-call-seat, .emote-callout.play-type-call-seat),
@@ -13767,7 +13620,7 @@ body[data-screen='game'] :is(.play-type-call, .last-card-call, .emote-callout, .
   z-index: 19000 !important;
 }
 
-@media (min-width: 861px) {
+@media (min-width: 861px) and (orientation: portrait) {
   body[data-screen='game'] .topbar {
     display: flex !important;
     flex-direction: row !important;
@@ -13814,7 +13667,7 @@ body[data-screen='game'] :is(.play-type-call, .last-card-call, .emote-callout, .
   }
 }
 
-@media (max-width: 860px) {
+@media (max-width: 860px) and (orientation: portrait) {
   body[data-screen='game'] .topbar {
     flex-wrap: nowrap !important;
     align-items: center !important;
@@ -13844,5 +13697,41 @@ body[data-screen='game'] :is(.play-type-call, .last-card-call, .emote-callout, .
     min-height: 30px !important;
     padding: 3px 8px !important;
     font-size: clamp(.66rem, 1.9vw, .78rem) !important;
+  }
+}
+
+@media (orientation: landscape) {
+  body[data-screen='game'] .topbar {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+  }
+  body[data-screen='game'] .topbar > div:first-child {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: auto !important;
+  }
+  body[data-screen='game'] .topbar-right {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
+    margin-left: auto !important;
+    justify-items: end !important;
+  }
+  body[data-screen='game'] .topbar-right .control-row {
+    width: auto !important;
+    max-width: none !important;
+    justify-content: flex-end !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    overflow-y: hidden !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+  body[data-screen='game'] .topbar-right .control-row::-webkit-scrollbar {
+    display: none;
   }
 }
