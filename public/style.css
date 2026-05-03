@@ -11981,11 +11981,11 @@ body[data-screen='game'] {
   --opp-side-open-scale: 1;
   --opp-played-pair-overlap: -0.82;
 }
-@media (max-width: 860px) {
+@media (max-width: 860px) and (orientation: portrait) {
   body[data-screen='game'] {
-    --opp-side-station-drop: clamp(8px, calc((780px - var(--app-vh, 100svh)) * 0.12), 28px);
-    --opp-side-fan-offset: 38px;
-    --opp-side-pack-pad-top: clamp(18px, calc((780px - var(--app-vh, 100svh)) * 0.16), 64px);
+    --opp-side-station-drop: 0px;
+    --opp-side-fan-offset: 0px;
+    --opp-side-pack-pad-top: 0px;
   }
 }
 body[data-screen='game'] .seat.west,
@@ -13059,6 +13059,9 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
     min-height: calc(var(--card-h) * 1.14 + 18px) !important;
     padding-bottom: 2px !important;
   }
+  body[data-screen='game'][data-orientation='portrait'] .center-last-south {
+    bottom: calc(var(--game-table-h, 0px) * 0.025) !important;
+  }
   body[data-screen='game'][data-orientation='portrait'] .main-zone {
     align-content: start !important;
     grid-template-rows: auto minmax(0, var(--game-table-h, 1fr)) auto !important;
@@ -13310,12 +13313,12 @@ body[data-screen='game'] :is(.seat.west, .seat.east) .side-station-stack .oppone
 
 @media (max-width: 860px) and (orientation: portrait) {
   body[data-screen='game'][data-orientation='portrait'] {
-    --opp-side-station-drop: clamp(12px, calc((var(--game-table-h, 0px) - 340px) * 0.08), 30px);
-    --opp-side-avatar-top: calc(38% + var(--opp-side-station-drop));
-    --opp-side-fan-offset: 48px;
+    --opp-side-station-drop: 0px;
+    --opp-side-avatar-top: calc(var(--game-table-h, 0px) * 0.52);
+    --opp-side-fan-offset: calc(var(--game-table-h, 0px) * 0.08);
     --opp-closed-gap: clamp(22px, 3vmin, 28px);
     --opp-open-gap: clamp(62px, 7.8vmin, 78px);
-    --opp-side-section-pad-top: calc(54px + var(--opp-side-station-drop));
+    --opp-side-section-pad-top: calc(var(--game-table-h, 0px) * 0.06);
     --opp-north-fan-top: clamp(44px, 5vmin, 52px);
     --opp-north-open-gap: clamp(50px, 5.8vmin, 62px);
     --opp-fan-closed-mini-scale: .72;
@@ -13346,7 +13349,7 @@ body[data-screen='game'] :is(.seat.west, .seat.east) .side-station-stack .oppone
     align-content: center !important;
   }
   body[data-screen='game'][data-orientation='portrait'] {
-    --opp-side-pack-pad-top: calc(64% + var(--opp-side-station-drop));
+    --opp-side-pack-pad-top: calc(var(--game-table-h, 0px) * 0.26);
   }
   body[data-screen='game'][data-orientation='portrait'] .seat.west .seat-pack,
   body[data-screen='game'][data-orientation='portrait'] .seat.east .seat-pack {
