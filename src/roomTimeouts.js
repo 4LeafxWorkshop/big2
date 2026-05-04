@@ -37,7 +37,7 @@ export function createRoomTimeoutController(deps){
     const remainingHumans=roster.filter((p,playerIdx)=>playerIdx!==idx&&deps.isRoomPlayerHuman(p));
     if(!remainingHumans.length){
       nextGame=deps.cloneRoomGame(game);
-      deps.addRoomSystemLog(nextGame,`${kickedName} ${deps.t('roomKickedTimeout')}`);
+      deps.addRoomSystemLog(nextGame,{key:'roomKickedTimeout',args:{name:kickedName}});
       return{players:[],game:nextGame,changed:true,kicked:true,roomDeleted:true,strikes,playerName:kickedName};
     }
     const replaced=replaceTimedOutPlayerWithBot(roster,seat);
@@ -50,7 +50,7 @@ export function createRoomTimeoutController(deps){
       nextGame.players[seat].gender=String(replacement.gender??'male')==='female'?'female':'male';
       nextGame.players[seat].picture='';
     }
-    deps.addRoomSystemLog(nextGame,`${kickedName} ${deps.t('roomKickedTimeout')}`);
+    deps.addRoomSystemLog(nextGame,{key:'roomKickedTimeout',args:{name:kickedName}});
     return{players:replaced,game:nextGame,changed:true,kicked:true,strikes,playerName:kickedName};
   }
 

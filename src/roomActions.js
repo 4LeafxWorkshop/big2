@@ -311,8 +311,7 @@ export function createRoomActionsController(deps){
         if(data.game&&String(data.status)==='playing'&&players.length>prevCount){
           const game=deps.cloneRoomGame(data.game);
           if(game){
-            const text=deps.t('roomJoinLog').replace('{{name}}',name);
-            deps.addRoomSystemLog(game,text);
+            deps.addRoomSystemLog(game,{key:'roomJoinLog',args:{name}});
             updates.game=game;
             updates.gameVersion=Number(data.gameVersion||0)+1;
           }

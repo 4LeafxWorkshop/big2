@@ -1148,7 +1148,7 @@ function deriveZhHkComposedClipKeys(variantClipKey='',clipKey=''){
   const variantNum=Number(match[1]);
   if(!Number.isFinite(variantNum)||variantNum<1||variantNum>5)return[];
   if(variantNum===1)return[baseClip];
-  const tailMap={
+const tailMap={
     2:'line-play-tail-2',
     3:'line-play-tail-3',
     4:'line-play-tail-4',
@@ -1159,6 +1159,74 @@ function deriveZhHkComposedClipKeys(variantClipKey='',clipKey=''){
   return[baseClip,tailKey];
 }
 const kindLabel=(k)=> (KIND[state.language]??KIND.en??KIND['zh-HK'])?.[k] ?? k;
+function systemLogEntrySignature(entry){
+  if(!entry||typeof entry!=='object')return`text:${String(entry??'')}`;
+  const key=String(entry.key??'').trim();
+  const text=String(entry.text??'').trim();
+  const args=entry.args&&typeof entry.args==='object'&&!Array.isArray(entry.args)?JSON.stringify(entry.args):'';
+  return`${key?`key:${key}`:`text:${text}`}|${args}`;
+}
+function normalizeSystemLogEntry(entry,ts=Date.now()){
+  if(entry&&typeof entry==='object'&&!Array.isArray(entry)){
+    const key=String(entry.key??'').trim();
+    const text=String(entry.text??'').trim();
+    const args=entry.args&&typeof entry.args==='object'&&!Array.isArray(entry.args)?{...entry.args}:null;
+    const outTs=Number(entry.ts)||ts;
+    if(key){
+      const out={key,ts:outTs};
+      if(args&&Object.keys(args).length)out.args=args;
+      if(text)out.text=text;
+      return out;
+    }
+    if(text)return{text,ts:outTs};
+    return null;
+  }
+  const text=String(entry??'').trim();
+  return text?{text,ts}:null;
+}
+function replaceTemplateArgs(template,args={}){
+  let out=String(template??'');
+  for(const [key,value] of Object.entries(args)){
+    out=out.replaceAll(`{{${key}}}`,String(value??''));
+  }
+  return out;
+}
+function renderSystemLogEntryText(entry){
+  if(!entry)return'';
+  if(typeof entry==='string')return entry;
+  const key=String(entry.key??'').trim();
+  const text=String(entry.text??'').trim();
+  const args=entry.args&&typeof entry.args==='object'&&!Array.isArray(entry.args)?entry.args:{};
+  if(!key)return text;
+  const name=String(args.name??'').trim();
+  const kind=String(args.kind??'').trim();
+  const penalties=String(args.penalties??args.penalty??args.remain??'').trim();
+  switch(key){
+    case'roomJoinLog':
+      return replaceTemplateArgs(t('roomJoinLog'),{name});
+    case'roomLeaveLog':
+      return replaceTemplateArgs(t('roomLeaveLog'),{name});
+    case'roomKickedTimeout':
+      return `${name?`${name} `:''}${t('roomKickedTimeout')}`;
+    case'start':
+      return `${name?`${name} `:''}${t('start')}`.trim();
+    case'retake':
+      return `${name?`${name} `:''}${t('retake')}`.trim();
+    case'pass':
+      return `${name?`${name} `:''}${t('pass')}.`.trim();
+    case'played':
+      return `${name?`${name} `:''}${t('played')}${kind?` ${kindLabel(kind)}`:''}.`.trim();
+    case'wins':
+      return `${name?`${name} `:''}${t('wins')}${penalties?` ${t('penalty')}:${penalties}`:''}`.trim();
+    case'custom':
+      return text;
+    default:{
+      const localized=replaceTemplateArgs(t(key),args);
+      if(localized&&localized!==key)return localized;
+      return text||localized||key;
+    }
+  }
+}
 function setSoloStatus(message,{appendLog=true,meta=null}={}){
   const g=state.solo;
   if(!g)return;
@@ -1172,8 +1240,11 @@ function setSoloStatus(message,{appendLog=true,meta=null}={}){
   if(!appendLog||!text)return;
   if(!Array.isArray(g.systemLog))g.systemLog=[];
   const last=g.systemLog[g.systemLog.length-1];
-  if(last&&last.text===text)return;
-  g.systemLog.push({text,ts:Date.now()});
+  const entry=normalizeSystemLogEntry(meta&&typeof meta==='object'&&String(meta.key??'').trim()
+    ?{key:String(meta.key).trim(),args:Object.fromEntries(Object.entries(meta).filter(([k])=>k!=='key'&&k!=='ts')),text,ts:Date.now()}
+    :{text,ts:Date.now()});
+  if(last&&systemLogEntrySignature(last)===systemLogEntrySignature(entry))return;
+  g.systemLog.push(entry);
   if(g.systemLog.length>200)g.systemLog=g.systemLog.slice(-200);
 }
 function leaderboardPanelHtml(){
@@ -1632,6 +1703,17 @@ async function refreshRoomStateAfterActionFailure(){
       render();
     }
   }catch{}
+}
+async function reconnectToCurrentRoomIfPossible(){
+  const roomId=String(state.room.id||'').trim();
+  if(!roomId)return false;
+  const code=String(state.room.code||'').trim();
+  const resolved=await resolveRoomDocByDirectory(roomId,code);
+  if(!resolved?.doc?.exists)return false;
+  const nextRoomId=String(resolved.roomId||resolved.doc.id||roomId).trim();
+  if(!nextRoomId)return false;
+  await connectToRoom(nextRoomId,code,resolved.instanceId||'');
+  return true;
 }
 async function ensureFirebaseWriteAuth(){
   return Boolean(firebaseDb||initFirebaseIfReady());
@@ -2424,8 +2506,11 @@ function setGameStatus(game,message,{appendLog=true,now=Date.now(),meta=null}={}
   if(!appendLog||!text)return;
   if(!Array.isArray(game.systemLog))game.systemLog=[];
   const last=game.systemLog[game.systemLog.length-1];
-  if(last&&last.text===text)return;
-  game.systemLog.push({text,ts:now});
+  const entry=normalizeSystemLogEntry(meta&&typeof meta==='object'&&String(meta.key??'').trim()
+    ?{key:String(meta.key).trim(),args:Object.fromEntries(Object.entries(meta).filter(([k])=>k!=='key'&&k!=='ts')),text,ts:now}
+    :{text,ts:now});
+  if(last&&systemLogEntrySignature(last)===systemLogEntrySignature(entry))return;
+  game.systemLog.push(entry);
   if(game.systemLog.length>200)game.systemLog=game.systemLog.slice(-200);
 }
 function roomSeatForPlayer(roomData,playerId){
@@ -2710,9 +2795,11 @@ async function roomSubmitPlay(cards,seatOverride=null){
   const seat=Number.isInteger(seatOverride)?seatOverride:roomSelfSeat(state.room.data);
   if(seat<0)return;
   const now=Date.now();
-  try{
-    const ref=roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(roomId);
-    await roomDb.runTransaction(async(tx)=>{
+  const submitOnce=async()=>{
+    const actionRoomDb=currentRoomDb();
+    if(!actionRoomDb)throw new Error('room missing');
+    const ref=actionRoomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(roomId);
+    await actionRoomDb.runTransaction(async(tx)=>{
       const snap=await tx.get(ref);
       if(!snap.exists)throw new Error('room missing');
       const data=snap.data()??{};
@@ -2744,39 +2831,63 @@ async function roomSubmitPlay(cards,seatOverride=null){
       }
       const canAct=(selfSeat===seat)||((target&&!target.isHuman)&&isHostActor)||(timedOut&&target?.isHuman);
       if(!canAct)throw new Error('not allowed');
-        const result=applyPlayToGame(game,seat,cards,now);
-        if(!result.ok)throw new Error(result.reason||'invalid');
-        const updates={game:result.game,updatedAt:now,gameVersion:Number(data.gameVersion||0)+1};
-        const reaction=!target?.isHuman?pickBotReaction(result.game,seat,'play',result):null;
-        if(reaction){
-          updates.game={...result.game,emote:{id:reaction.id,ts:Math.trunc(now),by:reaction.by,seat}};
+      const result=applyPlayToGame(game,seat,cards,now);
+      if(!result.ok)throw new Error(result.reason||'invalid');
+      const updates={game:result.game,updatedAt:now,gameVersion:Number(data.gameVersion||0)+1};
+      const reaction=!target?.isHuman?pickBotReaction(result.game,seat,'play',result):null;
+      if(reaction){
+        updates.game={...result.game,emote:{id:reaction.id,ts:Math.trunc(now),by:reaction.by,seat}};
+      }
+      const actorUid=(selfSeat===seat)?currentRoomPlayerId():'';
+      const bumped=bumpRoomPlayerLastSeen(nextPlayers,actorUid,now);
+      if(bumped.changed)updates.players=bumped.players;
+      else if(nextPlayers!==data.players)updates.players=nextPlayers;
+      if(updates.players){
+        const hostStillHuman=updates.players.some((p)=>String(p?.uid||'')===String(data.hostId||'')&&isRoomPlayerHuman(p));
+        if(!hostStillHuman){
+          const nextHost=selectRoomHostCandidate(updates.players,now)||updates.players.find((p)=>isRoomPlayerHuman(p))||updates.players[0];
+          updates.hostId=String(nextHost?.uid||'');
+          updates.hostName=String(nextHost?.name||'');
         }
-        const actorUid=(selfSeat===seat)?currentRoomPlayerId():'';
-        const bumped=bumpRoomPlayerLastSeen(nextPlayers,actorUid,now);
-        if(bumped.changed)updates.players=bumped.players;
-        else if(nextPlayers!==data.players)updates.players=nextPlayers;
-        if(updates.players){
-          const hostStillHuman=updates.players.some((p)=>String(p?.uid||'')===String(data.hostId||'')&&isRoomPlayerHuman(p));
-          if(!hostStillHuman){
-            const nextHost=selectRoomHostCandidate(updates.players,now)||updates.players.find((p)=>isRoomPlayerHuman(p))||updates.players[0];
-            updates.hostId=String(nextHost?.uid||'');
-            updates.hostName=String(nextHost?.name||'');
-          }
-        }
-        if(result.finished){
-          updates.status='finished';
-          updates.expiresAt=nextRoomIdleExpiry(now);
-          updates.resultExpiresAt=now+ROOM_RESULT_IDLE_MS;
-          updates.totals=result.game.totals||[];
-          updates.roundCount=Number(data.roundCount||0)+1;
+      }
+      if(result.finished){
+        updates.status='finished';
+        updates.expiresAt=nextRoomIdleExpiry(now);
+        updates.resultExpiresAt=now+ROOM_RESULT_IDLE_MS;
+        updates.totals=result.game.totals||[];
+        updates.roundCount=Number(data.roundCount||0)+1;
       }
       tx.update(ref,updates);
     });
+  };
+  try{
+    await submitOnce();
     playSound('play');
     return true;
   }catch(err){
     const msg=String(err?.message??'');
     if(msg){
+      if(msg==='room missing'){
+        const reconnected=await reconnectToCurrentRoomIfPossible();
+        if(reconnected){
+          try{
+            await submitOnce();
+            playSound('play');
+            return true;
+          }catch(retryErr){
+            const retryMsg=String(retryErr?.message??'');
+            if(retryMsg){
+              if(retryMsg==='room not playing'||retryMsg==='not your turn'||retryMsg==='not allowed'){
+                void refreshRoomStateAfterActionFailure();
+                setRoomError(retryMsg);
+              }else{
+                setSoloStatus(retryMsg);
+              }
+            }
+            return false;
+          }
+        }
+      }
       if(msg==='room not playing'||msg==='not your turn'||msg==='not allowed'){
         void refreshRoomStateAfterActionFailure();
         setRoomError(msg);
@@ -2794,9 +2905,11 @@ async function roomSubmitPass(seatOverride=null){
   const seat=Number.isInteger(seatOverride)?seatOverride:roomSelfSeat(state.room.data);
   if(seat<0)return;
   const now=Date.now();
-  try{
-    const ref=roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(roomId);
-    await roomDb.runTransaction(async(tx)=>{
+  const submitOnce=async()=>{
+    const actionRoomDb=currentRoomDb();
+    if(!actionRoomDb)throw new Error('room missing');
+    const ref=actionRoomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(roomId);
+    await actionRoomDb.runTransaction(async(tx)=>{
       const snap=await tx.get(ref);
       if(!snap.exists)throw new Error('room missing');
       const data=snap.data()??{};
@@ -2826,33 +2939,57 @@ async function roomSubmitPass(seatOverride=null){
         const reset=resetTimeoutStrikeForSeat(nextPlayers,seat);
         if(reset.changed)nextPlayers=reset.players;
       }
-        const canAct=(selfSeat===seat)||((target&&!target.isHuman)&&isHostActor)||(timedOut&&target?.isHuman);
-        if(!canAct)throw new Error('not allowed');
-        const result=applyPassToGame(game,seat,now);
-        if(!result.ok)throw new Error(result.reason||'invalid');
-        const updates={game:result.game,updatedAt:now,gameVersion:Number(data.gameVersion||0)+1};
-        const reaction=!target?.isHuman?pickBotReaction(result.game,seat,'pass',null):null;
-        if(reaction){
-          updates.game={...result.game,emote:{id:reaction.id,ts:Math.trunc(now),by:reaction.by,seat}};
+      const canAct=(selfSeat===seat)||((target&&!target.isHuman)&&isHostActor)||(timedOut&&target?.isHuman);
+      if(!canAct)throw new Error('not allowed');
+      const result=applyPassToGame(game,seat,now);
+      if(!result.ok)throw new Error(result.reason||'invalid');
+      const updates={game:result.game,updatedAt:now,gameVersion:Number(data.gameVersion||0)+1};
+      const reaction=!target?.isHuman?pickBotReaction(result.game,seat,'pass',null):null;
+      if(reaction){
+        updates.game={...result.game,emote:{id:reaction.id,ts:Math.trunc(now),by:reaction.by,seat}};
+      }
+      const actorUid=(selfSeat===seat)?currentRoomPlayerId():'';
+      const bumped=bumpRoomPlayerLastSeen(nextPlayers,actorUid,now);
+      if(bumped.changed)updates.players=bumped.players;
+      else if(nextPlayers!==data.players)updates.players=nextPlayers;
+      if(updates.players){
+        const hostStillHuman=updates.players.some((p)=>String(p?.uid||'')===String(data.hostId||'')&&isRoomPlayerHuman(p));
+        if(!hostStillHuman){
+          const nextHost=selectRoomHostCandidate(updates.players,now)||updates.players.find((p)=>isRoomPlayerHuman(p))||updates.players[0];
+          updates.hostId=String(nextHost?.uid||'');
+          updates.hostName=String(nextHost?.name||'');
         }
-        const actorUid=(selfSeat===seat)?currentRoomPlayerId():'';
-        const bumped=bumpRoomPlayerLastSeen(nextPlayers,actorUid,now);
-        if(bumped.changed)updates.players=bumped.players;
-        else if(nextPlayers!==data.players)updates.players=nextPlayers;
-        if(updates.players){
-          const hostStillHuman=updates.players.some((p)=>String(p?.uid||'')===String(data.hostId||'')&&isRoomPlayerHuman(p));
-          if(!hostStillHuman){
-            const nextHost=selectRoomHostCandidate(updates.players,now)||updates.players.find((p)=>isRoomPlayerHuman(p))||updates.players[0];
-            updates.hostId=String(nextHost?.uid||'');
-            updates.hostName=String(nextHost?.name||'');
-          }
-        }
-        tx.update(ref,updates);
-      });
+      }
+      tx.update(ref,updates);
+    });
+  };
+  try{
+    await submitOnce();
       playSound('pass');
   }catch(err){
     const msg=String(err?.message??'');
     if(msg){
+      if(msg==='room missing'){
+        const reconnected=await reconnectToCurrentRoomIfPossible();
+        if(reconnected){
+          try{
+            await submitOnce();
+            playSound('pass');
+            return;
+          }catch(retryErr){
+            const retryMsg=String(retryErr?.message??'');
+            if(retryMsg){
+              if(retryMsg==='room not playing'||retryMsg==='not your turn'||retryMsg==='not allowed'){
+                void refreshRoomStateAfterActionFailure();
+                setRoomError(retryMsg);
+              }else{
+                setSoloStatus(retryMsg);
+              }
+            }
+            return;
+          }
+        }
+      }
       if(msg==='room not playing'||msg==='not your turn'||msg==='not allowed'){
         void refreshRoomStateAfterActionFailure();
         setRoomError(msg);
@@ -4893,15 +5030,20 @@ function historyHtml(h,self,participants=[],systemLog=[]){
     const cards=(e.cards??[]).map((c)=>renderStaticCard(c,true)).join('');
     items.push({ts:Number(e.ts)||0,seq:seq++,html:`<div class="history-item"><div class="history-head"><div class="history-title">${tag}</div>${timeText?`<div class="history-time">${esc(timeText)}</div>`:''}</div><div class="history-detail-row"><div class="history-detail">${esc(detail)}</div><div class="history-cards">${cards}</div></div></div>`});
   }
-  const sysEntries=(systemLog??[]).map((x)=>typeof x==='string'?{text:x,ts:0}:{text:String(x?.text??''),ts:Number(x?.ts)||0}).filter((x)=>x.text.trim());
+  const sysEntries=(systemLog??[]).map((x)=>{
+    if(typeof x==='string')return{text:x,ts:0};
+    if(x&&typeof x==='object')return normalizeSystemLogEntry(x,Number(x?.ts)||0);
+    return null;
+  }).filter((x)=>x&&(String(x.text??'').trim()||String(x.key??'').trim()));
   for(const s of sysEntries){
     const timeText=formatSystemLogDateTime(s.ts);
-    const participant=resolveLogStatusParticipantFromText(s.text,participantList);
+    const renderedText=renderSystemLogEntryText(s);
+    const participant=resolveLogStatusParticipantFromText(renderedText,participantList);
     const color=participant?playerColorByViewClass(participant.cls):'var(--player-color, #7aaed8)';
     const avatarSrc=String(participant?.avatarSrc||participant?.picture||'').trim();
     const systemLine=avatarSrc
-      ?`<div class="history-meta history-system-line" style="--player-color:${color};"><span class="history-avatar-badge" style="--player-color:${color};"><img class="game-log-fab-status-avatar history-avatar" src="${esc(avatarSrc)}" alt="" aria-hidden="true"/></span><span>${esc(s.text)}</span></div>`
-      :`<div class="history-meta history-system-line">${esc(s.text)}</div>`;
+      ?`<div class="history-meta history-system-line" style="--player-color:${color};"><span class="history-avatar-badge" style="--player-color:${color};"><img class="game-log-fab-status-avatar history-avatar" src="${esc(avatarSrc)}" alt="" aria-hidden="true"/></span><span>${esc(renderedText)}</span></div>`
+      :`<div class="history-meta history-system-line">${esc(renderedText)}</div>`;
     items.push({ts:Number(s.ts)||0,seq:seq++,html:`<div class="history-item"><div class="history-head">${systemLine}${timeText?`<div class="history-time">${esc(timeText)}</div>`:''}</div></div>`});
   }
   const entries=items.sort((a,b)=>(b.ts-a.ts)||(b.seq-a.seq)).map((x)=>x.html);
@@ -4912,8 +5054,10 @@ function addRoomSystemLog(game,text){
   if(!game||!text)return;
   if(!Array.isArray(game.systemLog))game.systemLog=[];
   const last=game.systemLog[game.systemLog.length-1];
-  if(last&&String(last.text||'')===text)return;
-  game.systemLog.push({text,ts:Date.now()});
+  const entry=normalizeSystemLogEntry(text,Date.now());
+  if(!entry)return;
+  if(last&&systemLogEntrySignature(last)===systemLogEntrySignature(entry))return;
+  game.systemLog.push(entry);
   if(game.systemLog.length>200)game.systemLog=game.systemLog.slice(-200);
 }
 function centerMovesHtml(v){

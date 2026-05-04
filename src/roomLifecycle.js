@@ -117,8 +117,7 @@ export function createRoomLifecycleController(deps){
             }
           }
           if(game){
-            const text=deps.roomLeaveLogText(String(leaving.name||''));
-            deps.addRoomSystemLog(game,text);
+            deps.addRoomSystemLog(game,{key:'roomLeaveLog',args:{name:String(leaving.name||'')}});
           }
           tx.update(ref,{players:remaining,playerIds:deps.roomPlayerIds(remaining),game,updatedAt:now,gameVersion:Number(data.gameVersion||0)+1,...hostUpdate});
           return;
