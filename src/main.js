@@ -2831,7 +2831,7 @@ async function roomSubmitPlay(cards,seatOverride=null){
       const result=applyPlayToGame(game,seat,cards,now);
       if(!result.ok)throw new Error(result.reason||'invalid');
       const updates={game:result.game,updatedAt:now,gameVersion:Number(data.gameVersion||0)+1};
-      const reaction=!target?.isHuman&&selfSeat!==seat?pickBotReaction(result.game,seat,'play',result):null;
+      const reaction=target?.isHuman?null:pickBotReaction(result.game,seat,'play',result);
       if(reaction){
         updates.game={...result.game,emote:{id:reaction.id,ts:Math.trunc(now),by:reaction.by,seat}};
       }
@@ -2936,12 +2936,12 @@ async function roomSubmitPass(seatOverride=null){
         const reset=resetTimeoutStrikeForSeat(nextPlayers,seat);
         if(reset.changed)nextPlayers=reset.players;
       }
-      const canAct=(selfSeat===seat)||(!target?.isHuman)||(timedOut&&target?.isHuman&&isHostActor);
+      const canAct=(selfSeat===seat)||((target&&!target.isHuman)&&isHostActor)||(timedOut&&target?.isHuman);
       if(!canAct)throw new Error('not allowed');
       const result=applyPassToGame(game,seat,now);
       if(!result.ok)throw new Error(result.reason||'invalid');
       const updates={game:result.game,updatedAt:now,gameVersion:Number(data.gameVersion||0)+1};
-      const reaction=!target?.isHuman&&selfSeat!==seat?pickBotReaction(result.game,seat,'pass',null):null;
+      const reaction=target?.isHuman?null:pickBotReaction(result.game,seat,'pass',null);
       if(reaction){
         updates.game={...result.game,emote:{id:reaction.id,ts:Math.trunc(now),by:reaction.by,seat}};
       }

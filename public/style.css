@@ -304,6 +304,7 @@ body[data-screen='game'] {
   background-repeat: no-repeat, no-repeat, no-repeat;
 }
 body[data-screen='game'] #app {
+  touch-action: manipulation;
   height: 100dvh;
   max-height: 100dvh;
   padding-bottom: 0 !important;
@@ -1808,6 +1809,12 @@ body[data-screen='home'] .home-wrap {
 .room-share-qr-box {
   display: grid;
   place-items: center;
+  touch-action: manipulation;
+  cursor: zoom-in;
+}
+.room-lobby-qr-box {
+  touch-action: manipulation;
+  cursor: zoom-in;
 }
 .room-share-panel-simple .room-share-qr-box {
   padding: 12px;
@@ -1884,6 +1891,48 @@ body[data-screen='home'] .home-wrap {
   aspect-ratio: 1 / 1;
   border-radius: 12px;
   background: #fff;
+}
+.room-invite-qr-zoom-open {
+  overflow: hidden;
+}
+.room-invite-qr-zoom-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 12040;
+  border: 0;
+  padding: 0;
+  margin: 0;
+  background: rgba(3, 12, 22, .72);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+.room-invite-qr-zoom-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+.room-invite-qr-zoom-ghost {
+  position: fixed;
+  z-index: 12041;
+  left: 50%;
+  top: 50%;
+  width: min(88vw, 420px);
+  aspect-ratio: 1 / 1;
+  transform: translate(-50%, -50%) scale(.9);
+  opacity: 0;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 20px 48px rgba(0,0,0,.42);
+  object-fit: contain;
+  transition: transform 120ms ease, opacity 120ms ease;
+  -webkit-user-drag: none;
+  user-select: none;
+  pointer-events: none;
+}
+.room-invite-qr-zoom-ghost.active {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
 }
 .room-share-qr-copy {
   min-width: 0;
@@ -7027,6 +7076,10 @@ body[data-screen='game'][data-orientation='portrait'] #game-log-fab .game-log-fa
 }
 body[data-screen='game'][data-log-sheet='1'] #game-log-fab {
   display: none !important;
+}
+body[data-screen='game'] .game-shell.game-over .game-log-fab,
+body[data-screen='game'] .game-shell.game-over #game-log-fab {
+  z-index: 35 !important;
 }
 body[data-screen='game'][data-orientation='portrait'] .action-strip .game-log-fab .game-log-fab-status { max-width: min(64vw, 260px); }
 body[data-screen='game'][data-orientation='portrait'] .action-strip .game-log-fab-divider {
@@ -13677,19 +13730,19 @@ body[data-screen='game'] .service-bell-food {
 }
 body[data-screen='game'] :is(.seat.north .seat-name-fixed[data-opponent-name], .seat.west .seat-name-fixed[data-opponent-name], .seat.east .seat-name-fixed[data-opponent-name]) {
   position: relative !important;
-  z-index: 16000 !important;
+  z-index: 22040 !important;
 }
 body[data-screen='game'] :is(.seat.west .side-station-core > .seat-name-fixed[data-opponent-name], .seat.east .side-station-core > .seat-name-fixed[data-opponent-name]) {
   position: relative !important;
-  z-index: 18000 !important;
+  z-index: 22045 !important;
   isolation: isolate !important;
 }
 body[data-screen='game'] :is(.seat.west .side-station-core > .seat-name-fixed[data-opponent-name] .name, .seat.east .side-station-core > .seat-name-fixed[data-opponent-name] .name) {
   position: relative !important;
-  z-index: 18001 !important;
+  z-index: 22046 !important;
 }
 body[data-screen='game'] :is(.play-type-call, .last-card-call, .emote-callout, .seat-motto-callout, .self-table-emote, .table-emote) {
-  z-index: 19000 !important;
+  z-index: 22050 !important;
 }
 
 @media (min-width: 861px) and (orientation: portrait) {
