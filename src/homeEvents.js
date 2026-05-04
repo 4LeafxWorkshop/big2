@@ -461,6 +461,10 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
     let qrLongPressTimer=0;
     let qrLongPressTriggered=false;
     let qrClickCopyTimer=0;
+    let qrTapZoomTriggered=false;
+    let qrLastTapAt=0;
+    let qrLastTapX=0;
+    let qrLastTapY=0;
     const clearQrLongPress=()=>{
       if(qrLongPressTimer){
         win.clearTimeout(qrLongPressTimer);
@@ -470,6 +474,7 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
     qrBtn?.addEventListener('pointerdown',(ev)=>{
       if(typeof ev?.pointerType!=='string')return;
       qrLongPressTriggered=false;
+      qrTapZoomTriggered=false;
       clearQrLongPress();
       if(ev.pointerType!=='touch'&&ev.pointerType!=='pen')return;
       qrLongPressTimer=win.setTimeout(async()=>{
@@ -496,11 +501,37 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       }
       showRoomInviteQrZoom();
     });
+    qrBtn?.addEventListener('pointerup',(ev)=>{
+      if(typeof ev?.pointerType!=='string')return;
+      if(ev.pointerType!=='touch'&&ev.pointerType!=='pen')return;
+      if(qrLongPressTriggered)return;
+      const now=Date.now();
+      const moved=Math.hypot(ev.clientX-qrLastTapX,ev.clientY-qrLastTapY);
+      const withinDoubleTap=now-qrLastTapAt<320&&moved<18;
+      qrLastTapAt=now;
+      qrLastTapX=ev.clientX;
+      qrLastTapY=ev.clientY;
+      if(!withinDoubleTap)return;
+      ev.preventDefault();
+      ev.stopPropagation();
+      if(qrClickCopyTimer){
+        win.clearTimeout(qrClickCopyTimer);
+        qrClickCopyTimer=0;
+      }
+      qrTapZoomTriggered=true;
+      showRoomInviteQrZoom();
+    });
     qrBtn?.addEventListener('click',(ev)=>{
       if(qrLongPressTriggered){
         ev.preventDefault();
         ev.stopPropagation();
         qrLongPressTriggered=false;
+        return;
+      }
+      if(qrTapZoomTriggered){
+        ev.preventDefault();
+        ev.stopPropagation();
+        qrTapZoomTriggered=false;
         return;
       }
       if(ev.detail>=2)return;

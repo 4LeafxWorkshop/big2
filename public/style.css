@@ -8602,6 +8602,18 @@ body[data-orientation='landscape'] .table { --table-tilt: 0deg; }
 .result-card .room-expiry-row {
   justify-self: center;
 }
+body[data-screen='game'] .congrats-card .room-expiry-row.room-expiry-top,
+body[data-screen='game'] .result-card .room-expiry-row.room-expiry-top {
+  position: sticky;
+  top: 0;
+  z-index: 4;
+  width: 100%;
+  justify-content: flex-end;
+  align-self: start;
+  justify-self: end;
+  background: linear-gradient(180deg, rgba(8, 27, 44, .96), rgba(8, 27, 44, .82));
+  padding: 2px 0 4px;
+}
 
 .result-screen {
   position: fixed;

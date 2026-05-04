@@ -2834,7 +2834,7 @@ async function roomSubmitPlay(cards,seatOverride=null){
       const result=applyPlayToGame(game,seat,cards,now);
       if(!result.ok)throw new Error(result.reason||'invalid');
       const updates={game:result.game,updatedAt:now,gameVersion:Number(data.gameVersion||0)+1};
-      const reaction=!target?.isHuman?pickBotReaction(result.game,seat,'play',result):null;
+      const reaction=!target?.isHuman&&selfSeat!==seat?pickBotReaction(result.game,seat,'play',result):null;
       if(reaction){
         updates.game={...result.game,emote:{id:reaction.id,ts:Math.trunc(now),by:reaction.by,seat}};
       }
@@ -2944,7 +2944,7 @@ async function roomSubmitPass(seatOverride=null){
       const result=applyPassToGame(game,seat,now);
       if(!result.ok)throw new Error(result.reason||'invalid');
       const updates={game:result.game,updatedAt:now,gameVersion:Number(data.gameVersion||0)+1};
-      const reaction=!target?.isHuman?pickBotReaction(result.game,seat,'pass',null):null;
+      const reaction=!target?.isHuman&&selfSeat!==seat?pickBotReaction(result.game,seat,'pass',null):null;
       if(reaction){
         updates.game={...result.game,emote:{id:reaction.id,ts:Math.trunc(now),by:reaction.by,seat}};
       }
