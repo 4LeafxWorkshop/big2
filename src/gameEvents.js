@@ -336,6 +336,7 @@ function bindLogSheetSwipe({
       return;
     }
     if(dx<-90&&absDy<Math.max(28,absDx*0.5)){
+      if(state.home.mode==='room')return;
       const emoteBtn=document.getElementById('emote-toggle');
       if(emoteBtn&&!emoteBtn.hasAttribute('disabled')){
         emoteBtn.click();

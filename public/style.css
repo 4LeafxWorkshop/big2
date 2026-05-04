@@ -13111,8 +13111,8 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
   }
   body[data-screen='game'][data-orientation='portrait'] .action-strip .hand {
     overflow: hidden !important;
-    min-height: calc(var(--card-h) * 1.14 + 18px) !important;
-    padding-bottom: 2px !important;
+    min-height: calc(var(--card-h) * 1.2 + 24px) !important;
+    padding-bottom: 6px !important;
   }
   body[data-screen='game'][data-orientation='portrait'] .center-last-south {
     bottom: calc(var(--game-table-h, 0px) * 0.025) !important;
@@ -13245,7 +13245,7 @@ body[data-screen='game'] :is(.seat.north, .seat.west, .seat.east) > .seat-name-f
 
 body[data-screen='game'][data-orientation='landscape'] .action-strip,
 body[data-screen='game'][data-orientation='portrait'] .action-strip {
-  padding-bottom: 8px !important;
+  padding-bottom: 12px !important;
 }
 
 @media (min-width: 861px) and (orientation: landscape) {

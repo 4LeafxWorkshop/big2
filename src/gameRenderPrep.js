@@ -599,7 +599,7 @@ export function buildResultScreenHtml(params){
     <div class="result-card">
       <h2 class="title-with-icon"><span class="title-icon title-icon-result" aria-hidden="true"></span><span>${t('resultTitle')}</span></h2>
       ${topHint?`<div class="hint">${esc(topHint)}</div>`:''}
-      ${isRoom?`<div class="room-expiry-row"><span>${t('roomCountdown')}</span><button type="button" class="room-expiry-reset-btn" data-room-expiry-reset="1"><strong data-room-countdown-value>${esc(roomCountdown)}</strong></button></div>`:''}
+      ${isRoom?`<div class="room-expiry-row room-expiry-top"><span>${t('roomCountdown')}</span><button type="button" class="room-expiry-reset-btn" data-room-expiry-reset="1"><strong data-room-countdown-value>${esc(roomCountdown)}</strong></button></div>`:''}
       <div class="result-list">${rows}</div>
       <div class="control-row">
         <button id="result-home" class="secondary">${isRoom?t('roomLeave'):t('home')}</button>
@@ -632,5 +632,5 @@ export function buildCongratsOverlayHtml(params){
   const againHtml=(!isRoom||(isHost&&!roomExpired))
     ?`<button id="congrats-again" class="primary">${t('again')}</button>`
     :`<span class="hint">${roomExpired?t('roomHostSneakAway'):t('roomWaitingHost')}</span>`;
-  return`<div class="congrats-screen"><div class="congrats-card"><h3 class="title-with-icon"><span class="title-icon title-icon-congrats" aria-hidden="true"></span><span>${t('congrats')}</span></h3><div class="hint">${esc(uiStatus(v.status,v.statusMeta))}</div>${isRoom?`<div class="room-expiry-row"><span>${t('roomCountdown')}</span><button type="button" class="room-expiry-reset-btn" data-room-expiry-reset="1"><strong data-room-countdown-value>${esc(roomCountdown)}</strong></button></div>`:''}<div class="control-row"><button id="congrats-home" class="secondary">${t('home')}</button>${againHtml}</div></div></div>`;
+  return`<div class="congrats-screen"><div class="congrats-card"><h3 class="title-with-icon"><span class="title-icon title-icon-congrats" aria-hidden="true"></span><span>${t('congrats')}</span></h3><div class="hint">${esc(uiStatus(v.status,v.statusMeta))}</div>${isRoom?`<div class="room-expiry-row room-expiry-top"><span>${t('roomCountdown')}</span><button type="button" class="room-expiry-reset-btn" data-room-expiry-reset="1"><strong data-room-countdown-value>${esc(roomCountdown)}</strong></button></div>`:''}<div class="control-row"><button id="congrats-home" class="secondary">${t('home')}</button>${againHtml}</div></div></div>`;
 }
