@@ -6252,16 +6252,16 @@ body[data-screen='game'] .closed-card-pile > .closed-count-pill {
   grid-area: auto;
   margin-bottom: 0;
   position: absolute;
-  top: 6px;
+  top: 3px;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(calc(-50% + 3px));
   z-index: 20;
 }
 /* South panel: force centered name badge, overriding seat-name-fixed base left:6px!important */
 .action-strip .seat-name-fixed.player-tag {
   left: 50% !important;
   right: auto !important;
-  transform: translateX(-50%) !important;
+  transform: translateX(calc(-50% + 3px)) !important;
   overflow: visible !important;
 }
 .action-strip .control-row {
@@ -8657,15 +8657,15 @@ body[data-orientation='landscape'] .table { --table-tilt: 0deg; }
 }
 .room-expiry-row.room-expiry-top {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 6px;
+  right: 6px;
   z-index: 12020;
   width: auto;
   justify-content: flex-end;
   align-self: start;
   justify-self: end;
   background: linear-gradient(180deg, rgba(8, 27, 44, .98), rgba(8, 27, 44, .84));
-  padding: 6px 10px;
+  padding: 4px 8px;
   border-radius: 999px;
   border: 1px solid rgba(255,255,255,.12);
   box-shadow: 0 10px 24px rgba(0,0,0,.24);
@@ -8821,8 +8821,8 @@ body[data-screen='game'] .result-card > * {
 }
 body[data-screen='game'] .result-card .room-expiry-row.room-expiry-top {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: 6px;
+  right: 6px;
   grid-column: 1 / -1;
   justify-self: end;
   align-self: start;
@@ -13221,8 +13221,8 @@ body[data-screen='game'] {
 body[data-screen='game'] .room-top-meta-table {
   position: absolute !important;
   top: var(--room-top-meta-offset-top) !important;
-  left: auto !important;
-  right: var(--room-top-meta-offset-left) !important;
+  left: var(--room-top-meta-offset-left) !important;
+  right: auto !important;
   transform: none !important;
   z-index: 20 !important;
   pointer-events: none !important;
