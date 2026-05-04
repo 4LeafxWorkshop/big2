@@ -6906,7 +6906,7 @@ body[data-screen='game'][data-orientation='portrait'] .side-zone { display: none
   position: fixed;
   right: 8px;
   bottom: 6px;
-  z-index: 11000;
+  z-index: 11990;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -8604,15 +8604,19 @@ body[data-orientation='landscape'] .table { --table-tilt: 0deg; }
 }
 body[data-screen='game'] .congrats-card .room-expiry-row.room-expiry-top,
 body[data-screen='game'] .result-card .room-expiry-row.room-expiry-top {
-  position: sticky;
-  top: 0;
-  z-index: 4;
-  width: 100%;
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  z-index: 12010;
+  width: auto;
   justify-content: flex-end;
   align-self: start;
   justify-self: end;
-  background: linear-gradient(180deg, rgba(8, 27, 44, .96), rgba(8, 27, 44, .82));
-  padding: 2px 0 4px;
+  background: linear-gradient(180deg, rgba(8, 27, 44, .98), rgba(8, 27, 44, .84));
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: 0 10px 24px rgba(0,0,0,.24);
 }
 
 .result-screen {
@@ -8767,7 +8771,6 @@ body[data-screen='game'] .result-card .room-expiry-row.room-expiry-top {
   grid-column: 1 / -1;
   justify-self: end;
   align-self: start;
-  width: 100%;
   display: flex;
   justify-content: flex-end;
   text-align: right;
