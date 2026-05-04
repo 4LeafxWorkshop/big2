@@ -316,6 +316,7 @@ function bindLogSheetSwipe({
       if(logBtn&&!logBtn.hasAttribute('disabled')){
         logBtn.click();
       }else{
+        state.logTouched=true;
         state.showLogSheet=true;
         render();
       }

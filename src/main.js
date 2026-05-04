@@ -2686,9 +2686,6 @@ function applyRoomGameSnapshot(roomData){
   state.home.showLeaderboard=false;
   state.showScoreGuide=false;
   state.opponentProfileName='';
-  state.logTouched=false;
-  state.showLog=false;
-  state.showLogSheet=false;
   state.recommendation=null;
   setRecommendHint('');
   const selfSeat=Number.isInteger(state.room.selfSeat)?state.room.selfSeat:0;
@@ -5422,6 +5419,7 @@ function handleGameTopbarClick(ev){
       btn.setAttribute('data-ignore-click','0');
       return;
     }
+    state.logTouched=true;
     state.showLogSheet=!state.showLogSheet;
     render();
     return;
