@@ -2829,7 +2829,7 @@ async function roomSubmitPlay(cards,seatOverride=null){
         const reset=resetTimeoutStrikeForSeat(nextPlayers,seat);
         if(reset.changed)nextPlayers=reset.players;
       }
-      const canAct=(selfSeat===seat)||((target&&!target.isHuman)&&isHostActor)||(timedOut&&target?.isHuman);
+      const canAct=(selfSeat===seat)||(!target?.isHuman)||(timedOut&&target?.isHuman&&isHostActor);
       if(!canAct)throw new Error('not allowed');
       const result=applyPlayToGame(game,seat,cards,now);
       if(!result.ok)throw new Error(result.reason||'invalid');
@@ -2939,7 +2939,7 @@ async function roomSubmitPass(seatOverride=null){
         const reset=resetTimeoutStrikeForSeat(nextPlayers,seat);
         if(reset.changed)nextPlayers=reset.players;
       }
-      const canAct=(selfSeat===seat)||((target&&!target.isHuman)&&isHostActor)||(timedOut&&target?.isHuman);
+      const canAct=(selfSeat===seat)||(!target?.isHuman)||(timedOut&&target?.isHuman&&isHostActor);
       if(!canAct)throw new Error('not allowed');
       const result=applyPassToGame(game,seat,now);
       if(!result.ok)throw new Error(result.reason||'invalid');
@@ -3012,7 +3012,6 @@ function maybeRunRoomAi(){
   const g=state.room.data.game;
   const current=g?.players?.[g?.currentSeat];
   if(!g||g.gameOver||!current)return;
-  if(!current.isHuman&&!roomIsHost())return;
   if(current.isHuman){
     const timeout=getRoomTurnTimeoutWithGrace(state.room.data);
     const startedAt=Number(g.turnStartedAt)||0;
@@ -3048,18 +3047,19 @@ function maybeRunRoomAi(){
     return;
   }
   const DEFAULT_AI_DELAY_MS=320;
-  const wait=DEFAULT_AI_DELAY_MS;
   aiTimer=window.setTimeout(async()=>{
-    const live=state.room.data?.game;
-    if(!live||live.gameOver)return;
-    if(!roomIsHost())return;
-    const actor=live.players?.[live.currentSeat];
+    const liveRoom=await resolveRoomDocByDirectory(state.room.id||'',state.room.code||'');
+    const live=liveRoom?.doc?.data?.()??state.room.data?.game;
+    const liveGame=live?.game??live;
+    if(!liveGame||liveGame.gameOver)return;
+    if(Number(liveGame.currentSeat)!==Number(g.currentSeat))return;
+    const actor=liveGame.players?.[liveGame.currentSeat];
     if(!actor||actor.isHuman)return;
-    const ch=chooseRoomAiPlay(actor.hand,live,live.aiDifficulty);
-    if(!ch)await roomSubmitPass(live.currentSeat);
-    else await roomSubmitPlay(ch.cards,live.currentSeat);
+    const ch=chooseRoomAiPlay(actor.hand,liveGame,liveGame.aiDifficulty);
+    if(!ch)await roomSubmitPass(liveGame.currentSeat);
+    else await roomSubmitPlay(ch.cards,liveGame.currentSeat);
     window.setTimeout(()=>{maybeRunRoomAi();},420);
-  },wait);
+  },DEFAULT_AI_DELAY_MS);
 }
 function syncRoomCountdownTicker(){
   const roomData=state.room.data;
