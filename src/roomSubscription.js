@@ -158,7 +158,19 @@ export function createRoomSubscriptionController(deps){
         return;
       }
       if(prevRoomData&&!selfEntry){
-        deps.abandonRoomLocally(deps.t('roomKickedTimeout'),true);
+        deps.setRoomError(reconnectMsg);
+        void (async()=>{
+          const freshResolved=await resolveRoomDocByDirectory(roomId,code);
+          const freshData=freshResolved?.doc?.data?.()??null;
+          const freshPlayers=Array.isArray(freshData?.players)?freshData.players:[];
+          const freshResolvedId=String(freshResolved?.doc?.data?.()?.players?.find?.((p)=>roomPlayerMatchesCurrentUser(p))?.uid||'').trim();
+          const freshSelfEntry=freshPlayers.find((p)=>roomPlayerMatchesCurrentUser(p))
+            ||(freshResolvedId?freshPlayers.find((p)=>String(p?.uid||'')===freshResolvedId):null)
+            ||null;
+          if(freshSelfEntry)return;
+          if(String(deps.getState()?.room?.id||'')!==String(roomId||''))return;
+          deps.abandonRoomLocally(deps.t('roomKickedTimeout'),true);
+        })();
         return;
       }
       deps.startRoomPresencePing();
