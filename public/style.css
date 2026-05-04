@@ -308,6 +308,7 @@ body[data-screen='game'] #app {
   max-height: 100dvh;
   padding-bottom: 0 !important;
   margin-top: 0 !important;
+  touch-action: manipulation;
 }
 body[data-screen='game'] .game-shell,
 body[data-screen='game'] .main-zone,
@@ -1582,6 +1583,9 @@ body[data-screen='home'] .home-wrap {
   color: inherit;
   cursor: pointer;
   text-align: center;
+  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  user-select: none;
 }
 .room-lobby-qr-box-inner {
   display: grid;
@@ -1613,6 +1617,47 @@ body[data-screen='home'] .home-wrap {
   color: rgba(236, 248, 241, .8);
   text-align: center;
   white-space: nowrap;
+}
+.room-qr-zoom-open {
+  overflow: hidden !important;
+}
+.room-qr-zoom-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 14050;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(2, 10, 18, .78);
+  backdrop-filter: blur(4px);
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+.room-qr-zoom-backdrop.active {
+  opacity: 1;
+}
+.room-qr-zoom-frame {
+  all: unset;
+  box-sizing: border-box;
+  width: min(88vw, 420px);
+  max-height: min(88vh, 420px);
+  padding: 14px;
+  border-radius: 14px;
+  background: rgba(10, 28, 42, .92);
+  border: 1px solid rgba(255,255,255,.18);
+  box-shadow: 0 16px 34px rgba(0,0,0,.4);
+  display: grid;
+  place-items: center;
+  cursor: zoom-out;
+}
+.room-qr-zoom-image {
+  display: block;
+  width: min(100%, 360px);
+  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: contain;
+  background: #fff;
+  border-radius: 10px;
 }
 .room-id-stack {
   display: contents;

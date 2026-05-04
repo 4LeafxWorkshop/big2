@@ -407,7 +407,112 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       cacheLastRoomCodeCopy(code);
       await writeClipboardText(code);
     };
-    doc.getElementById('room-copy-qr')?.addEventListener('click',copyRoomInviteQr);
+    let roomInviteQrZoomCleanup=null;
+    const clearRoomInviteQrZoom=()=>{
+      if(typeof roomInviteQrZoomCleanup==='function'){
+        roomInviteQrZoomCleanup();
+      }
+      roomInviteQrZoomCleanup=null;
+    };
+    const showRoomInviteQrZoom=()=>{
+      const dataUrl=String(state.room.inviteQrDataUrl||'').trim();
+      if(!dataUrl)return;
+      clearRoomInviteQrZoom();
+      const overlay=doc.createElement('div');
+      overlay.className='room-qr-zoom-backdrop';
+      const frame=doc.createElement('button');
+      frame.type='button';
+      frame.className='room-qr-zoom-frame';
+      frame.setAttribute('aria-label',String(t('roomInviteQr')));
+      const img=doc.createElement('img');
+      img.className='room-qr-zoom-image';
+      img.src=dataUrl;
+      img.alt=String(t('roomInviteQr'));
+      frame.appendChild(img);
+      overlay.appendChild(frame);
+      doc.body.classList.add('room-qr-zoom-open');
+      doc.body.appendChild(overlay);
+      const stopFrameClick=(ev)=>{
+        ev.stopPropagation();
+      };
+      const handleEsc=(ev)=>{
+        if(ev.key==='Escape')dismiss();
+      };
+      const dismiss=()=>{
+        doc.removeEventListener('keydown',handleEsc,true);
+        overlay.removeEventListener('click',dismiss);
+        frame.removeEventListener('click',stopFrameClick);
+        overlay.classList.remove('active');
+        doc.body.classList.remove('room-qr-zoom-open');
+        win.setTimeout(()=>{
+          overlay.remove();
+        },120);
+        roomInviteQrZoomCleanup=null;
+      };
+      frame.addEventListener('click',stopFrameClick);
+      overlay.addEventListener('click',dismiss);
+      win.setTimeout(()=>{
+        doc.addEventListener('keydown',handleEsc,true);
+        overlay.classList.add('active');
+      },0);
+      roomInviteQrZoomCleanup=dismiss;
+    };
+    const qrBtn=doc.getElementById('room-copy-qr');
+    let qrLongPressTimer=0;
+    let qrLongPressTriggered=false;
+    let qrClickCopyTimer=0;
+    const clearQrLongPress=()=>{
+      if(qrLongPressTimer){
+        win.clearTimeout(qrLongPressTimer);
+        qrLongPressTimer=0;
+      }
+    };
+    qrBtn?.addEventListener('pointerdown',(ev)=>{
+      if(typeof ev?.pointerType!=='string')return;
+      qrLongPressTriggered=false;
+      clearQrLongPress();
+      if(ev.pointerType!=='touch'&&ev.pointerType!=='pen')return;
+      qrLongPressTimer=win.setTimeout(async()=>{
+        qrLongPressTimer=0;
+        qrLongPressTriggered=true;
+        await copyRoomInviteQr();
+      },550);
+    });
+    qrBtn?.addEventListener('pointerup',()=>{
+      clearQrLongPress();
+    });
+    qrBtn?.addEventListener('pointercancel',()=>{
+      clearQrLongPress();
+    });
+    qrBtn?.addEventListener('pointerleave',()=>{
+      clearQrLongPress();
+    });
+    qrBtn?.addEventListener('dblclick',(ev)=>{
+      ev.preventDefault();
+      ev.stopPropagation();
+      if(qrClickCopyTimer){
+        win.clearTimeout(qrClickCopyTimer);
+        qrClickCopyTimer=0;
+      }
+      showRoomInviteQrZoom();
+    });
+    qrBtn?.addEventListener('click',(ev)=>{
+      if(qrLongPressTriggered){
+        ev.preventDefault();
+        ev.stopPropagation();
+        qrLongPressTriggered=false;
+        return;
+      }
+      if(ev.detail>=2)return;
+      if(qrClickCopyTimer){
+        win.clearTimeout(qrClickCopyTimer);
+        qrClickCopyTimer=0;
+      }
+      qrClickCopyTimer=win.setTimeout(async()=>{
+        qrClickCopyTimer=0;
+        await copyRoomInviteQr();
+      },260);
+    });
     doc.getElementById('room-share-code-copy')?.addEventListener('click',copyRoomInviteCode);
     doc.getElementById('room-share-code-copy')?.addEventListener('keydown',async(e)=>{
       if(e.key!=='Enter'&&e.key!==' ')return;
