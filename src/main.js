@@ -1621,6 +1621,18 @@ async function connectToRoom(roomId,code='',instanceId=''){
 async function resolveRoomDocByDirectory(roomId='',code=''){
   return roomSubscriptionController.resolveRoomDocByDirectory(roomId,code);
 }
+async function refreshRoomStateAfterActionFailure(){
+  try{
+    const roomId=String(state.room.id||'').trim();
+    if(!roomId)return;
+    const resolved=await resolveRoomDocByDirectory(roomId,String(state.room.code||''));
+    const roomData=resolved?.doc?.data?.();
+    if(roomData){
+      applyRoomGameSnapshot(roomData);
+      render();
+    }
+  }catch{}
+}
 async function ensureFirebaseWriteAuth(){
   return Boolean(firebaseDb||initFirebaseIfReady());
 }
@@ -2764,7 +2776,14 @@ async function roomSubmitPlay(cards,seatOverride=null){
     return true;
   }catch(err){
     const msg=String(err?.message??'');
-    if(msg)setSoloStatus(msg);
+    if(msg){
+      if(msg==='room not playing'||msg==='not your turn'||msg==='not allowed'){
+        void refreshRoomStateAfterActionFailure();
+        setRoomError(msg);
+      }else{
+        setSoloStatus(msg);
+      }
+    }
   }
   return false;
 }
@@ -2833,7 +2852,14 @@ async function roomSubmitPass(seatOverride=null){
       playSound('pass');
   }catch(err){
     const msg=String(err?.message??'');
-    if(msg)setSoloStatus(msg);
+    if(msg){
+      if(msg==='room not playing'||msg==='not your turn'||msg==='not allowed'){
+        void refreshRoomStateAfterActionFailure();
+        setRoomError(msg);
+      }else{
+        setSoloStatus(msg);
+      }
+    }
   }
 }
 function roomIsHost(){
@@ -2857,16 +2883,27 @@ function maybeRunRoomAi(){
     const remaining=timeout-elapsed;
     const timedOut=startedAt>0&&remaining<=0;
     if(timedOut){
-      if(g.lastPlay){
-        void roomSubmitPass(g.currentSeat);
-      }else{
-        const legal=legalTurnPlays(current.hand,g);
-        if(legal.length){
-          const forced=strongestLastCardBlockPlay(current.hand,g,g.currentSeat);
-          const play=forced??[...legal].sort((a,b)=>comparePower(a.eval.power,b.eval.power))[0];
-          void roomSubmitPlay(play.cards,g.currentSeat);
+      void (async()=>{
+        const live=await resolveRoomDocByDirectory(state.room.id||'',state.room.code||'');
+        const fresh=live?.doc?.data?.()||null;
+        const freshGame=fresh?.game;
+        if(!fresh||String(fresh.status||'')!=='playing'||!freshGame)return;
+        if(Number(freshGame.currentSeat)!==g.currentSeat)return;
+        const freshStartedAt=Number(freshGame.turnStartedAt)||0;
+        const freshTimeout=getRoomTurnTimeoutWithGrace(fresh);
+        if(!(freshStartedAt>0&&(Date.now()-freshStartedAt)>=freshTimeout))return;
+        if(freshGame.lastPlay){
+          void roomSubmitPass(freshGame.currentSeat);
+        }else{
+          const currentFresh=freshGame.players?.[freshGame.currentSeat];
+          const legal=currentFresh?legalTurnPlays(currentFresh.hand,freshGame):[];
+          if(legal.length){
+            const forced=strongestLastCardBlockPlay(currentFresh.hand,freshGame,freshGame.currentSeat);
+            const play=forced??[...legal].sort((a,b)=>comparePower(a.eval.power,b.eval.power))[0];
+            void roomSubmitPlay(play.cards,freshGame.currentSeat);
+          }
         }
-      }
+      })();
     }else{
       const wait=Math.min(1000,Math.max(200,Number.isFinite(remaining)?remaining:1000));
       aiTimer=window.setTimeout(()=>{maybeRunRoomAi();},wait);
