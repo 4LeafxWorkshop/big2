@@ -8703,7 +8703,12 @@ body[data-screen='game'] .result-card::before {
 }
 body[data-screen='game'] .result-card > * {
   position: relative;
-  z-index: 1;
+  z-index: 0;
+}
+body[data-screen='game'] .result-card .room-expiry-row.room-expiry-top {
+  justify-self: end;
+  align-self: start;
+  margin-left: auto;
 }
 .result-list {
   display: grid;
@@ -13737,4 +13742,40 @@ body[data-screen='game'] :is(.play-type-call, .last-card-call, .emote-callout, .
   body[data-screen='game'] .topbar-right .control-row::-webkit-scrollbar {
     display: none;
   }
+}
+
+/* Final top-layer override: opponent callouts stay above seat stations, fans, and closed-card stacks. */
+body[data-screen='game'] :is(
+  .seat.north > .seat-pack > .seat-name-fixed,
+  .seat.west > .side-station-stack > .seat-name-fixed,
+  .seat.east > .side-station-stack > .seat-name-fixed,
+  .seat.north .seat-pack > .seat-name-fixed[data-opponent-name],
+  .seat.west .side-station-stack > .seat-name-fixed[data-opponent-name],
+  .seat.east .side-station-stack > .seat-name-fixed[data-opponent-name]
+) {
+  position: relative !important;
+  z-index: 28000 !important;
+  isolation: isolate !important;
+}
+
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] :is(
+  .play-type-call-seat,
+  .last-card-call-seat,
+  .emote-callout.play-type-call-seat,
+  .food-callout-seat,
+  .seat-motto-callout
+) {
+  z-index: 30000 !important;
+}
+
+body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout {
+  z-index: 30002 !important;
+}
+
+body[data-screen='game'] .seat[data-seat-emote-active='1'] :is(
+  .seat-name-fixed[data-opponent-name],
+  .seat-name-fixed[data-opponent-name] .name
+) {
+  z-index: 31000 !important;
+  isolation: isolate !important;
 }
