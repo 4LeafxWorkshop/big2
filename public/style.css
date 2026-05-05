@@ -13248,6 +13248,9 @@ body[data-screen='game'] :is(.seat.north, .seat.west, .seat.east) :is(.opponent-
 body[data-screen='game'] :is(.seat.north .seat-pack, .seat.west .side-station-stack, .seat.east .side-station-stack) {
   position: relative !important;
 }
+body[data-screen='game'] :is(.seat.north .seat-section, .seat.west .seat-section, .seat.east .seat-section) {
+  overflow: visible !important;
+}
 body[data-screen='game'] :is(.seat.north .seat-pack > .seat-name-fixed, .seat.west .side-station-stack > .seat-name-fixed, .seat.east .side-station-stack > .seat-name-fixed) {
   position: relative !important;
   z-index: 13010 !important;
@@ -13885,17 +13888,17 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] :is(
   .food-callout-seat,
   .seat-motto-callout
 ) {
-  z-index: 30000 !important;
+  z-index: 40000 !important;
 }
 
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout {
-  z-index: 30002 !important;
+  z-index: 40002 !important;
 }
 
 body[data-screen='game'] .seat[data-seat-emote-active='1'] :is(
   .seat-name-fixed[data-opponent-name],
   .seat-name-fixed[data-opponent-name] .name
 ) {
-  z-index: 31000 !important;
+  z-index: 40010 !important;
   isolation: isolate !important;
 }
