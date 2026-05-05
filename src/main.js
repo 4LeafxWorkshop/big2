@@ -57,6 +57,7 @@ import {createRoomSubscriptionController} from './roomSubscription.js';
 import {createRoomTimeoutController} from './roomTimeouts.js';
 import {buildActiveRoomRow, buildRoomDirectoryDoc} from './roomDirectory.js';
 import {getNextSoloRoundWins, getNextSoloTotals, resetSoloSessionCarryoverState} from './soloState.js';
+import {Browser} from '@capacitor/browser';
 import {GoogleAuth} from '@codetrix-studio/capacitor-google-auth';
 
 const RANKS=['3','4','5','6','7','8','9','10','J','Q','K','A','2'];
@@ -385,10 +386,15 @@ function matchGuestPlayerId(roomData){
   }
   return '';
 }
-function runPopunderAd(){
+async function runPopunderAd(){
   if(APP_CHANNEL==='STORE')return;
   const url='https://omg10.com/4/10921720';
   try{
+    if(isNativeIosApp()){
+      armedPopunderWindow=null;
+      await Browser.open({url});
+      return;
+    }
     let win=armedPopunderWindow;
     if(win&&!win.closed){
       try{
