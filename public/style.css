@@ -13902,3 +13902,42 @@ body[data-screen='game'] .seat[data-seat-emote-active='1'] :is(
   z-index: 40010 !important;
   isolation: isolate !important;
 }
+
+/* Foreground lock: active callouts must paint above every in-game card stack. */
+body[data-screen='game'] :is(
+  .seat.north,
+  .seat.west,
+  .seat.east,
+  .seat.north .seat-pack,
+  .seat.west .side-station-stack,
+  .seat.east .side-station-stack,
+  .seat.west .side-station-core,
+  .seat.east .side-station-core
+):has(:is(.play-type-call, .last-card-call, .emote-callout, .seat-motto-callout)) {
+  position: relative !important;
+  z-index: 2147482000 !important;
+  isolation: auto !important;
+}
+
+body[data-screen='game'] :is(
+  .seat-name-fixed,
+  .mobile-opponent-name,
+  .action-strip,
+  .action-strip .player-tag
+):has(:is(.play-type-call, .last-card-call, .emote-callout, .seat-motto-callout)) {
+  position: relative !important;
+  z-index: 2147483000 !important;
+  isolation: isolate !important;
+}
+
+body[data-screen='game'] :is(
+  .play-type-call,
+  .last-card-call,
+  .emote-callout,
+  .seat-motto-callout,
+  .self-table-emote,
+  .table-emote
+) {
+  position: absolute !important;
+  z-index: 2147483600 !important;
+}
