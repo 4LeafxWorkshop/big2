@@ -1,3 +1,103 @@
+const FOREGROUND_CALLOUT_SELECTOR='.play-type-call:not(.seat-motto-callout), .last-card-call, .emote-callout';
+const CALLOUT_ANCHOR_GAP=8;
+
+function resolveCalloutAnchor(bubble,doc){
+  const isSelfBubble=
+    bubble.dataset?.calloutSelf==='1'||
+    bubble.classList.contains('play-type-call-self')||
+    bubble.classList.contains('last-card-call-self')||
+    Boolean(bubble.closest('.action-strip .player-tag, .table > .player-tag'));
+  if(isSelfBubble){
+    const anchor=doc.querySelector('.player-avatar-wrap-self')||doc.getElementById('self-avatar-img');
+    return anchor instanceof HTMLElement?{anchor,isSelf:true,seatClass:'south'}:null;
+  }
+  const storedSeat=String(bubble.dataset?.calloutSeatClass||'').trim();
+  const seat=storedSeat
+    ?doc.querySelector(`.seat.${storedSeat}`)
+    :bubble.closest('.seat');
+  if(!(seat instanceof HTMLElement))return null;
+  const anchor=
+    seat.querySelector('.player-avatar-wrap-opponent, .player-avatar-opponent')||
+    seat.querySelector('.seat-name-fixed[data-opponent-name]')||
+    seat.querySelector('.side-station-stack, .seat-pack');
+  if(!(anchor instanceof HTMLElement))return null;
+  const seatClass=['north','west','east','south'].find((cls)=>seat.classList.contains(cls))||storedSeat||'';
+  return{anchor,isSelf:false,seatClass};
+}
+
+function positionedCalloutOrigin(anchorRect,bubbleRect,{isSelf=false,seatClass=''}={}){
+  const width=Math.max(0,Number(bubbleRect?.width)||0);
+  const height=Math.max(0,Number(bubbleRect?.height)||0);
+  const anchorX=anchorRect.left+(anchorRect.width/2);
+  const anchorY=anchorRect.top+(anchorRect.height/2);
+  if(isSelf||seatClass==='south'){
+    return{
+      left:anchorX-(width/2),
+      top:anchorRect.top-height-CALLOUT_ANCHOR_GAP
+    };
+  }
+  if(seatClass==='north'){
+    return{
+      left:anchorX-(width/2),
+      top:anchorRect.top-height-CALLOUT_ANCHOR_GAP
+    };
+  }
+  if(seatClass==='west'){
+    return{
+      left:anchorRect.right+CALLOUT_ANCHOR_GAP,
+      top:anchorY-(height/2)
+    };
+  }
+  if(seatClass==='east'){
+    return{
+      left:anchorRect.left-width-CALLOUT_ANCHOR_GAP,
+      top:anchorY-(height/2)
+    };
+  }
+  return{
+    left:anchorX-(width/2),
+    top:anchorRect.top-height-CALLOUT_ANCHOR_GAP
+  };
+}
+
+export function syncCalloutForegroundLayer({
+  documentRef=()=>document
+}={}){
+  const doc=documentRef();
+  const shell=doc.querySelector('.game-shell');
+  if(!(shell instanceof HTMLElement))return null;
+  let layer=shell.querySelector('.game-foreground-layer');
+  if(!(layer instanceof HTMLElement)){
+    layer=doc.createElement('div');
+    layer.className='game-foreground-layer';
+    layer.setAttribute('aria-hidden','true');
+    shell.appendChild(layer);
+  }
+  const bubbles=[...doc.querySelectorAll(FOREGROUND_CALLOUT_SELECTOR)];
+  for(const bubble of bubbles){
+    if(!(bubble instanceof HTMLElement))continue;
+    const anchorInfo=resolveCalloutAnchor(bubble,doc);
+    if(!anchorInfo)continue;
+    if(!bubble.dataset.calloutForeground){
+      bubble.dataset.calloutSelf=anchorInfo.isSelf?'1':'0';
+      if(anchorInfo.seatClass)bubble.dataset.calloutSeatClass=anchorInfo.seatClass;
+      bubble.dataset.calloutForeground='1';
+      bubble.dataset.calloutPending='1';
+      layer.appendChild(bubble);
+    }else if(bubble.parentElement!==layer){
+      layer.appendChild(bubble);
+    }
+    const bubbleRect=bubble.getBoundingClientRect();
+    const anchorRect=anchorInfo.anchor.getBoundingClientRect();
+    const origin=positionedCalloutOrigin(anchorRect,bubbleRect,anchorInfo);
+    bubble.style.setProperty('--callout-layer-left',`${origin.left.toFixed(1)}px`);
+    bubble.style.setProperty('--callout-layer-top',`${origin.top.toFixed(1)}px`);
+    bubble.dataset.calloutReady='1';
+    delete bubble.dataset.calloutPending;
+  }
+  return layer;
+}
+
 export function retargetCalloutTails({
   documentRef=()=>document,
   windowRef=()=>window,
@@ -5,7 +105,8 @@ export function retargetCalloutTails({
 }={}){
   const doc=documentRef();
   const win=windowRef();
-  const bubbles=[...doc.querySelectorAll('.play-type-call:not(.seat-motto-callout), .last-card-call, .emote-callout, .seat-motto-callout')];
+  syncCalloutForegroundLayer({documentRef});
+  const bubbles=[...doc.querySelectorAll(`${FOREGROUND_CALLOUT_SELECTOR}, .seat-motto-callout`)];
   const visualViewport=win.visualViewport||null;
   const viewportLeft=Math.max(0,Number(visualViewport?.offsetLeft)||0);
   const viewportTop=Math.max(0,Number(visualViewport?.offsetTop)||0);
@@ -41,10 +142,18 @@ export function retargetCalloutTails({
     if(!(bubble instanceof HTMLElement))continue;
     const tail=bubble.querySelector('.tail');
     if(!(tail instanceof HTMLElement))continue;
-    const isSelfBubble=bubble.classList.contains('play-type-call-self')||bubble.classList.contains('last-card-call-self');
+    const isSelfBubble=
+      bubble.dataset?.calloutSelf==='1'||
+      bubble.classList.contains('play-type-call-self')||
+      bubble.classList.contains('last-card-call-self')||
+      Boolean(bubble.closest('.action-strip .player-tag, .table > .player-tag'));
     let avatar=null;
     let anchorTarget=null;
-    if(isSelfBubble){
+    const foregroundAnchor=resolveCalloutAnchor(bubble,doc);
+    if(foregroundAnchor){
+      avatar=foregroundAnchor.anchor;
+      anchorTarget=foregroundAnchor.anchor;
+    }else if(isSelfBubble){
       avatar=doc.querySelector('.player-avatar-wrap-self')||doc.getElementById('self-avatar-img');
       anchorTarget=avatar;
     }else{
@@ -72,13 +181,16 @@ export function retargetCalloutTails({
     let dir='south';
     if(!isSelfBubble){
       const seat=bubble.closest('.seat');
+      const seatClass=foregroundAnchor?.seatClass||'';
       const isFoodOrEmoteBubble=bubble.classList.contains('food-callout-seat')||bubble.classList.contains('emote-callout');
       if(bubble.classList.contains('seat-motto-callout')){
         dir='north';
-      }else if(seat?.classList.contains('north')){
-        dir='north';
-      }else if((seat?.classList.contains('west')||seat?.classList.contains('east'))&&!isFoodOrEmoteBubble){
-        dir='south';
+      }else if(seat?.classList.contains('north')||seatClass==='north'){
+        dir=bubble.dataset?.calloutForeground==='1'?(dy<0?'north':'south'):'north';
+      }else if(((seat?.classList.contains('west')||seat?.classList.contains('east'))||seatClass==='west'||seatClass==='east')&&!isFoodOrEmoteBubble){
+        dir=bubble.dataset?.calloutForeground==='1'
+          ?(seatClass==='east'||seat?.classList.contains('east')?'east':'west')
+          :'south';
       }else if(Math.abs(dx)>Math.abs(dy)){
         dir=dx<0?'west':'east';
       }else{
@@ -89,13 +201,15 @@ export function retargetCalloutTails({
     tail.classList.add(`tail-${dir}`);
     tail.style.removeProperty('--tail-anchor-x');
     tail.style.removeProperty('--tail-anchor-y');
-    bubble.classList.remove('callout-screen-float');
-    bubble.style.removeProperty('position');
-    bubble.style.removeProperty('left');
-    bubble.style.removeProperty('top');
-    bubble.style.removeProperty('right');
-    bubble.style.removeProperty('bottom');
-    bubble.style.removeProperty('z-index');
+    if(bubble.dataset?.calloutForeground!=='1'){
+      bubble.classList.remove('callout-screen-float');
+      bubble.style.removeProperty('position');
+      bubble.style.removeProperty('left');
+      bubble.style.removeProperty('top');
+      bubble.style.removeProperty('right');
+      bubble.style.removeProperty('bottom');
+      bubble.style.removeProperty('z-index');
+    }
     bubble.style.removeProperty('--callout-fit-scale');
     let sx=0;
     let sy=0;

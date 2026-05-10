@@ -6728,6 +6728,7 @@ function syncViewport(){
   requestAnimationFrame(syncLandscapeGameHandSizing);
   requestAnimationFrame(syncGamePortraitLayout);
   requestAnimationFrame(syncHandStackMode);
+  requestAnimationFrame(retargetCalloutTails);
 }
 
 let viewportRecoveryTimer=0;
@@ -6746,12 +6747,14 @@ function scheduleViewportRecovery(delayMs=0){
         window.requestAnimationFrame(syncLandscapeGameHandSizing);
         window.requestAnimationFrame(syncGamePortraitLayout);
         window.requestAnimationFrame(syncHandStackMode);
+        window.requestAnimationFrame(retargetCalloutTails);
         window.setTimeout(()=>{
           syncViewport();
           syncLandscapeGameHandSizing();
           syncDiscardSizeFromHand();
           syncGamePortraitLayout();
           syncHandStackMode();
+          retargetCalloutTails();
         },180);
       }
     }));

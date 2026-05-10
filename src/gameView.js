@@ -216,5 +216,5 @@ export function renderGameShell(params){
     introPanelHtml,
     leaderboardModalHtml
   }=params;
-  return`<section class="game-shell ${gameOver?'game-over':''} ${showLog?'log-open':''}"><div class="main-zone">${gameTopbarHtml}${gameTableHtml}${gameActionZoneHtml}${selfTableEmoteHtml}${congratsOverlayHtml}${revealHtml}</div>${sideZoneHtml}${resultScreenHtml}${opponentProfileModalHtml}${scoreGuideModalHtml}${introPanelHtml}${leaderboardModalHtml}</section>`;
+  return`<section class="game-shell ${gameOver?'game-over':''} ${showLog?'log-open':''}"><div class="main-zone">${gameTopbarHtml}${gameTableHtml}${gameActionZoneHtml}${selfTableEmoteHtml}${congratsOverlayHtml}${revealHtml}</div>${sideZoneHtml}<div class="game-foreground-layer" aria-hidden="true"></div>${resultScreenHtml}${opponentProfileModalHtml}${scoreGuideModalHtml}${introPanelHtml}${leaderboardModalHtml}</section>`;
 }

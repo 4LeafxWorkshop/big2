@@ -254,6 +254,7 @@ test('renderGameShell assembles the main sections and overlays', ()=>{
   assert.match(html,/class="game-shell {2}log-open"/);
   assert.match(html,/id="topbar"/);
   assert.match(html,/id="side"/);
+  assert.match(html,/class="game-foreground-layer"/);
   assert.match(html,/id="lb"/);
 });
 

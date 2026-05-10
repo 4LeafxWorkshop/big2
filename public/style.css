@@ -13942,6 +13942,35 @@ body[data-screen='game'] :is(
   z-index: 2147483600 !important;
 }
 
+body[data-screen='game'] .game-foreground-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483400;
+  pointer-events: none;
+  overflow: visible;
+  contain: none;
+  isolation: isolate;
+}
+
+body[data-screen='game'] .game-foreground-layer :is(
+  .play-type-call,
+  .last-card-call,
+  .emote-callout,
+  .food-callout-seat
+) {
+  position: fixed !important;
+  left: var(--callout-layer-left, 0px) !important;
+  top: var(--callout-layer-top, 0px) !important;
+  right: auto !important;
+  bottom: auto !important;
+  z-index: 1 !important;
+  pointer-events: none;
+}
+
+body[data-screen='game'] .game-foreground-layer [data-callout-pending='1']:not([data-callout-ready='1']) {
+  opacity: 0 !important;
+}
+
 /* iOS-safe foreground lock: do not rely on :has() for active callout stacks. */
 body[data-screen='game'] :is(
   .seat.seat-callout-active,
@@ -13983,7 +14012,6 @@ body[data-screen='game'] .seat-callout-active :is(
   .closed-card-pile,
   .opponent-fan,
   .closed-back,
-  .closed-count-pill,
   .seat-open-play,
   .seat-open-play .seat-played,
   .seat-open-play .card.mini
