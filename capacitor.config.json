@@ -9,7 +9,7 @@
   "plugins": {
     "GoogleAuth": {
       "clientId": "477275151783-tcvc9gbhlq03kuvlsajoke17v9hostic.apps.googleusercontent.com",
-      "androidClientId": "477275151783-1i7lrg5n9qfeeqq1gvn0kg2tlrv7cd68.apps.googleusercontent.com",
+      "androidClientId": "477275151783-tcvc9gbhlq03kuvlsajoke17v9hostic.apps.googleusercontent.com",
       "iosClientId": "477275151783-j8gv40mg9u8vaflcvgmc6gbn1rf25ttn.apps.googleusercontent.com",
       "scopes": ["profile", "email"],
       "serverClientId": "477275151783-tcvc9gbhlq03kuvlsajoke17v9hostic.apps.googleusercontent.com",
