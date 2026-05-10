@@ -25,7 +25,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.1029664741170-hq85mojpc3md3pl1dtsth9j59rkamlka</string>
+				<string>com.googleusercontent.apps.477275151783-j8gv40mg9u8vaflcvgmc6gbn1rf25ttn</string>
 			</array>
 		</dict>
 	</array>
@@ -52,6 +52,6 @@
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
     <key>GIDClientID</key>
-    <string>1029664741170-hq85mojpc3md3pl1dtsth9j59rkamlka.apps.googleusercontent.com</string>
+    <string>477275151783-j8gv40mg9u8vaflcvgmc6gbn1rf25ttn.apps.googleusercontent.com</string>
 </dict>
 </plist>

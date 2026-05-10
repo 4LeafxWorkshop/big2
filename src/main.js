@@ -22,6 +22,7 @@ import {createLangMenuController} from './langMenu.js';
 import {renderCenterLastMoves, renderGameActionZone, renderGameLogSheet, renderGameShell, renderGameSideZone, renderGameTable, renderGameTopbar, renderOpponentLabel, renderOpponentSeat, renderOpponentSeats, renderOpponentStationFlow, renderSeatLastAction} from './gameView.js';
 import {buildCalloutRenderState, buildCongratsOverlayHtml, buildGameAuxRenderState, buildGameShellMarkup, buildOpponentSeatsHtml, buildResultScreenHtml, buildRoomMetaTableHtml, buildSelfRenderState} from './gameRenderPrep.js';
 import {renderConfidentialStamp, renderIntroPanel, renderLeaderboardModal, renderLeaderboardPanel, renderOpponentProfileModal, renderScoreGuideModal} from './modalViews.js';
+import {GoogleAuth} from '@codetrix-studio/capacitor-google-auth';
 import {botAvatarUrl, resolveAvatarSrc} from './avatarProfile.js';
 import {BACK_OPTIONS, CALLOUT_RESPONSE_TEXT, KIND, LANGUAGE_NATIVE_LABEL, LANGUAGE_OPTIONS} from './localeData.js';
 import {I18N} from './i18nData.js';
@@ -422,7 +423,6 @@ let roomInviteQrRequestToken=0;
 let roomInviteJoinInFlight=false;
 let qrCodeModulePromise=null;
 let capacitorBrowserModulePromise=null;
-let googleAuthModulePromise=null;
 async function loadQrCode(){
   qrCodeModulePromise??=import('qrcode');
   const mod=await qrCodeModulePromise;
@@ -432,11 +432,6 @@ async function loadCapacitorBrowser(){
   capacitorBrowserModulePromise??=import('@capacitor/browser');
   const mod=await capacitorBrowserModulePromise;
   return mod.Browser;
-}
-async function loadGoogleAuth(){
-  googleAuthModulePromise??=import('@codetrix-studio/capacitor-google-auth');
-  const mod=await googleAuthModulePromise;
-  return mod.GoogleAuth;
 }
 function preloadGooglePicture(){
   const pic=String(state.home.google?.picture??'').trim();
@@ -1883,13 +1878,11 @@ const googleIdentityController=createGoogleIdentityController({
   useNativeGoogleAuth:()=>isNativeAndroidApp()||isNativeIosApp(),
   useWebGoogleFallbackButton:()=>false,
   nativeGoogleSignIn:async()=>{
-    const GoogleAuth=await loadGoogleAuth();
     const user=await GoogleAuth.signIn();
     await handleNativeGoogleUser(user);
     return true;
   },
   nativeGoogleSignOut:async()=>{
-    const GoogleAuth=await loadGoogleAuth();
     await GoogleAuth.signOut();
     return true;
   },
@@ -3425,9 +3418,7 @@ function isNativeIosApp(){
 }
 function initNativeGoogleAuth(){
   if(!isNativeAndroidApp()&&!isNativeIosApp())return;
-  void loadGoogleAuth().then((GoogleAuth)=>{
-    GoogleAuth?.initialize?.();
-  }).catch((err)=>{
+  void Promise.resolve(GoogleAuth.initialize?.()).catch((err)=>{
     console.warn('native google auth init failed',err);
   });
 }
