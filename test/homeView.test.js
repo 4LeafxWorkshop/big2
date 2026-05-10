@@ -32,6 +32,7 @@ function render(overrides={}){
     introPanelHtml:'<div id="intro-panel"></div>',
     leaderboardModalHtml:'<div id="lb-panel"></div>',
     scoreGuideModalHtml:'<div id="score-guide"></div>',
+    buildVersionLabel:'v0.0.0 test',
     ...overrides
   });
 }
@@ -50,6 +51,7 @@ test('renderHomeMarkup includes the main home controls and optional overlays', (
   assert.match(html,/id="sound-slider"/);
   assert.match(html,/id="intro-panel"/);
   assert.match(html,/id="score-guide"/);
+  assert.match(html,/class="home-build-version">v0\.0\.0 test<\/div>/);
   assert.doesNotMatch(html,/id="lb-panel"/);
 });
 

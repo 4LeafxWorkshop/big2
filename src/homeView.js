@@ -76,10 +76,12 @@ export function renderHomeMarkup(params){
     roomJoinModal,
     introPanelHtml,
     leaderboardModalHtml,
-    scoreGuideModalHtml
+    scoreGuideModalHtml,
+    buildVersionLabel=''
   }=params;
+  const versionHtml=buildVersionLabel?`<div class="home-build-version">${esc(buildVersionLabel)}</div>`:'';
 
-  return`<section class="home-wrap royal-home-wrap"><section class="home-panel royal-home-panel"><header class="royal-home-head">${renderHomeTopActionsHtml({intro,allowOpponents,renderLangMenu,esc,t})}<div class="royal-title-wrap"><div class="home-logo-block"><img class="title-logo title-logo-home" src="${withBase('title-lockup-home.png')}" alt="鋤大D TRADITIONAL BIG TWO"/></div></div></header><section class="royal-home-body"><div class="home-form-grid">${renderHomeProfileCardHtml({homeAvatarSrc,esc,state,t,aiFieldLeft,cardBackLeft})}${renderHomeSettingsCardHtml({t,aiFieldRight,soundEnabled,calloutDisplayEnabled,emoteDisplayEnabled,vibrateEnabled,moreSettingsOpen,cardBackRight})}</div>${renderHomeActionRowHtml({soloBtnHtml,roomButtonsHtml})}</section></section>${mainPageLegalMiniHtml}${roomLobbyHtml}${roomJoinModal}${state.home.showIntro?introPanelHtml:''}${state.home.showLeaderboard?leaderboardModalHtml:''}${state.showScoreGuide?scoreGuideModalHtml:''}</section>`;
+  return`<section class="home-wrap royal-home-wrap"><section class="home-panel royal-home-panel"><header class="royal-home-head">${renderHomeTopActionsHtml({intro,allowOpponents,renderLangMenu,esc,t})}<div class="royal-title-wrap"><div class="home-logo-block"><img class="title-logo title-logo-home" src="${withBase('title-lockup-home.png')}" alt="鋤大D TRADITIONAL BIG TWO"/></div></div></header><section class="royal-home-body"><div class="home-form-grid">${renderHomeProfileCardHtml({homeAvatarSrc,esc,state,t,aiFieldLeft,cardBackLeft})}${renderHomeSettingsCardHtml({t,aiFieldRight,soundEnabled,calloutDisplayEnabled,emoteDisplayEnabled,vibrateEnabled,moreSettingsOpen,cardBackRight})}</div>${renderHomeActionRowHtml({soloBtnHtml,roomButtonsHtml})}</section></section>${mainPageLegalMiniHtml}${versionHtml}${roomLobbyHtml}${roomJoinModal}${state.home.showIntro?introPanelHtml:''}${state.home.showLeaderboard?leaderboardModalHtml:''}${state.showScoreGuide?scoreGuideModalHtml:''}</section>`;
 }
 
 export function renderConfigMarkup(params){

@@ -5992,7 +5992,8 @@ function renderHome(){
     roomJoinModal,
     introPanelHtml:state.home.showIntro?introPanelHtml():'',
     leaderboardModalHtml:state.home.showLeaderboard?leaderboardModalHtml():'',
-    scoreGuideModalHtml:state.showScoreGuide?scoreGuideModalHtml():''
+    scoreGuideModalHtml:state.showScoreGuide?scoreGuideModalHtml():'',
+    buildVersionLabel:import.meta.env.BUILD_VERSION||''
   });
   restoreCardbackCarouselDom(preservedCarousels);
   lastCardbackCarouselLanguage=state.language;
@@ -6806,6 +6807,93 @@ window.addEventListener('popstate',()=>{
   restorePendingRoomInviteFromStorage();
   void maybeAutoJoinPendingRoomInvite();
 });
+if(import.meta.env.DEV){
+  const visualCards=[
+    {rank:1,suit:1},{rank:2,suit:2},
+    {rank:3,suit:0},{rank:4,suit:1},{rank:5,suit:2},{rank:6,suit:3},{rank:7,suit:0},
+    {rank:8,suit:1},{rank:9,suit:2},{rank:10,suit:3},{rank:11,suit:0},{rank:12,suit:1}
+  ];
+  const visualPlayers=()=>[
+    {name:'4Leaf CS',gender:'male',hand:visualCards.slice(0,2),isHuman:true},
+    {name:'East Bot',gender:'female',hand:visualCards.slice(2,7),isHuman:false},
+    {name:'North Bot',gender:'female',hand:visualCards.slice(7,12),isHuman:false},
+    {name:'West Bot',gender:'male',hand:visualCards.slice(2,6),isHuman:false}
+  ];
+  const setVisualPassCallout=(seat=1,text='Pass!')=>{
+    const safeSeat=Math.max(0,Math.min(3,Number(seat)||0));
+    const now=Date.now();
+    if(aiTimer){clearTimeout(aiTimer);aiTimer=null;}
+    if(calloutExpireTimer){clearTimeout(calloutExpireTimer);calloutExpireTimer=null;}
+    clearCalloutStates();
+    state.language='en';
+    state.home.mode='solo';
+    state.screen='game';
+    state.showLog=true;
+    state.showLogSheet=false;
+    state.selected.clear();
+    state.recommendation=null;
+    state.serviceBell.foodCallout=null;
+    state.emote.active=null;
+    state.solo={
+      players:visualPlayers(),
+      botProfiles:[
+        {name:'East Bot',gender:'female'},
+        {name:'North Bot',gender:'female'},
+        {name:'West Bot',gender:'male'}
+      ],
+      botNames:['East Bot','North Bot','West Bot'],
+      totals:[5098,5000,5000,5000],
+      roundWins:[0,0,0,0],
+      currentSeat:0,
+      lastPlay:{seat:0,eval:{valid:true,count:1,kind:'single',power:[11,0]},cards:[{rank:11,suit:0}]},
+      passStreak:1,
+      isFirstTrick:false,
+      gameOver:false,
+      status:'',
+      statusMeta:null,
+      systemLog:[],
+      history:[{action:'pass',seat:safeSeat,name:visualPlayers()[safeSeat].name,ts:now}],
+      aiDifficulty:'normal',
+      lastCardBreach:null,
+      roundSummary:null
+    };
+    passCallState.key=`pass-1-${safeSeat}`;
+    passCallState.seat=safeSeat;
+    passCallState.text=String(text||'Pass!');
+    passCallState.until=now+60000;
+    passCallState.startedAt=now-1000;
+    passCallState.nonce=`visual-${safeSeat}`;
+    passCallState.historyLen=1;
+    render();
+    scheduleViewportRecovery(0);
+  };
+  const rectFor=(selector)=>{
+    const el=document.querySelector(selector);
+    if(!(el instanceof HTMLElement))return null;
+    const rect=el.getBoundingClientRect();
+    return{left:rect.left,top:rect.top,right:rect.right,bottom:rect.bottom,width:rect.width,height:rect.height};
+  };
+  window.__BIG2_VISUAL_TEST__={
+    showCallout({seat=1,text='Pass!'}={}){
+      setVisualPassCallout(seat,text);
+    },
+    metrics(){
+      const bubble=document.querySelector('.game-foreground-layer :is(.play-type-call, .last-card-call, .emote-callout)');
+      const tail=bubble?.querySelector?.('.tail');
+      const seatClass=String(bubble?.dataset?.calloutSeatClass||'');
+      return{
+        seatClass,
+        bubble:rectFor('.game-foreground-layer :is(.play-type-call, .last-card-call, .emote-callout)'),
+        tailClass:tail instanceof HTMLElement?[...tail.classList].join(' '):'',
+        eastAvatar:rectFor('.seat.east .player-avatar-wrap-opponent'),
+        northAvatar:rectFor('.seat.north .player-avatar-wrap-opponent'),
+        westAvatar:rectFor('.seat.west .player-avatar-wrap-opponent'),
+        selfAvatar:rectFor('.player-avatar-wrap-self'),
+        countPill:rectFor('.seat-callout-active .closed-count-pill')
+      };
+    }
+  };
+}
 window.addEventListener('load',()=>{if(state.screen==='home')onGoogleScriptLoaded(renderGoogleInline);},{once:true});
 initNativeGoogleAuth();
 loadGoogleSession();bootFirebase();syncViewport();render();

@@ -25,12 +25,16 @@ function resolveCalloutAnchor(bubble,doc){
   return{anchor,isSelf:false,seatClass};
 }
 
-function positionedCalloutOrigin(anchorRect,bubbleRect,{isSelf=false,seatClass=''}={}){
+function isMobileCalloutLayout(doc){
+  return doc?.body?.dataset?.isMobile==='1'||doc?.body?.dataset?.orientation==='portrait';
+}
+
+function positionedCalloutOrigin(anchorRect,bubbleRect,{isSelf=false,seatClass='',mobileLayout=false}={}){
   const width=Math.max(0,Number(bubbleRect?.width)||0);
   const height=Math.max(0,Number(bubbleRect?.height)||0);
   const anchorX=anchorRect.left+(anchorRect.width/2);
   const anchorY=anchorRect.top+(anchorRect.height/2);
-  if(isSelf||seatClass==='south'){
+  if(mobileLayout||isSelf||seatClass==='south'){
     return{
       left:anchorX-(width/2),
       top:anchorRect.top-height-CALLOUT_ANCHOR_GAP
@@ -89,7 +93,10 @@ export function syncCalloutForegroundLayer({
     }
     const bubbleRect=bubble.getBoundingClientRect();
     const anchorRect=anchorInfo.anchor.getBoundingClientRect();
-    const origin=positionedCalloutOrigin(anchorRect,bubbleRect,anchorInfo);
+    const origin=positionedCalloutOrigin(anchorRect,bubbleRect,{
+      ...anchorInfo,
+      mobileLayout:isMobileCalloutLayout(doc)
+    });
     bubble.style.setProperty('--callout-layer-left',`${origin.left.toFixed(1)}px`);
     bubble.style.setProperty('--callout-layer-top',`${origin.top.toFixed(1)}px`);
     bubble.dataset.calloutReady='1';
@@ -189,7 +196,7 @@ export function retargetCalloutTails({
         dir=bubble.dataset?.calloutForeground==='1'?(dy<0?'north':'south'):'north';
       }else if(((seat?.classList.contains('west')||seat?.classList.contains('east'))||seatClass==='west'||seatClass==='east')&&!isFoodOrEmoteBubble){
         dir=bubble.dataset?.calloutForeground==='1'
-          ?(seatClass==='east'||seat?.classList.contains('east')?'east':'west')
+          ?(isMobileCalloutLayout(doc)?(dy<0?'north':'south'):(seatClass==='east'||seat?.classList.contains('east')?'east':'west'))
           :'south';
       }else if(Math.abs(dx)>Math.abs(dy)){
         dir=dx<0?'west':'east';

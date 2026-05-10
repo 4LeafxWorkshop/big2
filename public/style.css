@@ -3794,6 +3794,18 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   border: 0;
   box-shadow: none;
 }
+.royal-home-wrap .home-build-version {
+  position: fixed;
+  right: max(8px, env(safe-area-inset-right));
+  bottom: max(6px, env(safe-area-inset-bottom));
+  z-index: 6;
+  font-size: .62rem;
+  line-height: 1;
+  letter-spacing: .04em;
+  color: rgba(242, 224, 178, .5);
+  user-select: text;
+  pointer-events: none;
+}
 .royal-home-wrap .legal-mini-links {
   gap: 6px;
 }

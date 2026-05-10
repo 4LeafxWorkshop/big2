@@ -80,6 +80,46 @@ test('syncCalloutForegroundLayer positions active callouts from their avatar anc
   assert.equal(bubble.style.values['--callout-layer-top'],'65.0px');
 });
 
+test('syncCalloutForegroundLayer positions mobile side callouts above the avatar', ()=>{
+  const layer={
+    appendChild(node){node.parentElement=this;}
+  };
+  const shell={
+    querySelector(selector){return selector==='.game-foreground-layer'?layer:null;}
+  };
+  const avatarRect={left:188,top:78,width:20,height:20,right:208,bottom:98};
+  const bubbleRect={left:90,top:80,width:80,height:30,right:170,bottom:110};
+  const avatar={getBoundingClientRect(){return avatarRect;}};
+  const seat={
+    classList:makeClassList(['east']),
+    querySelector(selector){
+      return selector.includes('player-avatar-wrap-opponent')?avatar:null;
+    }
+  };
+  const bubble={
+    dataset:{},
+    classList:makeClassList(['play-type-call-seat']),
+    style:makeStyle(),
+    parentElement:null,
+    closest(selector){return selector==='.seat'?seat:null;},
+    getBoundingClientRect(){return bubbleRect;}
+  };
+  const documentStub={
+    body:{dataset:{isMobile:'1',orientation:'portrait'}},
+    querySelector(selector){return selector==='.game-shell'?shell:null;},
+    querySelectorAll(){return [bubble];}
+  };
+  const originalHTMLElement=globalThis.HTMLElement;
+  globalThis.HTMLElement=Object;
+  try{
+    syncCalloutForegroundLayer({documentRef:()=>documentStub});
+  }finally{
+    globalThis.HTMLElement=originalHTMLElement;
+  }
+  assert.equal(bubble.style.values['--callout-layer-left'],'158.0px');
+  assert.equal(bubble.style.values['--callout-layer-top'],'40.0px');
+});
+
 test('retargetCalloutTails retargets self bubble tail and sets anchor', ()=>{
   const tail={classList:makeClassList(['tail','tail-north']),style:makeStyle()};
   const bubbleRect={left:20,top:20,width:80,height:30,right:100,bottom:50};
@@ -240,6 +280,56 @@ test('retargetCalloutTails points east foreground callout tail toward the avatar
     globalThis.HTMLElement=originalHTMLElement;
   }
   assert.equal(tail.classList.contains('tail-east'),true);
+});
+
+test('retargetCalloutTails uses a bottom tail for mobile east foreground callouts', ()=>{
+  const tail={classList:makeClassList(['tail','tail-east']),style:makeStyle()};
+  const bubbleRect={left:158,top:40,width:80,height:30,right:238,bottom:70};
+  const avatarRect={left:188,top:78,width:20,height:20,right:208,bottom:98};
+  const avatar={getBoundingClientRect(){return avatarRect;}};
+  const seat={
+    classList:makeClassList(['east']),
+    querySelector(selector){
+      return selector.includes('player-avatar-wrap-opponent')?avatar:null;
+    }
+  };
+  const bubble={
+    dataset:{calloutForeground:'1',calloutSeatClass:'east'},
+    classList:makeClassList(['play-type-call-seat']),
+    style:makeStyle(),
+    parentElement:{},
+    querySelector(selector){return selector==='.tail'?tail:null;},
+    closest(){return null;},
+    getBoundingClientRect(){return bubbleRect;}
+  };
+  const layer={
+    appendChild(node){node.parentElement=this;}
+  };
+  const shell={
+    querySelector(selector){return selector==='.game-foreground-layer'?layer:null;}
+  };
+  const documentStub={
+    body:{dataset:{isMobile:'1',orientation:'portrait'}},
+    documentElement:{clientWidth:260,clientHeight:180},
+    querySelector(selector){
+      if(selector==='.game-shell')return shell;
+      if(selector==='.seat.east')return seat;
+      return null;
+    },
+    querySelectorAll(){return [bubble];}
+  };
+  const originalHTMLElement=globalThis.HTMLElement;
+  globalThis.HTMLElement=Object;
+  try{
+    retargetCalloutTails({
+      documentRef:()=>documentStub,
+      windowRef:()=>({innerWidth:260,innerHeight:180}),
+      isMobilePointer:()=>true
+    });
+  }finally{
+    globalThis.HTMLElement=originalHTMLElement;
+  }
+  assert.equal(tail.classList.contains('tail-south'),true);
 });
 
 test('syncHandStackMode applies stacked overlap when cards exceed width', ()=>{
