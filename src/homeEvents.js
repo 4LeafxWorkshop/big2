@@ -1,6 +1,10 @@
-import {Clipboard} from '@capacitor/clipboard';
-
 export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>window}={}){
+  let clipboardModulePromise=null;
+  const loadClipboard=async()=>{
+    clipboardModulePromise??=import('@capacitor/clipboard');
+    const mod=await clipboardModulePromise;
+    return mod.Clipboard;
+  };
   return function bindHomeEvents({
     state,
     joinOpen,
@@ -73,6 +77,7 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       }catch{
       }
       try{
+        const Clipboard=await loadClipboard();
         const res=await Clipboard.read();
         return String(res?.value??res?.text??'').trim();
       }catch{
@@ -88,6 +93,7 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       }catch{
       }
       try{
+        const Clipboard=await loadClipboard();
         await Clipboard.write({string:text});
         return true;
       }catch{

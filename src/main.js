@@ -23,7 +23,6 @@ import {renderCenterLastMoves, renderGameActionZone, renderGameLogSheet, renderG
 import {buildCalloutRenderState, buildCongratsOverlayHtml, buildGameAuxRenderState, buildGameShellMarkup, buildOpponentSeatsHtml, buildResultScreenHtml, buildRoomMetaTableHtml, buildSelfRenderState} from './gameRenderPrep.js';
 import {renderConfidentialStamp, renderIntroPanel, renderLeaderboardModal, renderLeaderboardPanel, renderOpponentProfileModal, renderScoreGuideModal} from './modalViews.js';
 import {botAvatarUrl, resolveAvatarSrc} from './avatarProfile.js';
-import QRCode from 'qrcode';
 import {BACK_OPTIONS, CALLOUT_RESPONSE_TEXT, KIND, LANGUAGE_NATIVE_LABEL, LANGUAGE_OPTIONS} from './localeData.js';
 import {I18N} from './i18nData.js';
 import {getScoreGuideText} from './scoreGuideData.js';
@@ -57,8 +56,6 @@ import {createRoomSubscriptionController} from './roomSubscription.js';
 import {createRoomTimeoutController} from './roomTimeouts.js';
 import {buildActiveRoomRow, buildRoomDirectoryDoc} from './roomDirectory.js';
 import {getNextSoloRoundWins, getNextSoloTotals, resetSoloSessionCarryoverState} from './soloState.js';
-import {Browser} from '@capacitor/browser';
-import {GoogleAuth} from '@codetrix-studio/capacitor-google-auth';
 
 const RANKS=['3','4','5','6','7','8','9','10','J','Q','K','A','2'];
 const SUITS=[
@@ -392,6 +389,7 @@ async function runPopunderAd(){
   try{
     if(isNativeIosApp()){
       armedPopunderWindow=null;
+      const Browser=await loadCapacitorBrowser();
       await Browser.open({url});
       return;
     }
@@ -422,6 +420,24 @@ let armedPopunderWindow=null;
 let googlePicturePreloadToken=0;
 let roomInviteQrRequestToken=0;
 let roomInviteJoinInFlight=false;
+let qrCodeModulePromise=null;
+let capacitorBrowserModulePromise=null;
+let googleAuthModulePromise=null;
+async function loadQrCode(){
+  qrCodeModulePromise??=import('qrcode');
+  const mod=await qrCodeModulePromise;
+  return mod.default??mod;
+}
+async function loadCapacitorBrowser(){
+  capacitorBrowserModulePromise??=import('@capacitor/browser');
+  const mod=await capacitorBrowserModulePromise;
+  return mod.Browser;
+}
+async function loadGoogleAuth(){
+  googleAuthModulePromise??=import('@codetrix-studio/capacitor-google-auth');
+  const mod=await googleAuthModulePromise;
+  return mod.GoogleAuth;
+}
 function preloadGooglePicture(){
   const pic=String(state.home.google?.picture??'').trim();
   state.home.google.pictureLoaded=false;
@@ -522,6 +538,7 @@ async function refreshRoomInviteQrDataUrl(force=false){
   state.room.inviteQrError='';
   render();
   try{
+    const QRCode=await loadQrCode();
     const qrDataUrl=await QRCode.toDataURL(inviteUrl,{errorCorrectionLevel:'M',margin:1,width:280,color:{dark:'#111111',light:'#ffffff'}});
     const cardDataUrl=await buildRoomInviteCardDataUrl({
       qrDataUrl,
@@ -1866,11 +1883,13 @@ const googleIdentityController=createGoogleIdentityController({
   useNativeGoogleAuth:()=>isNativeAndroidApp()||isNativeIosApp(),
   useWebGoogleFallbackButton:()=>false,
   nativeGoogleSignIn:async()=>{
+    const GoogleAuth=await loadGoogleAuth();
     const user=await GoogleAuth.signIn();
     await handleNativeGoogleUser(user);
     return true;
   },
   nativeGoogleSignOut:async()=>{
+    const GoogleAuth=await loadGoogleAuth();
     await GoogleAuth.signOut();
     return true;
   },
@@ -3406,11 +3425,11 @@ function isNativeIosApp(){
 }
 function initNativeGoogleAuth(){
   if(!isNativeAndroidApp()&&!isNativeIosApp())return;
-  try{
-    GoogleAuth.initialize();
-  }catch(err){
+  void loadGoogleAuth().then((GoogleAuth)=>{
+    GoogleAuth?.initialize?.();
+  }).catch((err)=>{
     console.warn('native google auth init failed',err);
-  }
+  });
 }
 function isStandaloneWebApp(){
   return Boolean(
