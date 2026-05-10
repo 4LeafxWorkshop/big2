@@ -10286,7 +10286,7 @@ body[data-screen='game'] .action-strip .control-row .game-icon-btn .sort-icon {
 body[data-screen='game'] .service-bell-layer {
   position: absolute;
   inset: 0;
-  z-index: 12500;
+  z-index: 2147483300;
   pointer-events: none;
   overflow: hidden;
   isolation: isolate;
@@ -10298,7 +10298,7 @@ body[data-screen='game'] .service-bell-layer.is-ready {
 body[data-screen='game'] .table > .service-bell-layer {
   position: absolute !important;
   inset: 0 !important;
-  z-index: 12500 !important;
+  z-index: 2147483300 !important;
 }
 body[data-screen='game'] .service-bell-layer .service-bell-hero-wrap {
   position: absolute;
@@ -13513,7 +13513,7 @@ body[data-screen='game'] :is(.seat.west, .seat.east) .side-station-stack .oppone
 /* Layer lock: food visuals above open/discard cards, below profile labels. */
 body[data-screen='game'] .service-bell-layer,
 body[data-screen='game'] .table > .service-bell-layer {
-  z-index: 12500 !important;
+  z-index: 2147483300 !important;
 }
 body[data-screen='game'] :is(.table-center-stack, .center-last, .center-last-north, .center-last-west, .center-last-east, .center-last-south, .seat-open-play, .seat-open-play .seat-played) {
   z-index: 11000 !important;
@@ -13534,7 +13534,7 @@ body[data-screen='game'] .seat[data-seat-emote-active='1'] :is(.seat-name-fixed[
 }
 body[data-screen='game'] .service-bell-food-layer,
 body[data-screen='game'] .service-bell-food {
-  z-index: 12900 !important;
+  z-index: 2147483300 !important;
 }
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] .food-callout-seat {
   z-index: 14020 !important;
@@ -13567,7 +13567,7 @@ body[data-screen='game'] :is(
   .service-bell-food-layer,
   .service-bell-food
 ) {
-  z-index: 12900 !important;
+  z-index: 2147483300 !important;
 }
 body[data-screen='game'] :is(
   .seat-name-fixed[data-opponent-name],
@@ -13740,11 +13740,11 @@ body[data-screen='game'] :is(.seat.north .seat-pass-label, .seat.west .seat-pass
   margin-right: auto !important;
 }
 body[data-screen='game'] .service-bell-food-layer {
-  z-index: auto !important;
+  z-index: 2147483300 !important;
   isolation: auto !important;
 }
 body[data-screen='game'] .service-bell-food {
-  z-index: 12900 !important;
+  z-index: 2147483300 !important;
 }
 body[data-screen='game'] :is(.seat.north .seat-name-fixed[data-opponent-name], .seat.west .seat-name-fixed[data-opponent-name], .seat.east .seat-name-fixed[data-opponent-name]) {
   position: relative !important;

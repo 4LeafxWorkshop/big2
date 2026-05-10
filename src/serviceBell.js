@@ -12,6 +12,8 @@ const SERVICE_BELL_FOODS=[
 ];
 
 const SERVICE_BELL_SLOTS=['tl','tr','ml','mr'];
+const SERVICE_BELL_LAYER_Z=2147483300;
+const SERVICE_BELL_FOOD_LAYER_Z=2147483300;
 const SERVICE_BELL_SLOT_POINTS={
   portrait:{
     tl:{x:'16%',y:'15%'},
@@ -164,14 +166,14 @@ export function createServiceBellController(deps={}){
     if(heroHost){
       if(heroHost.parentElement!==targetParent)targetParent.appendChild(heroHost);
       heroImg=heroHost.querySelector('.service-bell-hero')??heroImg;
-      applyPlacement(heroHost,targetParent,12500);
+      applyPlacement(heroHost,targetParent,SERVICE_BELL_LAYER_Z);
       return heroHost;
     }
     heroHost=doc.getElementById('service-bell-layer');
     if(heroHost&&heroHost.isConnected!==false){
       if(heroHost.parentElement!==targetParent)targetParent.appendChild(heroHost);
       heroImg=heroHost.querySelector('.service-bell-hero');
-      applyPlacement(heroHost,targetParent,12500);
+      applyPlacement(heroHost,targetParent,SERVICE_BELL_LAYER_Z);
       return heroHost;
     }
     heroHost=doc.createElement('div');
@@ -180,7 +182,7 @@ export function createServiceBellController(deps={}){
     heroHost.setAttribute('aria-hidden','true');
     heroHost.innerHTML=`<div class="service-bell-hero-wrap"><img class="service-bell-hero" src="${withBase('foods/bell.png')}" alt="" aria-hidden="true"/></div>`;
     targetParent.appendChild(heroHost);
-    applyPlacement(heroHost,targetParent,12500);
+    applyPlacement(heroHost,targetParent,SERVICE_BELL_LAYER_Z);
     heroImg=heroHost.querySelector('.service-bell-hero');
     return heroHost;
   };
@@ -191,13 +193,13 @@ export function createServiceBellController(deps={}){
     const targetParent=getFoodPlacementParent()??doc.body;
     if(foodHost){
       placeFoodHost(foodHost,targetParent);
-      applyPlacement(foodHost,targetParent);
+      applyPlacement(foodHost,targetParent,SERVICE_BELL_FOOD_LAYER_Z);
       return foodHost;
     }
     foodHost=doc.getElementById('service-bell-food-layer');
     if(foodHost&&foodHost.isConnected!==false){
       placeFoodHost(foodHost,targetParent);
-      applyPlacement(foodHost,targetParent);
+      applyPlacement(foodHost,targetParent,SERVICE_BELL_FOOD_LAYER_Z);
       return foodHost;
     }
     foodHost=doc.createElement('div');
@@ -205,7 +207,7 @@ export function createServiceBellController(deps={}){
     foodHost.className='service-bell-food-layer';
     foodHost.setAttribute('aria-hidden','true');
     placeFoodHost(foodHost,targetParent);
-    applyPlacement(foodHost,targetParent);
+    applyPlacement(foodHost,targetParent,SERVICE_BELL_FOOD_LAYER_Z);
     return foodHost;
   };
 
@@ -311,7 +313,7 @@ export function createServiceBellController(deps={}){
     const targetParent=getPlacementParent()??getDoc()?.body;
     if(targetParent&&shell.parentElement!==targetParent){
       targetParent.appendChild(shell);
-      applyPlacement(shell,targetParent,12500);
+      applyPlacement(shell,targetParent,SERVICE_BELL_LAYER_Z);
     }
     const foodParent=getFoodPlacementParent()??getDoc()?.body;
     if(foodLayer&&foodLayer.parentElement!==foodParent){
