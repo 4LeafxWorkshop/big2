@@ -70,7 +70,7 @@ test('applyTimeoutStrikeToRoomState replaces player with bot at max strikes', ()
   assert.equal(result.players[0].timeoutStrikes,0);
   assert.equal(result.game.players[0].uid,'bot:0:Bot 1');
   assert.equal(result.game.players[0].isHuman,false);
-  assert.deepEqual(logs,['Alice roomKickedTimeout']);
+  assert.deepEqual(logs,[{key:'roomKickedTimeout',args:{name:'Alice'}}]);
 });
 
 test('applyTimeoutStrikeToRoomState deletes room when timed out player is the last human', ()=>{
@@ -85,7 +85,7 @@ test('applyTimeoutStrikeToRoomState deletes room when timed out player is the la
   assert.equal(result.kicked,true);
   assert.equal(result.roomDeleted,true);
   assert.deepEqual(result.players,[]);
-  assert.deepEqual(logs,['Alice roomKickedTimeout']);
+  assert.deepEqual(logs,[{key:'roomKickedTimeout',args:{name:'Alice'}}]);
 });
 
 test('resetTimeoutStrikeForSeat clears accumulated timeout strikes', ()=>{

@@ -3,7 +3,6 @@ import {renderRoomActiveCardHtml, renderRoomCreateCardHtml} from './roomLobbyCar
 const roomLobbyIconHtml=`<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M5.5 4.5A1.5 1.5 0 0 1 7 3h8.5A1.5 1.5 0 0 1 17 4.5V20H7a1.5 1.5 0 0 1-1.5-1.5V4.5Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M14 6.25V17.75" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M10 12h.01" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>`;
 const roomJoinIconHtml=`<svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M4.5 10.5 12 4l7.5 6.5V20h-5.25v-5.25h-4.5V20H4.5V10.5Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9.75 20v-4.75h4.5V20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
 const roomPasteIconHtml=`<svg viewBox="0 0 330 330" focusable="false" aria-hidden="true"><path d="M310 315v-95h-8.786H280h-21.213H200h-15c-8.284 0-15-6.716-15-15v-15v-58.787V110V88.787V80H95c-8.284 0-15 6.716-15 15v113.292V260v30v16.338V315c0 8.284 6.716 15 15 15h200C303.284 330 310 323.284 310 315z" fill="currentColor"/><path d="M235 10h-75.872c-2.061-5.822-7.6-10-14.128-10h-20c-6.528 0-12.066 4.178-14.128 10H35c-8.284 0-15 6.716-15 15v250c0 8.284 6.716 15 15 15h15v-30v-51.708V40h30.872c2.062 5.822 7.6 10 14.128 10h80c6.528 0 12.066-4.178 14.128-10H220v26.431c.413.369.819.749 1.214 1.144l20 20L250 96.36V25C250 16.716 243.284 10 235 10z" fill="currentColor"/><path d="M220 108.787 200 88.787v42.426V190h58.787h42.427L250 138.787z" fill="currentColor"/></svg>`;
-const roomReturnIconHtml=`<svg viewBox="0 0 469.411 469.411" focusable="false" aria-hidden="true"><path d="M397.305 207.826c-67.733-59.947-161.493-61.12-194.56-59.307V74.706c0-5.867-4.8-10.667-10.667-10.667-2.453 0-4.907.853-6.827 2.453L3.918 215.826c-4.587 3.733-5.227 10.453-1.493 15.04.427.533.96.96 1.493 1.493l181.333 149.333c4.587 3.733 11.307 3.093 15.04-1.493 1.6-1.92 2.453-4.267 2.453-6.827v-77.013c34.667-8 175.147-30.507 246.613 103.36 1.813 3.52 5.44 5.653 9.387 5.653 3.413 0 6.72-1.6 8.853-4.693 1.28-1.813 1.813-4.053 1.813-6.293 0-69.626-24.214-132.346-71.999-174.799zM260.558 269.159c-41.067 0-70.72 8.427-71.467 8.64-4.587 1.28-7.68 5.44-7.68 10.24v62.72l-153.92-126.72 153.92-126.72v62.72c0 5.867 4.8 10.667 10.667 10.667.427 0 .853 0 1.28-.107 1.173-.107 115.2-12.907 189.76 53.227 35.2 31.147 56.213 75.2 62.72 130.987-43.059-34.146-119.006-49.293-174.261-49.293z" fill="currentColor"/></svg>`;
 
 export function renderRoomLobbyOverlay(params){
   const {
@@ -16,7 +15,6 @@ export function renderRoomLobbyOverlay(params){
     inviteQrError,
     roomPrivacyRow,
     roomSeats,
-    roomErrorHtml,
     roomStartControl,
     roomPendingHint,
     roomStarting,
@@ -26,8 +24,6 @@ export function renderRoomLobbyOverlay(params){
   if(!visible)return'';
 
   const roomCodeCopyLabel=String(t('roomCodeClickCopy'));
-  const roomCodeCopyLabelOpen=roomCodeCopyLabel.replace(/[）)]$/,'');
-  const roomCodeCopyLabelClose=roomCodeCopyLabel.endsWith('）')?'）':roomCodeCopyLabel.endsWith(')')?')':'';
   const qrHtml=inviteQrLoading
     ?`<div class="room-lobby-qr-placeholder">${t('roomInviteLoading')}</div>`
     :inviteQrDataUrl
@@ -46,7 +42,6 @@ export function renderRoomJoinOverlay(params){
   const {
     visible,
     activeRooms,
-    activeRoomsLoading,
     hiddenCount,
     roomErrorHtml,
     roomCodeValue,

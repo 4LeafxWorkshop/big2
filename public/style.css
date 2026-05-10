@@ -13941,3 +13941,66 @@ body[data-screen='game'] :is(
   position: absolute !important;
   z-index: 2147483600 !important;
 }
+
+/* iOS-safe foreground lock: do not rely on :has() for active callout stacks. */
+body[data-screen='game'] :is(
+  .seat.seat-callout-active,
+  .seat-pack.seat-callout-active,
+  .side-station-stack.seat-callout-active,
+  .side-station-core.seat-callout-active,
+  .action-zone.seat-callout-active,
+  .action-strip.seat-callout-active
+) {
+  position: relative !important;
+  z-index: 2147482500 !important;
+  isolation: auto !important;
+  overflow: visible !important;
+}
+
+body[data-screen='game'] :is(
+  .seat-name-fixed.seat-callout-active,
+  .action-strip.seat-callout-active .player-tag
+) {
+  position: relative !important;
+  z-index: 2147483000 !important;
+  isolation: isolate !important;
+  overflow: visible !important;
+}
+
+body[data-screen='game'] .action-strip.seat-callout-active .seat-name-fixed.player-tag {
+  position: absolute !important;
+  top: 3px !important;
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(calc(-50% + 3px)) !important;
+  z-index: 2147483000 !important;
+  isolation: isolate !important;
+  overflow: visible !important;
+}
+
+body[data-screen='game'] .seat-callout-active :is(
+  .opponent-fan-wrap,
+  .closed-card-pile,
+  .opponent-fan,
+  .closed-back,
+  .closed-count-pill,
+  .seat-open-play,
+  .seat-open-play .seat-played,
+  .seat-open-play .card.mini
+) {
+  z-index: 1 !important;
+}
+
+body[data-screen='game'] :is(
+  .seat-name-fixed.seat-callout-active,
+  .action-strip.seat-callout-active .player-tag
+) :is(
+  .play-type-call,
+  .last-card-call,
+  .emote-callout,
+  .food-callout-seat,
+  .seat-motto-callout
+) {
+  position: absolute !important;
+  z-index: 2147483600 !important;
+}

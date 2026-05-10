@@ -1,4 +1,4 @@
-import {PROFILE_LINE_TRANSLATIONS_RAW, PROFILE_MOTTO_TRANSLATIONS} from './opponentProfileData.js';
+import {PROFILE_LINE_TRANSLATIONS_BY_ID, PROFILE_MOTTO_TRANSLATIONS_BY_ID} from './opponentProfileData.js';
 
 export function createOpponentProfileTextHelpers(deps){
   const {esc,getLanguage}=deps;
@@ -10,49 +10,26 @@ export function createOpponentProfileTextHelpers(deps){
     return clean.map((p)=>`<p>${esc(p)}</p>`).join('');
   }
 
-  const PROFILE_LINE_TRANSLATIONS_CACHE={};
-
-  function normalizeProfileKey(value=''){
-    return String(value??'')
-      .replace(/[“”]/g,'"')
-      .replace(/[‘’]/g,"'")
-      .replace(/[\u2010-\u2015\u2212]/g,'-')
-      .replace(/\u00a0/g,' ')
-      .replace(/\s+/g,' ')
-      .trim()
-      .toLowerCase();
+  function getProfileLineTranslation(langKey,lineId){
+    const lang=PROFILE_LINE_TRANSLATIONS_BY_ID[langKey]?langKey:'';
+    if(!lang||!lineId)return '';
+    return PROFILE_LINE_TRANSLATIONS_BY_ID[lang]?.[lineId]??'';
   }
 
-  function getProfileLineTranslation(langKey,line){
-    const lang=PROFILE_LINE_TRANSLATIONS_RAW[langKey]?langKey:'';
-    if(!lang)return '';
-    let cache=PROFILE_LINE_TRANSLATIONS_CACHE[lang];
-    if(!cache){
-      cache={};
-      const src=PROFILE_LINE_TRANSLATIONS_RAW[lang]??{};
-      Object.entries(src).forEach(([k,v])=>{
-        const nk=normalizeProfileKey(k);
-        if(nk)cache[nk]=v;
-      });
-      PROFILE_LINE_TRANSLATIONS_CACHE[lang]=cache;
-    }
-    const key=normalizeProfileKey(line);
-    return key?cache[key]??'':'';
-  }
-
-  function translateProfileLines(value,langKey){
-    const lang=PROFILE_LINE_TRANSLATIONS_RAW[langKey]?langKey:'';
+  function translateProfileLines(value,langKey,profile){
+    const lang=PROFILE_LINE_TRANSLATIONS_BY_ID[langKey]?langKey:'';
     if(!lang)return value;
-    if(Array.isArray(value))return value.map((line)=>getProfileLineTranslation(lang,line)||line);
-    if(typeof value==='string')return getProfileLineTranslation(lang,value)||value;
+    const lineIds=Array.isArray(profile?.profileLineIds)?profile.profileLineIds:[];
+    if(Array.isArray(value))return value.map((line,index)=>getProfileLineTranslation(lang,lineIds[index])||line);
+    if(typeof value==='string')return getProfileLineTranslation(lang,lineIds[0])||value;
     return value;
   }
 
-  function translateProfileMotto(value,langKey){
-    const lang=PROFILE_MOTTO_TRANSLATIONS[langKey]?langKey:'';
+  function translateProfileMotto(value,langKey,profile){
+    const lang=PROFILE_MOTTO_TRANSLATIONS_BY_ID[langKey]?langKey:'';
     if(!lang||typeof value!=='string')return value;
-    const map=PROFILE_MOTTO_TRANSLATIONS[lang];
-    return map[value]??value;
+    const id=String(profile?.mottoId||'');
+    return id?PROFILE_MOTTO_TRANSLATIONS_BY_ID[lang]?.[id]??value:value;
   }
 
   function pickProfileLangKey(bank){
@@ -71,8 +48,8 @@ export function createOpponentProfileTextHelpers(deps){
     const fallback=bank.en??bank['zh-HK']??emptyValue;
     const value=bank?.[key]??fallback??emptyValue;
     const preferred=String(getLanguage()||'').trim();
-    if(field==='profile')return translateProfileLines(value,preferred);
-    if(field==='motto')return translateProfileMotto(value,preferred);
+    if(field==='profile')return translateProfileLines(value,preferred,profile);
+    if(field==='motto')return translateProfileMotto(value,preferred,profile);
     return value;
   }
 

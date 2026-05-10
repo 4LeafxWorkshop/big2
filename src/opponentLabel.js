@@ -72,9 +72,10 @@ export function renderOpponentSeatWrapperHtml(params){
     labelName,
     calloutHtml,
     emoteHtml,
-    foodCalloutHtml
+    foodCalloutHtml,
+    calloutActive=false
   }=params;
-  return`<div class="seat-name-fixed${peekActive?' motto-peek':''}"${opponentAttr}>${labelName}${calloutHtml}${emoteHtml}${foodCalloutHtml??''}</div>`;
+  return`<div class="seat-name-fixed${peekActive?' motto-peek':''}${calloutActive?' seat-callout-active':''}"${opponentAttr}>${labelName}${calloutHtml}${emoteHtml}${foodCalloutHtml??''}</div>`;
 }
 
 export function renderOpponentLabelNameHtml(params){
@@ -105,6 +106,7 @@ export function renderOpponentLabel(params){
     calloutHtml,
     emoteHtml,
     foodCalloutHtml,
+    calloutActive=false,
     peekActive,
     opponentAttr,
     esc,
@@ -116,5 +118,5 @@ export function renderOpponentLabel(params){
   const avatarHtml=renderOpponentAvatarHtmlFn({pColor,avatarSrc,playerAvatarClass,playerName,botNameAttr,hostBadgeHtml,badgeHtml,mottoText,mottoClass,hintText,mottoTilt,mottoTailDir,esc});
   const identityHtml=renderOpponentIdentityHtmlFn({playerName,playerScore,roundWinsHtml,namecardBtn,esc});
   const labelName=renderOpponentLabelNameHtmlFn({avatarHtml,identityHtml});
-  return renderOpponentSeatWrapperHtmlFn({peekActive,opponentAttr,labelName,calloutHtml,emoteHtml,foodCalloutHtml});
+  return renderOpponentSeatWrapperHtmlFn({peekActive,opponentAttr,labelName,calloutHtml,emoteHtml,foodCalloutHtml,calloutActive});
 }

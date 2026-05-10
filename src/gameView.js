@@ -92,7 +92,8 @@ export function renderGameActionZone(params){
     emotePanel,
     handHtml
   }=params;
-  return`<section class="action-zone"><div class="action-strip ${canControl&&!gameOver?'active':''}" style="--player-color:${playerColor};">${renderGameSelfTagHtml({selfAvatar,selfName,selfScore,selfRoundWinsHtml,selfCalloutHtml,esc})}${renderGameControlRowHtml({isRecPlay,canPlay,isRecPass,canPass,canSuggest,showRecommendHint,isRecEmpty,recommendHint,t,esc,canAutoSort,emotePanel,handHtml})}</div></section>`;
+  const selfCalloutActive=Boolean(selfCalloutHtml);
+  return`<section class="action-zone${selfCalloutActive?' seat-callout-active':''}"><div class="action-strip ${canControl&&!gameOver?'active':''}${selfCalloutActive?' seat-callout-active':''}" style="--player-color:${playerColor};">${renderGameSelfTagHtml({selfAvatar,selfName,selfScore,selfRoundWinsHtml,selfCalloutHtml,esc})}${renderGameControlRowHtml({isRecPlay,canPlay,isRecPass,canPass,canSuggest,showRecommendHint,isRecEmpty,recommendHint,t,esc,canAutoSort,emotePanel,handHtml})}</div></section>`;
 }
 
 export function renderGameTable(params){
@@ -164,10 +165,11 @@ export function renderOpponentSeat(params){
     shellStyle,
     outerLabelHtml,
     sectionStyle,
+    calloutActive=false,
     sideStationFlowHtml,
     openPlayHtml=''
   }=params;
-  return`<div class="seat ${cls} ${active?'active':''}"${seatAttrs} style="${shellStyle}">${outerLabelHtml}<div class="seat-pack seat-section" style="${sectionStyle}">${sideStationFlowHtml}${openPlayHtml}</div></div>`;
+  return`<div class="seat ${cls} ${active?'active':''}${calloutActive?' seat-callout-active':''}"${seatAttrs} style="${shellStyle}">${outerLabelHtml}<div class="seat-pack seat-section${calloutActive?' seat-callout-active':''}" style="${sectionStyle}">${sideStationFlowHtml}${openPlayHtml}</div></div>`;
 }
 
 export {renderOpponentLabel} from './opponentLabel.js';
@@ -182,12 +184,13 @@ export function renderOpponentStationFlow(params){
     fanAnchorStyle,
     closedPileCount=1,
     closedCountHtml,
-    opponentOpenPlayHtml
+    opponentOpenPlayHtml,
+    calloutActive=false
   }=params;
   const pileCount=Math.min(5,Math.max(1,Number(closedPileCount)||1));
   const closedPileHtml=`<div class="closed-card-pile" style="--closed-pile-count:${pileCount};"><div class="opponent-fan ${fanClassName}" style="${fanAnchorStyle}">${fan}</div>${closedCountHtml}</div>`;
   if(useFlowOpponentStation&&isSideSeat){
-    return`<div class="side-station-stack"><div class="side-station-core">${innerLabelHtml}<div class="opponent-fan-wrap">${closedPileHtml}</div></div>${opponentOpenPlayHtml}</div>`;
+    return`<div class="side-station-stack${calloutActive?' seat-callout-active':''}"><div class="side-station-core${calloutActive?' seat-callout-active':''}">${innerLabelHtml}<div class="opponent-fan-wrap">${closedPileHtml}</div></div>${opponentOpenPlayHtml}</div>`;
   }
   return`${innerLabelHtml}<div class="opponent-fan-wrap">${closedPileHtml}</div>${opponentOpenPlayHtml}`;
 }

@@ -45,8 +45,13 @@ test('runGamePostRender mounts log sheet, creates log fab, and runs callbacks', 
   const documentStub={
     body:{
       dataset:{tapDebugBound:'1'},
+      children:[],
       setAttribute(name,value){bodyAttrs[name]=value;},
-      removeAttribute(name){delete bodyAttrs[name];}
+      removeAttribute(name){delete bodyAttrs[name];},
+      appendChild(node){
+        this.children.push(node);
+        node.parentElement=this;
+      }
     },
     createElement(tag){
       const node={
@@ -58,6 +63,8 @@ test('runGamePostRender mounts log sheet, creates log fab, and runs callbacks', 
         offsetHeight:24,
         setAttribute(name,value){this.attrs[name]=value;},
         appendChild(){},
+        remove(){this.removed=true;},
+        querySelector(){return null;},
         className:'',
         id:'',
         type:'',
@@ -112,6 +119,7 @@ test('runGamePostRender mounts log sheet, creates log fab, and runs callbacks', 
       observeDiscardSize:()=>{observed+=1;},
       syncConfettiCanvases:()=>{confetti+=1;},
       syncLandscapeGameHandSizing:()=>{},
+      syncGamePortraitLayout:()=>{},
       syncDiscardSizeFromHand:()=>{discardSync+=1;},
       syncHandStackMode:()=>{handSync+=1;},
       retargetCalloutTails:()=>{retargets+=1;},
@@ -127,7 +135,7 @@ test('runGamePostRender mounts log sheet, creates log fab, and runs callbacks', 
   }
   assert.equal(createdNodes.length,1);
   assert.equal(createdNodes[0].id,'game-log-fab');
-  assert.equal(actionStrip.children.length,1);
+  assert.equal(documentStub.body.children.length,1);
   assert.equal(existingSheet.removed,true);
   assert.equal(app.lastInsert.html,'<div id="log-sheet"></div>');
   assert.equal(bodyAttrs['data-web-too-small'],'0');

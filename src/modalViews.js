@@ -13,8 +13,6 @@ export function renderIntroPanel(params){
     language,
     colorizeSuitText,
     esc,
-    withBase,
-    appTitle='Big Two',
     renderStaticCard,
     introHandSamples
   }=params;

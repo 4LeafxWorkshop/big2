@@ -67,7 +67,9 @@ test('renderGameActionZone renders controls, hand, and drag popup', ()=>{
   assert.match(html,/recommend-glow-play/);
   assert.match(html,/id="bell-toggle"/);
   assert.match(html,/🛎️/);
-  assert.match(html,/aria-label="Bellhop Bell"/);
+  assert.match(html,/aria-label="serviceBellTooltip"/);
+  assert.match(html,/action-zone seat-callout-active/);
+  assert.match(html,/action-strip active seat-callout-active/);
   assert.match(html,/id="auto-sort-btn"/);
   assert.match(html,/id="drag-popup"/);
 });
@@ -109,7 +111,7 @@ test('renderGameControlRowHtml renders the action controls and hand', ()=>{
   assert.match(html,/recommend-glow-play/);
   assert.match(html,/id="bell-toggle"/);
   assert.match(html,/🛎️/);
-  assert.match(html,/aria-label="Bellhop Bell"/);
+  assert.match(html,/aria-label="serviceBellTooltip"/);
   assert.match(html,/id="auto-sort-btn"/);
   assert.match(html,/id="drag-popup"/);
   assert.match(html,/id="emote-panel"/);

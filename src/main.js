@@ -539,9 +539,10 @@ async function refreshRoomInviteQrDataUrl(force=false){
     state.room.inviteCardDataUrl='';
     state.room.inviteQrError=t('roomInviteQrFail');
   }finally{
-    if(requestToken!==roomInviteQrRequestToken)return;
-    state.room.inviteQrLoading=false;
-    render();
+    if(requestToken===roomInviteQrRequestToken){
+      state.room.inviteQrLoading=false;
+      render();
+    }
   }
 }
 async function maybeAutoJoinPendingRoomInvite(){
@@ -4293,7 +4294,7 @@ function relabelSoloBots(){
   state.solo.players=state.solo.players.map((p,i)=>i===0?p:{...p,name:profiles[i-1].name,gender:profiles[i-1].gender});
 }
 
-function openEmotePicker(open,mode='normal'){
+function openEmotePicker(open){
   if(emotePickerTimer){clearTimeout(emotePickerTimer);emotePickerTimer=null;}
   state.emote.open=Boolean(open);
   if(state.emote.open){
@@ -4446,7 +4447,6 @@ function syncRoomEmote(roomData){
   if(id.startsWith(FOOD_EMOTE_PREFIX)){
     const foodId=id.slice(FOOD_EMOTE_PREFIX.length).trim().toLowerCase();
     const foodMeta=FOOD_CALLOUT_META[foodId]||null;
-    const by=String(raw.by||'').trim();
     let seat=resolvedSeat;
     const selfSeat=Number.isInteger(state.room.selfSeat)&&state.room.selfSeat>=0
       ?state.room.selfSeat
@@ -5930,8 +5930,6 @@ function renderHome(){
       window.sessionStorage?.setItem('big2:lastRoomCodeCopy',roomInviteCode);
     }catch{}
   }
-  const roomInviteUrl=roomInviteUrlFromCode(roomInviteCode);
-  const roomInviteMessage=roomInviteShareTextFromCode(roomInviteCode);
   const roomLobbyHtml=renderRoomLobbyOverlay({
     visible:inRoom&&roomStatus!=='playing',
     roomTitle,

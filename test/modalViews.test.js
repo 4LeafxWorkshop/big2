@@ -54,9 +54,7 @@ test('renderIntroPanel includes sample cards and close controls', ()=>{
   assert.match(html,/id="intro-modal"/);
   assert.match(html,/Diamond 3/);
   assert.match(html,/class="card"/);
-  assert.match(html,/class="intro-home-icon"/);
-  assert.match(html,/src="base:icons\/icon-192\.png"/);
-  assert.match(html,/Big Two/);
+  assert.match(html,/Guide How/);
 });
 
 test('renderLeaderboardPanel renders rows and controls', ()=>{

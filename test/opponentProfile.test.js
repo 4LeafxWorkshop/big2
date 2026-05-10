@@ -18,6 +18,7 @@ test('profileParagraphsHtml renders escaped paragraph markup', ()=>{
 test('profileFieldValue prefers current language and translates motto', ()=>{
   const helpers=createHelpers('fr');
   const profile={
+    mottoId:'zhiming_motto',
     motto:{en:'Slow is smooth.'}
   };
   assert.equal(helpers.profileFieldValue(profile,'motto','-'),'Lent, c’est fluide.');
@@ -26,6 +27,7 @@ test('profileFieldValue prefers current language and translates motto', ()=>{
 test('profileFieldValue translates profile lines for supported languages', ()=>{
   const helpers=createHelpers('ja');
   const profile={
+    profileLineIds:['xiuwen_profile_1'],
     profile:{
       en:'Slow grower, then unstoppable bloom. Most dangerous in the last few hands—you realize too late.'
     }

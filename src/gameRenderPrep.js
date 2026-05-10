@@ -215,6 +215,7 @@ export function buildOpponentSeatsHtml(params){
     const calloutHtml=seatCalloutHtml(player.seat,player.cls,playerColor,false);
     const emoteHtml=seatEmoteHtml(player.seat,player.cls,playerColor,false);
     const foodCalloutHtml=seatFoodCalloutHtml(player.seat,player.cls,playerColor,false);
+    const calloutActive=Boolean(calloutHtml||emoteHtml||foodCalloutHtml);
     const peekActive=isMobilePointer()&&state.mottoPeekName===String(opponentName);
     const outerLabel=renderOpponentLabel({
       pColor:playerColor,
@@ -235,6 +236,7 @@ export function buildOpponentSeatsHtml(params){
       calloutHtml,
       emoteHtml,
       foodCalloutHtml,
+      calloutActive,
       peekActive,
       opponentAttr,
       esc,
@@ -260,7 +262,8 @@ export function buildOpponentSeatsHtml(params){
       fanAnchorStyle,
       closedPileCount:player.count,
       closedCountHtml,
-      opponentOpenPlayHtml
+      opponentOpenPlayHtml,
+      calloutActive
     });
     return renderOpponentSeat({
       cls:player.cls,
@@ -269,6 +272,7 @@ export function buildOpponentSeatsHtml(params){
       shellStyle,
       outerLabelHtml,
       sectionStyle,
+      calloutActive,
       sideStationFlowHtml
     });
   }));

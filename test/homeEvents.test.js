@@ -148,7 +148,6 @@ test('home binder arms room start pending flow', async()=>{
   let timerValue=null;
   let renderCount=0;
   let startRoomCalls=0;
-  let popunderCalls=0;
   bindWith({
     document:makeDocument({byId:{'room-start':roomStart}}),
     pendingStartTimerRef:{
@@ -156,11 +155,7 @@ test('home binder arms room start pending flow', async()=>{
       set:(value)=>{timerValue=value;}
     },
     window:{
-      setTimeout:(fn,delay)=>{
-        if(delay===0){
-          popunderCalls+=1;
-          return 1;
-        }
+      setTimeout:()=>{
         return 2;
       },
       clearTimeout(){}
@@ -171,7 +166,6 @@ test('home binder arms room start pending flow', async()=>{
   await roomStart.dispatch('click');
   assert.equal(renderCount,1);
   assert.equal(startRoomCalls,1);
-  assert.equal(popunderCalls,1);
   assert.equal(timerValue,2);
 });
 
