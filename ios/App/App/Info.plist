@@ -51,6 +51,17 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<key>GADApplicationIdentifier</key>
+	<string>ca-app-pub-7970370189900466~1435612037</string>
+	<key>NSUserTrackingUsageDescription</key>
+	<string>This identifier will be used to deliver ads.</string>
+	<key>SKAdNetworkItems</key>
+	<array>
+		<dict>
+			<key>SKAdNetworkIdentifier</key>
+			<string>cstr6suwn9.skadnetwork</string>
+		</dict>
+	</array>
     <key>GIDClientID</key>
     <string>477275151783-j8gv40mg9u8vaflcvgmc6gbn1rf25ttn.apps.googleusercontent.com</string>
 </dict>

@@ -55,6 +55,7 @@ import {createRoomActionsController} from './roomActions.js';
 import {createRoomRosterSyncController} from './roomRosterSync.js';
 import {createRoomSubscriptionController} from './roomSubscription.js';
 import {createRoomTimeoutController} from './roomTimeouts.js';
+import {createMobileAdsController} from './mobileAds.js';
 import {buildActiveRoomRow, buildRoomDirectoryDoc} from './roomDirectory.js';
 import {getNextSoloRoundWins, getNextSoloTotals, resetSoloSessionCarryoverState} from './soloState.js';
 
@@ -385,15 +386,13 @@ function matchGuestPlayerId(roomData){
   return '';
 }
 async function runPopunderAd(){
-  if(APP_CHANNEL==='STORE')return;
-  const url='https://omg10.com/4/10921720';
   try{
-    if(isNativeIosApp()){
-      armedPopunderWindow=null;
-      const Browser=await loadCapacitorBrowser();
-      await Browser.open({url});
+    if(isNativeAndroidApp()||isNativeIosApp()){
+      await mobileAdsController.showStartGameInterstitial();
       return;
     }
+    if(APP_CHANNEL==='STORE')return;
+    const url='https://omg10.com/4/10921720';
     let win=armedPopunderWindow;
     if(win&&!win.closed){
       try{
@@ -422,16 +421,10 @@ let googlePicturePreloadToken=0;
 let roomInviteQrRequestToken=0;
 let roomInviteJoinInFlight=false;
 let qrCodeModulePromise=null;
-let capacitorBrowserModulePromise=null;
 async function loadQrCode(){
   qrCodeModulePromise??=import('qrcode');
   const mod=await qrCodeModulePromise;
   return mod.default??mod;
-}
-async function loadCapacitorBrowser(){
-  capacitorBrowserModulePromise??=import('@capacitor/browser');
-  const mod=await capacitorBrowserModulePromise;
-  return mod.Browser;
 }
 function preloadGooglePicture(){
   const pic=String(state.home.google?.picture??'').trim();
@@ -478,6 +471,7 @@ function attachFirebaseAuthPictureSync(){
   });
 }
 function armPopunderForGesture(){
+  if(isNativeAndroidApp()||isNativeIosApp())return;
   if(APP_CHANNEL==='STORE')return;
   if(!isIOSDevice())return;
   if(armedPopunderWindow&&!armedPopunderWindow.closed)return;
@@ -587,7 +581,6 @@ async function maybeAutoJoinPendingRoomInvite(){
   }
 }
 function schedulePopunderAfterRender(delayMs=250){
-  if(APP_CHANNEL==='STORE')return;
   const delay=Math.max(0,Number(delayMs)||0);
   const invoke=()=>window.setTimeout(runPopunderAd,delay);
   window.requestAnimationFrame(()=>window.requestAnimationFrame(()=>{
@@ -3416,11 +3409,20 @@ function isNativeIosApp(){
   const cap=window.Capacitor;
   return Boolean(cap?.isNativePlatform?.()&&nativePlatform()==='ios');
 }
+const mobileAdsController=createMobileAdsController({
+  isNativeAndroidApp,
+  isNativeIosApp
+});
 function initNativeGoogleAuth(){
   if(!isNativeAndroidApp()&&!isNativeIosApp())return;
   void Promise.resolve(GoogleAuth.initialize?.()).catch((err)=>{
     console.warn('native google auth init failed',err);
   });
+}
+function initNativeAdMob(){
+  if(!isNativeAndroidApp()&&!isNativeIosApp())return;
+  void mobileAdsController.initialize();
+  void mobileAdsController.prepareStartGameInterstitial();
 }
 function isStandaloneWebApp(){
   return Boolean(
@@ -6906,4 +6908,5 @@ if(import.meta.env.DEV){
 }
 window.addEventListener('load',()=>{if(state.screen==='home')onGoogleScriptLoaded(renderGoogleInline);},{once:true});
 initNativeGoogleAuth();
+initNativeAdMob();
 loadGoogleSession();bootFirebase();syncViewport();render();

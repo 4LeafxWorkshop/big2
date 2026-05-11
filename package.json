@@ -28,7 +28,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@capacitor/browser": "^7.0.5",
+    "@capacitor-community/admob": "^8.0.0",
     "@capacitor/clipboard": "^7.0.4",
     "@capacitor/core": "^7.6.2",
     "@capacitor/haptics": "^7.0.5",

@@ -46,7 +46,7 @@ export function createRoomMutationsController(deps){
   async function startRoom(){
     const state=deps.getState();
     const roomDb=deps.currentRoomDb();
-    if(!state.room.id||!roomDb)return;
+    if(!state.room.id||!roomDb)return false;
     const uid=deps.currentRoomPlayerId();
     try{
       const ref=roomDb.collection(deps.FIRESTORE_ROOMS_COLLECTION).doc(state.room.id);
@@ -92,11 +92,13 @@ export function createRoomMutationsController(deps){
           console.error('start room finalize failed',err);
         }
       },200);
+      return true;
     }catch(err){
       console.error('start room failed',err);
       const msg=String(err?.message??'');
       if(msg.includes('need players'))deps.setRoomError(deps.t('roomNeedPlayers'));
       deps.clearRoomStartPending();
+      return false;
     }
   }
 

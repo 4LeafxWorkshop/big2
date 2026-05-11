@@ -581,7 +581,8 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
         synced=await syncLeaderboardProfile(currentLeaderboardIdentity());
         if(!synced)await waitMs(250);
       }
-      await startRoom();
+      const started=await startRoom();
+      if(started)schedulePopunderAfterRender(350);
     };
     const roomStartBtn=doc.getElementById('room-start');
     roomStartBtn?.addEventListener('click',handleRoomStart);

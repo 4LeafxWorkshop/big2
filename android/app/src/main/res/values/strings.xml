@@ -5,4 +5,5 @@
     <string name="package_name">com.fourleafx.big2</string>
     <string name="custom_url_scheme">com.fourleafx.big2</string>
     <string name="server_client_id">477275151783-tcvc9gbhlq03kuvlsajoke17v9hostic.apps.googleusercontent.com</string>
+    <string name="admob_app_id">ca-app-pub-7970370189900466~3607539293</string>
 </resources>

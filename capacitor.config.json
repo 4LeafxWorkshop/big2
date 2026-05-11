@@ -2,7 +2,7 @@
   "appId": "com.fourleafx.big2",
   "appName": "港式鋤大D Big2",
   "webDir": "dist",
-  "server": {
+  "Xserver": {
     "url": "https://4leafx.com/big2",
     "cleartext": true
   },
