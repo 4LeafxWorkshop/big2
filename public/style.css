@@ -7083,6 +7083,10 @@ body[data-screen='game'][data-orientation='portrait'] #game-log-fab {
   z-index: 11970 !important;
   touch-action: auto !important;
 }
+body[data-screen='game'][data-orientation='portrait'] #game-log-fab,
+body[data-screen='game'][data-orientation='portrait'] .log-sheet {
+  z-index: 15050 !important;
+}
 body[data-screen='game'][data-orientation='portrait'] #game-log-fab .game-log-fab-copy {
   gap: 6px !important;
 }
