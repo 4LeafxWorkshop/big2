@@ -6,6 +6,7 @@ const ANDROID_INTERSTITIAL_AD_UNIT_ID='ca-app-pub-7970370189900466/3672876062';
 const IOS_INTERSTITIAL_AD_UNIT_ID='ca-app-pub-7970370189900466/1046712725';
 
 export function createMobileAdsController({
+  adMob=AdMob,
   isNativeAndroidApp=()=>false,
   isNativeIosApp=()=>false,
   useTestAdUnits=true
@@ -26,7 +27,7 @@ export function createMobileAdsController({
 
   async function initialize(){
     if(!isNativeAdMobPlatform())return false;
-    initializePromise??=AdMob.initialize()
+    initializePromise??=adMob.initialize(useTestAdUnits?{initializeForTesting:true}:undefined)
       .then(()=>true)
       .catch((err)=>{
         initializePromise=null;
@@ -39,7 +40,7 @@ export function createMobileAdsController({
     if(!isNativeAdMobPlatform())return false;
     await initialize();
     if(interstitialLoadPromise)return interstitialLoadPromise;
-    interstitialLoadPromise=AdMob.prepareInterstitial({
+    interstitialLoadPromise=adMob.prepareInterstitial({
       adId:currentInterstitialAdUnitId(),
       isTesting:useTestAdUnits
     }).then(()=>true).catch((err)=>{
@@ -55,7 +56,7 @@ export function createMobileAdsController({
     if(!isNativeAdMobPlatform())return false;
     await initialize();
     await prepareStartGameInterstitial();
-    await AdMob.showInterstitial();
+    await adMob.showInterstitial();
     void prepareStartGameInterstitial();
     return true;
   }

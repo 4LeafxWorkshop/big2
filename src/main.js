@@ -3411,7 +3411,8 @@ function isNativeIosApp(){
 }
 const mobileAdsController=createMobileAdsController({
   isNativeAndroidApp,
-  isNativeIosApp
+  isNativeIosApp,
+  useTestAdUnits:APP_CHANNEL!=='STORE'
 });
 function initNativeGoogleAuth(){
   if(!isNativeAndroidApp()&&!isNativeIosApp())return;
