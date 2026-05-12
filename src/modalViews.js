@@ -11,8 +11,18 @@ export function gestureGuideIconSvg(){
   return gestureIconSvg('handUp');
 }
 
+function gesturePopupIconSvg(){
+  return gestureIconSvg('hand');
+}
+
 function gestureIconSvg(kind){
   const icons={
+    hand:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M8 11v-4.5a1.5 1.5 0 0 1 3 0V11m0-1V8.5a1.5 1.5 0 0 1 3 0V11m0 0V9.5a1.5 1.5 0 0 1 3 0V15c0 3-2 6-5 6H10c-1.7 0-3.2-1-4-2.6L4 14.8c-.5-1 0-2.2 1-2.7.9-.4 2 .1 2.5 1.1l1 1.9V11c0-1 .8-1.8 1.8-1.8.9 0 1.7.7 1.7 1.6"/></svg>`,
+    up:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 4V2m0 0 2 2M12 2 10 4"/></svg>`,
+    right:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20 12h-2m0 0 2-2m-2 2 2 2"/></svg>`,
+    down:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 20v2m0 0-2-2m2 2 2-2"/></svg>`,
+    left:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 12h2m0 0-2-2m2 2-2 2"/></svg>`,
+    card:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="6.5" y="5.5" width="11" height="13" rx="1.8"/><path d="M12 15V9"/><path d="M9 12l3-3 3 3"/></svg>`,
     handUp:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M8 11v-4.5a1.5 1.5 0 0 1 3 0V11m0-1V8.5a1.5 1.5 0 0 1 3 0V11m0 0V9.5a1.5 1.5 0 0 1 3 0V15c0 3-2 6-5 6H10c-1.7 0-3.2-1-4-2.6L4 14.8c-.5-1 0-2.2 1-2.7.9-.4 2 .1 2.5 1.1l1 1.9V11c0-1 .8-1.8 1.8-1.8.9 0 1.7.7 1.7 1.6"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 4V2m0 0 2 2M12 2 10 4"/></svg>`,
     handRight:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M8 11v-4.5a1.5 1.5 0 0 1 3 0V11m0-1V8.5a1.5 1.5 0 0 1 3 0V11m0 0V9.5a1.5 1.5 0 0 1 3 0V15c0 3-2 6-5 6H10c-1.7 0-3.2-1-4-2.6L4 14.8c-.5-1 0-2.2 1-2.7.9-.4 2 .1 2.5 1.1l1 1.9V11c0-1 .8-1.8 1.8-1.8.9 0 1.7.7 1.7 1.6"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20 12h-2m0 0 2-2m-2 2 2 2"/></svg>`,
     handDown:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M8 11v-4.5a1.5 1.5 0 0 1 3 0V11m0-1V8.5a1.5 1.5 0 0 1 3 0V11m0 0V9.5a1.5 1.5 0 0 1 3 0V15c0 3-2 6-5 6H10c-1.7 0-3.2-1-4-2.6L4 14.8c-.5-1 0-2.2 1-2.7.9-.4 2 .1 2.5 1.1l1 1.9V11c0-1 .8-1.8 1.8-1.8.9 0 1.7.7 1.7 1.6"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 20v2m0 0-2-2m2 2 2-2"/></svg>`,
@@ -22,8 +32,20 @@ function gestureIconSvg(kind){
   return icons[kind]??icons.handUp;
 }
 
+function gestureIconPairHtml(primaryKind,secondaryKind){
+  return `<span class="coach-gesture-icon coach-gesture-icon-pair" aria-hidden="true"><span class="coach-gesture-icon-part coach-gesture-icon-primary">${gestureIconSvg(primaryKind)}</span><span class="coach-gesture-icon-part coach-gesture-icon-secondary">${gestureIconSvg(secondaryKind)}</span></span>`;
+}
+
 function gestureListItemHtml(text,kind,esc){
-  return `<li class="coach-gesture-item"><span class="coach-gesture-icon" aria-hidden="true">${gestureIconSvg(kind)}</span><span class="coach-gesture-text">${esc(text)}</span></li>`;
+  const iconMap={
+    handUp:['hand','up'],
+    handRight:['hand','right'],
+    handDown:['hand','down'],
+    handLeft:['hand','left'],
+    cardUp:['card','up']
+  };
+  const [primaryKind,secondaryKind]=iconMap[kind]??iconMap.handUp;
+  return `<li class="coach-gesture-item">${gestureIconPairHtml(primaryKind,secondaryKind)}<span class="coach-gesture-text">${esc(text)}</span></li>`;
 }
 
 export function renderIntroPanel(params){
@@ -51,7 +73,7 @@ export function renderIntroPanel(params){
     .map((p)=>`<p>${colorizeSuitText(p)}</p>`)
     .join('');
   const gestureHtml=showGestureGuide&&gestureList
-    ?`<article class="intro-block"><h4 class="title-with-icon"><span class="title-icon title-icon-guide" aria-hidden="true">${gestureGuideIconSvg()}</span><span>${esc(intro.guideGestureTitle)}</span></h4><p>${esc(intro.guideGestureIntro)}</p><ul>${gestureList}</ul></article>`
+    ?`<article class="intro-block"><h4 class="title-with-icon"><span class="title-icon title-icon-guide" aria-hidden="true">${gesturePopupIconSvg()}</span><span>${esc(intro.guideGestureTitle)}</span></h4><p>${esc(intro.guideGestureIntro)}</p><ul>${gestureList}</ul></article>`
     :'';
   return`<div class="intro-modal" id="intro-modal"><button class="intro-backdrop" id="intro-backdrop" aria-label="${esc(intro.btnHide)}"></button><section class="intro-sheet"><header class="intro-head"><div><h3 class="title-with-icon"><span class="title-icon title-icon-guide" aria-hidden="true"></span><span>${esc(intro.panelTitle)}</span></h3>${intro.panelSub?`<p>${colorizeSuitText(intro.panelSub)}</p>`:''}</div><button id="intro-close" class="secondary">${esc(intro.btnHide)}</button></header><div class="intro-grid"><article class="intro-block"><h4>${esc(intro.historyTitle)}</h4>${historyBlocks}</article><article class="intro-block"><h4>${esc(intro.howTitle)}</h4><p>${colorizeSuitText(intro.howBody)}</p><div class="intro-hand-list">${rows}</div></article><article class="intro-block"><h4>${esc(intro.flowTitle)}</h4><ul>${(intro.flowList??[]).map((x)=>`<li>${formatIntroLine(x)}</li>`).join('')}</ul></article><article class="intro-block"><h4>${esc(intro.playTitle)}</h4><ul>${(intro.playList??[]).map((x)=>`<li>${formatIntroLine(x)}</li>`).join('')}</ul></article><article class="intro-block"><h4>${esc(intro.guideHowTitle)}</h4><p>${esc(intro.guideHowIntro)}</p><ul>${howList}</ul></article>${gestureHtml}</div></section></div>`;
 }
@@ -63,7 +85,7 @@ export function renderCoachMarksPanel(params){
   }=params;
   const gestureKinds=['handUp','handRight','handDown','handLeft','cardUp'];
   const gestureList=(intro.guideGestureList??[]).map((x,i)=>gestureListItemHtml(x,gestureKinds[i]??gestureKinds[0],esc)).join('');
-  return`<div class="intro-modal coach-marks-modal" id="coach-marks-modal"><button class="intro-backdrop" id="coach-marks-backdrop" aria-label="${esc(intro.btnHide)}"></button><section class="intro-sheet coach-marks-sheet"><header class="intro-head"><div><h3 class="title-with-icon"><span class="title-icon title-icon-guide" aria-hidden="true">${gestureGuideIconSvg()}</span><span>${esc(intro.guideGestureTitle)}</span></h3><p>${esc(intro.guideGestureIntro)}</p></div><button id="coach-marks-close" class="secondary coach-marks-close-btn"><span class="coach-close-icon" aria-hidden="true">${gestureIconSvg('discard')}</span><span>${esc(intro.btnHide)}</span></button></header><div class="intro-grid"><article class="intro-block coach-marks-block"><ul>${gestureList}</ul></article></div></section></div>`;
+  return`<div class="intro-modal coach-marks-modal" id="coach-marks-modal"><button class="intro-backdrop" id="coach-marks-backdrop" aria-label="${esc(intro.btnHide)}"></button><section class="intro-sheet coach-marks-sheet"><header class="intro-head"><div><h3 class="title-with-icon"><span class="title-icon title-icon-guide" aria-hidden="true">${gesturePopupIconSvg()}</span><span>${esc(intro.guideGestureTitle)}</span></h3><p>${esc(intro.guideGestureIntro)}</p></div><button id="coach-marks-close" class="secondary coach-marks-close-btn">${esc(intro.btnHide)}</button></header><div class="intro-grid"><article class="intro-block coach-marks-block"><ul>${gestureList}</ul></article></div></section></div>`;
 }
 
 export function renderLeaderboardPanel(params){

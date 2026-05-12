@@ -4543,18 +4543,39 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
 }
 .coach-gesture-item {
   display: grid;
-  grid-template-columns: 20px minmax(0, 1fr);
+  grid-template-columns: 24px minmax(0, 1fr);
   gap: 8px;
   align-items: start;
 }
 .coach-gesture-icon {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   color: #7ec0ff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   margin-top: 1px;
+}
+.coach-gesture-icon-pair {
+  gap: 2px;
+}
+.coach-gesture-icon-part {
+  width: 11px;
+  height: 11px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+}
+.coach-gesture-icon-part svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .coach-gesture-icon svg {
   width: 100%;
