@@ -93,7 +93,8 @@ export function buildGameAuxRenderState(params){
     renderHandCard,
     cardId,
     showMust3Highlight,
-    isLowestSingle
+    isLowestSingle,
+    isMobilePointer
   }=params;
   const portraitMode=isPortraitMode();
   const logSheetOpen=portraitMode&&state.showLogSheet;
@@ -113,6 +114,9 @@ export function buildGameAuxRenderState(params){
     (showMust3Highlight&&isLowestSingle(card))?'must3-highlight':'',
     index+1
   )).join('');
+  const discardSwipeHintHtml=portraitMode&&isMobilePointer?.()
+    ?'<span aria-hidden="true">↑ swipe up to discard</span>'
+    :'';
   return{
     portraitMode,
     logSheetOpen,
@@ -124,7 +128,8 @@ export function buildGameAuxRenderState(params){
     showRecommendHint,
     isRecPlay,
     emotePanel,
-    handHtml
+    handHtml,
+    discardSwipeHintHtml
   };
 }
 

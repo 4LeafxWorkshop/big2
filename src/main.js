@@ -6380,7 +6380,8 @@ function renderGame(){
     showRecommendHint,
     isRecPlay,
     emotePanel,
-    handHtml
+    handHtml,
+    discardSwipeHintHtml
   }=buildGameAuxRenderState({
     state,
     v,
@@ -6394,7 +6395,8 @@ function renderGame(){
     renderHandCard,
     cardId,
     showMust3Highlight,
-    isLowestSingle
+    isLowestSingle,
+    isMobilePointer
   });
   const logSheetHtml=renderGameLogSheet({
     logSheetOpen,
@@ -6438,7 +6440,8 @@ function renderGame(){
     esc,
     canAutoSort,
     emotePanel,
-    handHtml
+    handHtml,
+    discardSwipeHintHtml
   });
   app.innerHTML=buildGameShellMarkup({
     v,

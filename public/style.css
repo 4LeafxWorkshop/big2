@@ -7966,6 +7966,17 @@ body[data-screen='game'] .log-side-card .log-status {
     font-size: .56rem;
   }
 }
+body[data-screen='game'][data-orientation='portrait'] .action-strip .hand-hint {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(6, 18, 30, .62);
+  border: 1px solid rgba(255,255,255,.16);
+  color: rgba(240, 248, 255, .9);
+  box-shadow: 0 6px 14px rgba(0,0,0,.18);
+}
 @media (max-width: 1220px) and (orientation: portrait) {
   body[data-screen='game'] .topbar {
     flex-wrap: wrap;
@@ -8742,6 +8753,9 @@ body[data-orientation='landscape'] .table { --table-tilt: 0deg; }
   width: 100%;
   max-height: 70dvh;
   overflow: hidden;
+}
+body[data-screen='game'][data-log-sheet='1'] .game-foreground-layer {
+  display: none !important;
 }
 .log-sheet-head {
   display: flex;
