@@ -61,6 +61,7 @@ test('renderIntroPanel includes sample cards and close controls', ()=>{
   assert.match(html,/class="card"/);
   assert.match(html,/Guide How/);
   assert.match(html,/Mobile game gestures:/);
+  assert.match(html,/gesture-icons\/hand-up\.png/);
   assert.match(html,/title-icon-guide/);
   assert.match(html,/coach-gesture-icon-pair/);
 });
@@ -77,7 +78,8 @@ test('renderCoachMarksPanel uses the gesture guide icon', ()=>{
   });
   assert.match(html,/id="coach-marks-modal"/);
   assert.match(html,/coach-marks-close/);
-  assert.match(html,/title-icon-guide/);
+  assert.match(html,/gesture-icons\/hand-up\.png/);
+  assert.doesNotMatch(html,/title-icon-guide/);
   assert.doesNotMatch(html,/coach-close-icon/);
 });
 

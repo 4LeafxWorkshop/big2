@@ -10,7 +10,7 @@ export function createIntroGuideHelpers(deps){
     renderStaticCard,
     ranks,
     suits,
-    isMobilePointer,
+    isGestureHelpEnabled=()=>false,
   }=deps;
 
   function introText(){
@@ -379,7 +379,7 @@ export function createIntroGuideHelpers(deps){
         '輪到你時，選牌後按「出牌」，可過牌時按「過牌」。',
         '需要提示可按「建議」，亦可使用排序或拖曳整理手牌。'
       ],
-      guideGestureTitle:'手勢操作',
+      guideGestureTitle:'手勢提示',
       guideGestureIntro:'手機遊戲手勢：',
       guideGestureList:[
         '在桌面向上滑動可打開遊戲記錄。',
@@ -488,7 +488,7 @@ export function createIntroGuideHelpers(deps){
       appTitle:t('title'),
       renderStaticCard,
       introHandSamples:introHandSamples(),
-      showGestureGuide:Boolean(isMobilePointer?.())
+      showGestureGuide:Boolean(isGestureHelpEnabled?.())
     });
   }
 

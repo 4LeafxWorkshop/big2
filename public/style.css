@@ -4225,10 +4225,13 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237ec0ff' stroke-width='2.05' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='4' y='3' width='16' height='18' rx='2'/%3E%3Cpath d='M8 8h8M8 12h8M8 16h5'/%3E%3C/svg%3E");
 }
 .title-icon-guide {
+  width: 1.15rem;
+  height: 1.15rem;
+  margin-top: -2px;
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237ec0ff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 11v-4.5a1.5 1.5 0 0 1 3 0V11m0-1V8.5a1.5 1.5 0 0 1 3 0V11m0 0V9.5a1.5 1.5 0 0 1 3 0V15c0 3-2 6-5 6H10c-1.7 0-3.2-1-4-2.6L4 14.8c-.5-1 0-2.2 1-2.7.9-.4 2 .1 2.5 1.1l1 1.9V11c0-1 .8-1.8 1.8-1.8.9 0 1.7.7 1.7 1.6'/%3E%3Cpath d='M12 4V2m0 0 2 2M12 2 10 4'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237ec0ff' stroke-width='2.05' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6.5 6.2A2.2 2.2 0 0 1 8.7 4h5.1c1.3 0 2.5.4 3.4 1.3.9-.9 2.1-1.3 3.4-1.3h5.1A2.2 2.2 0 0 1 28 6.2V18a2.2 2.2 0 0 1-2.2 2.2h-5.1c-1.3 0-2.5.4-3.4 1.3-.9-.9-2.1-1.3-3.4-1.3H8.7A2.2 2.2 0 0 1 6.5 18V6.2Z' transform='scale(.714)'/%3E%3Cpath d='M12 6v13'/%3E%3Cpath d='M7.5 8.2h4.1'/%3E%3Cpath d='M7.5 11.2h4.1'/%3E%3Cpath d='M12.4 8.2h4.1'/%3E%3Cpath d='M12.4 11.2h4.1'/%3E%3C/svg%3E");
 }
 .title-icon-leaderboard {
   background-repeat: no-repeat;
@@ -4543,49 +4546,25 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
 }
 .coach-gesture-item {
   display: grid;
-  grid-template-columns: 24px minmax(0, 1fr);
-  gap: 8px;
+  grid-template-columns: 52px minmax(0, 1fr);
+  gap: 14px;
   align-items: start;
 }
 .coach-gesture-icon {
-  width: 24px;
-  height: 24px;
+  width: 52px;
+  height: 52px;
   color: #7ec0ff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-top: 1px;
+  margin-top: 0;
 }
-.coach-gesture-icon-pair {
-  gap: 2px;
-}
-.coach-gesture-icon-part {
-  width: 11px;
-  height: 11px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-}
-.coach-gesture-icon-part svg {
+.gesture-icon-image,
+.coach-gesture-icon img {
   width: 100%;
   height: 100%;
   display: block;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-.coach-gesture-icon svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+  object-fit: contain;
 }
 .coach-gesture-text {
   min-width: 0;
@@ -9267,10 +9246,10 @@ body[data-screen='game'] .table .coach-marks-badge {
   position: absolute;
   top: calc(var(--table-felt-inset) + 8px);
   right: calc(var(--table-felt-inset) + 8px);
-  width: 44px;
-  height: 44px;
-  min-width: 44px;
-  min-height: 44px;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
   padding: 0;
   border-radius: 999px;
   border: 1px solid rgba(255,255,255,.14);
@@ -9287,9 +9266,6 @@ body[data-screen='game'] .table .coach-marks-badge {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
-body[data-screen='game']:not([data-native-ios='1']):not([data-native-android='1']) .table .coach-marks-badge {
-  display: none !important;
-}
 body[data-screen='game'] .table .coach-marks-badge:hover,
 body[data-screen='game'] .table .coach-marks-badge:active,
 body[data-screen='game'] .table .coach-marks-badge:focus-visible {
@@ -9298,9 +9274,15 @@ body[data-screen='game'] .table .coach-marks-badge:focus-visible {
   background: rgba(8, 24, 38, .34);
 }
 body[data-screen='game'] .table .coach-marks-badge svg {
-  width: 26px;
-  height: 26px;
+  width: 30px;
+  height: 30px;
   display: block;
+}
+body[data-screen='game'] .table .coach-marks-badge img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: contain;
 }
 
 body[data-screen='game'][data-orientation='portrait'] .table {
