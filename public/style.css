@@ -6765,6 +6765,9 @@ body[data-screen='game'] .self-table-emote.emote-rude {
   flex: 0 0 auto;
   cursor: grab;
   touch-action: manipulation;
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+  user-select: none;
   transition: transform 120ms ease, box-shadow 120ms ease;
   padding: 0;
   border: 0;
@@ -8720,7 +8723,7 @@ body[data-orientation='landscape'] .table { --table-tilt: 0deg; }
 .log-sheet {
   position: fixed;
   inset: 0;
-  z-index: 11980;
+  z-index: 2147483647;
   display: grid;
   align-items: end;
   justify-items: stretch;
@@ -9985,6 +9988,25 @@ body[data-screen='game'] .seat-name-fixed .player-avatar-wrap.player-avatar-wrap
 body[data-screen='game'] .action-strip .player-tag .player-avatar-wrap.player-avatar-wrap-self {
   width: 38px;
   height: 38px;
+}
+body[data-screen='game'][data-orientation='portrait'] .action-strip .player-tag .player-avatar-self {
+  pointer-events: none;
+  -webkit-touch-callout: none;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+@media (max-width: 860px) and (orientation: portrait) {
+  body[data-screen='game'] .action-strip .hand .hand-card {
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-drag: none;
+    user-select: none;
+  }
+  body[data-screen='game'] .action-strip .hand .hand-card .card-art {
+    -webkit-touch-callout: none;
+    -webkit-user-drag: none;
+    user-select: none;
+  }
 }
 body[data-screen='game'] .seat-count-tag,
 body[data-screen='game'] .action-strip .player-tag .seat-count-tag {

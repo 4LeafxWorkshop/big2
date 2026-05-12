@@ -117,6 +117,14 @@ function bindCardInteractions({
     let touchTapActive=false;
     let touchStartX=0;
     let touchStartY=0;
+    const triggerSwipeDiscard=()=>{
+      unlockAudio();
+      if(!v.canControl||!id)return;
+      if(!state.selected.size)state.selected.add(id);
+      playSound('select');
+      mobileTapState.lastTapAt=Date.now();
+      document.getElementById('play-btn')?.click();
+    };
     const toggleSelect=()=>{
       unlockAudio();
       if(!v.canControl||!id)return;
@@ -142,6 +150,12 @@ function bindCardInteractions({
     n.addEventListener('drop',(e)=>{if(!dragEnabled||!id)return;e.preventDefault();hideDragPopup();const fromId=state.drag.id||e.dataTransfer?.getData('text/plain');if(!fromId||fromId===id)return;reorderCurrent(v,fromId,id);state.drag.moved=true;render();});
     n.addEventListener('dragend',()=>{hideDragPopup();setTimeout(()=>{state.drag.id=null;},0);});
     if(isMobilePointer()){
+      n.addEventListener('contextmenu',(e)=>{
+        e.preventDefault();
+        e.stopPropagation();
+      });
+    }
+    if(isMobilePointer()){
       if(window.PointerEvent){
         n.addEventListener('pointerdown',(e)=>{
           if(e.pointerType==='mouse')return;
@@ -155,7 +169,14 @@ function bindCardInteractions({
           if(e.pointerType==='mouse')return;
           if(!pointerTapActive||e.pointerId!==pointerTapId)return;
           pointerTapActive=false;
-          const moved=Math.hypot(e.clientX-pointerStartX,e.clientY-pointerStartY);
+          const dx=e.clientX-pointerStartX;
+          const dy=pointerStartY-e.clientY;
+          const moved=Math.hypot(dx,dy);
+          if(dy>56&&Math.abs(dx)<Math.max(28,dy*0.5)){
+            e.preventDefault();
+            triggerSwipeDiscard();
+            return;
+          }
           if(moved>12)return;
           e.preventDefault();
           mobileTapState.lastTapAt=Date.now();
@@ -176,7 +197,14 @@ function bindCardInteractions({
           touchTapActive=false;
           const touch=e.changedTouches?.[0];
           if(!touch)return;
-          const moved=Math.hypot(touch.clientX-touchStartX,touch.clientY-touchStartY);
+          const dx=touch.clientX-touchStartX;
+          const dy=touchStartY-touch.clientY;
+          const moved=Math.hypot(dx,dy);
+          if(dy>56&&Math.abs(dx)<Math.max(28,dy*0.5)){
+            e.preventDefault();
+            triggerSwipeDiscard();
+            return;
+          }
           if(moved>12)return;
           e.preventDefault();
           mobileTapState.lastTapAt=Date.now();
