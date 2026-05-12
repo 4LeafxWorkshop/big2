@@ -5449,7 +5449,14 @@ function handleGameTopbarClick(ev){
   const btn=t.closest?.('#game-intro-toggle,#coach-marks-toggle,#score-guide-toggle,#game-lb-toggle,#game-log-fab');
   if(!btn)return;
   if(btn.id==='game-intro-toggle'){state.home.showIntro=true;render();return;}
-  if(btn.id==='coach-marks-toggle'){state.showCoachMarks=true;render();return;}
+  if(btn.id==='coach-marks-toggle'){
+    try{
+      window.localStorage?.removeItem('big2.mobileCoachMarksDismissed.v1');
+    }catch{}
+    state.showCoachMarks=true;
+    render();
+    return;
+  }
   if(btn.id==='score-guide-toggle'){state.showScoreGuide=true;render();return;}
   if(btn.id==='game-lb-toggle'){state.home.showLeaderboard=true;refreshLeaderboard(true);render();return;}
   if(btn.id==='game-log-fab'){

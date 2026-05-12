@@ -9245,12 +9245,12 @@ body[data-screen='game'] .table-turn-compass .table-turn-pointer {
 }
 body[data-screen='game'] .table .coach-marks-badge {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  width: 28px;
-  height: 28px;
-  min-width: 28px;
-  min-height: 28px;
+  top: 10px;
+  right: 10px;
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  min-height: 34px;
   padding: 0;
   border-radius: 999px;
   border: 1px solid rgba(255,255,255,.14);
@@ -9275,8 +9275,8 @@ body[data-screen='game'] .table .coach-marks-badge:focus-visible {
   background: rgba(8, 24, 38, .34);
 }
 body[data-screen='game'] .table .coach-marks-badge svg {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   display: block;
 }
 
