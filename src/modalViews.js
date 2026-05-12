@@ -7,6 +7,10 @@ export function renderConfidentialStamp({text,esc,classes=''}) {
   return `<span class="${className}" aria-hidden="true">${esc(text)}</span>`;
 }
 
+function gestureHandIconSvg(){
+  return `<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M8 11v-4.5a1.5 1.5 0 0 1 3 0V11m0-1V8.5a1.5 1.5 0 0 1 3 0V11m0 0V9.5a1.5 1.5 0 0 1 3 0V15c0 3-2 6-5 6H10c-1.7 0-3.2-1-4-2.6L4 14.8c-.5-1 0-2.2 1-2.7.9-.4 2 .1 2.5 1.1l1 1.9V11c0-1 .8-1.8 1.8-1.8.9 0 1.7.7 1.7 1.6"/></svg>`;
+}
+
 function gestureIconSvg(kind){
   const icons={
     log:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 5.5h12A2.5 2.5 0 0 1 20.5 8v5A2.5 2.5 0 0 1 18 15.5h-7l-4 3v-3H6A2.5 2.5 0 0 1 3.5 13V8A2.5 2.5 0 0 1 6 5.5Z"/><path d="M8 9h8"/><path d="M8 11.8h5"/></svg>`,
@@ -47,7 +51,7 @@ export function renderIntroPanel(params){
     .map((p)=>`<p>${colorizeSuitText(p)}</p>`)
     .join('');
   const gestureHtml=showGestureGuide&&gestureList
-    ?`<article class="intro-block"><h4>${esc(intro.guideGestureTitle)}</h4><p>${esc(intro.guideGestureIntro)}</p><ul>${gestureList}</ul></article>`
+    ?`<article class="intro-block"><h4 class="title-with-icon"><span class="title-icon title-icon-guide" aria-hidden="true">${gestureHandIconSvg()}</span><span>${esc(intro.guideGestureTitle)}</span></h4><p>${esc(intro.guideGestureIntro)}</p><ul>${gestureList}</ul></article>`
     :'';
   return`<div class="intro-modal" id="intro-modal"><button class="intro-backdrop" id="intro-backdrop" aria-label="${esc(intro.btnHide)}"></button><section class="intro-sheet"><header class="intro-head"><div><h3 class="title-with-icon"><span class="title-icon title-icon-guide" aria-hidden="true"></span><span>${esc(intro.panelTitle)}</span></h3>${intro.panelSub?`<p>${colorizeSuitText(intro.panelSub)}</p>`:''}</div><button id="intro-close" class="secondary">${esc(intro.btnHide)}</button></header><div class="intro-grid"><article class="intro-block"><h4>${esc(intro.historyTitle)}</h4>${historyBlocks}</article><article class="intro-block"><h4>${esc(intro.howTitle)}</h4><p>${colorizeSuitText(intro.howBody)}</p><div class="intro-hand-list">${rows}</div></article><article class="intro-block"><h4>${esc(intro.flowTitle)}</h4><ul>${(intro.flowList??[]).map((x)=>`<li>${formatIntroLine(x)}</li>`).join('')}</ul></article><article class="intro-block"><h4>${esc(intro.playTitle)}</h4><ul>${(intro.playList??[]).map((x)=>`<li>${formatIntroLine(x)}</li>`).join('')}</ul></article><article class="intro-block"><h4>${esc(intro.guideHowTitle)}</h4><p>${esc(intro.guideHowIntro)}</p><ul>${howList}</ul></article>${gestureHtml}</div></section></div>`;
 }
@@ -59,7 +63,7 @@ export function renderCoachMarksPanel(params){
   }=params;
   const gestureKinds=['log','recommend','food','emote','discard'];
   const gestureList=(intro.guideGestureList??[]).map((x,i)=>gestureListItemHtml(x,gestureKinds[i]??gestureKinds[0],esc)).join('');
-  return`<div class="intro-modal coach-marks-modal" id="coach-marks-modal"><button class="intro-backdrop" id="coach-marks-backdrop" aria-label="${esc(intro.btnHide)}"></button><section class="intro-sheet coach-marks-sheet"><header class="intro-head"><div><h3 class="title-with-icon"><span class="title-icon title-icon-guide" aria-hidden="true"></span><span>${esc(intro.guideGestureTitle)}</span></h3><p>${esc(intro.guideGestureIntro)}</p></div><button id="coach-marks-close" class="secondary coach-marks-close-btn"><span class="coach-close-icon" aria-hidden="true">${gestureIconSvg('discard')}</span><span>${esc(intro.btnHide)}</span></button></header><div class="intro-grid"><article class="intro-block coach-marks-block"><ul>${gestureList}</ul></article></div></section></div>`;
+  return`<div class="intro-modal coach-marks-modal" id="coach-marks-modal"><button class="intro-backdrop" id="coach-marks-backdrop" aria-label="${esc(intro.btnHide)}"></button><section class="intro-sheet coach-marks-sheet"><header class="intro-head"><div><h3 class="title-with-icon"><span class="title-icon title-icon-guide" aria-hidden="true">${gestureHandIconSvg()}</span><span>${esc(intro.guideGestureTitle)}</span></h3><p>${esc(intro.guideGestureIntro)}</p></div><button id="coach-marks-close" class="secondary coach-marks-close-btn"><span class="coach-close-icon" aria-hidden="true">${gestureIconSvg('discard')}</span><span>${esc(intro.btnHide)}</span></button></header><div class="intro-grid"><article class="intro-block coach-marks-block"><ul>${gestureList}</ul></article></div></section></div>`;
 }
 
 export function renderLeaderboardPanel(params){
