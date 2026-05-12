@@ -9967,39 +9967,6 @@ body[data-screen='game'] .player-avatar-wrap > .player-avatar {
   display: block;
   background: linear-gradient(140deg, var(--player-color, #7aaed8), #ffffff);
 }
-body[data-screen='game'] .player-avatar-wrap .coach-marks-badge {
-  position: absolute;
-  right: -7px;
-  bottom: -7px;
-  z-index: 8;
-  width: 18px;
-  height: 18px;
-  padding: 0;
-  border: 1px solid rgba(255,255,255,.24);
-  border-radius: 999px;
-  background: rgba(7, 22, 34, .78);
-  color: rgba(244, 249, 251, .88);
-  box-shadow: 0 1px 4px rgba(0, 0, 0, .24);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: .7rem;
-  font-weight: 700;
-  line-height: 1;
-  opacity: .82;
-  cursor: pointer;
-  pointer-events: auto;
-  touch-action: manipulation;
-  -webkit-tap-highlight-color: transparent;
-}
-body[data-screen='game'] .player-avatar-wrap .coach-marks-badge:hover,
-body[data-screen='game'] .player-avatar-wrap .coach-marks-badge:active {
-  opacity: 1;
-}
-body[data-screen='game'] .player-avatar-wrap .coach-marks-badge span {
-  display: block;
-  transform: translateY(-.5px);
-}
 body[data-screen='game'] .player-avatar-wrap.avatar-rim::after {
   content: '';
   position: absolute;
@@ -10424,6 +10391,37 @@ body[data-screen='game'] .action-strip .control-row .game-icon-btn .sort-icon {
   height: 18px;
   display: block;
   flex: 0 0 auto;
+}
+body[data-screen='game'] .topbar .coach-marks-badge {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(255,255,255,.04);
+  color: rgba(244,249,251,.82);
+  box-shadow: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: .72rem;
+  font-weight: 700;
+  line-height: 1;
+  opacity: .72;
+  flex: 0 0 auto;
+}
+body[data-screen='game'] .topbar .coach-marks-badge:hover,
+body[data-screen='game'] .topbar .coach-marks-badge:active,
+body[data-screen='game'] .topbar .coach-marks-badge:focus-visible {
+  opacity: 1;
+  border-color: rgba(255,255,255,.26);
+  background: rgba(255,255,255,.08);
+}
+body[data-screen='game'] .topbar .coach-marks-badge span {
+  display: block;
+  transform: translateY(-.5px);
 }
 body[data-screen='game'] .service-bell-layer {
   position: absolute;
