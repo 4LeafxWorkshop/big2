@@ -9247,10 +9247,10 @@ body[data-screen='game'] .table .coach-marks-badge {
   position: absolute;
   top: 10px;
   right: 10px;
-  width: 40px;
-  height: 40px;
-  min-width: 40px;
-  min-height: 40px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
   padding: 0;
   border-radius: 999px;
   border: 1px solid rgba(255,255,255,.14);
@@ -9260,7 +9260,7 @@ body[data-screen='game'] .table .coach-marks-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  z-index: 6;
+  z-index: 2147483450;
   opacity: .66;
   flex: 0 0 auto;
   pointer-events: auto;
@@ -9275,8 +9275,8 @@ body[data-screen='game'] .table .coach-marks-badge:focus-visible {
   background: rgba(8, 24, 38, .34);
 }
 body[data-screen='game'] .table .coach-marks-badge svg {
-  width: 24px;
-  height: 24px;
+  width: 26px;
+  height: 26px;
   display: block;
 }
 
