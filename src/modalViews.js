@@ -9,11 +9,11 @@ export function renderConfidentialStamp({text,esc,classes=''}) {
 
 function gestureIconSvg(kind){
   const icons={
-    log:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v10"/><path d="M8 9l4 4 4-4"/><path d="M5 18h14"/></svg>`,
-    recommend:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3l2.8 6 6.2.9-4.5 4.3 1.1 6.1-5.6-3-5.6 3 1.1-6.1L3 9.9 9.2 9z"/></svg>`,
-    food:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 3v8"/><path d="M11 3v8"/><path d="M9 11v10"/><path d="M17 3v8"/><path d="M17 11c0 4-2 6-4 7"/></svg>`,
-    emote:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="9" cy="10" r="1"/><circle cx="15" cy="10" r="1"/><path d="M8 15c1.1 1.2 2.4 1.8 4 1.8s2.9-.6 4-1.8"/></svg>`,
-    discard:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 8h12"/><path d="M8 8l1 11h6l1-11"/><path d="M10 4h4"/></svg>`
+    log:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 5.5h12A2.5 2.5 0 0 1 20.5 8v5A2.5 2.5 0 0 1 18 15.5h-7l-4 3v-3H6A2.5 2.5 0 0 1 3.5 13V8A2.5 2.5 0 0 1 6 5.5Z"/><path d="M8 9h8"/><path d="M8 11.8h5"/></svg>`,
+    recommend:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4.5" y="5.5" width="11" height="13" rx="1.8"/><path d="M12 12h6"/><path d="M15 9l3 3-3 3"/></svg>`,
+    food:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4.5" y="5.5" width="11" height="13" rx="1.8"/><path d="M10 10v6"/><path d="M7 13l3 3 3-3"/></svg>`,
+    emote:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4.5" y="5.5" width="11" height="13" rx="1.8"/><path d="M14 12H8"/><path d="M11 9l-3 3 3 3"/></svg>`,
+    discard:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4.5" y="5.5" width="11" height="13" rx="1.8"/><path d="M10 14V8"/><path d="M7 11l3-3 3 3"/></svg>`
   };
   return icons[kind]??icons.log;
 }

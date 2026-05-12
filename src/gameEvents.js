@@ -803,11 +803,7 @@ export function createGameEventsBinder({
     document.getElementById('score-guide-close')?.addEventListener('click',()=>{state.showScoreGuide=false;render();});
     document.getElementById('score-guide-backdrop')?.addEventListener('click',()=>{state.showScoreGuide=false;render();});
     document.getElementById('coach-marks-toggle')?.addEventListener('click',()=>{
-      try{
-        window.localStorage?.removeItem?.('big2_coach_marks_dismissed');
-      }catch{}
-      state.showCoachMarks=true;
-      render();
+      window.__big2OpenCoachMarks?.();
     });
     document.getElementById('coach-marks-close')?.addEventListener('click',()=>{
       dismissCoachMarks();

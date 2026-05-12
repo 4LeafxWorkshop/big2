@@ -5458,11 +5458,7 @@ function handleGameTopbarClick(ev){
   if(!btn)return;
   if(btn.id==='game-intro-toggle'){state.home.showIntro=true;render();return;}
   if(btn.id==='coach-marks-toggle'){
-    try{
-      window.localStorage?.removeItem('big2.mobileCoachMarksDismissed.v1');
-    }catch{}
-    state.showCoachMarks=true;
-    render();
+    openCoachMarks();
     return;
   }
   if(btn.id==='score-guide-toggle'){state.showScoreGuide=true;render();return;}
@@ -6267,11 +6263,12 @@ function renderGame(){
   const v=buildView();
   if(!v){state.screen='home';renderHome();return;}
   const intro=introText();
-  const coachMarksEligible=isMobilePointer()&&!v.gameOver&&!isCoachMarksDismissed();
+  const coachMarksControlVisible=isMobilePointer()&&(isNativeIosApp()||isNativeAndroidApp());
+  const coachMarksEligible=coachMarksControlVisible&&!v.gameOver&&!isCoachMarksDismissed();
   if(coachMarksEligible&&state.screen==='game'&&!state.showCoachMarks)state.showCoachMarks=true;
   window.__big2OpenCoachMarks=openCoachMarks;
-  const coachMarksButtonHtml=isMobilePointer()
-    ?`<button id="coach-marks-toggle" onclick="return window.__big2OpenCoachMarks?.()" class="secondary coach-marks-badge" type="button" aria-label="${esc(intro.guideGestureTitle)}" data-tooltip="${esc(intro.guideGestureTitle)}"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" preserveAspectRatio="xMidYMid meet"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M8 11v-4.5a1.5 1.5 0 0 1 3 0V11m0-1V8.5a1.5 1.5 0 0 1 3 0V11m0 0V9.5a1.5 1.5 0 0 1 3 0V15c0 3-2 6-5 6H10c-1.7 0-3.2-1-4-2.6L4 14.8c-.5-1 0-2.2 1-2.7.9-.4 2 .1 2.5 1.1l1 1.9V11c0-1 .8-1.8 1.8-1.8.9 0 1.7.7 1.7 1.6"/></svg></button>`
+  const coachMarksButtonHtml=coachMarksControlVisible
+    ?`<button id="coach-marks-toggle" onclick="return window.__big2OpenCoachMarks?.()" class="secondary coach-marks-badge" type="button" aria-label="${esc(intro.guideGestureTitle)}" data-tooltip="${esc(intro.guideGestureTitle)}"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" preserveAspectRatio="xMidYMid meet"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 5.5h12A2.5 2.5 0 0 1 20.5 8v5A2.5 2.5 0 0 1 18 15.5h-7l-4 3v-3H6A2.5 2.5 0 0 1 3.5 13V8A2.5 2.5 0 0 1 6 5.5Z"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M8 9h8"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M8 11.8h5"/></svg></button>`
     :'';
   const rightSidebarDesktop=window.matchMedia('(min-width: 1081px)').matches;
   const rightSidebarMobileLandscape=window.matchMedia('(max-width: 860px) and (orientation: landscape)').matches;

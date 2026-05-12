@@ -9245,8 +9245,8 @@ body[data-screen='game'] .table-turn-compass .table-turn-pointer {
 }
 body[data-screen='game'] .table .coach-marks-badge {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: calc(var(--table-felt-inset) + 8px);
+  right: calc(var(--table-felt-inset) + 8px);
   width: 44px;
   height: 44px;
   min-width: 44px;
@@ -9266,6 +9266,9 @@ body[data-screen='game'] .table .coach-marks-badge {
   pointer-events: auto;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
+}
+body[data-screen='game']:not([data-native-ios='1']):not([data-native-android='1']) .table .coach-marks-badge {
+  display: none !important;
 }
 body[data-screen='game'] .table .coach-marks-badge:hover,
 body[data-screen='game'] .table .coach-marks-badge:active,
