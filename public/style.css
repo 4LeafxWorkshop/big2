@@ -4066,6 +4066,9 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   padding: 12px;
   animation: modalFade .16s ease-out;
 }
+.coach-marks-modal {
+  z-index: 2147483647;
+}
 .legal-modal {
   display: none;
 }
@@ -4523,6 +4526,23 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   display: grid;
   grid-template-columns: 1fr;
   gap: 10px;
+}
+.coach-marks-sheet {
+  width: min(560px, 100%);
+  max-height: min(72dvh, 560px);
+}
+.coach-marks-sheet .intro-head {
+  margin-bottom: 10px;
+}
+.coach-marks-block {
+  gap: 8px;
+}
+.coach-marks-block ul {
+  gap: 8px;
+  padding-left: 18px;
+}
+.coach-marks-block li {
+  line-height: 1.4;
 }
 .intro-block {
   display: grid;

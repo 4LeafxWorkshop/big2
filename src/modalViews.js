@@ -36,6 +36,15 @@ export function renderIntroPanel(params){
   return`<div class="intro-modal" id="intro-modal"><button class="intro-backdrop" id="intro-backdrop" aria-label="${esc(intro.btnHide)}"></button><section class="intro-sheet"><header class="intro-head"><div><h3 class="title-with-icon"><span class="title-icon title-icon-guide" aria-hidden="true"></span><span>${esc(intro.panelTitle)}</span></h3>${intro.panelSub?`<p>${colorizeSuitText(intro.panelSub)}</p>`:''}</div><button id="intro-close" class="secondary">${esc(intro.btnHide)}</button></header><div class="intro-grid"><article class="intro-block"><h4>${esc(intro.historyTitle)}</h4>${historyBlocks}</article><article class="intro-block"><h4>${esc(intro.howTitle)}</h4><p>${colorizeSuitText(intro.howBody)}</p><div class="intro-hand-list">${rows}</div></article><article class="intro-block"><h4>${esc(intro.flowTitle)}</h4><ul>${(intro.flowList??[]).map((x)=>`<li>${formatIntroLine(x)}</li>`).join('')}</ul></article><article class="intro-block"><h4>${esc(intro.playTitle)}</h4><ul>${(intro.playList??[]).map((x)=>`<li>${formatIntroLine(x)}</li>`).join('')}</ul></article><article class="intro-block"><h4>${esc(intro.guideHowTitle)}</h4><p>${esc(intro.guideHowIntro)}</p><ul>${howList}</ul></article>${gestureHtml}</div></section></div>`;
 }
 
+export function renderCoachMarksPanel(params){
+  const {
+    intro,
+    esc
+  }=params;
+  const gestureList=(intro.guideGestureList??[]).map((x)=>`<li>${esc(x)}</li>`).join('');
+  return`<div class="intro-modal coach-marks-modal" id="coach-marks-modal"><button class="intro-backdrop" id="coach-marks-backdrop" aria-label="${esc(intro.btnHide)}"></button><section class="intro-sheet coach-marks-sheet"><header class="intro-head"><div><h3 class="title-with-icon"><span class="title-icon title-icon-guide" aria-hidden="true"></span><span>${esc(intro.guideGestureTitle)}</span></h3><p>${esc(intro.guideGestureIntro)}</p></div><button id="coach-marks-close" class="secondary">${esc(intro.btnHide)}</button></header><div class="intro-grid"><article class="intro-block coach-marks-block"><ul>${gestureList}</ul></article></div></section></div>`;
+}
+
 export function renderLeaderboardPanel(params){
   const {
     leaderboard,

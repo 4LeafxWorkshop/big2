@@ -678,7 +678,8 @@ export function createGameEventsBinder({
   cardId,
   reorderCurrent,
   isMobilePointer,
-  autoArrangeCurrent
+  autoArrangeCurrent,
+  dismissCoachMarks=()=>{}
 }){
   let topbarDelegateBound=false;
   let opponentProfileDelegateBound=false;
@@ -801,6 +802,14 @@ export function createGameEventsBinder({
     });
     document.getElementById('score-guide-close')?.addEventListener('click',()=>{state.showScoreGuide=false;render();});
     document.getElementById('score-guide-backdrop')?.addEventListener('click',()=>{state.showScoreGuide=false;render();});
+    document.getElementById('coach-marks-close')?.addEventListener('click',()=>{
+      dismissCoachMarks();
+      render();
+    });
+    document.getElementById('coach-marks-backdrop')?.addEventListener('click',()=>{
+      dismissCoachMarks();
+      render();
+    });
     bindHomeAndResultActions({
       state,
       closeLangMenu,

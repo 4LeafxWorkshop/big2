@@ -93,8 +93,7 @@ export function buildGameAuxRenderState(params){
     renderHandCard,
     cardId,
     showMust3Highlight,
-    isLowestSingle,
-    isMobilePointer
+    isLowestSingle
   }=params;
   const portraitMode=isPortraitMode();
   const logSheetOpen=portraitMode&&state.showLogSheet;
@@ -114,9 +113,6 @@ export function buildGameAuxRenderState(params){
     (showMust3Highlight&&isLowestSingle(card))?'must3-highlight':'',
     index+1
   )).join('');
-  const discardSwipeHintHtml=portraitMode&&isMobilePointer?.()
-    ?'<span aria-hidden="true">↑ swipe up to discard</span>'
-    :'';
   return{
     portraitMode,
     logSheetOpen,
@@ -129,7 +125,7 @@ export function buildGameAuxRenderState(params){
     isRecPlay,
     emotePanel,
     handHtml,
-    discardSwipeHintHtml
+    discardSwipeHintHtml:''
   };
 }
 
@@ -452,7 +448,8 @@ export function buildGameShellMarkup(params){
     opponentProfileModalHtml,
     scoreGuideModalHtml,
     introPanelHtml,
-    leaderboardModalHtml
+    leaderboardModalHtml,
+    coachMarksHtml
   }=params;
   const gameTableHtml=renderGameTable({
     roomTopMetaTable,
@@ -480,7 +477,8 @@ export function buildGameShellMarkup(params){
     opponentProfileModalHtml:state.opponentProfileName?opponentProfileModalHtml(state.opponentProfileName):'',
     scoreGuideModalHtml:state.showScoreGuide?scoreGuideModalHtml():'',
     introPanelHtml:state.home.showIntro?introPanelHtml():'',
-    leaderboardModalHtml:state.home.showLeaderboard?leaderboardModalHtml():''
+    leaderboardModalHtml:state.home.showLeaderboard?leaderboardModalHtml():'',
+    coachMarksHtml:state.showCoachMarks?coachMarksHtml():''
   });
   if(!v.gameOver&&youWin){
     shellHtml=shellHtml.replace('<div class="win-celebrate"><div class="confetti-layer"></div>','<div class="win-celebrate"><canvas class="confetti-canvas" data-confetti="win" aria-hidden="true"></canvas>');

@@ -21,7 +21,7 @@ import {renderConfigMarkup, renderHomeMarkup, renderOpponentCard, renderOpponent
 import {createLangMenuController} from './langMenu.js';
 import {renderCenterLastMoves, renderGameActionZone, renderGameLogSheet, renderGameShell, renderGameSideZone, renderGameTable, renderGameTopbar, renderOpponentLabel, renderOpponentSeat, renderOpponentSeats, renderOpponentStationFlow, renderSeatLastAction} from './gameView.js';
 import {buildCalloutRenderState, buildCongratsOverlayHtml, buildGameAuxRenderState, buildGameShellMarkup, buildOpponentSeatsHtml, buildResultScreenHtml, buildRoomMetaTableHtml, buildSelfRenderState} from './gameRenderPrep.js';
-import {renderConfidentialStamp, renderIntroPanel, renderLeaderboardModal, renderLeaderboardPanel, renderOpponentProfileModal, renderScoreGuideModal} from './modalViews.js';
+import {renderCoachMarksPanel, renderConfidentialStamp, renderIntroPanel, renderLeaderboardModal, renderLeaderboardPanel, renderOpponentProfileModal, renderScoreGuideModal} from './modalViews.js';
 import {GoogleAuth} from '@codetrix-studio/capacitor-google-auth';
 import {botAvatarUrl, resolveAvatarSrc} from './avatarProfile.js';
 import {BACK_OPTIONS, CALLOUT_RESPONSE_TEXT, KIND, LANGUAGE_NATIVE_LABEL, LANGUAGE_OPTIONS} from './localeData.js';
@@ -591,6 +591,19 @@ function schedulePopunderAfterRender(delayMs=250){
     }
   }));
 }
+function isCoachMarksDismissed(){
+  try{
+    return String(window.localStorage?.getItem(COACH_MARKS_DISMISSED_KEY)??'').trim()==='1';
+  }catch{
+    return false;
+  }
+}
+function dismissCoachMarks(){
+  state.showCoachMarks=false;
+  try{
+    window.localStorage?.setItem(COACH_MARKS_DISMISSED_KEY,'1');
+  }catch{}
+}
 const actionGuard=new Map();
 function guardAction(key,windowMs=800){
   const now=Date.now();
@@ -601,7 +614,7 @@ function guardAction(key,windowMs=800){
 }
 
 const app=document.getElementById('app');
-const state={language:'zh-HK',screen:'home',screenBeforeConfig:'home',showRules:false,showLog:false,showLogSheet:false,logTouched:false,showScoreGuide:false,opponentProfileName:'',mottoPeekName:'',selected:new Set(),drag:{id:null,moved:false},playAnimKey:'',autoPassKey:'',score:5000,suggestCost:0,recommendation:null,recommendHint:'',logFab:{x:null,y:null},home:{mode:'solo',name:'玩家',gender:'male',avatarChoice:'male',aiDifficulty:'normal',backColor:'red',theme:'ocean',showIntro:false,showLeaderboard:false,showMoreSettings:false,google:{signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',pictureLoaded:false,gender:'',profileMissing:false,hydrating:false},leaderboard:{rows:[],sort:'totalDelta',period:'all',limit:20},activeRooms:{rows:[],loading:false,loadedAt:0,error:''}},room:{id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:false,inviteOpen:false,error:'',started:false,unsub:null,selfSeat:-1,recordedGameKey:'',lastMoveKey:'',playerId:'',pendingStart:false,lastResultPlayers:null,inviteUrl:'',inviteQrDataUrl:'',inviteCardDataUrl:'',inviteQrLoading:false,inviteQrError:'',pendingInviteCode:'',inviteQrPayload:'',adPromptGameKey:''},sessionId:'',solo:{players:[],botNames:[],totals:[5000,5000,5000,5000],currentSeat:0,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',history:[],aiDifficulty:'normal',lastCardBreach:null},emote:{open:false,active:null},serviceBell:{foodCallout:null}};
+const state={language:'zh-HK',screen:'home',screenBeforeConfig:'home',showRules:false,showLog:false,showLogSheet:false,logTouched:false,showScoreGuide:false,showCoachMarks:false,opponentProfileName:'',mottoPeekName:'',selected:new Set(),drag:{id:null,moved:false},playAnimKey:'',autoPassKey:'',score:5000,suggestCost:0,recommendation:null,recommendHint:'',logFab:{x:null,y:null},home:{mode:'solo',name:'玩家',gender:'male',avatarChoice:'male',aiDifficulty:'normal',backColor:'red',theme:'ocean',showIntro:false,showLeaderboard:false,showMoreSettings:false,google:{signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',pictureLoaded:false,gender:'',profileMissing:false,hydrating:false},leaderboard:{rows:[],sort:'totalDelta',period:'all',limit:20},activeRooms:{rows:[],loading:false,loadedAt:0,error:''}},room:{id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:false,inviteOpen:false,error:'',started:false,unsub:null,selfSeat:-1,recordedGameKey:'',lastMoveKey:'',playerId:'',pendingStart:false,lastResultPlayers:null,inviteUrl:'',inviteQrDataUrl:'',inviteCardDataUrl:'',inviteQrLoading:false,inviteQrError:'',pendingInviteCode:'',inviteQrPayload:'',adPromptGameKey:''},sessionId:'',solo:{players:[],botNames:[],totals:[5000,5000,5000,5000],currentSeat:0,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',history:[],aiDifficulty:'normal',lastCardBreach:null},emote:{open:false,active:null},serviceBell:{foodCallout:null}};
 const {
   EMOTE_STICKERS,
   cardImagePath,
@@ -1285,6 +1298,7 @@ function saveLeaderboardStore(store){
   runtimeProfileStore.players=store.players&&typeof store.players==='object'?store.players:{};
 }
 const LOCAL_ROOM_KEY='big2.currentRoomId';
+const COACH_MARKS_DISMISSED_KEY='big2.mobileCoachMarksDismissed.v1';
 const FIREBASE_INSTANCES_CACHE_KEY='big2.firebaseInstancesCache';
 const FIREBASE_INSTANCES_CACHE_TTL_MS=6*60*60*1000;
 // Keep room identity helpers early: profile/settings wiring reads currentRoomPlayerId during init.
@@ -3578,6 +3592,7 @@ const {
 const introGuideHelpers=createIntroGuideHelpers({
   getLanguage:()=>state.language,
   renderIntroPanel,
+  renderCoachMarksPanel,
   colorizeSuitText,
   esc,
   withBase,
@@ -3589,7 +3604,8 @@ const introGuideHelpers=createIntroGuideHelpers({
 });
 const {
   introText,
-  introPanelHtml
+  introPanelHtml,
+  coachMarksHtml
 }=introGuideHelpers;
 function hashNameSeed(name){
   const s=String(name??'');
@@ -5227,7 +5243,8 @@ const bindGameEvents=createGameEventsBinder({
   cardId,
   reorderCurrent,
   isMobilePointer,
-  autoArrangeCurrent
+  autoArrangeCurrent,
+  dismissCoachMarks
 });
 const bindConfigEvents=createConfigEventsBinder();
 const bindHomeEvents=createHomeEventsBinder();
@@ -5429,9 +5446,10 @@ function handleGameTopbarClick(ev){
   if(state.screen!=='game')return;
   const t=ev.target;
   if(!(t instanceof Element))return;
-  const btn=t.closest?.('#game-intro-toggle,#score-guide-toggle,#game-lb-toggle,#game-log-fab');
+  const btn=t.closest?.('#game-intro-toggle,#coach-marks-toggle,#score-guide-toggle,#game-lb-toggle,#game-log-fab');
   if(!btn)return;
   if(btn.id==='game-intro-toggle'){state.home.showIntro=true;render();return;}
+  if(btn.id==='coach-marks-toggle'){state.showCoachMarks=true;render();return;}
   if(btn.id==='score-guide-toggle'){state.showScoreGuide=true;render();return;}
   if(btn.id==='game-lb-toggle'){state.home.showLeaderboard=true;refreshLeaderboard(true);render();return;}
   if(btn.id==='game-log-fab'){
@@ -6234,6 +6252,8 @@ function renderGame(){
   const v=buildView();
   if(!v){state.screen='home';renderHome();return;}
   const intro=introText();
+  const coachMarksEligible=isMobilePointer()&&!v.gameOver&&!isCoachMarksDismissed();
+  if(coachMarksEligible&&state.screen==='game'&&!state.showCoachMarks)state.showCoachMarks=true;
   const rightSidebarDesktop=window.matchMedia('(min-width: 1081px)').matches;
   const rightSidebarMobileLandscape=window.matchMedia('(max-width: 860px) and (orientation: landscape)').matches;
   const rightSidebarTabletLandscape=window.matchMedia('(min-width: 861px) and (max-width: 1080px) and (orientation: landscape)').matches;
@@ -6416,6 +6436,9 @@ function renderGame(){
   const gameTopbarHtml=renderGameTopbar({
     renderLangMenu,
     introButtonLabel:intro.btnShow,
+    coachMarksButtonHtml:isMobilePointer()
+      ?`<button id="coach-marks-toggle" class="secondary game-icon-btn coach-marks-toggle" type="button" aria-label="${esc(intro.guideGestureTitle)}" data-tooltip="${esc(intro.guideGestureTitle)}"><span class="title-icon title-icon-guide" aria-hidden="true"></span></button>`
+      :'',
     t,
     esc,
     withBase
@@ -6467,7 +6490,8 @@ function renderGame(){
     opponentProfileModalHtml,
     scoreGuideModalHtml,
     introPanelHtml,
-    leaderboardModalHtml
+    leaderboardModalHtml,
+    coachMarksHtml:state.showCoachMarks&&coachMarksEligible?coachMarksHtml():''
   });
   runGamePostRender({
     app,

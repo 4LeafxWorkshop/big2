@@ -2,11 +2,12 @@ export function renderGameTopbar(params){
   const {
     renderLangMenu,
     introButtonLabel,
+    coachMarksButtonHtml='',
     t,
     esc,
     withBase
   }=params;
-  return`<header class="topbar"><div class="game-title-wrap"><span class="game-logo-block"><img class="title-logo title-logo-game" src="${withBase('title-lockup-game.png')}" alt="鋤大D TRADITIONAL BIG TWO"/></span></div><div class="topbar-right"><div class="control-row">${renderLangMenu('game-lang-menu')}<button id="game-intro-toggle" class="secondary">${esc(introButtonLabel)}</button><button id="score-guide-toggle" class="secondary">${t('scoreGuide')}</button><button id="game-lb-toggle" class="secondary">${t('lb')}</button><button id="home-btn" class="secondary">${t('home')}</button><button id="restart-btn" class="primary">${t('restart')}</button></div></div></header>`;
+  return`<header class="topbar"><div class="game-title-wrap"><span class="game-logo-block"><img class="title-logo title-logo-game" src="${withBase('title-lockup-game.png')}" alt="鋤大D TRADITIONAL BIG TWO"/></span></div><div class="topbar-right"><div class="control-row">${renderLangMenu('game-lang-menu')}<button id="game-intro-toggle" class="secondary">${esc(introButtonLabel)}</button>${coachMarksButtonHtml}<button id="score-guide-toggle" class="secondary">${t('scoreGuide')}</button><button id="game-lb-toggle" class="secondary">${t('lb')}</button><button id="home-btn" class="secondary">${t('home')}</button><button id="restart-btn" class="primary">${t('restart')}</button></div></div></header>`;
 }
 
 export function renderGameSideZone(params){
@@ -216,7 +217,8 @@ export function renderGameShell(params){
     opponentProfileModalHtml,
     scoreGuideModalHtml,
     introPanelHtml,
-    leaderboardModalHtml
+    leaderboardModalHtml,
+    coachMarksHtml
   }=params;
-  return`<section class="game-shell ${gameOver?'game-over':''} ${showLog?'log-open':''}"><div class="main-zone">${gameTopbarHtml}${gameTableHtml}${gameActionZoneHtml}${selfTableEmoteHtml}${congratsOverlayHtml}${revealHtml}</div>${sideZoneHtml}<div class="game-foreground-layer" aria-hidden="true"></div>${resultScreenHtml}${opponentProfileModalHtml}${scoreGuideModalHtml}${introPanelHtml}${leaderboardModalHtml}</section>`;
+  return`<section class="game-shell ${gameOver?'game-over':''} ${showLog?'log-open':''}"><div class="main-zone">${gameTopbarHtml}${gameTableHtml}${gameActionZoneHtml}${selfTableEmoteHtml}${congratsOverlayHtml}${revealHtml}</div>${sideZoneHtml}<div class="game-foreground-layer" aria-hidden="true"></div>${resultScreenHtml}${opponentProfileModalHtml}${scoreGuideModalHtml}${introPanelHtml}${leaderboardModalHtml}${coachMarksHtml}</section>`;
 }

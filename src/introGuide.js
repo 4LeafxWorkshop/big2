@@ -2,6 +2,7 @@ export function createIntroGuideHelpers(deps){
   const {
     getLanguage,
     renderIntroPanel,
+    renderCoachMarksPanel,
     colorizeSuitText,
     esc,
     withBase,
@@ -491,9 +492,17 @@ export function createIntroGuideHelpers(deps){
     });
   }
 
+  function coachMarksHtml(){
+    return renderCoachMarksPanel({
+      intro:introText(),
+      esc
+    });
+  }
+
   return{
     introText,
     introHandSamples,
-    introPanelHtml
+    introPanelHtml,
+    coachMarksHtml
   };
 }
