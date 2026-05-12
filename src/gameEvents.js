@@ -802,6 +802,10 @@ export function createGameEventsBinder({
     });
     document.getElementById('score-guide-close')?.addEventListener('click',()=>{state.showScoreGuide=false;render();});
     document.getElementById('score-guide-backdrop')?.addEventListener('click',()=>{state.showScoreGuide=false;render();});
+    document.getElementById('coach-marks-toggle')?.addEventListener('click',()=>{
+      state.showCoachMarks=true;
+      render();
+    });
     document.getElementById('coach-marks-close')?.addEventListener('click',()=>{
       dismissCoachMarks();
       render();
