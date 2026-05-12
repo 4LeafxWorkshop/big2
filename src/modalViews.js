@@ -14,7 +14,8 @@ export function renderIntroPanel(params){
     colorizeSuitText,
     esc,
     renderStaticCard,
-    introHandSamples
+    introHandSamples,
+    showGestureGuide=false
   }=params;
   const formatIntroLine=(text)=>{
     const token='{{3D}}';
@@ -23,12 +24,16 @@ export function renderIntroPanel(params){
   };
   const rows=introHandSamples.map((row)=>`<div class="intro-hand-row"><div class="intro-hand-meta"><strong>${esc(row.name)}</strong><span>${esc(row.desc)}</span></div><div class="intro-hand-cards">${row.cards.map((c)=>renderStaticCard(c,true)).join('')}</div></div>`).join('');
   const howList=(intro.guideHowList??[]).map((x)=>`<li>${esc(x)}</li>`).join('');
+  const gestureList=(intro.guideGestureList??[]).map((x)=>`<li>${esc(x)}</li>`).join('');
   const historyBlocks=String(intro.historyBody??'')
     .split(/\n\s*\n/)
     .filter(Boolean)
     .map((p)=>`<p>${colorizeSuitText(p)}</p>`)
     .join('');
-  return`<div class="intro-modal" id="intro-modal"><button class="intro-backdrop" id="intro-backdrop" aria-label="${esc(intro.btnHide)}"></button><section class="intro-sheet"><header class="intro-head"><div><h3 class="title-with-icon"><span class="title-icon title-icon-guide" aria-hidden="true"></span><span>${esc(intro.panelTitle)}</span></h3>${intro.panelSub?`<p>${colorizeSuitText(intro.panelSub)}</p>`:''}</div><button id="intro-close" class="secondary">${esc(intro.btnHide)}</button></header><div class="intro-grid"><article class="intro-block"><h4>${esc(intro.historyTitle)}</h4>${historyBlocks}</article><article class="intro-block"><h4>${esc(intro.howTitle)}</h4><p>${colorizeSuitText(intro.howBody)}</p><div class="intro-hand-list">${rows}</div></article><article class="intro-block"><h4>${esc(intro.flowTitle)}</h4><ul>${(intro.flowList??[]).map((x)=>`<li>${formatIntroLine(x)}</li>`).join('')}</ul></article><article class="intro-block"><h4>${esc(intro.playTitle)}</h4><ul>${(intro.playList??[]).map((x)=>`<li>${formatIntroLine(x)}</li>`).join('')}</ul></article><article class="intro-block"><h4>${esc(intro.guideHowTitle)}</h4><p>${esc(intro.guideHowIntro)}</p><ul>${howList}</ul></article></div></section></div>`;
+  const gestureHtml=showGestureGuide&&gestureList
+    ?`<article class="intro-block"><h4>${esc(intro.guideGestureTitle)}</h4><p>${esc(intro.guideGestureIntro)}</p><ul>${gestureList}</ul></article>`
+    :'';
+  return`<div class="intro-modal" id="intro-modal"><button class="intro-backdrop" id="intro-backdrop" aria-label="${esc(intro.btnHide)}"></button><section class="intro-sheet"><header class="intro-head"><div><h3 class="title-with-icon"><span class="title-icon title-icon-guide" aria-hidden="true"></span><span>${esc(intro.panelTitle)}</span></h3>${intro.panelSub?`<p>${colorizeSuitText(intro.panelSub)}</p>`:''}</div><button id="intro-close" class="secondary">${esc(intro.btnHide)}</button></header><div class="intro-grid"><article class="intro-block"><h4>${esc(intro.historyTitle)}</h4>${historyBlocks}</article><article class="intro-block"><h4>${esc(intro.howTitle)}</h4><p>${colorizeSuitText(intro.howBody)}</p><div class="intro-hand-list">${rows}</div></article><article class="intro-block"><h4>${esc(intro.flowTitle)}</h4><ul>${(intro.flowList??[]).map((x)=>`<li>${formatIntroLine(x)}</li>`).join('')}</ul></article><article class="intro-block"><h4>${esc(intro.playTitle)}</h4><ul>${(intro.playList??[]).map((x)=>`<li>${formatIntroLine(x)}</li>`).join('')}</ul></article><article class="intro-block"><h4>${esc(intro.guideHowTitle)}</h4><p>${esc(intro.guideHowIntro)}</p><ul>${howList}</ul></article>${gestureHtml}</div></section></div>`;
 }
 
 export function renderLeaderboardPanel(params){

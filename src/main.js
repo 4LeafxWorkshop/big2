@@ -3584,7 +3584,8 @@ const introGuideHelpers=createIntroGuideHelpers({
   t,
   renderStaticCard,
   ranks:RANKS,
-  suits:SUITS
+  suits:SUITS,
+  isMobilePointer
 });
 const {
   introText,

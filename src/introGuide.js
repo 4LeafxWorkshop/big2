@@ -9,6 +9,7 @@ export function createIntroGuideHelpers(deps){
     renderStaticCard,
     ranks,
     suits,
+    isMobilePointer,
   }=deps;
 
   function introText(){
@@ -47,6 +48,15 @@ export function createIntroGuideHelpers(deps){
           'In a room, the host can press Start when at least 2 players are inside.',
           'On your turn, select cards and tap Play; tap Pass when allowed.',
           'Use Suggest for help, and sort/drag to organize your hand.'
+        ],
+        guideGestureTitle:'Gesture Controls',
+        guideGestureIntro:'Mobile game gestures:',
+        guideGestureList:[
+          'Swipe up on the table to open the game log.',
+          'Swipe right to request a recommendation.',
+          'Swipe down to trigger the food callout.',
+          'Swipe left to open the emote picker.',
+          'Swipe up on selected cards to discard them.'
         ],
         guideHomeTitle:'Add to Home Screen',
         guideHomeIntro:'Add it to your Home screen for a full-screen, app-like launch.',
@@ -105,6 +115,15 @@ export function createIntroGuideHelpers(deps){
           'À votre tour, sélectionnez des cartes puis Jouer ; Passez si autorisé.',
           'Utilisez Suggestion et triez/drag pour organiser votre main.'
         ],
+        guideGestureTitle:'Gestes',
+        guideGestureIntro:'Gestes de jeu sur mobile :',
+        guideGestureList:[
+          'Glissez vers le haut sur la table pour ouvrir le journal de partie.',
+          'Glissez vers la droite pour demander une recommandation.',
+          'Glissez vers le bas pour déclencher l’appel nourriture.',
+          'Glissez vers la gauche pour ouvrir le sélecteur d’emotes.',
+          'Glissez vers le haut sur les cartes sélectionnées pour les défausser.'
+        ],
         guideHomeTitle:'Ajouter à l’écran d’accueil',
         guideHomeIntro:'Ajoutez l’app pour un lancement plein écran, comme une application.',
         guideAndroidTitle:'Android (Chrome)',
@@ -161,6 +180,15 @@ export function createIntroGuideHelpers(deps){
           'Im Raum kann der Host starten, sobald mindestens 2 Spieler drin sind.',
           'Im Zug Karten wählen und Spielen; Passen, wenn erlaubt.',
           'Vorschlag nutzen und per Sortieren/Drag die Hand ordnen.'
+        ],
+        guideGestureTitle:'Gestensteuerung',
+        guideGestureIntro:'Mobile Spielgesten:',
+        guideGestureList:[
+          'Nach oben über das Spielfeld wischen, um das Spielprotokoll zu öffnen.',
+          'Nach rechts wischen, um eine Empfehlung anzufordern.',
+          'Nach unten wischen, um den Food-Callout auszulösen.',
+          'Nach links wischen, um die Emote-Auswahl zu öffnen.',
+          'Nach oben über ausgewählte Karten wischen, um sie abzulegen.'
         ],
         guideHomeTitle:'Zum Startbildschirm hinzufügen',
         guideHomeIntro:'Füge es zum Startbildschirm hinzu für einen Vollbild‑App‑Start.',
@@ -219,6 +247,15 @@ export function createIntroGuideHelpers(deps){
           'En tu turno, selecciona cartas y pulsa Jugar; Pasa si está permitido.',
           'Usa Sugerir y ordena/arrastra para organizar la mano.'
         ],
+        guideGestureTitle:'Gestos',
+        guideGestureIntro:'Gestos de juego en móvil:',
+        guideGestureList:[
+          'Desliza hacia arriba sobre la mesa para abrir el historial de la partida.',
+          'Desliza a la derecha para pedir una recomendación.',
+          'Desliza hacia abajo para activar el aviso de comida.',
+          'Desliza a la izquierda para abrir el selector de emotes.',
+          'Desliza hacia arriba sobre las cartas seleccionadas para descartarlas.'
+        ],
         guideHomeTitle:'Añadir a la pantalla de inicio',
         guideHomeIntro:'Añádelo a Inicio para abrirlo a pantalla completa como app.',
         guideAndroidTitle:'Android (Chrome)',
@@ -276,6 +313,15 @@ export function createIntroGuideHelpers(deps){
           '自分の番にカードを選び、プレイをタップ。必要ならパスします。',
           'サジェストで補助し、並び替え/ドラッグで手札を整理します。'
         ],
+        guideGestureTitle:'ジェスチャー',
+        guideGestureIntro:'モバイルの操作ジェスチャー：',
+        guideGestureList:[
+          'テーブルを上にスワイプするとゲームログを開きます。',
+          '右にスワイプするとおすすめを表示します。',
+          '下にスワイプするとフードの吹き出しを出します。',
+          '左にスワイプするとエモート選択を開きます。',
+          '選択したカードを上にスワイプすると捨てます。'
+        ],
         guideHomeTitle:'ホーム画面に追加',
         guideHomeIntro:'ホーム画面に追加すると、アプリのように全画面開起できます。',
         guideAndroidTitle:'Android (Chrome)',
@@ -331,6 +377,15 @@ export function createIntroGuideHelpers(deps){
         '房主可在至少 2 位玩家進入房間後按「開始」。',
         '輪到你時，選牌後按「出牌」，可過牌時按「過牌」。',
         '需要提示可按「建議」，亦可使用排序或拖曳整理手牌。'
+      ],
+      guideGestureTitle:'手勢操作',
+      guideGestureIntro:'手機遊戲手勢：',
+      guideGestureList:[
+        '在桌面向上滑動可打開遊戲記錄。',
+        '向右滑動可要求推薦出牌。',
+        '向下滑動可觸發食物提示。',
+        '向左滑動可打開表情選擇。',
+        '在已選取的牌上向上滑動即可出牌。'
       ],
       guideHomeTitle:'加到主畫面',
       guideHomeIntro:'加到主畫面後可像 App 一樣全螢幕開啟。',
@@ -431,7 +486,8 @@ export function createIntroGuideHelpers(deps){
       withBase,
       appTitle:t('title'),
       renderStaticCard,
-      introHandSamples:introHandSamples()
+      introHandSamples:introHandSamples(),
+      showGestureGuide:Boolean(isMobilePointer?.())
     });
   }
 
