@@ -21,7 +21,7 @@ import {renderConfigMarkup, renderHomeMarkup, renderOpponentCard, renderOpponent
 import {createLangMenuController} from './langMenu.js';
 import {renderCenterLastMoves, renderGameActionZone, renderGameLogSheet, renderGameShell, renderGameSideZone, renderGameTable, renderGameTopbar, renderOpponentLabel, renderOpponentSeat, renderOpponentSeats, renderOpponentStationFlow, renderSeatLastAction} from './gameView.js';
 import {buildCalloutRenderState, buildCongratsOverlayHtml, buildGameAuxRenderState, buildGameShellMarkup, buildOpponentSeatsHtml, buildResultScreenHtml, buildRoomMetaTableHtml, buildSelfRenderState} from './gameRenderPrep.js';
-import {renderCoachMarksPanel, renderConfidentialStamp, renderIntroPanel, renderLeaderboardModal, renderLeaderboardPanel, renderOpponentProfileModal, renderScoreGuideModal} from './modalViews.js';
+import {gestureGuideIconSvg, renderCoachMarksPanel, renderConfidentialStamp, renderIntroPanel, renderLeaderboardModal, renderLeaderboardPanel, renderOpponentProfileModal, renderScoreGuideModal} from './modalViews.js';
 import {GoogleAuth} from '@codetrix-studio/capacitor-google-auth';
 import {botAvatarUrl, resolveAvatarSrc} from './avatarProfile.js';
 import {BACK_OPTIONS, CALLOUT_RESPONSE_TEXT, KIND, LANGUAGE_NATIVE_LABEL, LANGUAGE_OPTIONS} from './localeData.js';
@@ -6268,7 +6268,7 @@ function renderGame(){
   if(coachMarksEligible&&state.screen==='game'&&!state.showCoachMarks)state.showCoachMarks=true;
   window.__big2OpenCoachMarks=openCoachMarks;
   const coachMarksButtonHtml=coachMarksControlVisible
-    ?`<button id="coach-marks-toggle" onclick="return window.__big2OpenCoachMarks?.()" class="secondary coach-marks-badge" type="button" aria-label="${esc(intro.guideGestureTitle)}" data-tooltip="${esc(intro.guideGestureTitle)}"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" preserveAspectRatio="xMidYMid meet"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M8 11v-4.5a1.5 1.5 0 0 1 3 0V11m0-1V8.5a1.5 1.5 0 0 1 3 0V11m0 0V9.5a1.5 1.5 0 0 1 3 0V15c0 3-2 6-5 6H10c-1.7 0-3.2-1-4-2.6L4 14.8c-.5-1 0-2.2 1-2.7.9-.4 2 .1 2.5 1.1l1 1.9V11c0-1 .8-1.8 1.8-1.8.9 0 1.7.7 1.7 1.6"/></svg></button>`
+    ?`<button id="coach-marks-toggle" onclick="return window.__big2OpenCoachMarks?.()" class="secondary coach-marks-badge" type="button" aria-label="${esc(intro.guideGestureTitle)}" data-tooltip="${esc(intro.guideGestureTitle)}">${gestureGuideIconSvg()}</button>`
     :'';
   const rightSidebarDesktop=window.matchMedia('(min-width: 1081px)').matches;
   const rightSidebarMobileLandscape=window.matchMedia('(max-width: 860px) and (orientation: landscape)').matches;

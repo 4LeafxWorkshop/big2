@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+  renderCoachMarksPanel,
   renderIntroPanel,
   renderLeaderboardModal,
   renderLeaderboardPanel,
@@ -35,6 +36,9 @@ test('renderIntroPanel includes sample cards and close controls', ()=>{
       guideHowTitle:'Guide How',
       guideHowIntro:'Intro',
       guideHowList:['One'],
+      guideGestureTitle:'Gesture Controls',
+      guideGestureIntro:'Mobile game gestures:',
+      guideGestureList:['Swipe up on the table to open the game log.'],
       guideHomeTitle:'Home',
       guideHomeIntro:'Intro',
       guideAndroidTitle:'Android',
@@ -49,12 +53,30 @@ test('renderIntroPanel includes sample cards and close controls', ()=>{
     withBase:(value)=>`base:${value}`,
     appTitle:'Big Two',
     renderStaticCard:()=>'<div class="card"></div>',
-    introHandSamples:[{name:'Single',desc:'One card',cards:[{rank:0,suit:0}]}]
+    introHandSamples:[{name:'Single',desc:'One card',cards:[{rank:0,suit:0}]}],
+    showGestureGuide:true
   });
   assert.match(html,/id="intro-modal"/);
   assert.match(html,/Diamond 3/);
   assert.match(html,/class="card"/);
   assert.match(html,/Guide How/);
+  assert.match(html,/Mobile game gestures:/);
+  assert.match(html,/M12 4V2/);
+});
+
+test('renderCoachMarksPanel uses the gesture guide icon', ()=>{
+  const html=renderCoachMarksPanel({
+    intro:{
+      btnHide:'Hide',
+      guideGestureTitle:'Gesture Controls',
+      guideGestureIntro:'Mobile game gestures:',
+      guideGestureList:['Swipe up on the table to open the game log.']
+    },
+    esc:(value)=>String(value)
+  });
+  assert.match(html,/id="coach-marks-modal"/);
+  assert.match(html,/coach-marks-close/);
+  assert.match(html,/M12 4V2/);
 });
 
 test('renderLeaderboardPanel renders rows and controls', ()=>{
