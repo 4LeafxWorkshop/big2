@@ -9247,10 +9247,10 @@ body[data-screen='game'] .table .coach-marks-badge {
   position: absolute;
   top: 10px;
   right: 10px;
-  width: 34px;
-  height: 34px;
-  min-width: 34px;
-  min-height: 34px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
   padding: 0;
   border-radius: 999px;
   border: 1px solid rgba(255,255,255,.14);
@@ -9275,8 +9275,8 @@ body[data-screen='game'] .table .coach-marks-badge:focus-visible {
   background: rgba(8, 24, 38, .34);
 }
 body[data-screen='game'] .table .coach-marks-badge svg {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   display: block;
 }
 
