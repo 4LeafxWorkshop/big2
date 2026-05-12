@@ -478,7 +478,7 @@ export function buildGameShellMarkup(params){
     scoreGuideModalHtml:state.showScoreGuide?scoreGuideModalHtml():'',
     introPanelHtml:state.home.showIntro?introPanelHtml():'',
     leaderboardModalHtml:state.home.showLeaderboard?leaderboardModalHtml():'',
-    coachMarksHtml:state.showCoachMarks?coachMarksHtml():''
+    coachMarksHtml:state.showCoachMarks?coachMarksHtml:''
   });
   if(!v.gameOver&&youWin){
     shellHtml=shellHtml.replace('<div class="win-celebrate"><div class="confetti-layer"></div>','<div class="win-celebrate"><canvas class="confetti-canvas" data-confetti="win" aria-hidden="true"></canvas>');

@@ -7,6 +7,21 @@ export function renderConfidentialStamp({text,esc,classes=''}) {
   return `<span class="${className}" aria-hidden="true">${esc(text)}</span>`;
 }
 
+function gestureIconSvg(kind){
+  const icons={
+    log:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3v10"/><path d="M8 9l4 4 4-4"/><path d="M5 18h14"/></svg>`,
+    recommend:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 3l2.8 6 6.2.9-4.5 4.3 1.1 6.1-5.6-3-5.6 3 1.1-6.1L3 9.9 9.2 9z"/></svg>`,
+    food:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M7 3v8"/><path d="M11 3v8"/><path d="M9 11v10"/><path d="M17 3v8"/><path d="M17 11c0 4-2 6-4 7"/></svg>`,
+    emote:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="9" cy="10" r="1"/><circle cx="15" cy="10" r="1"/><path d="M8 15c1.1 1.2 2.4 1.8 4 1.8s2.9-.6 4-1.8"/></svg>`,
+    discard:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 8h12"/><path d="M8 8l1 11h6l1-11"/><path d="M10 4h4"/></svg>`
+  };
+  return icons[kind]??icons.log;
+}
+
+function gestureListItemHtml(text,kind,esc){
+  return `<li class="coach-gesture-item"><span class="coach-gesture-icon" aria-hidden="true">${gestureIconSvg(kind)}</span><span class="coach-gesture-text">${esc(text)}</span></li>`;
+}
+
 export function renderIntroPanel(params){
   const {
     intro,
@@ -24,7 +39,8 @@ export function renderIntroPanel(params){
   };
   const rows=introHandSamples.map((row)=>`<div class="intro-hand-row"><div class="intro-hand-meta"><strong>${esc(row.name)}</strong><span>${esc(row.desc)}</span></div><div class="intro-hand-cards">${row.cards.map((c)=>renderStaticCard(c,true)).join('')}</div></div>`).join('');
   const howList=(intro.guideHowList??[]).map((x)=>`<li>${esc(x)}</li>`).join('');
-  const gestureList=(intro.guideGestureList??[]).map((x)=>`<li>${esc(x)}</li>`).join('');
+  const gestureKinds=['log','recommend','food','emote','discard'];
+  const gestureList=(intro.guideGestureList??[]).map((x,i)=>gestureListItemHtml(x,gestureKinds[i]??gestureKinds[0],esc)).join('');
   const historyBlocks=String(intro.historyBody??'')
     .split(/\n\s*\n/)
     .filter(Boolean)
@@ -41,8 +57,9 @@ export function renderCoachMarksPanel(params){
     intro,
     esc
   }=params;
-  const gestureList=(intro.guideGestureList??[]).map((x)=>`<li>${esc(x)}</li>`).join('');
-  return`<div class="intro-modal coach-marks-modal" id="coach-marks-modal"><button class="intro-backdrop" id="coach-marks-backdrop" aria-label="${esc(intro.btnHide)}"></button><section class="intro-sheet coach-marks-sheet"><header class="intro-head"><div><h3 class="title-with-icon"><span class="title-icon title-icon-guide" aria-hidden="true"></span><span>${esc(intro.guideGestureTitle)}</span></h3><p>${esc(intro.guideGestureIntro)}</p></div><button id="coach-marks-close" class="secondary">${esc(intro.btnHide)}</button></header><div class="intro-grid"><article class="intro-block coach-marks-block"><ul>${gestureList}</ul></article></div></section></div>`;
+  const gestureKinds=['log','recommend','food','emote','discard'];
+  const gestureList=(intro.guideGestureList??[]).map((x,i)=>gestureListItemHtml(x,gestureKinds[i]??gestureKinds[0],esc)).join('');
+  return`<div class="intro-modal coach-marks-modal" id="coach-marks-modal"><button class="intro-backdrop" id="coach-marks-backdrop" aria-label="${esc(intro.btnHide)}"></button><section class="intro-sheet coach-marks-sheet"><header class="intro-head"><div><h3 class="title-with-icon"><span class="title-icon title-icon-guide" aria-hidden="true"></span><span>${esc(intro.guideGestureTitle)}</span></h3><p>${esc(intro.guideGestureIntro)}</p></div><button id="coach-marks-close" class="secondary coach-marks-close-btn"><span class="coach-close-icon" aria-hidden="true">${gestureIconSvg('discard')}</span><span>${esc(intro.btnHide)}</span></button></header><div class="intro-grid"><article class="intro-block coach-marks-block"><ul>${gestureList}</ul></article></div></section></div>`;
 }
 
 export function renderLeaderboardPanel(params){
