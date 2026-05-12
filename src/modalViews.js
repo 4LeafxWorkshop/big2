@@ -13,13 +13,13 @@ function gestureHandIconSvg(){
 
 function gestureIconSvg(kind){
   const icons={
-    log:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 5.5h12A2.5 2.5 0 0 1 20.5 8v5A2.5 2.5 0 0 1 18 15.5h-7l-4 3v-3H6A2.5 2.5 0 0 1 3.5 13V8A2.5 2.5 0 0 1 6 5.5Z"/><path d="M8 9h8"/><path d="M8 11.8h5"/></svg>`,
-    recommend:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4.5" y="5.5" width="11" height="13" rx="1.8"/><path d="M12 12h6"/><path d="M15 9l3 3-3 3"/></svg>`,
-    food:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4.5" y="5.5" width="11" height="13" rx="1.8"/><path d="M10 10v6"/><path d="M7 13l3 3 3-3"/></svg>`,
-    emote:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4.5" y="5.5" width="11" height="13" rx="1.8"/><path d="M14 12H8"/><path d="M11 9l-3 3 3 3"/></svg>`,
-    discard:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="4.5" y="5.5" width="11" height="13" rx="1.8"/><path d="M10 14V8"/><path d="M7 11l3-3 3 3"/></svg>`
+    handUp:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M8 11v-4.5a1.5 1.5 0 0 1 3 0V11m0-1V8.5a1.5 1.5 0 0 1 3 0V11m0 0V9.5a1.5 1.5 0 0 1 3 0V15c0 3-2 6-5 6H10c-1.7 0-3.2-1-4-2.6L4 14.8c-.5-1 0-2.2 1-2.7.9-.4 2 .1 2.5 1.1l1 1.9V11c0-1 .8-1.8 1.8-1.8.9 0 1.7.7 1.7 1.6"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 4V2m0 0 2 2M12 2 10 4"/></svg>`,
+    handRight:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M8 11v-4.5a1.5 1.5 0 0 1 3 0V11m0-1V8.5a1.5 1.5 0 0 1 3 0V11m0 0V9.5a1.5 1.5 0 0 1 3 0V15c0 3-2 6-5 6H10c-1.7 0-3.2-1-4-2.6L4 14.8c-.5-1 0-2.2 1-2.7.9-.4 2 .1 2.5 1.1l1 1.9V11c0-1 .8-1.8 1.8-1.8.9 0 1.7.7 1.7 1.6"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20 12h-2m0 0 2-2m-2 2 2 2"/></svg>`,
+    handDown:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M8 11v-4.5a1.5 1.5 0 0 1 3 0V11m0-1V8.5a1.5 1.5 0 0 1 3 0V11m0 0V9.5a1.5 1.5 0 0 1 3 0V15c0 3-2 6-5 6H10c-1.7 0-3.2-1-4-2.6L4 14.8c-.5-1 0-2.2 1-2.7.9-.4 2 .1 2.5 1.1l1 1.9V11c0-1 .8-1.8 1.8-1.8.9 0 1.7.7 1.7 1.6"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 20v2m0 0-2-2m2 2 2-2"/></svg>`,
+    handLeft:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M8 11v-4.5a1.5 1.5 0 0 1 3 0V11m0-1V8.5a1.5 1.5 0 0 1 3 0V11m0 0V9.5a1.5 1.5 0 0 1 3 0V15c0 3-2 6-5 6H10c-1.7 0-3.2-1-4-2.6L4 14.8c-.5-1 0-2.2 1-2.7.9-.4 2 .1 2.5 1.1l1 1.9V11c0-1 .8-1.8 1.8-1.8.9 0 1.7.7 1.7 1.6"/><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 12h2m0 0-2-2m2 2-2 2"/></svg>`,
+    cardUp:`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="6.5" y="5.5" width="11" height="13" rx="1.8"/><path d="M12 15V9"/><path d="M9 12l3-3 3 3"/></svg>`
   };
-  return icons[kind]??icons.log;
+  return icons[kind]??icons.handUp;
 }
 
 function gestureListItemHtml(text,kind,esc){
@@ -43,7 +43,7 @@ export function renderIntroPanel(params){
   };
   const rows=introHandSamples.map((row)=>`<div class="intro-hand-row"><div class="intro-hand-meta"><strong>${esc(row.name)}</strong><span>${esc(row.desc)}</span></div><div class="intro-hand-cards">${row.cards.map((c)=>renderStaticCard(c,true)).join('')}</div></div>`).join('');
   const howList=(intro.guideHowList??[]).map((x)=>`<li>${esc(x)}</li>`).join('');
-  const gestureKinds=['log','recommend','food','emote','discard'];
+  const gestureKinds=['handUp','handRight','handDown','handLeft','cardUp'];
   const gestureList=(intro.guideGestureList??[]).map((x,i)=>gestureListItemHtml(x,gestureKinds[i]??gestureKinds[0],esc)).join('');
   const historyBlocks=String(intro.historyBody??'')
     .split(/\n\s*\n/)
@@ -61,7 +61,7 @@ export function renderCoachMarksPanel(params){
     intro,
     esc
   }=params;
-  const gestureKinds=['log','recommend','food','emote','discard'];
+  const gestureKinds=['handUp','handRight','handDown','handLeft','cardUp'];
   const gestureList=(intro.guideGestureList??[]).map((x,i)=>gestureListItemHtml(x,gestureKinds[i]??gestureKinds[0],esc)).join('');
   return`<div class="intro-modal coach-marks-modal" id="coach-marks-modal"><button class="intro-backdrop" id="coach-marks-backdrop" aria-label="${esc(intro.btnHide)}"></button><section class="intro-sheet coach-marks-sheet"><header class="intro-head"><div><h3 class="title-with-icon"><span class="title-icon title-icon-guide" aria-hidden="true">${gestureHandIconSvg()}</span><span>${esc(intro.guideGestureTitle)}</span></h3><p>${esc(intro.guideGestureIntro)}</p></div><button id="coach-marks-close" class="secondary coach-marks-close-btn"><span class="coach-close-icon" aria-hidden="true">${gestureIconSvg('discard')}</span><span>${esc(intro.btnHide)}</span></button></header><div class="intro-grid"><article class="intro-block coach-marks-block"><ul>${gestureList}</ul></article></div></section></div>`;
 }
