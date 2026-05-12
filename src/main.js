@@ -6255,7 +6255,7 @@ function renderGame(){
   const coachMarksEligible=isMobilePointer()&&!v.gameOver&&!isCoachMarksDismissed();
   if(coachMarksEligible&&state.screen==='game'&&!state.showCoachMarks)state.showCoachMarks=true;
   const coachMarksBadgeHtml=isMobilePointer()
-    ?`<button id="coach-marks-toggle" class="coach-marks-badge" type="button" aria-label="${esc(intro.btnShow)}" data-tooltip="${esc(intro.btnShow)}">?</button>`
+    ?`<button id="coach-marks-toggle" class="coach-marks-badge" type="button" aria-label="${esc(intro.btnShow)}" data-tooltip="${esc(intro.guideGestureTitle)}"><span aria-hidden="true">?</span></button>`
     :'';
   const rightSidebarDesktop=window.matchMedia('(min-width: 1081px)').matches;
   const rightSidebarMobileLandscape=window.matchMedia('(max-width: 860px) and (orientation: landscape)').matches;
