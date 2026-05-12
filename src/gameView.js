@@ -109,10 +109,13 @@ export function renderGameTable(params){
     centerLastMovesHtml,
     turnCompassHtml,
     inventoryDecorHtml='',
+    coachMarksButtonHtml='',
+    coachMarksLabel='',
     showWinCelebrate,
     t
   }=params;
-  return`<section class="table">${roomTopMetaTable}${seatHtml}<div class="table-center-stack">${mobileNamesHtml}${mobileDiscardHtml}${centerMovesHtml}${centerLastMovesHtml}</div>${turnCompassHtml??''}${inventoryDecorHtml}${showWinCelebrate?`<div class="win-celebrate"><div class="confetti-layer"></div><div class="win-banner">${t('congrats')}</div></div>`:''}</section>`;
+  const coachMarksHtml=coachMarksButtonHtml||`<button id="coach-marks-toggle" class="secondary coach-marks-badge" type="button" aria-label="${coachMarksLabel}" data-tooltip="${coachMarksLabel}"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" preserveAspectRatio="xMidYMid meet"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M8 11v-4.5a1.5 1.5 0 0 1 3 0V11m0-1V8.5a1.5 1.5 0 0 1 3 0V11m0 0V9.5a1.5 1.5 0 0 1 3 0V15c0 3-2 6-5 6H10c-1.7 0-3.2-1-4-2.6L4 14.8c-.5-1 0-2.2 1-2.7.9-.4 2 .1 2.5 1.1l1 1.9V11c0-1 .8-1.8 1.8-1.8.9 0 1.7.7 1.7 1.6"/></svg></button>`;
+  return`<section class="table">${roomTopMetaTable}${seatHtml}${coachMarksHtml}<div class="table-center-stack">${mobileNamesHtml}${mobileDiscardHtml}${centerMovesHtml}${centerLastMovesHtml}</div>${turnCompassHtml??''}${inventoryDecorHtml}${showWinCelebrate?`<div class="win-celebrate"><div class="confetti-layer"></div><div class="win-banner">${t('congrats')}</div></div>`:''}</section>`;
 }
 
 export function renderSeatLastAction(action,{

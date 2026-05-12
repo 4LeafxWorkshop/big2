@@ -450,6 +450,8 @@ export function buildGameShellMarkup(params){
     scoreGuideModalHtml,
     introPanelHtml,
     leaderboardModalHtml,
+    coachMarksButtonHtml,
+    coachMarksLabel,
     coachMarksHtml
   }=params;
   const gameTableHtml=renderGameTable({
@@ -461,6 +463,8 @@ export function buildGameShellMarkup(params){
     centerLastMovesHtml:centerLastMovesHtml(lastActions,v.selfSeat),
     turnCompassHtml:buildTurnCompassHtml(v,t),
     inventoryDecorHtml:buildTableInventoryDecorHtml(withBase),
+    coachMarksButtonHtml,
+    coachMarksLabel,
     showWinCelebrate:!v.gameOver&&youWin,
     t
   });

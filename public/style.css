@@ -9243,6 +9243,42 @@ body[data-screen='game'] .table-turn-compass .table-turn-pointer {
   filter: drop-shadow(0 0 4px color-mix(in srgb, #d8d8d8 26%, transparent));
   opacity: .4;
 }
+body[data-screen='game'] .table .coach-marks-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(8, 24, 38, .24);
+  color: rgba(244,249,251,.72);
+  box-shadow: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 6;
+  opacity: .66;
+  flex: 0 0 auto;
+  pointer-events: auto;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+body[data-screen='game'] .table .coach-marks-badge:hover,
+body[data-screen='game'] .table .coach-marks-badge:active,
+body[data-screen='game'] .table .coach-marks-badge:focus-visible {
+  opacity: 1;
+  border-color: rgba(255,255,255,.24);
+  background: rgba(8, 24, 38, .34);
+}
+body[data-screen='game'] .table .coach-marks-badge svg {
+  width: 16px;
+  height: 16px;
+  display: block;
+}
 
 body[data-screen='game'][data-orientation='portrait'] .table {
   padding: clamp(12px, 2.1vw, 20px) !important;
@@ -10391,36 +10427,6 @@ body[data-screen='game'] .action-strip .control-row .game-icon-btn .sort-icon {
   height: 18px;
   display: block;
   flex: 0 0 auto;
-}
-body[data-screen='game'] .topbar .coach-marks-badge {
-  width: 30px;
-  height: 30px;
-  min-width: 30px;
-  min-height: 30px;
-  padding: 0;
-  border-radius: 10px;
-  border: 1px solid rgba(255,255,255,.12);
-  background: rgba(255,255,255,.03);
-  color: rgba(244,249,251,.78);
-  box-shadow: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  opacity: .68;
-  flex: 0 0 auto;
-}
-body[data-screen='game'] .topbar .coach-marks-badge:hover,
-body[data-screen='game'] .topbar .coach-marks-badge:active,
-body[data-screen='game'] .topbar .coach-marks-badge:focus-visible {
-  opacity: 1;
-  border-color: rgba(255,255,255,.22);
-  background: rgba(255,255,255,.06);
-}
-body[data-screen='game'] .topbar .coach-marks-badge span {
-  display: block;
-  width: 14px;
-  height: 14px;
 }
 body[data-screen='game'] .service-bell-layer {
   position: absolute;

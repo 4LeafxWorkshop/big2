@@ -6254,8 +6254,8 @@ function renderGame(){
   const intro=introText();
   const coachMarksEligible=isMobilePointer()&&!v.gameOver&&!isCoachMarksDismissed();
   if(coachMarksEligible&&state.screen==='game'&&!state.showCoachMarks)state.showCoachMarks=true;
-  const coachMarksBadgeHtml=isMobilePointer()
-    ?`<button id="coach-marks-toggle" class="secondary coach-marks-badge" type="button" aria-label="${esc(intro.guideGestureTitle)}" data-tooltip="${esc(intro.guideGestureTitle)}"><span class="title-icon title-icon-guide" aria-hidden="true"></span></button>`
+  const coachMarksButtonHtml=isMobilePointer()
+    ?`<button id="coach-marks-toggle" class="secondary coach-marks-badge" type="button" aria-label="${esc(intro.guideGestureTitle)}" data-tooltip="${esc(intro.guideGestureTitle)}"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" preserveAspectRatio="xMidYMid meet"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M8 11v-4.5a1.5 1.5 0 0 1 3 0V11m0-1V8.5a1.5 1.5 0 0 1 3 0V11m0 0V9.5a1.5 1.5 0 0 1 3 0V15c0 3-2 6-5 6H10c-1.7 0-3.2-1-4-2.6L4 14.8c-.5-1 0-2.2 1-2.7.9-.4 2 .1 2.5 1.1l1 1.9V11c0-1 .8-1.8 1.8-1.8.9 0 1.7.7 1.7 1.6"/></svg></button>`
     :'';
   const rightSidebarDesktop=window.matchMedia('(min-width: 1081px)').matches;
   const rightSidebarMobileLandscape=window.matchMedia('(max-width: 860px) and (orientation: landscape)').matches;
@@ -6439,7 +6439,6 @@ function renderGame(){
   const gameTopbarHtml=renderGameTopbar({
     renderLangMenu,
     introButtonLabel:intro.btnShow,
-    coachMarksButtonHtml:coachMarksBadgeHtml,
     t,
     esc,
     withBase
@@ -6492,6 +6491,8 @@ function renderGame(){
     scoreGuideModalHtml,
     introPanelHtml,
     leaderboardModalHtml,
+    coachMarksButtonHtml,
+    coachMarksLabel:esc(intro.guideGestureTitle),
     coachMarksHtml:state.showCoachMarks&&coachMarksEligible?coachMarksHtml():''
   });
   runGamePostRender({
