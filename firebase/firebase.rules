@@ -194,6 +194,7 @@ service cloud.firestore {
       'soundEnabled',
       'calloutDisplayEnabled',
       'emoteDisplayEnabled',
+      'gestureHelpEnabled',
       'vibrateEnabled',
       'calloutVoiceMode',
       'calloutStylePack',
@@ -269,6 +270,7 @@ service cloud.firestore {
       (!('soundEnabled' in s) || s.soundEnabled is bool) &&
       (!('calloutDisplayEnabled' in s) || s.calloutDisplayEnabled is bool) &&
       (!('emoteDisplayEnabled' in s) || s.emoteDisplayEnabled is bool) &&
+      (!('gestureHelpEnabled' in s) || s.gestureHelpEnabled is bool) &&
       (!('vibrateEnabled' in s) || s.vibrateEnabled is bool) &&
       (!('calloutVoiceMode' in s) || (s.calloutVoiceMode is string && isValidVoiceMode(s.calloutVoiceMode))) &&
       (!('calloutStylePack' in s) || (s.calloutStylePack is string && isValidCalloutStylePack(s.calloutStylePack))) &&

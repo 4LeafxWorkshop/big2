@@ -13,7 +13,8 @@ test('createIntroGuideHelpers exposes intro text and panel html', ()=>{
     t:(key)=>key,
     renderStaticCard:({rank,suit})=>`${rank}:${suit}`,
     ranks:['3','4','5','6','7','8','9','10','J','Q','K','A','2'],
-    suits:[{symbol:'♦️'},{symbol:'♣️'},{symbol:'♥️'},{symbol:'♠️'}]
+    suits:[{symbol:'♦️'},{symbol:'♣️'},{symbol:'♥️'},{symbol:'♠️'}],
+    isGestureHelpEnabled:()=>true
   });
 
   const intro=helpers.introText();

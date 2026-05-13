@@ -22,6 +22,7 @@ function render(overrides={}){
     soundEnabled:true,
     calloutDisplayEnabled:false,
     emoteDisplayEnabled:true,
+    gestureHelpEnabled:false,
     vibrateEnabled:true,
     cardBackRight:'<div id="back-right"></div>',
     soloBtnHtml:'<button id="solo-start">solo</button>',
@@ -102,12 +103,14 @@ test('renderHomeSettingsCardHtml renders settings and toggles', ()=>{
     soundEnabled:true,
     calloutDisplayEnabled:false,
     emoteDisplayEnabled:true,
+    gestureHelpEnabled:false,
     vibrateEnabled:true,
     moreSettingsOpen:true,
     cardBackRight:'<div id="back-right"></div>'
   });
   assert.match(html,/home-section-title more-settings-toggle/);
   assert.match(html,/id="sound-slider"/);
+  assert.match(html,/id="gesture-help-slider"/);
   assert.match(html,/id="home-more-settings-panel"/);
   assert.match(html,/id="back-right"/);
 });

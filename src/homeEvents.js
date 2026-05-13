@@ -19,6 +19,7 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
     bindBackCarousel,
     bindSoundToggle,
     bindCalloutDisplayToggle,
+    bindGestureHelpToggle,
     bindEmoteDisplayToggle,
     bindVibrateToggle=()=>{},
     setRoomError,
@@ -245,6 +246,7 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
     bindBackCarousel('back-combo-right');
     bindSoundToggle('sound-slider');
     bindCalloutDisplayToggle('callout-display-slider');
+    bindGestureHelpToggle('gesture-help-slider');
     bindEmoteDisplayToggle('emote-display-slider');
     bindVibrateToggle('vibrate-slider');
 

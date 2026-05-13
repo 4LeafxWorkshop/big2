@@ -10,7 +10,6 @@ export function createIntroGuideHelpers(deps){
     renderStaticCard,
     ranks,
     suits,
-    isGestureHelpEnabled=()=>false,
   }=deps;
 
   function introText(){
@@ -487,14 +486,14 @@ export function createIntroGuideHelpers(deps){
       withBase,
       appTitle:t('title'),
       renderStaticCard,
-      introHandSamples:introHandSamples(),
-      showGestureGuide:Boolean(isGestureHelpEnabled?.())
+      introHandSamples:introHandSamples()
     });
   }
 
   function coachMarksHtml(){
     return renderCoachMarksPanel({
       intro:introText(),
+      language:getLanguage(),
       esc
     });
   }

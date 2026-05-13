@@ -4531,7 +4531,7 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   gap: 10px;
 }
 .coach-marks-sheet {
-  width: min(900px, 100%);
+  width: min(1040px, 100%);
   max-height: min(88dvh, 860px);
   padding: 24px 24px 18px;
   background:
@@ -4563,7 +4563,7 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
     "handUp handRight handDown"
     "handLeft cardUp .";
   grid-auto-rows: 1fr;
-  gap: 16px;
+  gap: 10px;
   padding: 0;
   margin: 0;
   list-style: none;
@@ -4573,12 +4573,12 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   display: grid;
   grid-template-areas:
     "icon body";
-  grid-template-columns: 120px minmax(0, 1fr);
-  gap: 10px 18px;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 8px 12px;
   justify-items: stretch;
   align-items: center;
-  padding: 12px 14px;
-  border-radius: 18px;
+  padding: 9px 10px;
+  border-radius: 14px;
   border: 1px solid rgba(255,255,255,.14);
   background:
     linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015)),
@@ -4619,8 +4619,8 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
 }
 .gesture-help-icon {
   grid-area: icon;
-  width: 108px;
-  height: 108px;
+  width: 96px;
+  height: 96px;
   color: #fff;
   display: inline-flex;
   align-items: center;
@@ -4634,9 +4634,22 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
 .gesture-help-body {
   grid-area: body;
   display: grid;
-  gap: 10px;
+  gap: 6px;
   align-content: center;
   min-width: 0;
+}
+.gesture-help-title-row,
+.gesture-help-action-row {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.gesture-help-title-row {
+  justify-content: flex-start;
+}
+.gesture-help-action-row {
+  justify-content: flex-start;
+  gap: 6px;
 }
 .gesture-icon-image,
 .coach-gesture-icon img {
@@ -4648,8 +4661,115 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
 .gesture-help-copy {
   min-width: 0;
   color: rgba(232,243,242,.92);
-  font-size: .88rem;
+  font-size: .8rem;
   line-height: 1.45;
+}
+.gesture-help-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  justify-self: end;
+  white-space: nowrap;
+  min-height: 26px;
+  padding: 2px 7px;
+  border-radius: 9px;
+  border: 1px solid rgba(255,255,255,.2);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.24), 0 2px 8px rgba(0,0,0,.32);
+  font-weight: 800;
+  font-size: .72rem;
+  position: relative;
+  overflow: visible;
+  transition:
+    transform 160ms var(--playful-pop),
+    box-shadow 160ms ease,
+    border-color 160ms ease,
+    filter 160ms ease;
+}
+.gesture-help-action-btn .gesture-help-action-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  flex: 0 0 auto;
+}
+.gesture-help-action-btn:hover,
+.gesture-help-action-btn:focus-visible {
+  transform: none !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.24), 0 2px 8px rgba(0,0,0,.32) !important;
+  filter: none !important;
+}
+.gesture-help-action-btn:active {
+  transform: none !important;
+}
+.gesture-help-action-btn-handUp {
+  background: linear-gradient(140deg, rgba(20, 58, 86, .92), rgba(8, 30, 50, .9));
+  color: #e9f4ff;
+}
+.gesture-help-action-btn-handRight {
+  background: linear-gradient(180deg, #4e87ef, #2d63d6);
+  color: #f5f8ff;
+  min-width: 0;
+}
+.gesture-help-action-btn-handDown {
+  background: linear-gradient(180deg, rgba(90,110,122,.88), rgba(56,73,86,.92));
+  color: #e9f1f6;
+}
+.gesture-help-action-btn-handLeft {
+  background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.11));
+  color: var(--text);
+}
+.gesture-help-action-btn-cardUp {
+  background: linear-gradient(140deg, #ffd166, var(--accent));
+  color: #1b232e;
+}
+.gesture-help-action-btn-handUp .gesture-help-action-icon {
+  width: 18px;
+  height: 18px;
+}
+.gesture-help-action-btn-handUp .gesture-help-action-icon .title-icon-log {
+  width: 18px;
+  height: 18px;
+}
+.gesture-help-action-btn-handUp .gesture-help-action-text {
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+.gesture-help-action-btn-handRight,
+.gesture-help-action-btn-cardUp {
+  min-height: 26px;
+}
+.gesture-help-action-btn-handRight .gesture-help-action-icon,
+.gesture-help-action-btn-cardUp .gesture-help-action-icon {
+  font-size: 1rem;
+}
+.gesture-help-action-btn-handDown,
+.gesture-help-action-btn-handLeft {
+  min-width: 28px;
+  padding: 2px 5px;
+  border: 1px solid rgba(255,255,255,.2);
+  background: linear-gradient(180deg, rgba(90,110,122,.88), rgba(56,73,86,.92));
+  color: #e9f1f6;
+}
+.gesture-help-action-btn-handDown .gesture-help-action-text,
+.gesture-help-action-btn-handLeft .gesture-help-action-text {
+  display: none;
+}
+.gesture-help-action-btn-handDown .gesture-help-action-icon,
+.gesture-help-action-btn-handLeft .gesture-help-action-icon {
+  width: 16px;
+  height: 16px;
+}
+.gesture-help-action-btn-handLeft {
+  background: linear-gradient(180deg, rgba(255,255,255,.18), rgba(255,255,255,.11));
+  color: var(--text);
+}
+.gesture-help-action-btn-handDown {
+  background: linear-gradient(180deg, rgba(90,110,122,.88), rgba(56,73,86,.92));
+  color: #e9f1f6;
+}
+.gesture-help-action-text {
+  line-height: 1;
 }
 .gesture-help-footer {
   display: flex;
@@ -4756,22 +4876,37 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
       "handDown handLeft"
       "cardUp cardUp";
     grid-auto-rows: 1fr;
-    gap: 10px;
+    gap: 8px;
   }
   .coach-gesture-item {
-    grid-template-columns: 84px minmax(0, 1fr);
-    padding: 10px 10px 11px;
+    grid-template-columns: 76px minmax(0, 1fr);
+    padding: 8px 9px;
     height: 100%;
   }
   .gesture-help-icon {
-    width: 84px;
-    height: 84px;
+    width: 76px;
+    height: 76px;
   }
   .gesture-help-label {
     font-size: .86rem;
   }
   .gesture-help-copy {
-    font-size: .8rem;
+    font-size: .76rem;
+  }
+  .gesture-help-action-btn {
+    gap: 4px;
+    justify-self: start;
+  }
+  .gesture-help-action-btn-handRight {
+    min-width: 0;
+  }
+  .gesture-help-action-btn-handUp .gesture-help-action-text {
+    font-size: .68rem;
+  }
+  .gesture-help-action-btn-handDown,
+  .gesture-help-action-btn-handLeft {
+    min-width: 28px;
+    padding: 2px 5px;
   }
   .gesture-help-footer {
     font-size: .82rem;

@@ -6,6 +6,7 @@ export function createProfileSettingsHelpers(deps){
     getSoundEnabled,
     getCalloutDisplayEnabled,
     getEmoteDisplayEnabled,
+    getGestureHelpEnabled=()=>false,
     getVibrateEnabled=()=>true,
     setVibrateEnabled=()=>{},
     normalizeCalloutStylePack,
@@ -67,6 +68,7 @@ export function createProfileSettingsHelpers(deps){
       soundEnabled:Boolean(getSoundEnabled()),
       calloutDisplayEnabled:Boolean(getCalloutDisplayEnabled()),
       emoteDisplayEnabled:Boolean(getEmoteDisplayEnabled()),
+      gestureHelpEnabled:Boolean(getGestureHelpEnabled()),
       vibrateEnabled:Boolean(getVibrateEnabled()),
       calloutVoiceMode:getSoundEnabled()?'auto':'off',
       calloutStylePack:normalizeCalloutStylePack(getCalloutStylePack()),
@@ -88,6 +90,7 @@ export function createProfileSettingsHelpers(deps){
     if(typeof settings.soundEnabled==='boolean')deps.setSoundEnabled(Boolean(settings.soundEnabled));
     if(typeof settings.calloutDisplayEnabled==='boolean')deps.setCalloutDisplayEnabled(Boolean(settings.calloutDisplayEnabled));
     if(typeof settings.emoteDisplayEnabled==='boolean')deps.setEmoteDisplayEnabled(Boolean(settings.emoteDisplayEnabled));
+    if(typeof settings.gestureHelpEnabled==='boolean')deps.setGestureHelpEnabled(Boolean(settings.gestureHelpEnabled));
     if(typeof settings.vibrateEnabled==='boolean')setVibrateEnabled(Boolean(settings.vibrateEnabled));
     deps.setCalloutVoiceMode(getSoundEnabled()?'auto':'off');
     deps.setCalloutStylePack(normalizeCalloutStylePack(settings.calloutStylePack));

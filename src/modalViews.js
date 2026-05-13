@@ -8,7 +8,7 @@ export function renderConfidentialStamp({text,esc,classes=''}) {
 }
 
 export function gestureGuideIconSvg(){
-  return gestureIconMarkup('handUp');
+  return gestureIconMarkup('tap');
 }
 
 function gestureIconBaseSrc(name){
@@ -19,6 +19,7 @@ function gestureIconBaseSrc(name){
 
 function gestureIconMarkup(kind){
   const srcMap={
+    tap:'tap',
     hand:'hand-up',
     up:'hand-up',
     right:'hand-right',
@@ -35,12 +36,67 @@ function gestureIconMarkup(kind){
   return `<img class="gesture-icon-image" src="${gestureIconBaseSrc(key)}" alt="" aria-hidden="true"/>`;
 }
 
-function gestureIconPairHtml(primaryKind,secondaryKind){
-  const kind=primaryKind==='card'&&secondaryKind==='up'?'cardUp':`hand${secondaryKind[0].toUpperCase()}${secondaryKind.slice(1)}`;
-  return `<span class="coach-gesture-icon coach-gesture-icon-pair" aria-hidden="true">${gestureIconMarkup(kind)}</span>`;
+function gestureHelpLabel(kind,language){
+  const labels={
+    'zh-HK':{
+      handUp:'遊戲紀錄',
+      handRight:'建議',
+      handDown:'上餐',
+      handLeft:'表情',
+      cardUp:'出牌'
+    },
+    en:{
+      handUp:'Game Log',
+      handRight:'Suggest',
+      handDown:'Food',
+      handLeft:'Emote',
+      cardUp:'Discard'
+    },
+    fr:{
+      handUp:'Journal',
+      handRight:'Conseil',
+      handDown:'Service',
+      handLeft:'Émote',
+      cardUp:'Défausser'
+    },
+    de:{
+      handUp:'Log',
+      handRight:'Tipp',
+      handDown:'Essen',
+      handLeft:'Emote',
+      cardUp:'Ablegen'
+    },
+    es:{
+      handUp:'Registro',
+      handRight:'Sugerir',
+      handDown:'Comida',
+      handLeft:'Emote',
+      cardUp:'Descartar'
+    },
+    ja:{
+      handUp:'ログ',
+      handRight:'おすすめ',
+      handDown:'フード',
+      handLeft:'エモート',
+      cardUp:'捨て札'
+    }
+  };
+  return(labels[language]??labels.en)[kind]??labels.en[kind]??kind;
 }
 
-function gestureListItemHtml(text,kind,esc){
+function gestureHelpFooterText(language){
+  const map={
+    'zh-HK':'提示：可在設定中開啟或關閉手勢提示。',
+    en:'Tip: You can turn gesture help on or off in settings.',
+    fr:'Astuce : vous pouvez activer ou désactiver l’aide par gestes dans les réglages.',
+    de:'Tipp: Du kannst die Gestenhilfe in den Einstellungen ein- oder ausschalten.',
+    es:'Consejo: puedes activar o desactivar la ayuda por gestos en ajustes.',
+    ja:'ヒント: 設定でジェスチャー案内をオン/オフできます。'
+  };
+  return map[language]??map.en;
+}
+
+function gestureListItemHtml(text,kind,esc,language){
   const iconMap={
     handUp:['hand','up'],
     handRight:['hand','right'],
@@ -49,7 +105,32 @@ function gestureListItemHtml(text,kind,esc){
     cardUp:['card','up']
   };
   const [primaryKind,secondaryKind]=iconMap[kind]??iconMap.handUp;
-  return `<li class="coach-gesture-item">${gestureIconPairHtml(primaryKind,secondaryKind)}<span class="coach-gesture-text">${esc(text)}</span></li>`;
+  const iconKind=primaryKind==='card'&&secondaryKind==='up'?'cardUp':`hand${secondaryKind[0].toUpperCase()}${secondaryKind.slice(1)}`;
+  const label=gestureHelpLabel(kind,language);
+  const actionIconHtml=kind==='handUp'
+    ?'<span class="title-icon title-icon-log" aria-hidden="true"></span>'
+    :kind==='handRight'
+      ?'<span aria-hidden="true">💡</span>'
+      :kind==='handDown'
+        ?'<span aria-hidden="true">🛎️</span>'
+        :kind==='handLeft'
+          ?'<span aria-hidden="true">😆</span>'
+          :'<span aria-hidden="true">▶</span>';
+  const buttonClass=kind==='handUp'
+    ?'secondary gesture-help-action-btn gesture-help-action-btn-handUp'
+    :kind==='handRight'
+      ?'secondary game-cta-btn gesture-help-action-btn gesture-help-action-btn-handRight'
+      :kind==='handDown'
+        ?'secondary game-cta-btn game-icon-btn gesture-help-action-btn gesture-help-action-btn-handDown'
+        :kind==='handLeft'
+          ?'secondary game-cta-btn game-icon-btn gesture-help-action-btn gesture-help-action-btn-handLeft'
+          :'primary game-cta-btn gesture-help-action-btn gesture-help-action-btn-cardUp';
+  const buttonText=(kind==='handDown'||kind==='handLeft')?'':`<span class="gesture-help-action-text">${esc(label)}</span>`;
+  return `<li class="coach-gesture-item gesture-help-item gesture-help-item-${kind}" data-gesture-kind="${kind}"><span class="coach-gesture-icon gesture-help-icon" aria-hidden="true">${gestureIconMarkup(iconKind)}</span><div class="gesture-help-body"><div class="gesture-help-title-row"><span class="gesture-help-label">${esc(label)}</span></div><div class="gesture-help-action-row"><button class="${buttonClass}" type="button"><span class="gesture-help-action-icon" aria-hidden="true">${actionIconHtml}</span>${buttonText}</button></div><span class="gesture-help-copy">${esc(text)}</span></div></li>`;
+}
+
+function renderGestureHelpStage({gestureListHtml,language}) {
+  return `<ul class="gesture-help-stage gesture-help-list">${gestureListHtml}</ul><footer class="gesture-help-footer"><span class="gesture-help-footer-icon" aria-hidden="true">💡</span><span>${gestureHelpFooterText(language)}</span></footer>`;
 }
 
 export function renderIntroPanel(params){
@@ -69,27 +150,23 @@ export function renderIntroPanel(params){
   };
   const rows=introHandSamples.map((row)=>`<div class="intro-hand-row"><div class="intro-hand-meta"><strong>${esc(row.name)}</strong><span>${esc(row.desc)}</span></div><div class="intro-hand-cards">${row.cards.map((c)=>renderStaticCard(c,true)).join('')}</div></div>`).join('');
   const howList=(intro.guideHowList??[]).map((x)=>`<li>${esc(x)}</li>`).join('');
-  const gestureKinds=['handUp','handRight','handDown','handLeft','cardUp'];
-  const gestureList=(intro.guideGestureList??[]).map((x,i)=>gestureListItemHtml(x,gestureKinds[i]??gestureKinds[0],esc)).join('');
   const historyBlocks=String(intro.historyBody??'')
     .split(/\n\s*\n/)
     .filter(Boolean)
     .map((p)=>`<p>${colorizeSuitText(p)}</p>`)
     .join('');
-  const gestureHtml=showGestureGuide&&gestureList
-    ?`<article class="intro-block"><h4 class="title-with-icon"><span>${esc(intro.guideGestureTitle)}</span></h4><p>${esc(intro.guideGestureIntro)}</p><ul>${gestureList}</ul></article>`
-    :'';
-  return`<div class="intro-modal" id="intro-modal"><button class="intro-backdrop" id="intro-backdrop" aria-label="${esc(intro.btnHide)}"></button><section class="intro-sheet"><header class="intro-head"><div><h3 class="title-with-icon"><span class="title-icon title-icon-guide" aria-hidden="true"></span><span>${esc(intro.panelTitle)}</span></h3>${intro.panelSub?`<p>${colorizeSuitText(intro.panelSub)}</p>`:''}</div><button id="intro-close" class="secondary">${esc(intro.btnHide)}</button></header><div class="intro-grid"><article class="intro-block"><h4>${esc(intro.historyTitle)}</h4>${historyBlocks}</article><article class="intro-block"><h4>${esc(intro.howTitle)}</h4><p>${colorizeSuitText(intro.howBody)}</p><div class="intro-hand-list">${rows}</div></article><article class="intro-block"><h4>${esc(intro.flowTitle)}</h4><ul>${(intro.flowList??[]).map((x)=>`<li>${formatIntroLine(x)}</li>`).join('')}</ul></article><article class="intro-block"><h4>${esc(intro.playTitle)}</h4><ul>${(intro.playList??[]).map((x)=>`<li>${formatIntroLine(x)}</li>`).join('')}</ul></article><article class="intro-block"><h4>${esc(intro.guideHowTitle)}</h4><p>${esc(intro.guideHowIntro)}</p><ul>${howList}</ul></article>${gestureHtml}</div></section></div>`;
+  return`<div class="intro-modal" id="intro-modal"><button class="intro-backdrop" id="intro-backdrop" aria-label="${esc(intro.btnHide)}"></button><section class="intro-sheet"><header class="intro-head"><div><h3 class="title-with-icon"><span class="title-icon title-icon-guide" aria-hidden="true"></span><span>${esc(intro.panelTitle)}</span></h3>${intro.panelSub?`<p>${colorizeSuitText(intro.panelSub)}</p>`:''}</div><button id="intro-close" class="secondary">${esc(intro.btnHide)}</button></header><div class="intro-grid"><article class="intro-block"><h4>${esc(intro.historyTitle)}</h4>${historyBlocks}</article><article class="intro-block"><h4>${esc(intro.howTitle)}</h4><p>${colorizeSuitText(intro.howBody)}</p><div class="intro-hand-list">${rows}</div></article><article class="intro-block"><h4>${esc(intro.flowTitle)}</h4><ul>${(intro.flowList??[]).map((x)=>`<li>${formatIntroLine(x)}</li>`).join('')}</ul></article><article class="intro-block"><h4>${esc(intro.playTitle)}</h4><ul>${(intro.playList??[]).map((x)=>`<li>${formatIntroLine(x)}</li>`).join('')}</ul></article><article class="intro-block"><h4>${esc(intro.guideHowTitle)}</h4><p>${esc(intro.guideHowIntro)}</p><ul>${howList}</ul></article></div></section></div>`;
 }
 
 export function renderCoachMarksPanel(params){
   const {
     intro,
+    language='en',
     esc
   }=params;
   const gestureKinds=['handUp','handRight','handDown','handLeft','cardUp'];
-  const gestureList=(intro.guideGestureList??[]).map((x,i)=>gestureListItemHtml(x,gestureKinds[i]??gestureKinds[0],esc)).join('');
-  return`<div class="intro-modal coach-marks-modal" id="coach-marks-modal"><button class="intro-backdrop" id="coach-marks-backdrop" aria-label="${esc(intro.btnHide)}"></button><section class="intro-sheet coach-marks-sheet"><header class="intro-head"><div><h3>${esc(intro.guideGestureTitle)}</h3><p>${esc(intro.guideGestureIntro)}</p></div><button id="coach-marks-close" class="secondary coach-marks-close-btn">${esc(intro.btnHide)}</button></header><div class="intro-grid"><article class="intro-block coach-marks-block"><ul>${gestureList}</ul></article></div></section></div>`;
+  const gestureList=(intro.guideGestureList??[]).map((x,i)=>gestureListItemHtml(x,gestureKinds[i]??gestureKinds[0],esc,language)).join('');
+  return`<div class="intro-modal coach-marks-modal" id="coach-marks-modal"><button class="intro-backdrop" id="coach-marks-backdrop" aria-label="${esc(intro.btnHide)}"></button><section class="intro-sheet coach-marks-sheet"><header class="intro-head"><div><h3>${esc(intro.guideGestureTitle)}</h3><p>${esc(intro.guideGestureIntro)}</p></div><button id="coach-marks-close" class="secondary coach-marks-close-btn">${esc(intro.btnHide)}</button></header><div class="intro-grid"><article class="intro-block coach-marks-block">${renderGestureHelpStage({gestureListHtml:gestureList,language})}</article></div></section></div>`;
 }
 
 export function renderLeaderboardPanel(params){

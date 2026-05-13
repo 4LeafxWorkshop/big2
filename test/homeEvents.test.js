@@ -100,6 +100,7 @@ function bindWith(overrides={}){
     bindBackCarousel:overrides.bindBackCarousel??(()=>{}),
     bindSoundToggle:overrides.bindSoundToggle??(()=>{}),
     bindCalloutDisplayToggle:overrides.bindCalloutDisplayToggle??(()=>{}),
+    bindGestureHelpToggle:overrides.bindGestureHelpToggle??(()=>{}),
     bindEmoteDisplayToggle:overrides.bindEmoteDisplayToggle??(()=>{}),
     setRoomError:overrides.setRoomError??(()=>{}),
     t:overrides.t??((key)=>key),

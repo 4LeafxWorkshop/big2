@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
+  gestureGuideIconSvg,
   renderCoachMarksPanel,
   renderIntroPanel,
   renderLeaderboardModal,
@@ -36,9 +37,6 @@ test('renderIntroPanel includes sample cards and close controls', ()=>{
       guideHowTitle:'Guide How',
       guideHowIntro:'Intro',
       guideHowList:['One'],
-      guideGestureTitle:'Gesture Controls',
-      guideGestureIntro:'Mobile game gestures:',
-      guideGestureList:['Swipe up on the table to open the game log.'],
       guideHomeTitle:'Home',
       guideHomeIntro:'Intro',
       guideAndroidTitle:'Android',
@@ -60,10 +58,9 @@ test('renderIntroPanel includes sample cards and close controls', ()=>{
   assert.match(html,/Diamond 3/);
   assert.match(html,/class="card"/);
   assert.match(html,/Guide How/);
-  assert.match(html,/Mobile game gestures:/);
-  assert.match(html,/gesture-icons\/hand-up\.png/);
   assert.match(html,/title-icon-guide/);
-  assert.match(html,/coach-gesture-icon-pair/);
+  assert.doesNotMatch(html,/gesture-help-stage/);
+  assert.doesNotMatch(html,/gesture-help-label/);
 });
 
 test('renderCoachMarksPanel uses the gesture guide icon', ()=>{
@@ -72,15 +69,55 @@ test('renderCoachMarksPanel uses the gesture guide icon', ()=>{
       btnHide:'Hide',
       guideGestureTitle:'Gesture Controls',
       guideGestureIntro:'Mobile game gestures:',
-      guideGestureList:['Swipe up on the table to open the game log.']
+      guideGestureList:[
+        'Swipe up on the table to open the game log.',
+        'Swipe right to request a recommendation.',
+        'Swipe down to trigger the food callout.',
+        'Swipe left to open the emote picker.',
+        'Swipe up on selected cards to play them.'
+      ]
     },
+    language:'zh-HK',
     esc:(value)=>String(value)
   });
   assert.match(html,/id="coach-marks-modal"/);
   assert.match(html,/coach-marks-close/);
   assert.match(html,/gesture-icons\/hand-up\.png/);
-  assert.doesNotMatch(html,/title-icon-guide/);
+  assert.match(html,/遊戲紀錄/);
+  assert.match(html,/建議/);
+  assert.match(html,/上餐/);
+  assert.match(html,/表情/);
+  assert.match(html,/出牌/);
+  assert.match(html,/gesture-help-action-btn/);
+  assert.match(html,/gesture-help-title-row/);
+  assert.match(html,/title-icon-log/);
+  assert.match(html,/🛎️/);
+  assert.match(html,/😆/);
+  assert.match(html,/gesture-help-action-btn-handDown/);
+  assert.match(html,/gesture-help-action-btn-handLeft/);
+  assert.match(html,/gesture-help-action-btn-handDown" type="button"><span class="gesture-help-action-icon" aria-hidden="true"><span aria-hidden="true">🛎️<\/span><\/span><\/button>/);
+  assert.match(html,/gesture-help-action-btn-handLeft" type="button"><span class="gesture-help-action-icon" aria-hidden="true"><span aria-hidden="true">😆<\/span><\/span><\/button>/);
+  assert.match(html,/gesture-help-stage/);
   assert.doesNotMatch(html,/coach-close-icon/);
+});
+
+test('gestureHelpLabel uses Game Log for English hand-up', ()=>{
+  const html=renderCoachMarksPanel({
+    intro:{
+      btnHide:'Hide',
+      guideGestureTitle:'Gesture Controls',
+      guideGestureIntro:'Mobile game gestures:',
+      guideGestureList:['Swipe up on the table to open the game log.']
+    },
+    language:'en',
+    esc:(value)=>String(value)
+  });
+  assert.match(html,/Game Log/);
+  assert.doesNotMatch(html,/>Log<\/span>/);
+});
+
+test('gestureGuideIconSvg uses the tap badge icon', ()=>{
+  assert.match(gestureGuideIconSvg(),/gesture-icons\/tap\.png/);
 });
 
 test('renderLeaderboardPanel renders rows and controls', ()=>{

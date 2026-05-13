@@ -14,6 +14,7 @@ function createHelpers(stateOverrides={}){
   let soundEnabled=true;
   let calloutDisplayEnabled=false;
   let emoteDisplayEnabled=true;
+  let gestureHelpEnabled=false;
   let vibrateEnabled=true;
   let calloutStylePack='classic';
   let calloutVoiceMode='auto';
@@ -27,6 +28,8 @@ function createHelpers(stateOverrides={}){
     setCalloutDisplayEnabled:(value)=>{calloutDisplayEnabled=value;},
     getEmoteDisplayEnabled:()=>emoteDisplayEnabled,
     setEmoteDisplayEnabled:(value)=>{emoteDisplayEnabled=value;},
+    getGestureHelpEnabled:()=>gestureHelpEnabled,
+    setGestureHelpEnabled:(value)=>{gestureHelpEnabled=value;state.home.gestureHelpEnabled=value;},
     getVibrateEnabled:()=>vibrateEnabled,
     setVibrateEnabled:(value)=>{vibrateEnabled=value;},
     normalizeCalloutStylePack:(value)=>value||'classic',
@@ -42,7 +45,7 @@ function createHelpers(stateOverrides={}){
   return{
     state,
     helpers,
-    getFlags:()=>({soundEnabled,calloutDisplayEnabled,emoteDisplayEnabled,vibrateEnabled,calloutStylePack,calloutVoiceMode})
+    getFlags:()=>({soundEnabled,calloutDisplayEnabled,emoteDisplayEnabled,gestureHelpEnabled,vibrateEnabled,calloutStylePack,calloutVoiceMode})
   };
 }
 
@@ -52,6 +55,7 @@ test('collectMainSettings reflects current state and toggles', ()=>{
   assert.equal(settings.language,'zh-HK');
   assert.equal(settings.backColor,'red');
   assert.equal(settings.soundEnabled,true);
+  assert.equal(settings.gestureHelpEnabled,false);
   assert.equal(settings.vibrateEnabled,true);
 });
 
@@ -64,6 +68,7 @@ test('applyMainSettings updates state and mutable flags', ()=>{
     soundEnabled:false,
     calloutDisplayEnabled:true,
     emoteDisplayEnabled:false,
+    gestureHelpEnabled:true,
     vibrateEnabled:false,
     calloutStylePack:'minimal',
     gender:'female',
@@ -74,10 +79,12 @@ test('applyMainSettings updates state and mutable flags', ()=>{
   assert.equal(state.home.backColor,'blue');
   assert.equal(state.home.gender,'female');
   assert.equal(state.home.avatarChoice,'google');
+  assert.equal(state.home.gestureHelpEnabled,true);
   assert.deepEqual(getFlags(),{
     soundEnabled:false,
     calloutDisplayEnabled:true,
     emoteDisplayEnabled:false,
+    gestureHelpEnabled:true,
     vibrateEnabled:false,
     calloutStylePack:'minimal',
     calloutVoiceMode:'off'
