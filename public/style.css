@@ -4583,9 +4583,11 @@ ul.gesture-help-list {
   border-radius: 14px;
   border: 1px solid var(--line-b);
   background:
-    linear-gradient(140deg, rgba(255,255,255,.06), rgba(255,255,255,.02)),
-    linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
-  box-shadow: var(--ui-inset-highlight);
+    linear-gradient(180deg, rgba(255,255,255,.025), rgba(255,255,255,.012)),
+    rgba(6, 20, 33, .7);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.03),
+    0 8px 18px rgba(0,0,0,.18);
   height: 100%;
 }
 .gesture-help-item-handUp {
@@ -4876,23 +4878,25 @@ ul.gesture-help-list {
 }
 @media (max-width: 760px) {
   .gesture-help-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
     grid-template-areas:
-      "handUp handRight"
-      "handDown handLeft"
-      "cardUp cardUp";
-    grid-auto-rows: 1fr;
+      "handUp"
+      "handRight"
+      "handDown"
+      "handLeft"
+      "cardUp";
+    grid-auto-rows: auto;
     gap: 8px;
     padding-left: 0;
   }
   .coach-gesture-item {
-    grid-template-columns: 52px minmax(0, 1fr);
+    grid-template-columns: 48px minmax(0, 1fr);
     padding: 6px 7px;
     height: 100%;
   }
   .gesture-help-icon {
-    width: 52px;
-    height: 52px;
+    width: 48px;
+    height: 48px;
   }
   .gesture-help-label {
     font-size: .86rem;
@@ -13250,6 +13254,42 @@ body[data-screen='game'] .seat.north.active .seat-section {
 }
 
 @media (max-width: 860px) and (orientation: portrait) {
+  body[data-screen='game'][data-orientation='portrait'] .coach-marks-sheet {
+    width: min(100%, calc(100vw - 12px));
+    padding: 12px;
+  }
+  body[data-screen='game'][data-orientation='portrait'] .coach-marks-sheet .intro-head {
+    margin-bottom: 8px;
+  }
+  body[data-screen='game'][data-orientation='portrait'] .coach-marks-block {
+    padding: 7px;
+  }
+  body[data-screen='game'][data-orientation='portrait'] .gesture-help-list {
+    grid-template-columns: 1fr !important;
+    grid-template-areas: none !important;
+    gap: 7px;
+  }
+  body[data-screen='game'][data-orientation='portrait'] .gesture-help-item-handUp,
+  body[data-screen='game'][data-orientation='portrait'] .gesture-help-item-handRight,
+  body[data-screen='game'][data-orientation='portrait'] .gesture-help-item-handDown,
+  body[data-screen='game'][data-orientation='portrait'] .gesture-help-item-handLeft,
+  body[data-screen='game'][data-orientation='portrait'] .gesture-help-item-cardUp {
+    grid-area: auto;
+  }
+  body[data-screen='game'][data-orientation='portrait'] .coach-gesture-item {
+    grid-template-columns: 44px minmax(0, 1fr);
+    padding: 5px 6px;
+  }
+  body[data-screen='game'][data-orientation='portrait'] .gesture-help-icon {
+    width: 44px;
+    height: 44px;
+  }
+  body[data-screen='game'][data-orientation='portrait'] .gesture-help-label {
+    font-size: .84rem;
+  }
+  body[data-screen='game'][data-orientation='portrait'] .gesture-help-copy {
+    font-size: .74rem;
+  }
   body[data-screen='game'] .seat.north > .seat-name-fixed,
   body[data-screen='game'] .seat.north .seat-pack > .seat-name-fixed {
     top: 6px !important;
