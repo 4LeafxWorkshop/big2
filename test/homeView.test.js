@@ -54,7 +54,7 @@ test('renderHomeMarkup includes the main home controls and optional overlays', (
   assert.match(html,/home-form-more/);
   assert.match(html,/id="home-more-settings-toggle"/);
   assert.doesNotMatch(html,/home-more-settings-open/);
-  assert.doesNotMatch(html,/id="back-right"/);
+  assert.match(html,/id="back-right"/);
   assert.match(html,/id="intro-panel"/);
   assert.match(html,/id="score-guide"/);
   assert.match(html,/class="home-build-version">v0\.0\.0 test<\/div>/);
@@ -117,12 +117,13 @@ test('renderHomeSettingsCardHtml renders settings and toggles', ()=>{
     emoteDisplayEnabled:true,
     gestureHelpEnabled:false,
     vibrateEnabled:true,
+    cardBackRight:'<div id="back-right"></div>',
     moreSettingsOpen:false
   });
   assert.match(html,/id="sound-slider"/);
   assert.match(html,/id="home-more-settings-toggle"/);
   assert.match(html,/aria-expanded="false"/);
-  assert.doesNotMatch(html,/id="back-right"/);
+  assert.match(html,/id="back-right"/);
   assert.match(html,/more-settings-icon-down/);
 });
 

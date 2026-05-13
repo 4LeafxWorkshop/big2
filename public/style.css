@@ -979,7 +979,7 @@ body[data-screen='home'] .home-wrap {
   display: grid;
 }
 .royal-home-body .field-cardback-right {
-  display: grid;
+  display: none;
 }
 .royal-home-body .home-section-title {
   margin: 0;
@@ -8915,26 +8915,30 @@ body[data-screen='game'] .intro-modal {
   }
   .royal-home-body .home-form-right .field-ai {
     grid-column: 1;
+    order: 1;
   }
   .royal-home-body .home-form-right .field-sound {
     grid-column: 2;
-  }
-  .royal-home-body .home-profile-card {
     order: 1;
   }
-  .royal-home-body .field-cardback-left {
+  .royal-home-body .home-profile-card {
     order: 0;
   }
   .royal-home-body .field-ai-left {
     order: 2;
   }
+  .royal-home-body .field-cardback-right {
+    display: grid;
+    grid-column: 1 / -1;
+    order: -2;
+  }
   .royal-home-body .home-more-settings-toggle {
     grid-column: 1 / -1;
-    order: 1;
+    order: 2;
   }
   .royal-home-body .home-form-more .more-settings-panel {
     grid-column: 1 / -1;
-    order: 1;
+    order: 3;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 8px;
   }
@@ -8942,7 +8946,7 @@ body[data-screen='game'] .intro-modal {
     min-width: 0;
   }
   .royal-home-body .field-cardback-left {
-    display: grid;
+    display: none;
   }
   body[data-screen='game'] {
     --center-discard-scale: 1.18;

@@ -37,9 +37,10 @@ export function renderHomeSettingsCardHtml(params){
     emoteDisplayEnabled,
     gestureHelpEnabled,
     vibrateEnabled,
+    cardBackRight,
     moreSettingsOpen
   }=params;
-  return`<div class="home-form-col home-form-right home-section"><h3 class="home-section-title"><span class="title-icon title-icon-settings" aria-hidden="true"></span>${t('systemSettings')}</h3>${aiFieldRight}<label class="field field-sound"><span>${t('audioVoice')}</span>${binarySliderHtml({id:'sound-slider',value:soundEnabled,onLabel:t('soundOn'),offLabel:t('soundOff'),ariaLabel:t('audioVoice')})}</label>${moreSettingsOpen?'':`<button id="home-more-settings-toggle" class="home-more-settings-toggle" type="button" aria-expanded="false"><span class="more-settings-icon more-settings-icon-down" aria-hidden="true"></span><span>${t('moreSettings')}</span></button>`}</div>`;
+  return`<div class="home-form-col home-form-right home-section"><h3 class="home-section-title"><span class="title-icon title-icon-settings" aria-hidden="true"></span>${t('systemSettings')}</h3>${aiFieldRight}<label class="field field-sound"><span>${t('audioVoice')}</span>${binarySliderHtml({id:'sound-slider',value:soundEnabled,onLabel:t('soundOn'),offLabel:t('soundOff'),ariaLabel:t('audioVoice')})}</label>${cardBackRight}${moreSettingsOpen?'':`<button id="home-more-settings-toggle" class="home-more-settings-toggle" type="button" aria-expanded="false"><span class="more-settings-icon more-settings-icon-down" aria-hidden="true"></span><span>${t('moreSettings')}</span></button>`}</div>`;
 }
 
 export function renderHomeMoreSettingsCardHtml(params){
@@ -81,6 +82,7 @@ export function renderHomeMarkup(params){
     gestureHelpEnabled,
     vibrateEnabled,
     moreSettingsOpen,
+    cardBackRight,
     soloBtnHtml,
     roomButtonsHtml,
     mainPageLegalMiniHtml,
@@ -94,7 +96,7 @@ export function renderHomeMarkup(params){
   const versionHtml=buildVersionLabel?`<div class="home-build-version">${esc(buildVersionLabel)}</div>`:'';
   const moreSettingsClass=moreSettingsOpen?' home-more-settings-open':'';
 
-  return`<section class="home-wrap royal-home-wrap${moreSettingsClass}"><section class="home-panel royal-home-panel"><header class="royal-home-head">${renderHomeTopActionsHtml({intro,allowOpponents,renderLangMenu,esc,t})}<div class="royal-title-wrap"><div class="home-logo-block"><img class="title-logo title-logo-home" src="${withBase('title-lockup-home.png')}" alt="鋤大D TRADITIONAL BIG TWO"/></div></div></header><section class="royal-home-body${moreSettingsClass}"><div class="home-form-grid">${renderHomeProfileCardHtml({homeAvatarSrc,esc,state,t,aiFieldLeft,cardBackLeft})}${renderHomeSettingsCardHtml({t,aiFieldRight,soundEnabled,calloutDisplayEnabled,emoteDisplayEnabled,gestureHelpEnabled,vibrateEnabled,moreSettingsOpen})}${renderHomeMoreSettingsCardHtml({t,calloutDisplayEnabled,emoteDisplayEnabled,gestureHelpEnabled,vibrateEnabled,moreSettingsOpen})}</div>${renderHomeActionRowHtml({soloBtnHtml,roomButtonsHtml})}</section></section>${mainPageLegalMiniHtml}${versionHtml}${roomLobbyHtml}${roomJoinModal}${state.home.showIntro?introPanelHtml:''}${state.home.showLeaderboard?leaderboardModalHtml:''}${state.showScoreGuide?scoreGuideModalHtml:''}</section>`;
+  return`<section class="home-wrap royal-home-wrap${moreSettingsClass}"><section class="home-panel royal-home-panel"><header class="royal-home-head">${renderHomeTopActionsHtml({intro,allowOpponents,renderLangMenu,esc,t})}<div class="royal-title-wrap"><div class="home-logo-block"><img class="title-logo title-logo-home" src="${withBase('title-lockup-home.png')}" alt="鋤大D TRADITIONAL BIG TWO"/></div></div></header><section class="royal-home-body${moreSettingsClass}"><div class="home-form-grid">${renderHomeProfileCardHtml({homeAvatarSrc,esc,state,t,aiFieldLeft,cardBackLeft})}${renderHomeSettingsCardHtml({t,aiFieldRight,soundEnabled,calloutDisplayEnabled,emoteDisplayEnabled,gestureHelpEnabled,vibrateEnabled,cardBackRight,moreSettingsOpen})}${renderHomeMoreSettingsCardHtml({t,calloutDisplayEnabled,emoteDisplayEnabled,gestureHelpEnabled,vibrateEnabled,moreSettingsOpen})}</div>${renderHomeActionRowHtml({soloBtnHtml,roomButtonsHtml})}</section></section>${mainPageLegalMiniHtml}${versionHtml}${roomLobbyHtml}${roomJoinModal}${state.home.showIntro?introPanelHtml:''}${state.home.showLeaderboard?leaderboardModalHtml:''}${state.showScoreGuide?scoreGuideModalHtml:''}</section>`;
 }
 
 export function renderConfigMarkup(params){
