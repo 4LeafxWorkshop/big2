@@ -20,6 +20,7 @@
     "cap:sync": "npx cap sync",
     "cap:open:ios": "npx cap open ios",
     "cap:open:android": "npx cap open android",
+    "stress:firebase": "node tools/firebase-stress-estimate.mjs",
     "migrate:firestore": "node tools/firebase-firestore-migrate.mjs"
   },
   "description": "Client-side Big Two (鋤大D) web game with solo and room play, leaderboard, and responsive layouts for phone/tablet/desktop.",
