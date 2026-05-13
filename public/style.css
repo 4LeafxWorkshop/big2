@@ -953,7 +953,7 @@ body[data-screen='home'] .home-wrap {
 }
 .royal-home-body .home-form-more {
   display: none;
-  padding-left: 18px;
+  padding-left: 0;
   border-left: 0;
 }
 .royal-home-wrap.home-more-settings-open .royal-home-body .home-form-more {
@@ -8914,6 +8914,15 @@ body[data-screen='game'] .intro-modal {
   }
   .royal-home-body .home-form-right .field-ai {
     grid-column: 1;
+  }
+  .royal-home-body .home-profile-card {
+    order: 1;
+  }
+  .royal-home-body .field-cardback-left {
+    order: 0;
+  }
+  .royal-home-body .field-ai-left {
+    order: 2;
   }
   .royal-home-body .home-more-settings-toggle {
     grid-column: 1 / -1;
