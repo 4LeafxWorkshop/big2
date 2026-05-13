@@ -8893,6 +8893,7 @@ body[data-screen='game'] .intro-modal {
   }
   .royal-home-body .home-form-right {
     display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     gap: 10px;
     padding-left: 0;
     padding-right: 0;
@@ -8914,6 +8915,9 @@ body[data-screen='game'] .intro-modal {
   }
   .royal-home-body .home-form-right .field-ai {
     grid-column: 1;
+  }
+  .royal-home-body .home-form-right .field-sound {
+    grid-column: 2;
   }
   .royal-home-body .home-profile-card {
     order: 1;
