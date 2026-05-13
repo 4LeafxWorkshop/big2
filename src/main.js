@@ -622,7 +622,7 @@ function guardAction(key,windowMs=800){
 }
 
 const app=document.getElementById('app');
-const state={language:'zh-HK',screen:'home',screenBeforeConfig:'home',showRules:false,showLog:false,showLogSheet:false,logTouched:false,showScoreGuide:false,showCoachMarks:false,opponentProfileName:'',mottoPeekName:'',selected:new Set(),drag:{id:null,moved:false},playAnimKey:'',autoPassKey:'',score:5000,suggestCost:0,recommendation:null,recommendHint:'',logFab:{x:null,y:null},home:{mode:'solo',name:'玩家',gender:'male',avatarChoice:'male',aiDifficulty:'normal',backColor:'red',theme:'ocean',showIntro:false,showLeaderboard:false,showMoreSettings:false,google:{signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',pictureLoaded:false,gender:'',profileMissing:false,hydrating:false},leaderboard:{rows:[],sort:'totalDelta',period:'all',limit:20},activeRooms:{rows:[],loading:false,loadedAt:0,error:''}},room:{id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:false,inviteOpen:false,error:'',started:false,unsub:null,selfSeat:-1,recordedGameKey:'',lastMoveKey:'',playerId:'',pendingStart:false,lastResultPlayers:null,inviteUrl:'',inviteQrDataUrl:'',inviteCardDataUrl:'',inviteQrLoading:false,inviteQrError:'',pendingInviteCode:'',inviteQrPayload:'',adPromptGameKey:''},sessionId:'',solo:{players:[],botNames:[],totals:[5000,5000,5000,5000],currentSeat:0,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',history:[],aiDifficulty:'normal',lastCardBreach:null},emote:{open:false,active:null},serviceBell:{foodCallout:null}};
+const state={language:'zh-HK',screen:'home',screenBeforeConfig:'home',showRules:false,showLog:false,showLogSheet:false,logTouched:false,showScoreGuide:false,showCoachMarks:false,opponentProfileName:'',mottoPeekName:'',selected:new Set(),drag:{id:null,moved:false},playAnimKey:'',autoPassKey:'',score:5000,suggestCost:0,recommendation:null,recommendHint:'',logFab:{x:null,y:null},home:{mode:'solo',name:'玩家',gender:'male',avatarChoice:'male',aiDifficulty:'normal',backColor:'red',theme:'ocean',showIntro:false,showLeaderboard:false,showMoreSettings:false,gestureHelpEnabled:isNativeAndroidApp()||isNativeIosApp(),google:{signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',pictureLoaded:false,gender:'',profileMissing:false,hydrating:false},leaderboard:{rows:[],sort:'totalDelta',period:'all',limit:20},activeRooms:{rows:[],loading:false,loadedAt:0,error:''}},room:{id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:false,inviteOpen:false,error:'',started:false,unsub:null,selfSeat:-1,recordedGameKey:'',lastMoveKey:'',playerId:'',pendingStart:false,lastResultPlayers:null,inviteUrl:'',inviteQrDataUrl:'',inviteCardDataUrl:'',inviteQrLoading:false,inviteQrError:'',pendingInviteCode:'',inviteQrPayload:'',adPromptGameKey:''},sessionId:'',solo:{players:[],botNames:[],totals:[5000,5000,5000,5000],currentSeat:0,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',history:[],aiDifficulty:'normal',lastCardBreach:null},emote:{open:false,active:null},serviceBell:{foodCallout:null}};
 const {
   EMOTE_STICKERS,
   cardImagePath,
@@ -907,6 +907,7 @@ let calloutGateUntilPlay=false;
 let turnLockUntil=0;
 let calloutDisplayEnabled=true;
 let emoteDisplayEnabled=true;
+let gestureHelpEnabled=isNativeAndroidApp()||isNativeIosApp();
 let vibrateEnabled=true;
 let nativeHaptics=null;
 let nativeHapticsLoadAttempted=false;
@@ -1338,6 +1339,8 @@ const {
   setCalloutDisplayEnabled:(value)=>{calloutDisplayEnabled=value;},
   getEmoteDisplayEnabled:()=>emoteDisplayEnabled,
   setEmoteDisplayEnabled:(value)=>{emoteDisplayEnabled=value;},
+  getGestureHelpEnabled:()=>gestureHelpEnabled,
+  setGestureHelpEnabled:(value)=>{gestureHelpEnabled=value;state.home.gestureHelpEnabled=value;},
   getVibrateEnabled:()=>vibrateEnabled,
   setVibrateEnabled:(value)=>{vibrateEnabled=value;},
   normalizeCalloutStylePack,
@@ -3608,7 +3611,8 @@ const introGuideHelpers=createIntroGuideHelpers({
   renderStaticCard,
   ranks:RANKS,
   suits:SUITS,
-  isMobilePointer
+  isMobilePointer,
+  isGestureHelpEnabled:()=>gestureHelpEnabled
 });
 const {
   introText,
@@ -5508,6 +5512,17 @@ function bindCalloutDisplayToggle(sliderId){
   };
   slider.addEventListener('input',sync);
 }
+function bindGestureHelpToggle(sliderId){
+  const slider=document.querySelector(`#${sliderId} .setting-slider`);
+  if(!slider||typeof slider!=='object'||!('value' in slider))return;
+  const sync=()=>{
+    const enabled=Number(slider.value)>=1;
+    gestureHelpEnabled=enabled;
+    state.home.gestureHelpEnabled=enabled;
+    slider.parentElement?.style.setProperty('--setting-index',enabled?'1':'0');
+  };
+  slider.addEventListener('input',sync);
+}
 function bindBackCarousel(comboId){
   const viewport=document.getElementById(comboId);
   if(!(viewport instanceof HTMLElement))return;
@@ -6025,6 +6040,7 @@ function renderHome(){
     soundEnabled:Boolean(sound.enabled),
     calloutDisplayEnabled:Boolean(calloutDisplayEnabled),
     emoteDisplayEnabled:Boolean(emoteDisplayEnabled),
+    gestureHelpEnabled:Boolean(gestureHelpEnabled),
     vibrateEnabled:Boolean(vibrateEnabled),
     moreSettingsOpen:Boolean(state.home.showMoreSettings),
     cardBackRight,
@@ -6056,6 +6072,7 @@ function renderHome(){
     bindBackCarousel,
     bindSoundToggle,
     bindCalloutDisplayToggle,
+    bindGestureHelpToggle,
     bindEmoteDisplayToggle,
     bindVibrateToggle,
     setRoomError,
@@ -6117,6 +6134,7 @@ function renderConfig(){
     bindBackCarousel,
     bindSoundToggle,
     bindCalloutDisplayToggle,
+    bindGestureHelpToggle,
     bindEmoteDisplayToggle
   });
 }
@@ -6263,7 +6281,7 @@ function renderGame(){
   const v=buildView();
   if(!v){state.screen='home';renderHome();return;}
   const intro=introText();
-  const coachMarksControlVisible=isMobilePointer()&&(isNativeIosApp()||isNativeAndroidApp());
+  const coachMarksControlVisible=Boolean(gestureHelpEnabled);
   const coachMarksEligible=coachMarksControlVisible&&!v.gameOver&&!isCoachMarksDismissed();
   if(coachMarksEligible&&state.screen==='game'&&!state.showCoachMarks)state.showCoachMarks=true;
   window.__big2OpenCoachMarks=openCoachMarks;
@@ -6730,6 +6748,7 @@ function render(){
   }
   document.body.setAttribute('data-log-open',state.screen==='game'&&state.showLog?'1':'0');
   document.body.setAttribute('data-log-sheet',isPortraitLogSheetOpen()?'1':'0');
+  document.body.setAttribute('data-coach-marks',state.screen==='game'&&state.showCoachMarks?'1':'0');
   syncWebViewportGuardAttrs();
   syncRoomCountdownTicker();
   if(state.screen!=='game'){

@@ -4067,7 +4067,7 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   animation: modalFade .16s ease-out;
 }
 .coach-marks-modal {
-  z-index: 2147483600;
+  z-index: 2147483647 !important;
 }
 .legal-modal {
   display: none;
@@ -4231,7 +4231,7 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   background-repeat: no-repeat;
   background-position: center;
   background-size: contain;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237ec0ff' stroke-width='2.05' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6.5 6.2A2.2 2.2 0 0 1 8.7 4h5.1c1.3 0 2.5.4 3.4 1.3.9-.9 2.1-1.3 3.4-1.3h5.1A2.2 2.2 0 0 1 28 6.2V18a2.2 2.2 0 0 1-2.2 2.2h-5.1c-1.3 0-2.5.4-3.4 1.3-.9-.9-2.1-1.3-3.4-1.3H8.7A2.2 2.2 0 0 1 6.5 18V6.2Z' transform='scale(.714)'/%3E%3Cpath d='M12 6v13'/%3E%3Cpath d='M7.5 8.2h4.1'/%3E%3Cpath d='M7.5 11.2h4.1'/%3E%3Cpath d='M12.4 8.2h4.1'/%3E%3Cpath d='M12.4 11.2h4.1'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%237ec0ff' stroke-width='2.05' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15.5H6.5A2.5 2.5 0 0 0 4 21V5.5Z'/%3E%3Cpath d='M8 7h8M8 11h7'/%3E%3C/svg%3E");
 }
 .title-icon-leaderboard {
   background-repeat: no-repeat;
@@ -4531,43 +4531,146 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   gap: 10px;
 }
 .coach-marks-sheet {
-  width: min(560px, 100%);
-  max-height: min(72dvh, 560px);
+  width: min(900px, 100%);
+  max-height: min(88dvh, 860px);
+  padding: 24px 24px 18px;
+  background:
+    linear-gradient(180deg, rgba(12, 43, 72, .9), rgba(11, 34, 56, .94)),
+    rgba(9, 27, 45, .94);
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.03),
+    0 24px 60px rgba(0,0,0,.4);
 }
 .coach-marks-sheet .intro-head {
-  margin-bottom: 10px;
+  margin-bottom: 18px;
+  padding-bottom: 0;
 }
 .coach-marks-block {
-  gap: 8px;
+  gap: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
 }
-.coach-marks-block ul {
-  gap: 8px;
-  padding-left: 18px;
+.gesture-help-stage-wrap {
+  display: contents;
+}
+.gesture-help-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-areas:
+    "handUp handRight handDown"
+    "handLeft cardUp .";
+  grid-auto-rows: 1fr;
+  gap: 16px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  align-items: stretch;
 }
 .coach-gesture-item {
   display: grid;
-  grid-template-columns: 52px minmax(0, 1fr);
-  gap: 14px;
-  align-items: start;
+  grid-template-areas:
+    "icon body";
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 10px 18px;
+  justify-items: stretch;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(255,255,255,.14);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015)),
+    rgba(9, 30, 48, .58);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,.03),
+    0 10px 24px rgba(0,0,0,.18);
+  height: 100%;
 }
-.coach-gesture-icon {
-  width: 52px;
-  height: 52px;
-  color: #7ec0ff;
+.gesture-help-item-handUp {
+  grid-area: handUp;
+}
+.gesture-help-item-handRight {
+  grid-area: handRight;
+}
+.gesture-help-item-handDown {
+  grid-area: handDown;
+}
+.gesture-help-item-handLeft {
+  grid-area: handLeft;
+}
+.gesture-help-item-cardUp {
+  grid-area: cardUp;
+}
+.gesture-help-label {
+  display: inline-flex;
+  align-items: center;
+  min-height: 18px;
+  padding: 0;
+  border-radius: 0;
+  background: none;
+  border: 0;
+  color: rgba(229,244,255,.96);
+  font-size: .92rem;
+  font-weight: 800;
+  letter-spacing: .01em;
+  text-transform: none;
+}
+.gesture-help-icon {
+  grid-area: icon;
+  width: 108px;
+  height: 108px;
+  color: #fff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-top: 0;
+  align-self: center;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(0,0,0,.18), rgba(255,255,255,.02));
+  border: 1px solid rgba(255,255,255,.06);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.02), 0 0 0 1px rgba(0,0,0,.12);
+}
+.gesture-help-body {
+  grid-area: body;
+  display: grid;
+  gap: 10px;
+  align-content: center;
+  min-width: 0;
 }
 .gesture-icon-image,
 .coach-gesture-icon img {
-  width: 100%;
-  height: 100%;
+  width: 88%;
+  height: 88%;
   display: block;
   object-fit: contain;
 }
-.coach-gesture-text {
+.gesture-help-copy {
   min-width: 0;
+  color: rgba(232,243,242,.92);
+  font-size: .88rem;
+  line-height: 1.45;
+}
+.gesture-help-footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 16px;
+  margin-top: 2px;
+  border-top: 1px solid rgba(255,255,255,.1);
+  color: rgba(233, 242, 245, .9);
+  font-size: .92rem;
+}
+.gesture-help-footer-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  flex: 0 0 auto;
+  color: #d7bf93;
+  font-size: 1.2rem;
+  line-height: 1;
 }
 .coach-marks-close-btn {
   display: inline-flex;
@@ -4589,9 +4692,6 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
-}
-.coach-marks-block li {
-  line-height: 1.4;
 }
 .intro-block {
   display: grid;
@@ -4647,6 +4747,36 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   color: var(--muted);
   display: grid;
   gap: 3px;
+}
+@media (max-width: 760px) {
+  .gesture-help-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-areas:
+      "handUp handRight"
+      "handDown handLeft"
+      "cardUp cardUp";
+    grid-auto-rows: 1fr;
+    gap: 10px;
+  }
+  .coach-gesture-item {
+    grid-template-columns: 84px minmax(0, 1fr);
+    padding: 10px 10px 11px;
+    height: 100%;
+  }
+  .gesture-help-icon {
+    width: 84px;
+    height: 84px;
+  }
+  .gesture-help-label {
+    font-size: .86rem;
+  }
+  .gesture-help-copy {
+    font-size: .8rem;
+  }
+  .gesture-help-footer {
+    font-size: .82rem;
+    line-height: 1.4;
+  }
 }
 .intro-hand-list {
   display: grid;
@@ -8825,6 +8955,22 @@ body[data-orientation='landscape'] .table { --table-tilt: 0deg; }
 body[data-screen='game'][data-log-sheet='1'] .game-foreground-layer {
   display: none !important;
 }
+body[data-screen='game'][data-coach-marks='1'] .game-foreground-layer,
+body[data-screen='game'][data-coach-marks='1'] :is(
+  .play-type-call,
+  .last-card-call,
+  .emote-callout,
+  .food-callout-seat,
+  .seat-motto-callout,
+  .self-table-emote,
+  .table-emote
+) {
+  display: none !important;
+}
+body[data-screen='game'][data-coach-marks='1'] .game-shell > :not(.coach-marks-modal) {
+  display: none !important;
+  pointer-events: none !important;
+}
 .log-sheet-head {
   display: flex;
   align-items: center;
@@ -9241,6 +9387,11 @@ body[data-screen='game'] .table-turn-compass .table-turn-pointer {
   color: #d8d8d8;
   filter: drop-shadow(0 0 4px color-mix(in srgb, #d8d8d8 26%, transparent));
   opacity: .4;
+}
+body[data-screen='game'] .table-turn-compass[data-active-seat='south'] .table-turn-pointer {
+  opacity: 1;
+  color: #d8d8d8;
+  filter: drop-shadow(0 0 6px rgba(216,216,216,.34));
 }
 body[data-screen='game'] .table .coach-marks-badge {
   position: absolute;
