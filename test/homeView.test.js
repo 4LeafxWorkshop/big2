@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import {renderConfigMarkup, renderHomeActionRowHtml, renderHomeMarkup, renderHomeProfileCardHtml, renderHomeSettingsCardHtml, renderHomeTopActionsHtml, renderOpponentCard, renderOpponentsMarkup} from '../src/homeView.js';
+import {renderConfigMarkup, renderHomeActionRowHtml, renderHomeMarkup, renderHomeMoreSettingsCardHtml, renderHomeProfileCardHtml, renderHomeSettingsCardHtml, renderHomeTopActionsHtml, renderOpponentCard, renderOpponentsMarkup} from '../src/homeView.js';
 
 function render(overrides={}){
   return renderHomeMarkup({
@@ -45,15 +45,27 @@ test('renderHomeMarkup includes the main home controls and optional overlays', (
   assert.match(html,/id="solo-start"/);
   assert.match(html,/id="room-create"/);
   assert.match(html,/id="home-more-settings-toggle"/);
+  assert.match(html,/more-settings-icon-down/);
   assert.match(html,/id="home-more-settings-panel"/);
   assert.match(html,/id="callout-display-slider"/);
   assert.match(html,/id="emote-display-slider"/);
   assert.match(html,/id="vibrate-slider"/);
   assert.match(html,/id="sound-slider"/);
+  assert.match(html,/home-form-more/);
+  assert.match(html,/id="home-more-settings-toggle"/);
+  assert.doesNotMatch(html,/home-more-settings-open/);
+  assert.doesNotMatch(html,/id="back-right"/);
   assert.match(html,/id="intro-panel"/);
   assert.match(html,/id="score-guide"/);
   assert.match(html,/class="home-build-version">v0\.0\.0 test<\/div>/);
   assert.doesNotMatch(html,/id="lb-panel"/);
+});
+
+test('renderHomeMarkup marks the home layout open when more settings is enabled', ()=>{
+  const html=render({moreSettingsOpen:true});
+  assert.match(html,/home-more-settings-open/);
+  assert.match(html,/id="home-more-settings-toggle"/);
+  assert.match(html,/more-settings-icon-up/);
 });
 
 test('renderHomeMarkup omits opponent button when not allowed', ()=>{
@@ -105,14 +117,32 @@ test('renderHomeSettingsCardHtml renders settings and toggles', ()=>{
     emoteDisplayEnabled:true,
     gestureHelpEnabled:false,
     vibrateEnabled:true,
-    moreSettingsOpen:true,
-    cardBackRight:'<div id="back-right"></div>'
+    moreSettingsOpen:false
   });
-  assert.match(html,/home-section-title more-settings-toggle/);
   assert.match(html,/id="sound-slider"/);
-  assert.match(html,/id="gesture-help-slider"/);
+  assert.match(html,/id="home-more-settings-toggle"/);
+  assert.match(html,/aria-expanded="false"/);
+  assert.doesNotMatch(html,/id="back-right"/);
+  assert.match(html,/more-settings-icon-down/);
+});
+
+test('renderHomeMoreSettingsCardHtml renders the more settings controls', ()=>{
+  const html=renderHomeMoreSettingsCardHtml({
+    t:(key)=>key,
+    calloutDisplayEnabled:false,
+    emoteDisplayEnabled:true,
+    gestureHelpEnabled:false,
+    vibrateEnabled:true,
+    moreSettingsOpen:true
+  });
   assert.match(html,/id="home-more-settings-panel"/);
-  assert.match(html,/id="back-right"/);
+  assert.match(html,/id="home-more-settings-toggle"/);
+  assert.match(html,/aria-expanded="true"/);
+  assert.match(html,/more-settings-icon-up/);
+  assert.match(html,/id="gesture-help-slider"/);
+  assert.match(html,/id="callout-display-slider"/);
+  assert.match(html,/id="emote-display-slider"/);
+  assert.match(html,/id="vibrate-slider"/);
 });
 
 test('renderHomeActionRowHtml renders the start buttons row', ()=>{

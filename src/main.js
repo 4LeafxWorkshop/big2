@@ -609,6 +609,9 @@ function openCoachMarks(){
     window.localStorage?.removeItem(COACH_MARKS_DISMISSED_KEY);
   }catch{}
   state.showCoachMarks=true;
+  try{
+    document.body?.setAttribute('data-coach-marks','1');
+  }catch{}
   render();
   return false;
 }
