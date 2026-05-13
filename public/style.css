@@ -4531,32 +4531,33 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   gap: 10px;
 }
 .coach-marks-sheet {
-  width: min(1040px, 100%);
-  max-height: min(88dvh, 860px);
-  padding: 24px 24px 18px;
+  width: min(960px, 100%);
+  max-height: min(86dvh, 820px);
+  padding: 14px 4px 12px 14px;
   background:
-    linear-gradient(180deg, rgba(12, 43, 72, .9), rgba(11, 34, 56, .94)),
-    rgba(9, 27, 45, .94);
-  border: 1px solid rgba(255,255,255,.12);
-  box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,.03),
-    0 24px 60px rgba(0,0,0,.4);
+    radial-gradient(circle at 50% 0%, rgba(255, 218, 148, .08), transparent 30%),
+    var(--ui-surface-strong);
+  border: 1px solid rgba(255, 226, 171, .18);
+  box-shadow: var(--ui-shadow-strong), var(--ui-inset-highlight);
 }
 .coach-marks-sheet .intro-head {
-  margin-bottom: 18px;
+  margin-bottom: 8px;
   padding-bottom: 0;
 }
 .coach-marks-block {
-  gap: 0;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  box-shadow: none;
+  gap: 7px;
+  padding: 8px;
+  border-radius: var(--ui-radius-sm);
+  border: 1px solid var(--line-b);
+  background:
+    linear-gradient(140deg, rgba(255,255,255,.06), rgba(255,255,255,.02)),
+    linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+  box-shadow: var(--ui-inset-highlight);
 }
 .gesture-help-stage-wrap {
   display: contents;
 }
-.gesture-help-list {
+ul.gesture-help-list {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   grid-template-areas:
@@ -4565,6 +4566,7 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   grid-auto-rows: 1fr;
   gap: 10px;
   padding: 0;
+  padding-left: 0;
   margin: 0;
   list-style: none;
   align-items: stretch;
@@ -4573,19 +4575,17 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   display: grid;
   grid-template-areas:
     "icon body";
-  grid-template-columns: 96px minmax(0, 1fr);
-  gap: 8px 12px;
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 4px 8px;
   justify-items: stretch;
   align-items: center;
-  padding: 9px 10px;
+  padding: 7px 8px;
   border-radius: 14px;
-  border: 1px solid rgba(255,255,255,.14);
+  border: 1px solid var(--line-b);
   background:
-    linear-gradient(180deg, rgba(255,255,255,.03), rgba(255,255,255,.015)),
-    rgba(9, 30, 48, .58);
-  box-shadow:
-    inset 0 0 0 1px rgba(255,255,255,.03),
-    0 10px 24px rgba(0,0,0,.18);
+    linear-gradient(140deg, rgba(255,255,255,.06), rgba(255,255,255,.02)),
+    linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+  box-shadow: var(--ui-inset-highlight);
   height: 100%;
 }
 .gesture-help-item-handUp {
@@ -4619,17 +4619,17 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
 }
 .gesture-help-icon {
   grid-area: icon;
-  width: 96px;
-  height: 96px;
+  width: 56px;
+  height: 56px;
   color: #fff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   align-self: center;
   border-radius: 18px;
-  background: linear-gradient(180deg, rgba(0,0,0,.18), rgba(255,255,255,.02));
-  border: 1px solid rgba(255,255,255,.06);
-  box-shadow: inset 0 0 0 1px rgba(255,255,255,.02), 0 0 0 1px rgba(0,0,0,.12);
+  background: rgba(255,255,255,.05);
+  border: 1px solid rgba(255,255,255,.12);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.04), 0 6px 14px rgba(0,0,0,.12);
 }
 .gesture-help-body {
   grid-area: body;
@@ -4653,8 +4653,8 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
 }
 .gesture-icon-image,
 .coach-gesture-icon img {
-  width: 88%;
-  height: 88%;
+  width: 92%;
+  height: 92%;
   display: block;
   object-fit: contain;
 }
@@ -4868,6 +4868,12 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   display: grid;
   gap: 3px;
 }
+.coach-marks-block ul.gesture-help-list {
+  padding-left: 0;
+  padding-inline-start: 0;
+  margin-left: 0;
+  margin-inline-start: 0;
+}
 @media (max-width: 760px) {
   .gesture-help-list {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4877,15 +4883,16 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
       "cardUp cardUp";
     grid-auto-rows: 1fr;
     gap: 8px;
+    padding-left: 0;
   }
   .coach-gesture-item {
-    grid-template-columns: 76px minmax(0, 1fr);
-    padding: 8px 9px;
+    grid-template-columns: 52px minmax(0, 1fr);
+    padding: 6px 7px;
     height: 100%;
   }
   .gesture-help-icon {
-    width: 76px;
-    height: 76px;
+    width: 52px;
+    height: 52px;
   }
   .gesture-help-label {
     font-size: .86rem;
@@ -9101,10 +9108,6 @@ body[data-screen='game'][data-coach-marks='1'] :is(
   .table-emote
 ) {
   display: none !important;
-}
-body[data-screen='game'][data-coach-marks='1'] .game-shell > :not(.coach-marks-modal) {
-  display: none !important;
-  pointer-events: none !important;
 }
 .log-sheet-head {
   display: flex;
