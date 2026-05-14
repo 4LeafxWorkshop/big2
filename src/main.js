@@ -389,9 +389,17 @@ async function runPopunderAd(){
   try{
     if(isNativeAndroidApp()||isNativeIosApp()){
       await mobileAdsController.showStartGameInterstitial();
+      if(state.home.mode==='room'&&state.room?.data?.game&&!state.room.data.game.gameOver&&Number(state.room.data.game.turnStartedAt)===0){
+        await syncRoomTurnStartAfterAdClose(true);
+      }
       return;
     }
-    if(APP_CHANNEL==='STORE')return;
+    if(APP_CHANNEL==='STORE'){
+      if(state.home.mode==='room'&&state.room?.data?.game&&!state.room.data.game.gameOver&&Number(state.room.data.game.turnStartedAt)===0){
+        await syncRoomTurnStartAfterAdClose(true);
+      }
+      return;
+    }
     const url='https://omg10.com/4/10921720';
     let win=armedPopunderWindow;
     if(win&&!win.closed){
@@ -407,14 +415,59 @@ async function runPopunderAd(){
       win=window.open(url,'big2_ad_tab');
     }
     armedPopunderWindow=win&&!win.closed?win:null;
+    if(state.home.mode==='room'&&state.room?.data?.game&&!state.room.data.game.gameOver&&Number(state.room.data.game.turnStartedAt)===0){
+      void syncRoomTurnStartAfterAdClose(!win);
+    }
     if(!win)return;
     try{win.blur();}catch{}
     try{window.focus();}catch{}
   }catch(err){
     console.warn('popunder ad failed',err);
+    if(state.home.mode==='room'&&state.room?.data?.game&&!state.room.data.game.gameOver&&Number(state.room.data.game.turnStartedAt)===0){
+      void syncRoomTurnStartAfterAdClose(true);
+    }
   }finally{
     if(armedPopunderWindow?.closed)armedPopunderWindow=null;
   }
+}
+async function syncRoomTurnStartAfterAdClose(forceNow=false){
+  const roomId=String(state.room?.id||'').trim();
+  const roomDb=currentRoomDb();
+  const game=state.room?.data?.game;
+  if(!roomId||!roomDb||!game||game.gameOver||Number(game.turnStartedAt)>0)return;
+  if(forceNow){
+    try{
+      const ref=roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(roomId);
+      await roomDb.runTransaction(async(tx)=>{
+        const snap=await tx.get(ref);
+        if(!snap.exists)return;
+        const data=snap.data()??{};
+        if(String(data.status)!=='playing'||!data.game)return;
+        if(Number(data.game.turnStartedAt)>0)return;
+        tx.update(ref,{game:{...data.game,turnStartedAt:Date.now()},updatedAt:Date.now()});
+      });
+    }catch{}
+    return;
+  }
+  const waitStart=Date.now();
+  const poll=()=>{
+    const win=armedPopunderWindow;
+    const closed=!win||win.closed;
+    if(!closed&&Date.now()-waitStart<15000){
+      window.setTimeout(poll,250);
+      return;
+    }
+    void roomDb.runTransaction(async(tx)=>{
+      const ref=roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(roomId);
+      const snap=await tx.get(ref);
+      if(!snap.exists)return;
+      const data=snap.data()??{};
+      if(String(data.status)!=='playing'||!data.game)return;
+      if(Number(data.game.turnStartedAt)>0)return;
+      tx.update(ref,{game:{...data.game,turnStartedAt:Date.now()},updatedAt:Date.now()});
+    }).catch(()=>{});
+  };
+  poll();
 }
 let armedPopunderWindow=null;
 let googlePicturePreloadToken=0;

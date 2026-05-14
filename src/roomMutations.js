@@ -75,23 +75,24 @@ export function createRoomMutationsController(deps){
         const nextPlayers=bumped.changed?bumped.players:players;
         tx.update(ref,{status:'starting',updatedAt:now,expiresAt:deps.nextRoomIdleExpiry(now),playerIds:deps.roomPlayerIds(nextPlayers),players:nextPlayers,...hostUpdate});
       });
-      window.setTimeout(async()=>{
-        try{
-          await roomDb.runTransaction(async(tx)=>{
-            const snap=await tx.get(ref);
-            if(!snap.exists)return;
-            const data=snap.data()??{};
-            if(String(data.status)!=='starting')return;
-            const now=Date.now();
-            const game=deps.buildRoomGameState(data);
-            const bumped=deps.bumpRoomPlayerLastSeen(Array.isArray(data.players)?data.players:[],String(data.hostId||''),now);
-            const nextPlayers=bumped.changed?bumped.players:data.players;
-            tx.update(ref,{status:'playing',game,gameVersion:Number(data.gameVersion||0)+1,updatedAt:now,expiresAt:now+(24*60*60*1000),players:nextPlayers});
-          });
-        }catch(err){
-          console.error('start room finalize failed',err);
-        }
-      },200);
+        window.setTimeout(async()=>{
+          try{
+            await roomDb.runTransaction(async(tx)=>{
+              const snap=await tx.get(ref);
+              if(!snap.exists)return;
+              const data=snap.data()??{};
+              if(String(data.status)!=='starting')return;
+              const now=Date.now();
+              const game=deps.buildRoomGameState(data);
+              const bumped=deps.bumpRoomPlayerLastSeen(Array.isArray(data.players)?data.players:[],String(data.hostId||''),now);
+              const nextPlayers=bumped.changed?bumped.players:data.players;
+              game.turnStartedAt=0;
+              tx.update(ref,{status:'playing',game,gameVersion:Number(data.gameVersion||0)+1,updatedAt:now,expiresAt:now+(24*60*60*1000),players:nextPlayers});
+            });
+          }catch(err){
+            console.error('start room finalize failed',err);
+          }
+        },200);
       return true;
     }catch(err){
       console.error('start room failed',err);
@@ -152,6 +153,7 @@ export function createRoomMutationsController(deps){
         }
         const roomDataForRestart=players===data.players?data:{...data,players,hostId,hostName};
         const game=deps.buildRoomGameState(roomDataForRestart);
+        game.turnStartedAt=0;
         const bumped=deps.bumpRoomPlayerLastSeen(players,uid,now);
         const nextPlayers=bumped.changed?bumped.players:players;
         tx.update(ref,{
