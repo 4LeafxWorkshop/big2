@@ -8,7 +8,7 @@ const SERVICE_BELL_FOODS=[
   {id:'icedmilktea',file:'icedmilktea.png',voice:'icedmilktea_voice.mp3',width:100,height:174},
   {id:'sausagebun',file:'sausagebun.png',voice:'sausagebun_voice.mp3',width:172,height:115},
   {id:'redbeanice',file:'redbeanice.png',voice:'redbeanice_voice.mp3',width:96,height:197},
-  {id:'frenchtoast',file:'frenchtoast.png',voice:'frenchtoast_voice.mp3',width:186,height:118}
+  {id:'frenchtoast',file:'frenchtoast.png',voice:'frenchtoast_voice.mp3',width:186,height:112}
 ];
 
 const SERVICE_BELL_SLOTS=['tl','tr','ml','mr'];
