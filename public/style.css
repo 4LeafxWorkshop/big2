@@ -9597,8 +9597,8 @@ body[data-screen='game'] .table-turn-compass {
   position: absolute;
   right: 18px;
   bottom: 18px;
-  width: 58px;
-  height: 58px;
+  width: 38px;
+  height: 38px;
   z-index: 5;
   pointer-events: none;
 }
@@ -9612,8 +9612,8 @@ body[data-screen='game'] .table-turn-compass-ring {
   filter: drop-shadow(0 8px 18px rgba(0,0,0,.22));
 }
 body[data-screen='game'] .table-turn-compass .table-turn-pointer {
-  width: 58px;
-  height: 58px;
+  width: 38px;
+  height: 38px;
   display: block;
   color: #d8d8d8;
   filter: drop-shadow(0 0 4px color-mix(in srgb, #d8d8d8 26%, transparent));

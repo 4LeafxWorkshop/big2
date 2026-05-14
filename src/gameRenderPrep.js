@@ -5,10 +5,10 @@ import {renderOpponentIdentityHtml, renderOpponentLabel} from './opponentLabel.j
 
 const TURN_SEAT_CLS=['south','east','north','west'];
 const TURN_COMPASS_ICON_BY_SEAT={
-  north:`<svg class="table-turn-pointer" viewBox="0 0 24 24" aria-hidden="true" focusable="false" preserveAspectRatio="xMidYMid meet"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M15 11L12 8M12 8L9 11M12 8V16M21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21C16.9706 21 21 16.9706 21 12Z"/></svg>`,
-  east:`<svg class="table-turn-pointer" viewBox="0 0 24 24" aria-hidden="true" focusable="false" preserveAspectRatio="xMidYMid meet"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M13 15L16 12M16 12L13 9M16 12H8M21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21C16.9706 21 21 16.9706 21 12Z"/></svg>`,
-  south:`<svg class="table-turn-pointer" viewBox="0 0 24 24" aria-hidden="true" focusable="false" preserveAspectRatio="xMidYMid meet"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 13L12 16M12 16L15 13M12 16V8M21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21C16.9706 21 21 16.9706 21 12Z"/></svg>`,
-  west:`<svg class="table-turn-pointer" viewBox="0 0 24 24" aria-hidden="true" focusable="false" preserveAspectRatio="xMidYMid meet"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M11 9L8 12M8 12L11 15M8 12H16M21 12C21 7.02944 16.9706 3 12 3C7.02944 3 3 7.02944 3 12C3 16.9706 7.02944 21 12 21C16.9706 21 21 16.9706 21 12Z"/></svg>`
+  north:'turn-up',
+  east:'turn-right',
+  south:'turn-down',
+  west:'turn-left'
 };
 
 function getTurnCompassSeatCls(v){
@@ -18,10 +18,11 @@ function getTurnCompassSeatCls(v){
   return TURN_SEAT_CLS[idx]||'south';
 }
 
-function buildTurnCompassHtml(v,t){
+function buildTurnCompassHtml(v,t,withBase){
   if(v?.gameOver)return'';
   const activeSeatCls=getTurnCompassSeatCls(v);
-  return`<div class="table-turn-compass" data-active-seat="${activeSeatCls}" aria-label="${t('turn')}"><span class="table-turn-compass-ring">${TURN_COMPASS_ICON_BY_SEAT[activeSeatCls]??TURN_COMPASS_ICON_BY_SEAT.south}</span></div>`;
+  const iconName=TURN_COMPASS_ICON_BY_SEAT[activeSeatCls]??TURN_COMPASS_ICON_BY_SEAT.south;
+  return`<div class="table-turn-compass" data-active-seat="${activeSeatCls}" aria-label="${t('turn')}"><span class="table-turn-compass-ring"><img class="table-turn-pointer" src="${withBase(`turn-indicators/${iconName}.svg`)}" alt="" aria-hidden="true"/></span></div>`;
 }
 
 function buildTableInventoryDecorHtml(withBase){
@@ -463,7 +464,7 @@ export function buildGameShellMarkup(params){
     mobileDiscardHtml:'',
     centerMovesHtml:centerMovesHtml(v),
     centerLastMovesHtml:centerLastMovesHtml(lastActions,v.selfSeat),
-    turnCompassHtml:buildTurnCompassHtml(v,t),
+    turnCompassHtml:buildTurnCompassHtml(v,t,withBase),
     inventoryDecorHtml:buildTableInventoryDecorHtml(withBase),
     coachMarksButtonHtml,
     coachMarksLabel,
