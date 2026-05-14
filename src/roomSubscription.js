@@ -2,6 +2,9 @@ export function createRoomSubscriptionController(deps){
   function normalizeEmail(value){
     return String(value??'').trim().toLowerCase();
   }
+  function sameJsonValue(a,b){
+    return JSON.stringify(a)===JSON.stringify(b);
+  }
   function roomPlayerMatchesCurrentUser(entry){
     const currentEmail=normalizeEmail(deps.currentUserEmail?.());
     const entryEmail=normalizeEmail(entry?.email);
@@ -96,7 +99,7 @@ export function createRoomSubscriptionController(deps){
     const currentId=String(roomData?.hostId??'').trim();
     const currentName=String(roomData?.hostName??'').trim();
     if(!next.hostId)return;
-    if(next.hostId===currentId&&(!next.hostName||next.hostName===currentName))return;
+    if(next.hostId===currentId&&next.hostName===currentName)return;
     const firebaseDb=deps.getFirebaseDb();
     if(!firebaseDb)return;
     try{
@@ -107,6 +110,9 @@ export function createRoomSubscriptionController(deps){
         if(String(data.status??'')==='playing')return;
         const latest=resolveRoomHostInfo(data);
         if(!latest.hostId)return;
+        const latestId=String(data.hostId??'').trim();
+        const latestName=String(data.hostName??'').trim();
+        if(latest.hostId===latestId&&latest.hostName===latestName)return;
         tx.update(ref,{hostId:latest.hostId,hostName:latest.hostName,updatedAt:Date.now()});
       });
     }catch{}
@@ -206,6 +212,16 @@ export function createRoomSubscriptionController(deps){
         const hostEntry=rosterAll.find((p)=>String(p?.uid||'')===hostId)||null;
         const hostLastSeen=Number(hostEntry?.lastSeen||0);
         const hostStale=!hostEntry||(hostLastSeen>0&&now-hostLastSeen>deps.ROOM_HOST_TAKEOVER_MS);
+        const hostInfo=resolveRoomHostInfo({...data,players:active});
+        let nextHostId=hostInfo.hostId;
+        let nextHostName=hostInfo.hostName;
+        if(hostStale){
+          const candidate=deps.selectRoomHostCandidate(active,now);
+          if(candidate){
+            nextHostId=String(candidate.uid||nextHostId||'');
+            nextHostName=String(candidate.name||nextHostName||'');
+          }
+        }
         if(active.length!==rosterAll.length){
           const activeHumans=active.filter((p)=>String(p.uid||'').startsWith('uid:')||String(p.uid||'').startsWith('guest:'));
           if(!activeHumans.length){
@@ -214,35 +230,30 @@ export function createRoomSubscriptionController(deps){
             deps.abandonRoomLocally(staleMsg,true);
             return;
           }
-          const hostInfo=resolveRoomHostInfo({...data,players:active});
-          let nextHostId=hostInfo.hostId;
-          let nextHostName=hostInfo.hostName;
-          if(hostStale){
-            const candidate=deps.selectRoomHostCandidate(active,now);
-            if(candidate){
-              nextHostId=String(candidate.uid||nextHostId||'');
-              nextHostName=String(candidate.name||nextHostName||'');
-            }
+          const nextPlayerIds=deps.roomPlayerIds(active);
+          const hostMatches=String(data.hostId||'').trim()===nextHostId&&String(data.hostName||'').trim()===nextHostName;
+          const playersMatch=sameJsonValue(Array.isArray(data.players)?data.players:[],active);
+          if(!playersMatch||!idsMatch||!hostMatches){
+            void roomDb.collection(deps.FIRESTORE_ROOMS_COLLECTION).doc(roomId).update({
+              players:active,
+              playerIds:nextPlayerIds,
+              hostId:nextHostId,
+              hostName:nextHostName,
+              updatedAt:now
+            }).catch(()=>{});
           }
-          void roomDb.collection(deps.FIRESTORE_ROOMS_COLLECTION).doc(roomId).update({
-            players:active,
-            playerIds:deps.roomPlayerIds(active),
-            hostId:nextHostId,
-            hostName:nextHostName,
-            updatedAt:now
-          }).catch(()=>{});
         }else if(!idsMatch){
           void roomDb.collection(deps.FIRESTORE_ROOMS_COLLECTION).doc(roomId).update({
             playerIds:expectedIds,
             updatedAt:now
           }).catch(()=>{});
         }
-        if(hostStale){
-          const candidate=deps.selectRoomHostCandidate(active,now);
-          if(candidate&&String(candidate.uid||'')!==hostId){
+        if(hostStale&&active.length===rosterAll.length){
+          const hostMatches=String(data.hostId||'').trim()===nextHostId&&String(data.hostName||'').trim()===nextHostName;
+          if(!hostMatches&&nextHostId){
             void roomDb.collection(deps.FIRESTORE_ROOMS_COLLECTION).doc(roomId).update({
-              hostId:String(candidate.uid||''),
-              hostName:String(candidate.name||''),
+              hostId:nextHostId,
+              hostName:nextHostName,
               updatedAt:now
             }).catch(()=>{});
           }

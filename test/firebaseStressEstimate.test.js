@@ -5,6 +5,7 @@ import {
   estimateDailyLoad,
   estimateQuotaCapacity,
   estimateQuotaUsage,
+  estimateRoomHumanProfile,
   estimateRoomProfile,
   estimateSoloProfile,
   FREE_FIRESTORE_DAILY_QUOTA,
@@ -36,6 +37,46 @@ test('room profile accounts for each listener reading every room write', ()=>{
   });
   assert.equal(profile.writesPerGame,15);
   assert.equal(profile.readsPerGame,62);
+  assert.equal(profile.deletesPerGame,1);
+});
+
+test('human room profile adds reaction and presence activity on top of turn traffic', ()=>{
+  const profile=estimateRoomHumanProfile({
+    players:4,
+    movesPerGame:10,
+    setupReads:2,
+    setupWrites:3,
+    writesPerMove:1,
+    finishWrites:2,
+    deletesPerGame:1,
+    emojiPerPlayer:2,
+    bellPerPlayer:2,
+    presenceTouchesPerPlayer:1,
+    profileSyncWritesPerPlayer:1,
+    scoreSyncWritesPerPlayer:1
+  });
+  assert.equal(profile.writesPerGame,43);
+  assert.equal(profile.readsPerGame,174);
+  assert.equal(profile.deletesPerGame,1);
+});
+
+test('human room profile accepts measured per-game activity totals', ()=>{
+  const profile=estimateRoomHumanProfile({
+    players:4,
+    movesPerGame:10,
+    setupReads:2,
+    setupWrites:3,
+    writesPerMove:1,
+    finishWrites:2,
+    deletesPerGame:1,
+    emojiActions:6,
+    bellActions:2,
+    presenceTouches:1,
+    profileSyncWrites:4,
+    scoreSyncWrites:1
+  });
+  assert.equal(profile.writesPerGame,29);
+  assert.equal(profile.readsPerGame,118);
   assert.equal(profile.deletesPerGame,1);
 });
 

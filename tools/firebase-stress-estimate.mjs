@@ -24,6 +24,17 @@ export const DEFAULT_ROOM_PROFILE={
   deletesPerGame:1
 };
 
+export const DEFAULT_ROOM_HUMAN_PROFILE={
+  ...DEFAULT_ROOM_PROFILE,
+  emojiPerPlayer:2,
+  bellPerPlayer:2,
+  presenceTouchesPerPlayer:1,
+  profileSyncWritesPerPlayer:1,
+  scoreSyncWritesPerPlayer:1,
+  reactionWritesPerAction:1,
+  presenceWritesPerTouch:1
+};
+
 function positiveNumber(value,fallback){
   const n=Number(value);
   return Number.isFinite(n)&&n>=0?n:fallback;
@@ -57,6 +68,45 @@ export function estimateRoomProfile(input={}){
     readsPerGame:setupReads+(writesPerGame*players),
     writesPerGame,
     deletesPerGame
+  };
+}
+
+export function estimateRoomHumanProfile(input={}){
+  const base=estimateRoomProfile(input);
+  const emojiPerPlayer=positiveNumber(input.emojiPerPlayer,DEFAULT_ROOM_HUMAN_PROFILE.emojiPerPlayer);
+  const bellPerPlayer=positiveNumber(input.bellPerPlayer,DEFAULT_ROOM_HUMAN_PROFILE.bellPerPlayer);
+  const presenceTouchesPerPlayer=positiveNumber(input.presenceTouchesPerPlayer,DEFAULT_ROOM_HUMAN_PROFILE.presenceTouchesPerPlayer);
+  const profileSyncWritesPerPlayer=positiveNumber(input.profileSyncWritesPerPlayer,DEFAULT_ROOM_HUMAN_PROFILE.profileSyncWritesPerPlayer);
+  const scoreSyncWritesPerPlayer=positiveNumber(input.scoreSyncWritesPerPlayer,DEFAULT_ROOM_HUMAN_PROFILE.scoreSyncWritesPerPlayer);
+  const reactionWritesPerAction=positiveNumber(input.reactionWritesPerAction,DEFAULT_ROOM_HUMAN_PROFILE.reactionWritesPerAction);
+  const presenceWritesPerTouch=positiveNumber(input.presenceWritesPerTouch,DEFAULT_ROOM_HUMAN_PROFILE.presenceWritesPerTouch);
+  const emojiActions=positiveNumber(input.emojiActions,base.players*emojiPerPlayer);
+  const bellActions=positiveNumber(input.bellActions,base.players*bellPerPlayer);
+  const presenceTouches=positiveNumber(input.presenceTouches,base.players*presenceTouchesPerPlayer);
+  const profileSyncWrites=positiveNumber(input.profileSyncWrites,base.players*profileSyncWritesPerPlayer);
+  const scoreSyncWrites=positiveNumber(input.scoreSyncWrites,base.players*scoreSyncWritesPerPlayer);
+  const extraWritesPerGame=
+    (emojiActions*reactionWritesPerAction)+
+    (bellActions*reactionWritesPerAction)+
+    (presenceTouches*presenceWritesPerTouch)+
+    profileSyncWrites+
+    scoreSyncWrites;
+  return{
+    ...base,
+    emojiPerPlayer,
+    bellPerPlayer,
+    presenceTouchesPerPlayer,
+    profileSyncWritesPerPlayer,
+    scoreSyncWritesPerPlayer,
+    reactionWritesPerAction,
+    presenceWritesPerTouch,
+    emojiActions,
+    bellActions,
+    presenceTouches,
+    profileSyncWrites,
+    scoreSyncWrites,
+    writesPerGame:base.writesPerGame+extraWritesPerGame,
+    readsPerGame:base.readsPerGame+(extraWritesPerGame*base.players)
   };
 }
 
@@ -139,15 +189,59 @@ function pct(value){
   return `${(value*100).toFixed(1)}%`;
 }
 
+function humanRoomActivitySummary(profile){
+  const players=positiveInt(profile.players,DEFAULT_ROOM_PROFILE.players)||1;
+  const emojiPerPlayer=positiveNumber(profile.emojiPerPlayer,0);
+  const bellPerPlayer=positiveNumber(profile.bellPerPlayer,0);
+  const presenceTouchesPerPlayer=positiveNumber(profile.presenceTouchesPerPlayer,0);
+  const profileSyncWritesPerPlayer=positiveNumber(profile.profileSyncWritesPerPlayer,0);
+  const scoreSyncWritesPerPlayer=positiveNumber(profile.scoreSyncWritesPerPlayer,0);
+  const emojiActions=positiveNumber(profile.emojiActions,players*emojiPerPlayer);
+  const bellActions=positiveNumber(profile.bellActions,players*bellPerPlayer);
+  const presenceTouches=positiveNumber(profile.presenceTouches,players*presenceTouchesPerPlayer);
+  const profileSyncWrites=positiveNumber(profile.profileSyncWrites,players*profileSyncWritesPerPlayer);
+  const scoreSyncWrites=positiveNumber(profile.scoreSyncWrites,players*scoreSyncWritesPerPlayer);
+  const reactionWritesPerAction=positiveNumber(profile.reactionWritesPerAction,1);
+  const presenceWritesPerTouch=positiveNumber(profile.presenceWritesPerTouch,1);
+  const extraWrites=(emojiActions*reactionWritesPerAction)+(bellActions*reactionWritesPerAction)+(presenceTouches*presenceWritesPerTouch)+profileSyncWrites+scoreSyncWrites;
+  return[
+    `Activity mix: ${profile.movesPerGame} moves, ${emojiActions} emoji actions, ${bellActions} bell actions, ${presenceTouches} presence touches, ${profileSyncWrites} profile sync writes, ${scoreSyncWrites} score sync writes`,
+    `Extra human traffic: ${extraWrites} writes/game before listener fanout`
+  ];
+}
+
 function printEstimate(args){
   const scenario=String(args.scenario||'solo').toLowerCase();
   const quota=scaledQuota(args.projects??args['room-projects']??1);
+  const activityModel=String(args['activity-model']||'').trim().toLowerCase();
   const explicitProfile={
     readsPerGame:args['reads-per-game'],
     writesPerGame:args['writes-per-game'],
     deletesPerGame:args['deletes-per-game']
   };
-  const profile=scenario==='room'
+  const profile=scenario==='room-human'||activityModel==='human'
+    ?estimateRoomHumanProfile({
+      players:args.players,
+      movesPerGame:args.moves,
+      setupReads:args['setup-reads'],
+      setupWrites:args['setup-writes'],
+      writesPerMove:args['writes-per-move'],
+      finishWrites:args['finish-writes'],
+      deletesPerGame:args['deletes-per-game'],
+      emojiPerPlayer:args['emoji-per-player'],
+      bellPerPlayer:args['bell-per-player'],
+      presenceTouchesPerPlayer:args['presence-touches-per-player'],
+      profileSyncWritesPerPlayer:args['profile-sync-writes-per-player'],
+      scoreSyncWritesPerPlayer:args['score-sync-writes-per-player'],
+      emojiActions:args['emoji-actions'],
+      bellActions:args['bell-actions'],
+      presenceTouches:args['presence-touches'],
+      profileSyncWrites:args['profile-sync-writes'],
+      scoreSyncWrites:args['score-sync-writes'],
+      reactionWritesPerAction:args['reaction-writes-per-action'],
+      presenceWritesPerTouch:args['presence-writes-per-touch']
+    })
+    :scenario==='room'
     ?estimateRoomProfile({
       players:args.players,
       movesPerGame:args.moves,
@@ -173,6 +267,10 @@ function printEstimate(args){
   const usage=estimateQuotaUsage(load,quota);
 
   console.log(`Scenario: ${scenario}`);
+  if(scenario==='room-human'||activityModel==='human'){
+    console.log(`Activity model: human`);
+    humanRoomActivitySummary(profile).forEach((line)=>console.log(line));
+  }
   console.log(`Quota projects: ${quota.projects}`);
   console.log(`Per game: ${capacity.readsPerGame} reads, ${capacity.writesPerGame} writes, ${capacity.deletesPerGame} deletes`);
   console.log(`Free quota capacity: ${capacity.maxGamesPerDay} games/day, bottleneck=${capacity.bottleneck}`);

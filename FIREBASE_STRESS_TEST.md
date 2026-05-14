@@ -41,6 +41,20 @@ Room game estimate:
 node tools/firebase-stress-estimate.mjs --scenario room --users 100 --games-per-user 2 --players 4 --moves 52
 ```
 
+Human-activity room estimate:
+
+```powershell
+node tools/firebase-stress-estimate.mjs --scenario room-human --users 100 --games-per-user 2 --players 4 --moves 52 --emoji-per-player 2 --bell-per-player 2
+```
+
+Use the human-activity model when you want the estimate to reflect what players actually do in a room: turn moves, emoji, bell actions, profile syncs, and presence touches. The baseline room scenario stays available when you want a pure turn-traffic estimate.
+
+If you already measured a room session, pass the actual per-game totals instead of the defaults:
+
+```powershell
+node tools/firebase-stress-estimate.mjs --scenario room-human --users 48 --games-per-user 1 --players 4 --moves 52 --emoji-actions 6 --bell-actions 2 --presence-touches 1 --profile-sync-writes 4 --score-sync-writes 1
+```
+
 If room games are spread across the five dedicated room Firebase projects, include the project multiplier:
 
 ```powershell
@@ -54,6 +68,24 @@ Room games are read-heavy because every room document update is read by each act
 ```text
 room_reads_per_game = setup_reads + (room_writes_per_game * player_count)
 room_writes_per_game = setup_writes + (moves_per_game * writes_per_move) + finish_writes
+```
+
+For a more human-like estimate, add per-player activity traffic:
+
+```text
+room_writes_per_game = setup_writes + (moves_per_game * writes_per_move) + finish_writes
+                      + player_count * (emoji_per_player + bell_per_player + presence_touches_per_player
+                      + profile_sync_writes_per_player + score_sync_writes_per_player)
+room_reads_per_game = setup_reads + (room_writes_per_game * player_count)
+```
+
+If you have actual measured counts for a session, use those action totals directly:
+
+```text
+room_writes_per_game = setup_writes + (moves_per_game * writes_per_move) + finish_writes
+                      + emoji_actions + bell_actions + presence_touches
+                      + profile_sync_writes + score_sync_writes
+room_reads_per_game = setup_reads + (room_writes_per_game * player_count)
 ```
 
 ## What To Measure
