@@ -12,6 +12,17 @@ export const AVATAR_A4_COMMON={
   style:'default'
 };
 
+export const AVATAR_A4_BACKGROUND_COLORS=[
+  'b6e3f4',
+  'c0aede',
+  'd1d4f9',
+  'ffd5dc',
+  'ffdfbf',
+  'f4d0a4',
+  'b3f1c6',
+  'a4e1ff'
+];
+
 export const AVATAR_A4_HK={
   skinColor:['d08b5b','edb98a','ffdbb4','f8d25c'],
   hairColor:['2c1b18','4a312c','724133','a55728']

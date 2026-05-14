@@ -421,6 +421,11 @@ let googlePicturePreloadToken=0;
 let roomInviteQrRequestToken=0;
 let roomInviteJoinInFlight=false;
 let qrCodeModulePromise=null;
+function traceGooglePicture(step,details={}){
+  try{
+    console.debug('[google-picture]',step,details);
+  }catch{}
+}
 async function loadQrCode(){
   qrCodeModulePromise??=import('qrcode');
   const mod=await qrCodeModulePromise;
@@ -429,20 +434,29 @@ async function loadQrCode(){
 function preloadGooglePicture(){
   const pic=String(state.home.google?.picture??'').trim();
   state.home.google.pictureLoaded=false;
-  if(!pic)return;
+  if(!pic){
+    traceGooglePicture('preload-skip-empty',{signedIn:Boolean(state.home.google?.signedIn),email:String(state.home.google?.email??'')});
+    return;
+  }
   const normalizedPic=authPictureUrlFrom(pic);
-  if(!normalizedPic)return;
+  if(!normalizedPic){
+    traceGooglePicture('preload-skip-invalid',{picture:pic});
+    return;
+  }
   const token=++googlePicturePreloadToken;
+  traceGooglePicture('preload-start',{picture:normalizedPic});
   try{
     const img=new Image();
     img.onload=()=>{
       if(token!==googlePicturePreloadToken)return;
       state.home.google.pictureLoaded=true;
+      traceGooglePicture('preload-load-ok',{picture:normalizedPic});
       render();
     };
     img.onerror=()=>{
       if(token!==googlePicturePreloadToken)return;
       state.home.google.pictureLoaded=false;
+      traceGooglePicture('preload-load-failed',{picture:normalizedPic});
       render();
     };
     img.src=normalizedPic;
@@ -450,9 +464,19 @@ function preloadGooglePicture(){
 }
 function syncGooglePictureFromAuth(){
   const authPic=String(firebaseAuth?.currentUser?.photoURL??'').trim();
-  if(!authPic)return false;
-  if(!state.home.google?.signedIn)return false;
-  if(String(state.home.google.picture??'').trim()===authPic&&state.home.google.pictureLoaded)return false;
+  if(!authPic){
+    traceGooglePicture('auth-sync-empty',{signedIn:Boolean(state.home.google?.signedIn),email:String(state.home.google?.email??'')});
+    return false;
+  }
+  if(!state.home.google?.signedIn){
+    traceGooglePicture('auth-sync-skip-not-signed-in',{picture:authPic});
+    return false;
+  }
+  if(String(state.home.google.picture??'').trim()===authPic&&state.home.google.pictureLoaded){
+    traceGooglePicture('auth-sync-unchanged',{picture:authPic});
+    return false;
+  }
+  traceGooglePicture('auth-sync-update',{picture:authPic});
   mergeBrowserGoogleProfile({
     picture:authPic,
     pictureLoaded:false
@@ -5918,7 +5942,12 @@ function renderHome(){
   }
   const allowOpponents=location.hash==='#opponents';
   if(state.home.showLeaderboard)refreshLeaderboard();
-  const homeAvatarSrc=selfAvatarDataUri(state.home.name,'#7aaed8',state.home.gender);
+  const homeGenderKey=state.home.gender==='female'?'female':'male';
+  const homeAvatarFallbackSrc=AVATAR_BASE_SRC[homeGenderKey];
+  const homePicture=String(state.home.google?.picture??'').trim();
+  const homeAvatarSrc=homePicture
+    ?authPictureUrlFrom(homePicture)||homeAvatarFallbackSrc
+    :homeAvatarFallbackSrc;
   const cardBackLeft=`<label class="field field-cardback field-cardback-left"><span>${t('cardBack')}</span>${renderBackCarousel('back-combo-left')}</label>`;
   const cardBackRight=`<label class="field field-cardback field-cardback-right"><span>${t('cardBack')}</span>${renderBackCarousel('back-combo-right')}</label>`;
   const aiFieldLeft=`<label class="field field-ai field-ai-left"><span>${t('ai')}</span>${difficultySliderHtml('difficulty-slider-left',state.home.aiDifficulty,t)}</label>`;
@@ -6036,6 +6065,7 @@ function renderHome(){
     renderLangMenu,
     withBase,
     homeAvatarSrc,
+    homeAvatarFallbackSrc,
     esc,
     state,
     t,

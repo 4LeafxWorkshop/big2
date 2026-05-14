@@ -194,6 +194,13 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
         void syncLeaderboardProfile(currentLeaderboardIdentity());
       }
     });
+    doc.getElementById('home-avatar-img')?.addEventListener('error',(e)=>{
+      const img=e?.target;
+      if(!(img instanceof HTMLImageElement))return;
+      const fallback=String(img.dataset.fallback??'').trim();
+      if(!fallback||img.src===fallback)return;
+      img.src=fallback;
+    },{once:true});
     doc.querySelectorAll('#gender-combo .combo-btn').forEach((btn)=>btn.addEventListener('click',()=>{
       const value=String(btn.getAttribute('data-value')??'');
       if(value!=='male'&&value!=='female')return;

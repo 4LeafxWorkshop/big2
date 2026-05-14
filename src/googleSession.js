@@ -111,10 +111,14 @@ export function createGoogleSessionHelpers({
       const raw=storage.getItem(sessionKey);
       const parsed=raw?JSON.parse(raw):null;
       const email=String(parsed?.email??'').trim().toLowerCase().slice(0,120);
-      if(!email)return false;
+      if(!email){
+        console.debug('[google-picture] session-empty',{sessionKey});
+        return false;
+      }
       const state=getState();
       state.home.google={...state.home.google,signedIn:true,provider:'google',email,hydrating:true,profileMissing:false};
-      applyCachedGoogleProfileFromStore(email);
+      const cached=applyCachedGoogleProfileFromStore(email);
+      console.debug('[google-picture] session-restore',{email,cached});
       const firebaseAuth=getFirebaseAuth();
       const authPicture=String(firebaseAuth?.currentUser?.photoURL??'').trim();
       if(authPicture&&!String(state.home.google.picture??'').trim()){
@@ -122,7 +126,10 @@ export function createGoogleSessionHelpers({
           picture:authPicture,
           pictureLoaded:false
         });
+        console.debug('[google-picture] session-auth-picture',{email,picture:authPicture});
         preloadGooglePicture();
+      }else{
+        console.debug('[google-picture] session-no-auth-picture',{email,authPicturePresent:Boolean(authPicture),existingPicture:Boolean(String(state.home.google.picture??'').trim())});
       }
       if(initFirebaseIfReady()){
         void hydrateProfileBlocking().then(()=>{
@@ -134,7 +141,8 @@ export function createGoogleSessionHelpers({
         void afterSessionReady();
       }
       return true;
-    }catch{
+  }catch{
+      console.debug('[google-picture] session-restore-error');
       return false;
     }
   }
@@ -224,6 +232,14 @@ export function createGoogleSessionHelpers({
     gender=String(gender??'').trim().toLowerCase();
     const googleGender=(gender==='female'||gender==='male')?gender:'';
     const signedIn=Boolean(email||sub);
+    console.debug('[google-picture] sign-in-resolved',{
+      signedIn,
+      email,
+      hasTokenPicture:Boolean(normalizePictureValue(tokenPayload.picture)),
+      hasIncomingPicture:Boolean(Boolean(picture)),
+      hasUserPicture:Boolean(Boolean(normalizePictureValue((tokenPayload?.picture??'')))),
+      gender:googleGender||'(none)'
+    });
     mergeBrowserGoogleProfile({
       signedIn,
       provider:'google',
@@ -239,7 +255,8 @@ export function createGoogleSessionHelpers({
       hydrating:signedIn
     });
     if(signedIn){
-      applyCachedGoogleProfileFromStore(email);
+      const cached=applyCachedGoogleProfileFromStore(email);
+      console.debug('[google-picture] sign-in-cached-profile',{email,cached});
       preloadGooglePicture();
       const hydrated=await hydrateProfileBlocking();
       if(state.home.google.name)state.home.name=state.home.google.name;

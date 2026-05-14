@@ -1,5 +1,6 @@
 import {
   AVATAR_A4_COMMON,
+  AVATAR_A4_BACKGROUND_COLORS,
   AVATAR_A4_ENERGETIC,
   AVATAR_A4_FACIAL_HAIR,
   AVATAR_A4_HK,
@@ -19,6 +20,8 @@ export function resolveAvatarSrc({
   color,
   gender='male',
   isBot=false,
+  avatarVariant='',
+  avatarBackground='',
   authPictureUrlFrom,
   avatarDataUri
 }){
@@ -26,9 +29,13 @@ export function resolveAvatarSrc({
     return avatarDataUri(name,color,gender,true);
   }
   const pic=String(picture??'').trim();
-  return pic
-    ?authPictureUrlFrom(pic)
-    :avatarDataUri(name,color,gender,isBot);
+  if(!pic){
+    return avatarDataUri(name,color,gender,isBot,avatarVariant,avatarBackground);
+  }
+  const authPic=authPictureUrlFrom(pic);
+  return authPic
+    ?authPic
+    :avatarDataUri(name,color,gender,isBot,avatarVariant,avatarBackground);
 }
 
 function addCacheBuster(url){
@@ -64,6 +71,8 @@ export function createAvatarProfileHelpers(deps){
   function authPictureUrlFrom(picRaw){
     const pic=String(picRaw??'').trim();
     if(!pic)return'';
+    const lower=pic.toLowerCase();
+    if(lower==='undefined'||lower==='null'||lower==='nan')return'';
     try{
       let url=pic;
       if(/^data:|^blob:/i.test(url))return url;
@@ -80,7 +89,7 @@ export function createAvatarProfileHelpers(deps){
     return authPictureUrlFrom(getGooglePicture());
   }
 
-  function avatarDataUri(name,_color,gender='male',isBot=false){
+  function avatarDataUri(name,_color,gender='male',isBot=false,avatarVariant='',avatarBackground=''){
     const g=String(gender??'male')==='female'?'female':'male';
     const baseName=String(name??'player')||'player';
     const overrideImage=isBot?botAvatarUrl(baseName,withBase):'';
@@ -88,7 +97,13 @@ export function createAvatarProfileHelpers(deps){
       return overrideImage;
     }
     const variant=AVATAR_VARIANT_BY_NAME[baseName]??'';
-    const seedText=`${g}-${baseName}${variant?`-${variant}`:''}`;
+    const seedParts=[g,baseName];
+    if(variant)seedParts.push(variant);
+    const dynamicVariant=String(avatarVariant??'').trim();
+    if(dynamicVariant)seedParts.push(dynamicVariant);
+    const dynamicBackground=String(avatarBackground??'').trim();
+    if(dynamicBackground)seedParts.push(dynamicBackground);
+    const seedText=seedParts.join('-');
     const seedHash=hashNameSeed(seedText);
     const params=new URLSearchParams();
     params.set('seed',seedText);
@@ -103,7 +118,15 @@ export function createAvatarProfileHelpers(deps){
     params.set('skinColor',override?.skinColor??pick(AVATAR_A4_HK.skinColor,seedHash,8));
     params.set('hairColor',override?.hairColor??pick(AVATAR_A4_HK.hairColor,seedHash,9));
     params.set('facialHair',pick(AVATAR_A4_FACIAL_HAIR.list,seedHash,10));
-    params.set('facialHairProbability','0');
+    params.set(
+      'facialHairProbability',
+      g==='male'
+        ?pick(['0','20','35','50','65'],seedHash,11)
+        :'0'
+    );
+    if(dynamicBackground){
+      params.set('backgroundColor',pick(AVATAR_A4_BACKGROUND_COLORS,seedHash,12));
+    }
     Object.entries(AVATAR_A4_COMMON).forEach(([k,v])=>{
       if(params.has(k))return;
       params.set(k,v);

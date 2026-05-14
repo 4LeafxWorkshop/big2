@@ -19,13 +19,23 @@ export function renderHomeTopActionsHtml(params){
 export function renderHomeProfileCardHtml(params){
   const {
     homeAvatarSrc,
+    homeAvatarFallbackSrc,
     esc,
     state,
     t,
     aiFieldLeft,
     cardBackLeft
   }=params;
-  return`<div class="home-form-col home-form-left home-section"><h3 class="home-section-title"><span class="title-icon title-icon-player" aria-hidden="true"></span>${t('playerSettings')}</h3><div class="home-profile-card"><div class="home-profile-avatar"><img id="home-avatar-img" src="${homeAvatarSrc}" alt="${esc(state.home.name||t('name'))}"/></div><div class="home-profile-fields"><label class="field field-compact"><span>${t('name')}</span><div class="name-with-google"><input id="name-input" value="${esc(state.home.name)}" maxlength="18"/><div id="google-name-inline"></div></div></label><label class="field field-compact"><div class="option-combo toggle-combo" id="gender-combo"><button class="combo-btn toggle-btn ${state.home.avatarChoice==='male'?'active':''}" data-value="male">${t('male')}</button><button class="combo-btn toggle-btn ${state.home.avatarChoice==='female'?'active':''}" data-value="female">${t('female')}</button></div></label></div></div>${aiFieldLeft}${cardBackLeft}</div>`;
+  const normalizeAvatarSrc=(value)=>{
+    const src=String(value??'').trim();
+    if(!src)return'';
+    const lower=src.toLowerCase();
+    if(lower==='undefined'||lower==='null'||lower==='nan'||lower==='[object object]')return'';
+    return src;
+  };
+  const safeHomeAvatarSrc=normalizeAvatarSrc(homeAvatarSrc)||normalizeAvatarSrc(homeAvatarFallbackSrc);
+  const safeHomeAvatarFallbackSrc=normalizeAvatarSrc(homeAvatarFallbackSrc)||safeHomeAvatarSrc;
+  return`<div class="home-form-col home-form-left home-section"><h3 class="home-section-title"><span class="title-icon title-icon-player" aria-hidden="true"></span>${t('playerSettings')}</h3><div class="home-profile-card"><div class="home-profile-avatar"><img id="home-avatar-img" src="${safeHomeAvatarSrc}" data-fallback="${safeHomeAvatarFallbackSrc}" alt="${esc(state.home.name||t('name'))}"/></div><div class="home-profile-fields"><label class="field field-compact"><span>${t('name')}</span><div class="name-with-google"><input id="name-input" value="${esc(state.home.name)}" maxlength="18"/><div id="google-name-inline"></div></div></label><label class="field field-compact"><div class="option-combo toggle-combo" id="gender-combo"><span class="gender-voice-icon" aria-hidden="true" title="${t('audioVoice')}"><svg viewBox="0 0 24 24" focusable="false" aria-hidden="true"><path d="M4 14v-4h4l5-5v14l-5-5H4z"/><path d="M15.5 8.5c1.8 1.8 1.8 5.2 0 7"/><path d="M18.2 5.8c3.3 3.3 3.3 8.9 0 12.2"/></svg></span><button class="combo-btn toggle-btn ${state.home.avatarChoice==='male'?'active':''}" data-value="male">${t('male')}</button><button class="combo-btn toggle-btn ${state.home.avatarChoice==='female'?'active':''}" data-value="female">${t('female')}</button></div></label></div></div>${aiFieldLeft}${cardBackLeft}</div>`;
 }
 
 export function renderHomeSettingsCardHtml(params){
@@ -75,6 +85,7 @@ export function renderHomeMarkup(params){
     t,
     aiFieldLeft,
     cardBackLeft,
+    homeAvatarFallbackSrc,
     aiFieldRight,
     soundEnabled,
     calloutDisplayEnabled,
@@ -96,7 +107,7 @@ export function renderHomeMarkup(params){
   const versionHtml=buildVersionLabel?`<div class="home-build-version">${esc(buildVersionLabel)}</div>`:'';
   const moreSettingsClass=moreSettingsOpen?' home-more-settings-open':'';
 
-  return`<section class="home-wrap royal-home-wrap${moreSettingsClass}"><section class="home-panel royal-home-panel"><header class="royal-home-head">${renderHomeTopActionsHtml({intro,allowOpponents,renderLangMenu,esc,t})}<div class="royal-title-wrap"><div class="home-logo-block"><img class="title-logo title-logo-home" src="${withBase('title-lockup-home.png')}" alt="鋤大D TRADITIONAL BIG TWO"/></div></div></header><section class="royal-home-body${moreSettingsClass}"><div class="home-form-grid">${renderHomeProfileCardHtml({homeAvatarSrc,esc,state,t,aiFieldLeft,cardBackLeft})}${renderHomeSettingsCardHtml({t,aiFieldRight,soundEnabled,calloutDisplayEnabled,emoteDisplayEnabled,gestureHelpEnabled,vibrateEnabled,cardBackRight,moreSettingsOpen})}${renderHomeMoreSettingsCardHtml({t,calloutDisplayEnabled,emoteDisplayEnabled,gestureHelpEnabled,vibrateEnabled,moreSettingsOpen})}</div>${renderHomeActionRowHtml({soloBtnHtml,roomButtonsHtml})}</section></section>${mainPageLegalMiniHtml}${versionHtml}${roomLobbyHtml}${roomJoinModal}${state.home.showIntro?introPanelHtml:''}${state.home.showLeaderboard?leaderboardModalHtml:''}${state.showScoreGuide?scoreGuideModalHtml:''}</section>`;
+  return`<section class="home-wrap royal-home-wrap${moreSettingsClass}"><section class="home-panel royal-home-panel"><header class="royal-home-head">${renderHomeTopActionsHtml({intro,allowOpponents,renderLangMenu,esc,t})}<div class="royal-title-wrap"><div class="home-logo-block"><img class="title-logo title-logo-home" src="${withBase('title-lockup-home.png')}" alt="鋤大D TRADITIONAL BIG TWO"/></div></div></header><section class="royal-home-body${moreSettingsClass}"><div class="home-form-grid">${renderHomeProfileCardHtml({homeAvatarSrc,homeAvatarFallbackSrc,esc,state,t,aiFieldLeft,cardBackLeft})}${renderHomeSettingsCardHtml({t,aiFieldRight,soundEnabled,calloutDisplayEnabled,emoteDisplayEnabled,gestureHelpEnabled,vibrateEnabled,cardBackRight,moreSettingsOpen})}${renderHomeMoreSettingsCardHtml({t,calloutDisplayEnabled,emoteDisplayEnabled,gestureHelpEnabled,vibrateEnabled,moreSettingsOpen})}</div>${renderHomeActionRowHtml({soloBtnHtml,roomButtonsHtml})}</section></section>${mainPageLegalMiniHtml}${versionHtml}${roomLobbyHtml}${roomJoinModal}${state.home.showIntro?introPanelHtml:''}${state.home.showLeaderboard?leaderboardModalHtml:''}${state.showScoreGuide?scoreGuideModalHtml:''}</section>`;
 }
 
 export function renderConfigMarkup(params){

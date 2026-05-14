@@ -958,6 +958,8 @@ body[data-screen='home'] .home-wrap {
 }
 .royal-home-wrap.home-more-settings-open .royal-home-body .home-form-more {
   display: grid;
+  padding-left: 12px;
+  border-left: 1px solid rgba(245, 220, 164, .18);
 }
 .royal-home-body .home-form-col {
   gap: 16px;
@@ -1022,6 +1024,7 @@ body[data-screen='home'] .home-wrap {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center center;
 }
 .royal-home-body .home-profile-fields {
   flex: 1 1 auto;
@@ -1252,6 +1255,31 @@ body[data-screen='home'] .home-wrap {
   gap: 2px;
   border-radius: 10px;
   flex-wrap: nowrap;
+  align-items: center;
+}
+.royal-home-body #gender-combo .gender-voice-icon {
+  width: 18px;
+  height: 18px;
+  margin-left: 4px;
+  color: rgba(247, 231, 190, .78);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  pointer-events: none;
+}
+.royal-home-body #gender-combo .gender-voice-icon svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.95;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 .royal-home-body #gender-combo .toggle-btn {
   min-height: 32px;
@@ -8911,6 +8939,8 @@ body[data-screen='game'] .intro-modal {
   }
   .royal-home-wrap.home-more-settings-open .royal-home-body .home-form-more {
     display: grid;
+    padding-left: 0;
+    border-left: 0;
   }
   .royal-home-body .home-form-right .home-section-title {
     grid-column: 1 / -1;
