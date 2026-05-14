@@ -11544,37 +11544,6 @@ body[data-screen='game'] .action-strip {
   }
 }
 
-/* Tablet game page: keep topbar controls on one line (no wrap to second row). */
-@media (min-width: 861px) and (max-width: 1200px) and (orientation: portrait) {
-  body[data-screen='game'] .topbar {
-    display: flex !important;
-    flex-direction: row !important;
-    flex-wrap: wrap !important;
-    align-items: flex-start !important;
-    justify-content: flex-start !important;
-    gap: 8px !important;
-  }
-  body[data-screen='game'] .topbar-right {
-    width: 100% !important;
-    margin-left: 0 !important;
-    justify-content: flex-start !important;
-  }
-  body[data-screen='game'] .topbar-right .control-row {
-    display: flex !important;
-    flex-wrap: wrap !important;
-    align-items: center !important;
-    justify-content: flex-start !important;
-    gap: 4px !important;
-    width: 100% !important;
-    overflow-x: visible !important;
-    overflow-y: visible !important;
-  }
-  body[data-screen='game'] .topbar-right .control-row button {
-    flex: 0 0 auto !important;
-    white-space: nowrap !important;
-  }
-}
-
 /* Tablet portrait: keep south seat name top-center of south panel like web view. */
 @media (min-width: 861px) and (orientation: portrait) {
   body[data-screen='game'] .action-zone {
