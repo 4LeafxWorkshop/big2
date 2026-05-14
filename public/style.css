@@ -1402,6 +1402,8 @@ body[data-screen='home'] .home-wrap {
   display: grid;
   place-items: center;
   padding: 10px;
+  opacity: 0;
+  animation: modalFade .16s ease-out both;
 }
 .room-invite-overlay .room-backdrop {
   position: absolute;
@@ -4088,7 +4090,8 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   display: grid;
   place-items: center;
   padding: 12px;
-  animation: modalFade .16s ease-out;
+  opacity: 0;
+  animation: modalFade .16s ease-out both;
 }
 .coach-marks-modal {
   z-index: 2147483647 !important;
@@ -4197,7 +4200,7 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   100% { transform: translateY(0) scale(1); opacity: 1; }
 }
 @keyframes modalFade {
-  0% { opacity: .6; }
+  0% { opacity: 0; }
   100% { opacity: 1; }
 }
 .intro-sheet,
@@ -14338,6 +14341,9 @@ body[data-screen='game'] .game-foreground-layer {
   overflow: visible;
   contain: none;
   isolation: isolate;
+}
+body[data-screen='game']:has(.room-overlay, .intro-modal, .lb-modal, .score-guide-modal, .coach-marks-modal, .legal-modal.open) .game-foreground-layer {
+  display: none !important;
 }
 
 body[data-screen='game'] .game-foreground-layer :is(
