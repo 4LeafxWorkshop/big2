@@ -13995,9 +13995,6 @@ body[data-screen='game'] .service-bell-layer,
 body[data-screen='game'] .table > .service-bell-layer {
   z-index: 2147483300 !important;
 }
-body[data-screen='game'] :is(.table-center-stack, .center-last, .center-last-north, .center-last-west, .center-last-east, .center-last-south, .seat-open-play, .seat-open-play .seat-played) {
-  z-index: 11000 !important;
-}
 
 /* Final all-views layer contract: profile labels > food > open/discard cards. */
 body[data-screen='game'] :is(.seat.north > .seat-name-fixed, .seat.west > .seat-name-fixed, .seat.east > .seat-name-fixed, .seat.north .seat-pack > .seat-name-fixed, .seat.west .seat-pack > .seat-name-fixed, .seat.east .seat-pack > .seat-name-fixed, .seat.north .side-station-stack > .seat-name-fixed, .seat.west .side-station-stack > .seat-name-fixed, .seat.east .side-station-stack > .seat-name-fixed),
@@ -14005,18 +14002,6 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] :is(.name, .seat-i
   position: relative !important;
   z-index: 13000 !important;
 }
-body[data-screen='game'] .service-bell-food-layer,
-body[data-screen='game'] .service-bell-food {
-  z-index: 2147483300 !important;
-}
-body[data-screen='game'] :is(.table-center-stack, .center-last, .center-last-north, .center-last-west, .center-last-east, .center-last-south) {
-  z-index: 11000 !important;
-}
-body[data-screen='game'] :is(.center-last .seat-played, .seat-open-play, .seat-open-play .seat-played, .seat-open-play .card.mini, .seat-open-play .card.discard-card.mini) {
-  position: relative !important;
-  z-index: 11000 !important;
-}
-
 /* Final Layer Contract (authoritative)
    cards < food slide < seat station < all callouts/emote effects */
 body[data-screen='game'] :is(
@@ -14199,13 +14184,6 @@ body[data-screen='game'] :is(.seat.north .seat-pass-label, .seat.west .seat-pass
   align-items: center !important;
   margin-left: auto !important;
   margin-right: auto !important;
-}
-body[data-screen='game'] .service-bell-food-layer {
-  z-index: 2147483300 !important;
-  isolation: auto !important;
-}
-body[data-screen='game'] .service-bell-food {
-  z-index: 2147483300 !important;
 }
 body[data-screen='game'] :is(.seat.north .seat-name-fixed[data-opponent-name], .seat.west .seat-name-fixed[data-opponent-name], .seat.east .seat-name-fixed[data-opponent-name]) {
   position: relative !important;
