@@ -14350,28 +14350,6 @@ body[data-screen='game'] :is(
   isolation: isolate !important;
 }
 
-body[data-screen='game'] .seat-name-fixed[data-opponent-name] :is(
-  .play-type-call-seat,
-  .last-card-call-seat,
-  .emote-callout.play-type-call-seat,
-  .food-callout-seat,
-  .seat-motto-callout
-) {
-  z-index: 40000 !important;
-}
-
-body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout {
-  z-index: 40002 !important;
-}
-
-body[data-screen='game'] .seat[data-seat-emote-active='1'] :is(
-  .seat-name-fixed[data-opponent-name],
-  .seat-name-fixed[data-opponent-name] .name
-) {
-  z-index: 40010 !important;
-  isolation: isolate !important;
-}
-
 /* Foreground lock: active callouts must paint above every in-game card stack. */
 body[data-screen='game'] :is(
   .seat.north,
