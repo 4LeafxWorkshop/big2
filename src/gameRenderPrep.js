@@ -61,13 +61,15 @@ export function buildSelfRenderState(params){
   const authPic=authPictureUrl();
   const useGoogleSelfAvatar=Boolean(state.home.google?.signedIn&&authPic&&selfAvatarSrc===authPic);
   const selfDangerLast=Boolean(!v.gameOver&&self&&self.count===1);
-  const selfActive=Boolean(!v.gameOver&&self&&v.currentSeat===self.seat);
-  const selfIsHost=hostSeat!==null&&self&&hostSeat===self.seat;
+  const selfSeatNum=Number.isFinite(Number(self?.seat))?Number(self.seat):null;
+  const currentSeatNum=Number.isFinite(Number(v.currentSeat))?Number(v.currentSeat):null;
+  const selfActive=Boolean(!v.gameOver&&self&&selfSeatNum!==null&&currentSeatNum!==null&&currentSeatNum===selfSeatNum);
+  const selfIsHost=hostSeat!==null&&selfSeatNum!==null&&Number(hostSeat)===selfSeatNum;
   const selfHostBadgeHtml=selfIsHost?`<span class="lobby-seat-host-badge-text">${t('roomHostTag')}</span>`:'';
   const selfBadgeHtml=selfDangerLast
     ?`<span class="avatar-status-badge warning ${selfActive?'danger':''}" aria-label="${esc(t('lastCardCall'))}"></span>`
     :(selfActive?`<span class="avatar-status-badge turn" aria-label="${esc(t('wait'))}"></span>`:'');
-  const selfAvatar=`<span class="player-avatar-wrap player-avatar-wrap-self avatar-rim" style="--avatar-rim:${selfSeatColor};"><img id="self-avatar-img" class="player-avatar player-avatar-self ${avatarGenderClass(selfGender)} ${useGoogleSelfAvatar?'player-avatar-google':''}" style="--avatar-outline:${selfSeatColor};" src="${selfAvatarSrc}" data-fallback="${selfGender==='female'?AVATAR_BASE_SRC.female:AVATAR_BASE_SRC.male}" alt="${esc(selfName)}"/>${selfHostBadgeHtml}${selfBadgeHtml}${coachMarksButtonHtml}</span>`;
+  const selfAvatar=`<span class="player-avatar-wrap player-avatar-wrap-self avatar-rim${selfActive?' is-active':''}" style="--avatar-rim:${selfSeatColor};"><img id="self-avatar-img" class="player-avatar player-avatar-self ${avatarGenderClass(selfGender)} ${useGoogleSelfAvatar?'player-avatar-google':''}" style="--avatar-outline:${selfSeatColor};" src="${selfAvatarSrc}" data-fallback="${selfGender==='female'?AVATAR_BASE_SRC.female:AVATAR_BASE_SRC.male}" alt="${esc(selfName)}"/>${selfHostBadgeHtml}${selfBadgeHtml}${coachMarksButtonHtml}</span>`;
   let selfCalloutHtml=self?seatCalloutHtml(self.seat,'south',selfSeatColor,true):'';
   const selfEmoteHtml=self?seatEmoteHtml(self.seat,'south',selfSeatColor,true):'';
   if(selfEmoteHtml)selfCalloutHtml+=selfEmoteHtml;

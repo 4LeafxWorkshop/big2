@@ -10335,7 +10335,9 @@ body[data-screen='game'] .player-avatar-wrap {
   background: transparent;
 }
 body[data-screen='game'] .seat.active .player-avatar-wrap::before,
-body[data-screen='game'] .action-strip.active .player-avatar-wrap::before {
+body[data-screen='game'] .action-strip.active .player-avatar-wrap::before,
+body[data-screen='game'] .player-avatar-wrap-self.is-active::before,
+body[data-screen='game'] .table > .player-tag .player-avatar-wrap-self.is-active::before {
   content: '';
   position: absolute;
   inset: -6px;
@@ -10461,6 +10463,22 @@ body[data-screen='game'] .seat-name-fixed .player-avatar-wrap.player-avatar-wrap
 body[data-screen='game'] .action-strip .player-tag .player-avatar-wrap.player-avatar-wrap-self {
   width: 38px;
   height: 38px;
+}
+body[data-screen='game'] {
+  --south-tag-left: 50%;
+  --south-tag-right: auto;
+  --south-tag-top: 3px;
+  --south-tag-bottom: auto;
+  --south-tag-transform: translateX(calc(-50% + 3px));
+  --south-tag-z: 20;
+}
+body[data-screen='game'][data-orientation='portrait'][data-is-mobile='1'] {
+  --south-tag-left: 16px;
+  --south-tag-right: auto;
+  --south-tag-top: auto;
+  --south-tag-bottom: 16px;
+  --south-tag-transform: none;
+  --south-tag-z: 14000;
 }
 body[data-screen='game'][data-orientation='portrait'] .action-strip .player-tag .player-avatar-self {
   pointer-events: none;
@@ -12021,54 +12039,6 @@ body[data-screen='game'][data-web-too-small='1'][data-webview='1'] .game-shell {
   user-select: auto !important;
   filter: none;
 }
-/* Keep game topbar controls inside the header. */
-body[data-screen='game'] .topbar-right .control-row {
-  flex-wrap: wrap !important;
-  overflow: visible !important;
-  scrollbar-width: none;
-  white-space: normal;
-}
-body[data-screen='game'] .topbar-right .control-row::-webkit-scrollbar {
-  height: 0;
-}
-@media (min-width: 1081px) {
-  body[data-screen='game'] .topbar,
-  body[data-screen='game'] .topbar-right,
-  body[data-screen='game'] .topbar > div:first-child {
-    min-width: 0;
-    max-width: 100%;
-  }
-  body[data-screen='game'] .topbar {
-    flex-wrap: wrap !important;
-    align-items: flex-start !important;
-  }
-  body[data-screen='game'] .topbar-right {
-    width: 100% !important;
-    margin-left: 0 !important;
-    justify-content: flex-start !important;
-  }
-  body[data-screen='game'] .topbar-right .control-row {
-    width: 100% !important;
-    overflow-x: visible !important;
-    overflow-y: visible !important;
-    flex-wrap: wrap !important;
-    justify-content: flex-start !important;
-  }
-}
-
-@media (min-width: 1501px) {
-  body[data-screen='game'] .topbar {
-    justify-content: flex-start !important;
-  }
-  body[data-screen='game'] .topbar > div:first-child {
-    flex: 0 0 auto !important;
-  }
-  body[data-screen='game'] .topbar-right {
-    width: 100% !important;
-    margin-left: 0 !important;
-  }
-}
-
 @media (min-width: 861px) and (max-width: 1200px) {
   body[data-screen='game'] .topbar-right .control-row {
     scrollbar-width: none !important;
@@ -12416,40 +12386,40 @@ body[data-screen='game'] .east .opponent-fan {
   justify-self: center !important;
 }
 body[data-screen='game'] .north > .seat-name-fixed {
-  top: 6px !important;
-  left: 50% !important;
-  right: auto !important;
-  transform: translateX(-50%) !important;
+  top: var(--opp-north-name-top, 6px) !important;
+  left: var(--opp-north-name-left, 50%) !important;
+  right: var(--opp-north-name-right, auto) !important;
+  transform: var(--opp-north-name-transform, translateX(-50%)) !important;
 }
 body[data-screen='game'] .west > .seat-name-fixed {
-  top: 50% !important;
-  left: 6px !important;
-  right: auto !important;
-  transform: translateY(-50%) !important;
+  top: var(--opp-west-name-top, 50%) !important;
+  left: var(--opp-west-name-left, 6px) !important;
+  right: var(--opp-west-name-right, auto) !important;
+  transform: var(--opp-west-name-transform, translateY(-50%)) !important;
 }
 body[data-screen='game'] .east > .seat-name-fixed {
-  top: 50% !important;
-  right: 6px !important;
-  left: auto !important;
-  transform: translateY(-50%) !important;
+  top: var(--opp-east-name-top, 50%) !important;
+  right: var(--opp-east-name-right, 6px) !important;
+  left: var(--opp-east-name-left, auto) !important;
+  transform: var(--opp-east-name-transform, translateY(-50%)) !important;
 }
 body[data-screen='game'][data-orientation='portrait'] .north > .seat-name-fixed {
-  top: 6px !important;
-  left: 50% !important;
-  right: auto !important;
-  transform: translateX(-50%) !important;
+  top: var(--opp-north-name-top, 6px) !important;
+  left: var(--opp-north-name-left, 50%) !important;
+  right: var(--opp-north-name-right, auto) !important;
+  transform: var(--opp-north-name-transform, translateX(-50%)) !important;
 }
 body[data-screen='game'][data-orientation='portrait'] .west > .seat-name-fixed {
-  top: 50% !important;
-  left: 6px !important;
-  right: auto !important;
-  transform: translateY(-50%) !important;
+  top: var(--opp-west-name-top, 50%) !important;
+  left: var(--opp-west-name-left, 6px) !important;
+  right: var(--opp-west-name-right, auto) !important;
+  transform: var(--opp-west-name-transform, translateY(-50%)) !important;
 }
 body[data-screen='game'][data-orientation='portrait'] .east > .seat-name-fixed {
-  top: 50% !important;
-  right: 6px !important;
-  left: auto !important;
-  transform: translateY(-50%) !important;
+  top: var(--opp-east-name-top, 50%) !important;
+  right: var(--opp-east-name-right, 6px) !important;
+  left: var(--opp-east-name-left, auto) !important;
+  transform: var(--opp-east-name-transform, translateY(-50%)) !important;
 }
 
 /* Station lock (all views): keep side stations centered on their own columns. */
@@ -12484,7 +12454,7 @@ body[data-screen='game'][data-orientation='landscape'] .seat.east > .seat-name-f
 body[data-screen='game'] .seat.west .opponent-fan,
 body[data-screen='game'] .seat.east .opponent-fan {
   position: absolute !important;
-  top: calc(50% + 34px) !important;
+  top: calc(50% + var(--opp-side-fan-offset, 34px)) !important;
   left: 50% !important;
   right: auto !important;
   transform: translateX(-50%) !important;
@@ -12510,7 +12480,7 @@ body[data-screen='game'] .seat.east .seat-open-play {
 @media (max-width: 860px) and (orientation: portrait) {
   body[data-screen='game'] .seat.west .opponent-fan,
   body[data-screen='game'] .seat.east .opponent-fan {
-    top: calc(50% + 34px) !important;
+    top: calc(50% + var(--opp-side-fan-offset, 34px)) !important;
   }
   body[data-screen='game'] .seat.west .seat-open-play,
   body[data-screen='game'] .seat.east .seat-open-play {
@@ -12567,24 +12537,24 @@ body[data-screen='game'] .seat.east > .seat-name-fixed {
 }
 body[data-screen='game'][data-orientation='portrait'] .seat.west > .seat-name-fixed,
 body[data-screen='game'][data-orientation='landscape'] .seat.west > .seat-name-fixed {
-  top: 28px !important;
-  left: 6px !important;
-  right: auto !important;
-  transform: none !important;
+  top: var(--opp-west-name-top, 28px) !important;
+  left: var(--opp-west-name-left, 6px) !important;
+  right: var(--opp-west-name-right, auto) !important;
+  transform: var(--opp-west-name-transform, none) !important;
 }
 body[data-screen='game'][data-orientation='portrait'] .seat.east > .seat-name-fixed,
 body[data-screen='game'][data-orientation='landscape'] .seat.east > .seat-name-fixed {
-  top: 28px !important;
-  right: 6px !important;
-  left: auto !important;
-  transform: none !important;
+  top: var(--opp-east-name-top, 28px) !important;
+  right: var(--opp-east-name-right, 6px) !important;
+  left: var(--opp-east-name-left, auto) !important;
+  transform: var(--opp-east-name-transform, none) !important;
 }
 body[data-screen='game'][data-orientation='portrait'] .seat.north > .seat-name-fixed,
 body[data-screen='game'][data-orientation='landscape'] .seat.north > .seat-name-fixed {
-  top: 6px !important;
-  left: 50% !important;
-  right: auto !important;
-  transform: translateX(-50%) !important;
+  top: var(--opp-north-name-top, 6px) !important;
+  left: var(--opp-north-name-left, 50%) !important;
+  right: var(--opp-north-name-right, auto) !important;
+  transform: var(--opp-north-name-transform, translateX(-50%)) !important;
 }
 
 /* Single-source station float layout (web/mobile + portrait/landscape). */
@@ -12592,6 +12562,18 @@ body[data-screen='game'] {
   --opp-side-station-drop: 0px;
   --opp-side-avatar-top: calc(50% + var(--opp-side-station-drop));
   --opp-side-fan-offset: 34px;
+  --opp-north-name-top: 6px;
+  --opp-north-name-left: 50%;
+  --opp-north-name-right: auto;
+  --opp-north-name-transform: translateX(-50%);
+  --opp-west-name-top: 28px;
+  --opp-west-name-left: 6px;
+  --opp-west-name-right: auto;
+  --opp-west-name-transform: none;
+  --opp-east-name-top: 28px;
+  --opp-east-name-left: auto;
+  --opp-east-name-right: 6px;
+  --opp-east-name-transform: none;
   --opp-closed-gap: clamp(56px, 7.2vmin, 74px);
   --opp-open-gap: clamp(70px, 8.8vmin, 96px);
   --opp-side-fan-top: calc(var(--opp-side-avatar-top) + var(--opp-closed-gap));
@@ -12620,7 +12602,7 @@ body[data-screen='game'] {
 @media (max-width: 860px) and (orientation: portrait) {
   body[data-screen='game'] {
     --opp-side-station-drop: 0px;
-    --opp-side-fan-offset: 0px;
+    --opp-side-fan-offset: 34px;
     --opp-side-pack-pad-top: 0px;
   }
 }
@@ -12821,14 +12803,6 @@ body[data-screen='game'] .seat.east {
 }
 
 @media (max-width: 860px) and (orientation: portrait) {
-  body[data-screen='game'][data-orientation='portrait'] .topbar-right .control-row {
-    gap: 2px !important;
-  }
-  body[data-screen='game'][data-orientation='portrait'] .topbar-right .control-row button {
-    min-height: 28px !important;
-    padding: 2px 5px !important;
-    font-size: clamp(.6rem, 2.2vw, .7rem) !important;
-  }
   body[data-screen='game'][data-orientation='portrait'] .action-strip {
     padding-top: 6px !important;
     gap: 3px !important;
@@ -13483,23 +13457,23 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
     padding-top: 10px !important;
     padding-bottom: 0 !important;
   }
-  body[data-screen='game'][data-orientation='portrait'][data-is-mobile='1'] .action-strip .player-tag {
-    display: none !important;
-  }
-  body[data-screen='game'][data-orientation='portrait'][data-is-mobile='1'] .table > .player-tag {
+  body[data-screen='game'][data-orientation='portrait'][data-is-mobile='1'] :is(.action-strip .player-tag, .table > .player-tag) {
     display: inline-flex !important;
     position: absolute !important;
-    left: 10px !important;
-    right: auto !important;
-    bottom: 12px !important;
-    top: auto !important;
-    transform: none !important;
-    z-index: 14000 !important;
+    left: var(--south-tag-left) !important;
+    right: var(--south-tag-right) !important;
+    top: var(--south-tag-top) !important;
+    bottom: var(--south-tag-bottom) !important;
+    transform: var(--south-tag-transform) !important;
+    z-index: var(--south-tag-z) !important;
     margin: 0 !important;
     background: transparent !important;
     border: 0 !important;
     box-shadow: none !important;
     padding: 0 !important;
+  }
+  body[data-screen='game'][data-orientation='portrait'][data-is-mobile='1'] .action-strip .player-tag {
+    display: none !important;
   }
 }
 
@@ -13784,8 +13758,6 @@ body[data-screen='game'] .game-title-wrap .room-top-meta,
 body[data-screen='game'] .action-strip .control-row .room-top-meta {
   display: none !important;
 }
-body[data-screen='game'] .seat-name-fixed[data-opponent-name],
-body[data-screen='game'] .seat-name-fixed[data-opponent-name] :is(.play-type-call-seat, .last-card-call-seat, .emote-callout.play-type-call-seat),
 body[data-screen='game'] .action-strip :is(.play-type-call-self, .last-card-call-self, .emote-callout) {
   z-index: 14000 !important;
 }
@@ -13990,7 +13962,7 @@ body[data-screen='game'] :is(.seat.west, .seat.east) .side-station-stack .oppone
   body[data-screen='game'][data-orientation='portrait'] {
     --opp-side-station-drop: 0px;
     --opp-side-avatar-top: calc(var(--game-table-h, 0px) * 0.52);
-    --opp-side-fan-offset: calc(var(--game-table-h, 0px) * 0.08);
+    --opp-side-fan-offset: 34px;
     --opp-closed-gap: clamp(22px, 3vmin, 28px);
     --opp-open-gap: clamp(62px, 7.8vmin, 78px);
     --opp-side-section-pad-top: calc(var(--game-table-h, 0px) * 0.06);
@@ -14060,19 +14032,9 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] :is(.name, .seat-i
   position: relative !important;
   z-index: 13000 !important;
 }
-body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callout {
-  z-index: 17002 !important;
-}
-body[data-screen='game'] .seat[data-seat-emote-active='1'] :is(.seat-name-fixed[data-opponent-name], .seat-name-fixed[data-opponent-name] .name) {
-  z-index: 18020 !important;
-  isolation: isolate !important;
-}
 body[data-screen='game'] .service-bell-food-layer,
 body[data-screen='game'] .service-bell-food {
   z-index: 2147483300 !important;
-}
-body[data-screen='game'] .seat-name-fixed[data-opponent-name] .food-callout-seat {
-  z-index: 14020 !important;
 }
 body[data-screen='game'] :is(.table-center-stack, .center-last, .center-last-north, .center-last-west, .center-last-east, .center-last-south) {
   z-index: 11000 !important;
@@ -14120,15 +14082,6 @@ body[data-screen='game'] :is(
   .table-emote
 ) {
   z-index: 17000 !important;
-}
-body[data-screen='game'] .seat-name-fixed[data-opponent-name] :is(
-  .play-type-call-seat,
-  .last-card-call-seat,
-  .emote-callout.play-type-call-seat,
-  .food-callout-seat,
-  .seat-motto-callout
-) {
-  z-index: 17001 !important;
 }
 body[data-screen='game'][data-orientation='landscape'] .seat.north .seat-pack > .seat-name-fixed,
 body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-pack > .seat-name-fixed,
@@ -14294,10 +14247,6 @@ body[data-screen='game'] :is(.seat.west .side-station-core > .seat-name-fixed[da
   position: relative !important;
   z-index: 22046 !important;
 }
-body[data-screen='game'] :is(.play-type-call, .last-card-call, .emote-callout, .seat-motto-callout, .self-table-emote, .table-emote) {
-  z-index: 22050 !important;
-}
-
 @media (min-width: 861px) and (orientation: portrait) {
   body[data-screen='game'] .topbar {
     display: flex !important;

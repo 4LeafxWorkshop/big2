@@ -7,8 +7,9 @@ export function createProfileSettingsHelpers(deps){
     getCalloutDisplayEnabled,
     getEmoteDisplayEnabled,
     getGestureHelpEnabled=()=>false,
-    getVibrateEnabled=()=>true,
+    getVibrateEnabled=()=>false,
     setVibrateEnabled=()=>{},
+    isNativeApp=()=>false,
     normalizeCalloutStylePack,
     getCalloutStylePack,
     currentLeaderboardIdentity,
@@ -92,6 +93,10 @@ export function createProfileSettingsHelpers(deps){
     if(typeof settings.emoteDisplayEnabled==='boolean')deps.setEmoteDisplayEnabled(Boolean(settings.emoteDisplayEnabled));
     if(typeof settings.gestureHelpEnabled==='boolean')deps.setGestureHelpEnabled(Boolean(settings.gestureHelpEnabled));
     if(typeof settings.vibrateEnabled==='boolean')setVibrateEnabled(Boolean(settings.vibrateEnabled));
+    if(!isNativeApp()){
+      deps.setGestureHelpEnabled(false);
+      setVibrateEnabled(false);
+    }
     deps.setCalloutVoiceMode(getSoundEnabled()?'auto':'off');
     deps.setCalloutStylePack(normalizeCalloutStylePack(settings.calloutStylePack));
     const gender=String(settings.gender??'');
