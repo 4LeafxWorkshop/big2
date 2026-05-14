@@ -32,6 +32,7 @@ function createHelpers(stateOverrides={}){
     setGestureHelpEnabled:(value)=>{gestureHelpEnabled=value;state.home.gestureHelpEnabled=value;},
     getVibrateEnabled:()=>vibrateEnabled,
     setVibrateEnabled:(value)=>{vibrateEnabled=value;},
+    isNativeApp:()=>true,
     normalizeCalloutStylePack:(value)=>value||'classic',
     getCalloutStylePack:()=>calloutStylePack,
     setCalloutStylePack:(value)=>{calloutStylePack=value;},

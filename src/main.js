@@ -58,6 +58,7 @@ import {createRoomTimeoutController} from './roomTimeouts.js';
 import {createMobileAdsController} from './mobileAds.js';
 import {buildActiveRoomRow, buildRoomDirectoryDoc} from './roomDirectory.js';
 import {getNextSoloRoundWins, getNextSoloTotals, resetSoloSessionCarryoverState} from './soloState.js';
+import {Haptics} from '@capacitor/haptics';
 
 const RANKS=['3','4','5','6','7','8','9','10','J','Q','K','A','2'];
 const SUITS=[
@@ -990,8 +991,6 @@ let calloutDisplayEnabled=true;
 let emoteDisplayEnabled=true;
 let gestureHelpEnabled=isNativeApp;
 let vibrateEnabled=isNativeApp;
-let nativeHaptics=null;
-let nativeHapticsLoadAttempted=false;
 let hapticFallbackTimer=null;
 let calloutVoiceMode='auto'; // auto | recorded | off
 let calloutStylePack='energetic'; // forced energetic
@@ -4962,30 +4961,12 @@ function triggerHapticFallbackPulse(){
     body.setAttribute('data-haptic-fallback','0');
   },220);
 }
-async function loadNativeHaptics(){
-  if(nativeHapticsLoadAttempted)return nativeHaptics;
-  nativeHapticsLoadAttempted=true;
-  try{
-    const cap=window.Capacitor;
-    const direct=cap?.Plugins?.Haptics;
-    if(direct&&typeof direct.vibrate==='function'){
-      nativeHaptics=direct;
-      return nativeHaptics;
-    }
-  }catch{}
-  try{
-    const mod=await import('@capacitor/haptics');
-    const api=mod?.Haptics;
-    if(api&&typeof api.vibrate==='function'){
-      nativeHaptics=api;
-      return nativeHaptics;
-    }
-  }catch{}
-  return null;
-}
 async function triggerNativeHaptics(pattern){
-  const api=await loadNativeHaptics();
-  if(!api||typeof api.vibrate!=='function')return;
+  const api=Haptics;
+  if(!api||typeof api.vibrate!=='function'){
+    triggerHapticFallbackPulse();
+    return;
+  }
   const arr=Array.isArray(pattern)?pattern:[Number(pattern)||80];
   const pulses=arr
     .map((v,i)=>({v:Number(v)||0,i}))
