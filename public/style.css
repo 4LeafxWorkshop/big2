@@ -14167,12 +14167,6 @@ body[data-screen='game'] :is(.seat.west .side-station-core > .opponent-fan-wrap,
 body[data-screen='game'] :is(.seat.north .seat-open-play, .seat.west .seat-open-play, .seat.east .seat-open-play) {
   margin-top: 2px !important;
 }
-body[data-screen='game'] :is(.seat.north .seat-open-play, .seat.west .seat-open-play, .seat.east .seat-open-play),
-body[data-screen='game'] :is(.seat.north .seat-open-play .seat-played, .seat.west .seat-open-play .seat-played, .seat.east .seat-open-play .seat-played),
-body[data-screen='game'] :is(.seat.north .seat-open-play .card.mini, .seat.west .seat-open-play .card.mini, .seat.east .seat-open-play .card.mini) {
-  position: relative !important;
-  z-index: 11000 !important;
-}
 body[data-screen='game'] :is(.seat.north .seat-played-pass, .seat.west .seat-played-pass, .seat.east .seat-played-pass, .center-last-south .seat-played-pass) {
   justify-content: center !important;
   align-items: center !important;
