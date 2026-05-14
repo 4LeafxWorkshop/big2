@@ -1396,7 +1396,7 @@ body[data-screen='home'] .home-wrap {
 .room-overlay {
   position: fixed;
   inset: 0;
-  z-index: 12010;
+  z-index: 2147483647;
   background: rgba(3, 12, 22, .62);
   backdrop-filter: blur(3px);
   display: grid;
@@ -9693,7 +9693,7 @@ body[data-screen='game'] .lb-backdrop {
 body[data-screen='game'] .intro-modal,
 body[data-screen='game'] .lb-modal,
 body[data-screen='game'] .score-guide-modal {
-  z-index: 12000;
+  z-index: 2147483647 !important;
 }
 
 /* Make opponent (N/E/W) panels larger and transparent like reference. */
