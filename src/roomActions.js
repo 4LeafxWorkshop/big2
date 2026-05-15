@@ -8,7 +8,9 @@ export function createRoomActionsController(deps){
       deps.setRoomError(deps.t('roomLoginRequired'));
       return;
     }
-    deps.setRoomError('');
+    if(String(deps.getState()?.room?.error??'')!==''){
+      deps.setRoomError('');
+    }
     try{
       const state=deps.getState();
       if(state.room.id){
@@ -136,7 +138,9 @@ export function createRoomActionsController(deps){
     }
     const code=String(codeRaw??'').trim().toUpperCase();
     if(!code)return;
-    deps.setRoomError('');
+    if(String(deps.getState()?.room?.error??'')!==''){
+      deps.setRoomError('');
+    }
     let claimedRoomPointer=false;
     try{
       const doc=await deps.findRoomByCode(code);

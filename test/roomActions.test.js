@@ -48,6 +48,40 @@ test('createRoom reports when firebase is unavailable', async()=>{
   assert.equal(calls.errors[0],'roomCreateFail');
 });
 
+test('createRoom does not clear an already-empty room error on the hot path', async()=>{
+  const errors=[];
+  const roomDb={
+    collection(){
+      return{
+        doc(){
+          return{
+            id:'room-1',
+            firestore:roomDb,
+            async set(){},
+            async delete(){},
+          };
+        }
+      };
+    }
+  };
+  const {controller}=createController({
+    initFirebaseIfReady:()=>true,
+    signedInForPlay:()=>true,
+    ensureSingleRoomMembership:async()=>({ok:true}),
+    gateUserRoomAccess:async()=>({ok:true,claimed:false}),
+    gateGuestRoomAccess:async()=>({ok:true}),
+    chooseNextRoomFirebaseInstanceId:async()=> 'instance-1',
+    getFirebaseDbForInstanceId:async()=>roomDb,
+    findRoomByCode:async()=>null,
+    syncRoomDirectory:async()=>true,
+    subscribeRoom(){},
+    updateActiveRoomPointer(){},
+    setRoomError(value){errors.push(value);}
+  });
+  await controller.createRoom();
+  assert.deepEqual(errors,[]);
+});
+
 test('joinRoomByCode reports when firebase is unavailable', async()=>{
   const {calls,controller}=createController();
   await controller.joinRoomByCode('room1');

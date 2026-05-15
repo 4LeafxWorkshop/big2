@@ -2224,7 +2224,9 @@ const roomSubscriptionController=createRoomSubscriptionController({
   t
 });
 function setRoomError(msg){
-  state.room.error=msg||'';
+  const next=String(msg||'');
+  if(state.room.error===next)return;
+  state.room.error=next;
   render();
 }
 function clearRoomStartPending(){
