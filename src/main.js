@@ -142,6 +142,16 @@ async function deleteRoomIfDead(roomDb,roomId,{directoryId=roomId}={}){
   if(deleted)await deleteRoomDirectory(directoryId);
   return deleted;
 }
+async function deleteRoomGhost(liveEntry,directoryId){
+  if(!liveEntry?.snap?.ref)return false;
+  try{
+    await liveEntry.snap.ref.delete();
+  }catch{}
+  try{
+    await deleteRoomDirectory(directoryId);
+  }catch{}
+  return true;
+}
 function selectRoomHostCandidate(players,now){
   const humans=players.filter((p)=>isRoomPlayerHuman(p));
   if(!humans.length)return null;
@@ -2693,13 +2703,11 @@ async function loadActiveRoomsFromDirectoryDocs(directoryDocs){
     const liveEntry=liveRoomDocs.get(roomId)||null;
     if(!liveEntry){
       void deleteRoomDirectory(doc.id);
-      hiddenRooms+=1;
       continue;
     }
     const liveData=liveEntry.snap.data()??{};
     if(roomShouldAutoDelete(liveData,now)){
       void deleteRoomIfDead(liveEntry.snap.ref.firestore,roomId,{directoryId:doc.id});
-      hiddenRooms+=1;
       continue;
     }
     const row=buildActiveRoomRow({
@@ -2708,23 +2716,23 @@ async function loadActiveRoomsFromDirectoryDocs(directoryDocs){
       firebaseInstanceId:liveEntry.instanceId
     });
     if(!row){
-      hiddenRooms+=1;
+      void deleteRoomGhost(liveEntry,doc.id);
       continue;
     }
     const status=String(row.status||'');
     if(status!=='lobby'&&status!=='starting'&&status!=='playing'&&status!=='finished'){
-      hiddenRooms+=1;
+      void deleteRoomGhost(liveEntry,doc.id);
       continue;
     }
     const updatedAt=Number(row.updatedAt)||0;
     if(updatedAt>0){
       const staleAge=now-updatedAt;
       if((status==='lobby'||status==='starting'||status==='finished')&&staleAge>ROOM_PRUNE_LOBBY_MS){
-        hiddenRooms+=1;
+        void deleteRoomGhost(liveEntry,doc.id);
         continue;
       }
       if(status==='playing'&&staleAge>ROOM_PRUNE_PLAYING_MS){
-        hiddenRooms+=1;
+        void deleteRoomGhost(liveEntry,doc.id);
         continue;
       }
     }
@@ -2734,11 +2742,10 @@ async function loadActiveRoomsFromDirectoryDocs(directoryDocs){
     if(selfListed&&(!currentRoomId||currentRoomId!==roomId)){
       await dropSelfFromRoom(liveEntry,currentPlayerId);
       if(!currentRoomId)await updateActiveRoomPointer('');
-      hiddenRooms+=1;
       continue;
     }
     if(!humans.length&&status!=='playing'){
-      hiddenRooms+=1;
+      void deleteRoomGhost(liveEntry,doc.id);
       continue;
     }
     if(status==='finished'&&Number(row.players||0)>=Number(row.maxPlayers||4)){
