@@ -7377,7 +7377,9 @@ body[data-screen='game'] .side-zone.log-collapsed {
   gap: 7px;
 }
 .game-log-toggle { display: none; }
-body[data-screen='game'][data-orientation='portrait'] .side-zone { display: none !important; }
+@media (max-width: 860px) {
+  body[data-screen='game'][data-orientation='portrait'] .side-zone { display: none !important; }
+}
 .game-log-fab {
   position: fixed;
   right: 8px;
@@ -11941,17 +11943,6 @@ body[data-screen='game'][data-log-open='0'] .side-zone.log-collapsed .log-side-c
     max-width: 100% !important;
   }
 }
-@media (min-width: 861px) and (max-width: 1400px) and (orientation: landscape) {
-  body[data-screen='game'] .game-shell {
-    grid-template-columns: minmax(0, 1fr) !important;
-    grid-template-rows: minmax(0, 1fr) auto !important;
-  }
-  body[data-screen='game'] .side-zone,
-  body[data-screen='game'] .side-zone.log-collapsed {
-    display: none !important;
-  }
-}
-
 .win-celebrate {
   position: absolute;
   inset: 0;

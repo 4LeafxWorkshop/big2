@@ -21,7 +21,11 @@ export function renderGameSideZone(params){
     t,
     esc
   }=params;
-  if(portraitMode)return'';
+  const mobilePortraitMode=Boolean(portraitMode&&typeof window!=='undefined'&&(
+    window.matchMedia?.('(max-width: 860px)')?.matches
+    ??window.innerWidth<=860
+  ));
+  if(mobilePortraitMode)return'';
   const statusLine=logStatusHtml?`<div class="log-status log-status-inline"><span class="log-status-separator" aria-hidden="true">|</span><span class="log-status-copy"><span class="game-log-fab-status">${logStatusHtml}</span></span></div>`:'';
   return`<aside class="side-zone"><section class="side-card log-side-card"><h3 class="log-toggle-title title-with-icon" aria-label="${esc(logToggleStateText)}"><span class="title-icon title-icon-log" aria-hidden="true"></span><span class="log-toggle-text">${t('log')}</span>${statusLine}</h3><div class="history-list">${historyHtml}</div></section></aside>`;
 }
