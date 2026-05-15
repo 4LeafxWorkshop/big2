@@ -283,8 +283,12 @@ export function createRoomSubscriptionController(deps){
           }
         }
         liveState.room.lobbyRenderKey=nextLobbyKey;
-        if(startedLocally)return;
+        if(startedLocally){
+          deps.syncRoomLobbySeatPanel?.(data);
+          return;
+        }
         if(prevLobbyKey===nextLobbyKey)return;
+        if(deps.syncRoomLobbySeatPanel?.(data))return;
       }
       if(roomStatus==='playing'||roomStatus==='finished'){
         const presenceOnly=deps.isRoomPresenceOnlyUpdate(prevRoomData,data);

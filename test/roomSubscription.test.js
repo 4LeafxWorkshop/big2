@@ -37,6 +37,7 @@ function createController(overrides={}){
     setRoomError(){},
     setRoomResultExpiryReached(){},
     startRoomPresencePing(){},
+    syncRoomLobbySeatPanel(){return true;},
     syncRoomGameRoster(){return null;},
     syncRoomSelfScoreIfNeeded(){},
     t(key){return key;}
@@ -50,6 +51,7 @@ function createSnapshotHarness(overrides={}){
     abandon:[],
     errors:[],
     renders:0,
+    syncLobby:0,
     startPing:0,
     syncSelf:0,
     applySnapshots:0,
@@ -117,6 +119,7 @@ function createSnapshotHarness(overrides={}){
     setRoomError(value){calls.errors.push(value); state.room.error=value;},
     setRoomResultExpiryReached(){},
     startRoomPresencePing(){calls.startPing+=1;},
+    syncRoomLobbySeatPanel(){calls.syncLobby+=1; return true;},
     syncRoomGameRoster(){return null;},
     syncRoomSelfScoreIfNeeded(){calls.syncSelf+=1;},
     t(key){return key;},
@@ -254,7 +257,7 @@ test('resolveRoomDocByDirectory returns null when a stale room code no longer re
   assert.equal(resolved,null);
 });
 
-test('subscribeRoom clears reconnect error on a fresh snapshot and re-renders', ()=>{
+test('subscribeRoom clears reconnect error on a fresh snapshot and updates the lobby seat panel', ()=>{
   const {state,calls,controller,triggerSnapshot}=createSnapshotHarness();
   state.room.error='roomReconnecting';
   controller.subscribeRoom('room-1','ABCD','seed-services');
@@ -273,7 +276,8 @@ test('subscribeRoom clears reconnect error on a fresh snapshot and re-renders', 
   assert.equal(state.room.id,'room-1');
   assert.equal(calls.startPing,1);
   assert.equal(calls.syncSelf,1);
-  assert.equal(calls.renders,1);
+  assert.equal(calls.syncLobby,1);
+  assert.equal(calls.renders,0);
   assert.deepEqual(calls.errors,['']);
   assert.ok(calls.updates.length>=1);
   assert.deepEqual(calls.updates[0].playerIds,['guest:1']);
@@ -328,6 +332,29 @@ test('subscribeRoom skips the starting repaint when the local host already marke
   });
   assert.equal(calls.renders,0);
   assert.equal(state.room.error,'');
+});
+
+test('subscribeRoom updates the lobby seat panel in place when another player joins', ()=>{
+  const {calls,controller,triggerSnapshot}=createSnapshotHarness();
+  controller.subscribeRoom('room-1','ABCD','seed-services');
+  const now=Date.now();
+  triggerSnapshot({
+    exists:true,
+    data(){
+      return{
+        code:'ABCD',
+        status:'lobby',
+        updatedAt:now,
+        playerIds:['guest:1','guest:2'],
+        players:[
+          {uid:'guest:1',name:'Player',gender:'male',picture:'',seat:0,isHost:true,lastSeen:now},
+          {uid:'guest:2',name:'Other',gender:'female',picture:'',seat:1,isHost:false,lastSeen:now}
+        ]
+      };
+    }
+  });
+  assert.equal(calls.syncLobby,1);
+  assert.equal(calls.renders,0);
 });
 
 test('subscribeRoom abandons locally when the room snapshot disappears', ()=>{

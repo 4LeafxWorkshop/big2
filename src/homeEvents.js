@@ -363,6 +363,12 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
         if(typeof Element!=='function'||!(target instanceof Element))return;
         const activeGrid=doc.querySelector('.room-active-grid');
         if(!activeGrid)return;
+        const shareBtn=target.closest('[data-room-share-send]');
+        if(shareBtn){
+          e.stopPropagation();
+          await shareRoomInvite();
+          return;
+        }
         const joinBtn=target.closest('.room-card-join-btn');
         if(joinBtn&&activeGrid.contains(joinBtn)){
           e.stopPropagation();
@@ -488,7 +494,6 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       await writeClipboardText(inviteMessage);
     };
     doc.getElementById('room-share-send')?.addEventListener('click',shareRoomInvite);
-    doc.querySelectorAll('[data-room-share-send]').forEach((btn)=>btn.addEventListener('click',shareRoomInvite));
     const copyRoomInviteCode=async()=>{
       const code=String(state.room.code||state.room.pendingInviteCode||'').trim();
       if(!code)return;
