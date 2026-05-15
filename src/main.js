@@ -42,6 +42,7 @@ import {createOpponentProfileHelpers, resolveOpponentProfileModalState, resolveR
 import {createOpponentsEventsBinder} from './opponentsEvents.js';
 import {createProfileSettingsHelpers} from './profileSettings.js';
 import {renderRoomJoinOverlay, renderRoomLobbyOverlay} from './roomView.js';
+import {renderRoomActiveCardHtml} from './roomLobbyCard.js';
 import {createFooterMenuHelpers} from './footerMenu.js';
 import {createIntroGuideHelpers} from './introGuide.js';
 import {createRoomLifecycleController} from './roomLifecycle.js';
@@ -583,6 +584,75 @@ function restorePendingRoomInviteFromStorage(){
     return false;
   }
 }
+function syncRoomLobbyQrDom(){
+  const qrBoxInner=document.querySelector('#room-copy-qr .room-lobby-qr-box-inner');
+  if(!qrBoxInner)return false;
+  const inviteQrHtml=state.room.inviteQrLoading
+    ?`<div class="room-lobby-qr-placeholder">${t('roomInviteLoading')}</div>`
+    :state.room.inviteQrDataUrl
+      ?`<img class="room-lobby-qr" src="${state.room.inviteQrDataUrl}" alt="${t('roomInviteQr')}"/>`
+      :`<div class="room-lobby-qr-placeholder">${t('roomInviteEmpty')}</div>`;
+  qrBoxInner.innerHTML=`${inviteQrHtml}<div class="room-lobby-qr-caption">${t('roomInviteQrCaption')}</div>`;
+  const roomLobbyMain=document.querySelector('.room-lobby-main');
+  const inviteError=roomLobbyMain?.querySelector('.room-error')||null;
+  if(state.room.inviteQrError){
+    if(inviteError){
+      inviteError.textContent=state.room.inviteQrError;
+    }else if(roomLobbyMain){
+      const errorNode=document.createElement('div');
+      errorNode.className='hint room-error';
+      errorNode.textContent=state.room.inviteQrError;
+      const shareBox=roomLobbyMain.querySelector('.room-share-box');
+      shareBox?.insertAdjacentElement('afterend',errorNode);
+    }
+  }else if(inviteError){
+    inviteError.remove();
+  }
+  return true;
+}
+function syncRoomJoinActiveRoomsDom(){
+  const grid=document.querySelector('.room-active-grid');
+  if(!grid)return false;
+  const activeRooms=Array.isArray(state.home.activeRooms.rows)?state.home.activeRooms.rows:[];
+  const hiddenCount=Number(state.home.activeRooms.hiddenCount)||0;
+  const cards=activeRooms.length
+    ?activeRooms.map((room)=>renderRoomActiveCardHtml({
+        room,
+        t,
+        esc,
+        isRoomPlayerHuman,
+        authPictureUrlFrom,
+        avatarDataUri
+      })).join('')
+    :'';
+  const empty=activeRooms.length
+    ?''
+    :`<div class="room-active-card room-active-empty" aria-disabled="true"><div class="room-active-code">${t('roomActiveEmpty')}</div></div>`;
+  grid.innerHTML=`${cards}${empty}`;
+  const selectedCode=String(state.room.pendingInviteCode||'').trim().toUpperCase();
+  if(selectedCode){
+    grid.querySelectorAll('.room-active-card').forEach((card)=>{
+      const code=String(card.getAttribute('data-code')||'').trim().toUpperCase();
+      card.classList.toggle('active',code===selectedCode);
+    });
+  }
+  const hiddenNote=document.querySelector('.room-active-block .room-active-hidden');
+  const activeHead=document.querySelector('.room-active-block .room-active-head');
+  if(hiddenCount){
+    if(hiddenNote){
+      hiddenNote.textContent=`${t('roomActiveHidden')}: ${hiddenCount}`;
+    }else if(activeHead){
+      const note=document.createElement('span');
+      note.className='room-active-hidden';
+      note.textContent=`${t('roomActiveHidden')}: ${hiddenCount}`;
+      const refreshBtn=activeHead.querySelector('#room-active-refresh');
+      activeHead.insertBefore(note,refreshBtn||null);
+    }
+  }else if(hiddenNote){
+    hiddenNote.remove();
+  }
+  return true;
+}
 async function refreshRoomInviteQrDataUrl(force=false){
   const roomCode=normalizeRoomInviteCode(state.room.code||state.room.pendingInviteCode||'');
   if(!roomCode){
@@ -591,6 +661,7 @@ async function refreshRoomInviteQrDataUrl(force=false){
     state.room.inviteCardDataUrl='';
     state.room.inviteQrLoading=false;
     state.room.inviteQrError='';
+    syncRoomLobbyQrDom();
     return;
   }
   const inviteUrl=roomInviteUrlFromCode(roomCode);
@@ -603,7 +674,7 @@ async function refreshRoomInviteQrDataUrl(force=false){
   state.room.inviteQrPayload=inviteMessage;
   state.room.inviteQrLoading=true;
   state.room.inviteQrError='';
-  render();
+  syncRoomLobbyQrDom();
   try{
     const QRCode=await loadQrCode();
     const qrDataUrl=await QRCode.toDataURL(inviteUrl,{errorCorrectionLevel:'M',margin:1,width:280,color:{dark:'#111111',light:'#ffffff'}});
@@ -622,10 +693,11 @@ async function refreshRoomInviteQrDataUrl(force=false){
     state.room.inviteQrDataUrl='';
     state.room.inviteCardDataUrl='';
     state.room.inviteQrError=t('roomInviteQrFail');
+    syncRoomLobbyQrDom();
   }finally{
     if(requestToken===roomInviteQrRequestToken){
       state.room.inviteQrLoading=false;
-      render();
+      syncRoomLobbyQrDom();
     }
   }
 }
@@ -2577,7 +2649,6 @@ async function loadActiveRooms(attempt=0){
   if(state.home.activeRooms.loading)return;
   state.home.activeRooms.loading=true;
   state.home.activeRooms.error='';
-  render();
   try{
     const directoryDocs=await queryRecentRoomDirectories();
     const {rows,hiddenRooms}=await loadActiveRoomsFromDirectoryDocs(directoryDocs);
@@ -2593,7 +2664,7 @@ async function loadActiveRooms(attempt=0){
     state.home.activeRooms.error='load';
   }finally{
     state.home.activeRooms.loading=false;
-    render();
+    syncRoomJoinActiveRoomsDom();
   }
 }
 async function createRoom(){

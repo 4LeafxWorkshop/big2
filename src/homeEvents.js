@@ -356,20 +356,31 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
     doc.getElementById('room-active-refresh')?.addEventListener('click',async()=>{
       await loadActiveRooms();
     });
-    doc.querySelectorAll('.room-active-card').forEach((card)=>card.addEventListener('click',()=>{
-      if(card.hasAttribute('disabled')||card.getAttribute('data-private')==='1')return;
-      const code=String(card.getAttribute('data-code')||'');
-      if(!code)return;
-      applyRoomCodeToInput(code);
-      doc.querySelectorAll('.room-active-card').forEach((el)=>el.classList.toggle('active',el===card));
-    }));
-    doc.querySelectorAll('.room-card-join-btn').forEach((btn)=>btn.addEventListener('click',async(e)=>{
-      e.stopPropagation();
-      const code=String(btn.getAttribute('data-code')||'');
-      if(!code||btn.hasAttribute('disabled'))return;
-      applyRoomCodeToInput(code);
-      await joinRoomByCode(code);
-    }));
+    if(typeof doc.addEventListener==='function'&&!doc.__big2RoomActiveDelegationBound){
+      doc.__big2RoomActiveDelegationBound=true;
+      doc.addEventListener('click',async(e)=>{
+        const target=e?.target;
+        if(typeof Element!=='function'||!(target instanceof Element))return;
+        const activeGrid=doc.querySelector('.room-active-grid');
+        if(!activeGrid)return;
+        const joinBtn=target.closest('.room-card-join-btn');
+        if(joinBtn&&activeGrid.contains(joinBtn)){
+          e.stopPropagation();
+          const code=String(joinBtn.getAttribute('data-code')||'');
+          if(!code||joinBtn.hasAttribute('disabled'))return;
+          applyRoomCodeToInput(code);
+          await joinRoomByCode(code);
+          return;
+        }
+        const card=target.closest('.room-active-card');
+        if(!card||!activeGrid.contains(card))return;
+        if(card.hasAttribute('disabled')||card.getAttribute('data-private')==='1')return;
+        const code=String(card.getAttribute('data-code')||'');
+        if(!code)return;
+        applyRoomCodeToInput(code);
+        activeGrid.querySelectorAll('.room-active-card').forEach((el)=>el.classList.toggle('active',el===card));
+      });
+    }
 
     const shareRoomInviteWithQr=async(code)=>{
       if(!navigator.share)return false;
