@@ -5,6 +5,27 @@ export function createRoomSubscriptionController(deps){
   function sameJsonValue(a,b){
     return JSON.stringify(a)===JSON.stringify(b);
   }
+  function buildLobbyRenderKey(roomData){
+    const players=Array.isArray(roomData?.players)?roomData.players:[];
+    const playerKey=players.map((player)=>[
+      String(player?.uid||''),
+      String(player?.name||''),
+      String(player?.gender||''),
+      String(player?.picture||''),
+      Number(player?.seat??-1),
+      Number(Boolean(player?.isHost))
+    ].join('|')).join(';');
+    return[
+      String(roomData?.status||''),
+      String(roomData?.code||''),
+      String(roomData?.hostId||''),
+      String(roomData?.hostName||''),
+      Number(Boolean(roomData?.isPrivate)),
+      Number(roomData?.maxPlayers||0),
+      String(roomData?.playerIds?.join?.(',')||''),
+      playerKey
+    ].join('::');
+  }
   function roomPlayerMatchesCurrentUser(entry){
     const currentEmail=normalizeEmail(deps.currentUserEmail?.());
     const entryEmail=normalizeEmail(entry?.email);
@@ -202,6 +223,8 @@ export function createRoomSubscriptionController(deps){
         return;
       }
       if(roomStatus==='lobby'||roomStatus==='starting'){
+        const prevLobbyKey=String(liveState.room.lobbyRenderKey||'');
+        const nextLobbyKey=buildLobbyRenderKey(data);
         const active=rosterAll.filter((p)=>deps.isRoomPlayerActive(p,roomStatus,now));
         const expectedIds=deps.roomPlayerIds(rosterAll);
         const existingIds=Array.isArray(data.playerIds)?data.playerIds.map((v)=>String(v)):null;
@@ -258,6 +281,8 @@ export function createRoomSubscriptionController(deps){
             }).catch(()=>{});
           }
         }
+        liveState.room.lobbyRenderKey=nextLobbyKey;
+        if(prevLobbyKey===nextLobbyKey)return;
       }
       if(roomStatus==='playing'||roomStatus==='finished'){
         const presenceOnly=deps.isRoomPresenceOnlyUpdate(prevRoomData,data);

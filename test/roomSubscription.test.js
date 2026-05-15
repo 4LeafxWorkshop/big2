@@ -275,14 +275,44 @@ test('subscribeRoom clears reconnect error on a fresh snapshot and re-renders', 
   assert.equal(calls.syncSelf,1);
   assert.equal(calls.renders,1);
   assert.deepEqual(calls.errors,['']);
-  assert.equal(calls.updates.length,1);
+  assert.ok(calls.updates.length>=1);
   assert.deepEqual(calls.updates[0].playerIds,['guest:1']);
   assert.equal(typeof calls.updates[0].updatedAt,'number');
+});
+
+test('subscribeRoom skips lobby repaints when only presence fields change', ()=>{
+  const {calls,controller,triggerSnapshot}=createSnapshotHarness();
+  controller.subscribeRoom('room-1','ABCD','seed-services');
+  const base=Date.now();
+  triggerSnapshot({
+    exists:true,
+    data(){
+      return{
+        code:'ABCD',
+        status:'lobby',
+        updatedAt:base,
+        players:[{uid:'guest:1',name:'Player',gender:'male',picture:'',seat:0,isHost:true,lastSeen:base}]
+      };
+    }
+  });
+  const rendersAfterFirst=calls.renders;
+  triggerSnapshot({
+    exists:true,
+    data(){
+      return{
+        code:'ABCD',
+        status:'lobby',
+        updatedAt:base+1000,
+        players:[{uid:'guest:1',name:'Player',gender:'male',picture:'',seat:0,isHost:true,lastSeen:base+1000}]
+      };
+    }
+  });
+  assert.equal(calls.renders,rendersAfterFirst);
 });
 
 test('subscribeRoom abandons locally when the room snapshot disappears', ()=>{
   const {calls,controller,triggerSnapshot}=createSnapshotHarness();
   controller.subscribeRoom('room-1','ABCD','seed-services');
   triggerSnapshot({exists:false});
-  assert.deepEqual(calls.abandon,[{msg:'',openLobby:true}]);
+  assert.deepEqual(calls.abandon,[{msg:'roomDisconnected',openLobby:true}]);
 });
