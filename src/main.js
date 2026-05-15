@@ -1280,12 +1280,21 @@ function systemLogEntrySignature(entry){
   const args=entry.args&&typeof entry.args==='object'&&!Array.isArray(entry.args)?JSON.stringify(entry.args):'';
   return`${key?`key:${key}`:`text:${text}`}|${args}`;
 }
+function isIgnorableSystemLogText(text){
+  const norm=String(text??'').trim().toLowerCase();
+  if(!norm)return true;
+  return norm.includes('missing or insufficient permissions')
+    || norm.includes('firebaseerror: missing or insufficient permissions')
+    || norm.includes('permission-denied')
+    || norm.includes('missing permissions');
+}
 function normalizeSystemLogEntry(entry,ts=Date.now()){
   if(entry&&typeof entry==='object'&&!Array.isArray(entry)){
     const key=String(entry.key??'').trim();
     const text=String(entry.text??'').trim();
     const args=entry.args&&typeof entry.args==='object'&&!Array.isArray(entry.args)?{...entry.args}:null;
     const outTs=Number(entry.ts)||ts;
+    if(isIgnorableSystemLogText(text))return null;
     if(key){
       const out={key,ts:outTs};
       if(args&&Object.keys(args).length)out.args=args;
@@ -1296,6 +1305,7 @@ function normalizeSystemLogEntry(entry,ts=Date.now()){
     return null;
   }
   const text=String(entry??'').trim();
+  if(isIgnorableSystemLogText(text))return null;
   return text?{text,ts}:null;
 }
 function replaceTemplateArgs(template,args={}){
@@ -2681,7 +2691,15 @@ async function touchRoomPresence(force=false){
 }
 function startRoomPresencePing(){
   if(roomPresenceTimer||!state.room.id||!currentRoomDb())return;
-  roomPresenceTimer=1;
+  roomPresenceTimer=window.setInterval(()=>{
+    if(state.home.mode!=='room'||!state.room.id){
+      clearInterval(roomPresenceTimer);
+      roomPresenceTimer=null;
+      return;
+    }
+    if(String(state.room.data?.status||'')==='finished')return;
+    void touchRoomPresence();
+  },ROOM_PRESENCE_TOUCH_MIN_MS);
   if(String(state.room.data?.status||'')!=='finished')void touchRoomPresence(true);
 }
 async function updateActiveRoomPointer(roomId,instanceId=''){
@@ -4875,8 +4893,9 @@ function playSound(kind){
     return;
   }
   if(kind.startsWith('emote-')){
-    playTone(640,0.035,'sine',0.012);
-    playTone(880,0.03,'sine',0.008,0.03);
+    playTone(520,0.05,'square',0.035);
+    playTone(780,0.045,'sawtooth',0.028,0.02);
+    playTone(1040,0.04,'triangle',0.022,0.05);
     return;
   }
   if(kind==='select')playTone(520,0.08,'triangle',0.02);
@@ -6539,6 +6558,7 @@ function renderGame(){
   const gameTopbarHtml=renderGameTopbar({
     renderLangMenu,
     introButtonLabel:intro.btnShow,
+    roomExitHint:state.home.mode==='room'?t('roomExitHint'):'',
     t,
     esc,
     withBase

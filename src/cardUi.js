@@ -54,13 +54,21 @@ export function createCardUiHelpers(deps){
 
   function fanJitterDeg(seed,i){return((fanNoise(seed,i,'deg')*2)-1)*0.75;}
   function fanGap(seed,i){return fanNoise(seed,i,'gap');}
-  function fanLift(seed,i){return fanNoise(seed,i,'lift');}
+  function fanArcY(seed,i,total){
+    const count=Math.max(0,Number(total)||0);
+    if(count<5)return'0px';
+    const center=(count-1)/2;
+    const dist=Math.abs(i-center);
+    const span=Math.max(1,center);
+    const curve=Math.pow(dist/span,2)*3.2;
+    return`${curve.toFixed(2)}px`;
+  }
 
   function renderBackCards(count,seed=''){
     const shown=Math.max(0,Number(count)||0);
     const backFile=backAssetFile(getBackColor());
     const backAlt=String(getCardBackAlt?.()||'').trim()||'back';
-    return Array.from({length:shown},(_,i)=>`<span class="card back mini closed-back" style="--i:${i};--n:${shown};--fan-jitter:${fanJitterDeg(seed,i).toFixed(3)}deg;--fan-gap:${fanGap(seed,i).toFixed(3)};--fan-lift:${fanLift(seed,i).toFixed(3)};"><img class="card-art" src="${withBase(`card-assets/${backFile}`)}" alt="${backAlt}"/></span>`).join('');
+    return Array.from({length:shown},(_,i)=>`<span class="card back mini closed-back" style="--i:${i};--n:${shown};--fan-jitter:${fanJitterDeg(seed,i).toFixed(3)}deg;--fan-gap:${fanGap(seed,i).toFixed(3)};--fan-arc-y:${fanArcY(seed,i,shown)};"><img class="card-art" src="${withBase(`card-assets/${backFile}`)}" alt="${backAlt}"/></span>`).join('');
   }
 
   function calloutJitterStyle(viewCls,key=''){

@@ -528,6 +528,7 @@ export function buildResultScreenHtml(params){
       ?t('roomNeedPlayers')
       :(!canRoomAgain&&isRoom?t('roomWaitingHost'):'');
   const topHint=footerHint&&statusHint===footerHint?'':statusHint;
+  const roomExitHint=isRoom?t('roomExitHint'):'';
   const roomPictureBySeat=(()=>{
     const list=isRoom&&state.room.data?Array.isArray(state.room.data.players)?state.room.data.players:[]:[];
     const entries=list.map((p)=>[Number.isFinite(Number(p?.seat))?Number(p.seat):-1,String(p?.picture||'').trim()]);
@@ -623,6 +624,7 @@ export function buildResultScreenHtml(params){
     :(!isRoom?'':footerHint?``:`<span class="hint">${t('roomWaitingHost')}</span>`)}
         ${footerHint?`<span class="hint">${footerHint}</span>`:''}
       </div>
+      ${roomExitHint?`<div class="room-action-note hint">${esc(roomExitHint)}</div>`:''}
     </div>
   </section>`;
 }
@@ -644,8 +646,9 @@ export function buildCongratsOverlayHtml(params){
   const isHost=isRoom&&roomIsHost();
   const roomExpired=isRoom&&roomResultExpired(state.room.data);
   const roomCountdown=isRoom&&state.room.data?roomCountdownText(state.room.data):'';
+  const roomExitHint=isRoom?t('roomExitHint'):'';
   const againHtml=(!isRoom||(isHost&&!roomExpired))
     ?`<button id="congrats-again" class="primary">${t('again')}</button>`
     :`<span class="hint">${roomExpired?t('roomHostSneakAway'):t('roomWaitingHost')}</span>`;
-  return`<div class="congrats-screen"><div class="congrats-card"><h3 class="title-with-icon"><span class="title-icon title-icon-congrats" aria-hidden="true"></span><span>${t('congrats')}</span></h3><div class="hint">${esc(uiStatus(v.status,v.statusMeta))}</div>${isRoom?`<div class="room-expiry-row room-expiry-top"><span class="room-expiry-label"><i class="fa-solid fa-clock room-expiry-icon" aria-hidden="true"></i><span>${t('roomCountdown')}</span></span><button type="button" class="room-expiry-reset-btn" data-room-expiry-reset="1"><strong data-room-countdown-value>${esc(roomCountdown)}</strong></button></div>`:''}<div class="control-row"><button id="congrats-home" class="secondary">${t('home')}</button>${againHtml}</div></div></div>`;
+  return`<div class="congrats-screen"><div class="congrats-card"><h3 class="title-with-icon"><span class="title-icon title-icon-congrats" aria-hidden="true"></span><span>${t('congrats')}</span></h3><div class="hint">${esc(uiStatus(v.status,v.statusMeta))}</div>${isRoom?`<div class="room-expiry-row room-expiry-top"><span class="room-expiry-label"><i class="fa-solid fa-clock room-expiry-icon" aria-hidden="true"></i><span>${t('roomCountdown')}</span></span><button type="button" class="room-expiry-reset-btn" data-room-expiry-reset="1"><strong data-room-countdown-value>${esc(roomCountdown)}</strong></button></div>`:''}<div class="control-row"><button id="congrats-home" class="secondary">${t('home')}</button>${againHtml}</div>${roomExitHint?`<div class="room-action-note hint">${esc(roomExitHint)}</div>`:''}</div></div>`;
 }

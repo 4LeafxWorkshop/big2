@@ -127,7 +127,7 @@ export function createRoomSubscriptionController(deps){
     const ref=roomDb.collection(deps.FIRESTORE_ROOMS_COLLECTION).doc(roomId);
     const unsub=ref.onSnapshot((snap)=>{
       const liveState=deps.getState();
-      if(!snap.exists){deps.abandonRoomLocally('',true);return;}
+      if(!snap.exists){deps.abandonRoomLocally(deps.t('roomDisconnected'),true);return;}
       const data=snap.data()??{};
       const now=Date.now();
       const reconnectMsg=deps.t('roomReconnecting');
@@ -198,7 +198,7 @@ export function createRoomSubscriptionController(deps){
       if((roomStatus==='lobby'||roomStatus==='starting')&&!hasHuman){
         void roomDb.collection(deps.FIRESTORE_ROOMS_COLLECTION).doc(roomId).delete().catch(()=>{});
         void deps.deleteRoomDirectory(roomId);
-        deps.abandonRoomLocally(staleMsg,true);
+        deps.abandonRoomLocally(deps.t('roomDisconnected'),true);
         return;
       }
       if(roomStatus==='lobby'||roomStatus==='starting'){
@@ -227,7 +227,7 @@ export function createRoomSubscriptionController(deps){
           if(!activeHumans.length){
             void roomDb.collection(deps.FIRESTORE_ROOMS_COLLECTION).doc(roomId).delete().catch(()=>{});
             void deps.deleteRoomDirectory(roomId);
-            deps.abandonRoomLocally(staleMsg,true);
+            deps.abandonRoomLocally(deps.t('roomDisconnected'),true);
             return;
           }
           const nextPlayerIds=deps.roomPlayerIds(active);

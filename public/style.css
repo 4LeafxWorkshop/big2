@@ -2419,6 +2419,10 @@ body[data-screen='home'] .home-wrap {
   gap: 8px;
   flex-wrap: wrap;
 }
+.room-action-note {
+  flex-basis: 100%;
+  margin-top: 2px;
+}
 .room-join-card .room-actions {
   justify-content: flex-end;
 }
@@ -6560,21 +6564,29 @@ body[data-screen='game'] .closed-card-pile > .closed-count-pill {
   transform-origin: center center;
 }
 .east .opponent-fan .closed-back {
-  transform: translateY(calc(var(--fan-lift, 0.5) * var(--opp-fan-closed-lift-px))) rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
+  transform:
+    translateY(var(--fan-arc-y, 0px))
+    rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
 }
 .west .opponent-fan .closed-back {
-  transform: translateY(calc(var(--fan-lift, 0.5) * var(--opp-fan-closed-lift-px))) rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
+  transform:
+    translateY(var(--fan-arc-y, 0px))
+    rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
 }
 .north .opponent-fan .closed-back {
   margin-top: 0 !important;
   margin-left: var(--opp-fan-closed-shift-x) !important;
   left: 10px;
   transform-origin: center center;
-  transform: translateY(calc(var(--fan-lift, 0.5) * var(--opp-fan-closed-lift-px))) rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step)));
+  transform:
+    translateY(var(--fan-arc-y, 0px))
+    rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step)));
 }
 /* Top seat: keep horizontal spread, but card axis must stay vertical (upright). */
 .north .opponent-fan .card.back.mini.closed-back {
-  transform: rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
+  transform:
+    translateY(var(--fan-arc-y, 0px))
+    rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
 }
 
 /* Keep base back card size aligned with face card; panel-specific rules override above. */
@@ -8111,7 +8123,9 @@ body[data-screen='game'] .log-side-card .log-status {
   .north .opponent-fan .closed-back {
     margin-top: 0 !important;
     margin-left: var(--opp-fan-closed-shift-x) !important;
-    transform: rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
+    transform:
+      translateY(var(--fan-arc-y, 0px))
+      rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
   }
   .mobile-opponent-names {
     display: none;
@@ -8343,13 +8357,19 @@ body[data-screen='game'] .log-side-card .log-status {
     transform-origin: center center;
   }
   .east .opponent-fan .card.back.mini.closed-back {
-    transform: rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
+    transform:
+      translateY(var(--fan-arc-y, 0px))
+      rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
   }
   .west .opponent-fan .card.back.mini.closed-back {
-    transform: rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
+    transform:
+      translateY(var(--fan-arc-y, 0px))
+      rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
   }
   .north .opponent-fan .card.back.mini.closed-back {
-    transform: rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
+    transform:
+      translateY(var(--fan-arc-y, 0px))
+      rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
   }
   .north .opponent-fan .card.back.mini.closed-back:first-child {
     margin-left: 0 !important;
@@ -13230,7 +13250,9 @@ body[data-screen='game'] .seat.north.active .seat-section {
   body[data-screen='game'][data-orientation='portrait'] .seat.north .opponent-fan .card.back.mini.closed-back,
   body[data-screen='game'][data-orientation='portrait'] .seat.west .opponent-fan .card.back.mini.closed-back,
   body[data-screen='game'][data-orientation='portrait'] .seat.east .opponent-fan .card.back.mini.closed-back {
-    transform: rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
+    transform:
+      translateY(var(--fan-arc-y, 0px))
+      rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
   }
   body[data-screen='game'][data-orientation='portrait'] .seat.north .closed-count-pill,
   body[data-screen='game'][data-orientation='portrait'] .seat.west .closed-count-pill,
@@ -13525,7 +13547,9 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
   }
   body[data-screen='game'][data-orientation='landscape'] .seat.west .opponent-fan .card.back.mini.closed-back,
   body[data-screen='game'][data-orientation='landscape'] .seat.east .opponent-fan .card.back.mini.closed-back {
-    transform: rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
+    transform:
+      translateY(var(--fan-arc-y, 0px))
+      rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
   }
   body[data-screen='game'][data-orientation='landscape'] .seat.north .seat-open-play,
   body[data-screen='game'][data-orientation='landscape'] .seat.west .seat-open-play,
@@ -13566,7 +13590,9 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
     margin-top: 0 !important;
     margin-left: var(--opp-fan-closed-shift-x) !important;
     transform-origin: center center !important;
-    transform: rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
+    transform:
+      translateY(var(--fan-arc-y, 0px))
+      rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
   }
 }
 
@@ -13625,7 +13651,9 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
     margin-top: 0 !important;
     margin-left: var(--opp-fan-closed-shift-x) !important;
     transform-origin: center center !important;
-    transform: rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
+    transform:
+      translateY(var(--fan-arc-y, 0px))
+      rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
   }
   body[data-screen='game'][data-orientation='landscape'] .seat.west .opponent-fan .card.back.mini.closed-back,
   body[data-screen='game'][data-orientation='landscape'] .seat.east .opponent-fan .card.back.mini.closed-back {
@@ -13634,7 +13662,9 @@ body[data-screen='game'] .seat-name-fixed[data-opponent-name] .seat-motto-callou
     margin-top: 0 !important;
     margin-left: var(--opp-fan-closed-shift-x) !important;
     transform-origin: center center !important;
-    transform: rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
+    transform:
+      translateY(var(--fan-arc-y, 0px))
+      rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
   }
   body[data-screen='game'][data-orientation='landscape'] .seat.north .opponent-fan .closed-back:first-child,
   body[data-screen='game'][data-orientation='landscape'] .seat.west .opponent-fan .closed-back:first-child,
@@ -13930,7 +13960,9 @@ body[data-screen='game'] :is(.seat.west, .seat.east) .side-station-stack .oppone
 body[data-screen='game'] :is(.seat.west, .seat.east) .side-station-stack .opponent-fan .closed-back {
   margin-top: 0 !important;
   transform-origin: center bottom !important;
-  transform: rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
+  transform:
+    translateY(var(--fan-arc-y, 0px))
+    rotate(calc((var(--i) - (var(--n) - 1) / 2) * var(--opp-fan-closed-card-rotate-step))) !important;
 }
 
 @media (max-width: 860px) and (orientation: portrait) {
