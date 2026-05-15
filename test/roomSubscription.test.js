@@ -310,6 +310,26 @@ test('subscribeRoom skips lobby repaints when only presence fields change', ()=>
   assert.equal(calls.renders,rendersAfterFirst);
 });
 
+test('subscribeRoom skips the starting repaint when the local host already marked pending start', ()=>{
+  const {state,calls,controller,triggerSnapshot}=createSnapshotHarness();
+  state.room.pendingStart=true;
+  controller.subscribeRoom('room-1','ABCD','seed-services');
+  const now=Date.now();
+  triggerSnapshot({
+    exists:true,
+    data(){
+      return{
+        code:'ABCD',
+        status:'starting',
+        updatedAt:now,
+        players:[{uid:'guest:1',name:'Player',gender:'male',picture:'',seat:0,isHost:true,lastSeen:now}]
+      };
+    }
+  });
+  assert.equal(calls.renders,0);
+  assert.equal(state.room.error,'');
+});
+
 test('subscribeRoom abandons locally when the room snapshot disappears', ()=>{
   const {calls,controller,triggerSnapshot}=createSnapshotHarness();
   controller.subscribeRoom('room-1','ABCD','seed-services');

@@ -595,7 +595,6 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
         state.room.pendingStart=false;
         setRoomError(t('roomSendTimeout'));
       },5000));
-      render();
       let synced=false;
       for(let i=0;i<4&&!synced;i++){
         synced=await syncLeaderboardProfile(currentLeaderboardIdentity());

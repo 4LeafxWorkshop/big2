@@ -165,7 +165,7 @@ test('home binder arms room start pending flow', async()=>{
     startRoom:async()=>{startRoomCalls+=1;}
   });
   await roomStart.dispatch('click');
-  assert.equal(renderCount,1);
+  assert.equal(renderCount,0);
   assert.equal(startRoomCalls,1);
   assert.equal(timerValue,2);
 });

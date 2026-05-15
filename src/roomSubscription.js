@@ -164,6 +164,7 @@ export function createRoomSubscriptionController(deps){
       const prevRoomData=liveState.room.data;
       let resolvedId=String(liveState.room.playerId||'').trim();
       const matchedCurrent=Array.isArray(data.players)?data.players.find((p)=>roomPlayerMatchesCurrentUser(p))||null:null;
+      const startedLocally=String(data.status||'')==='starting'&&Boolean(liveState.room.pendingStart);
       if(!resolvedId||!Array.isArray(data.players)||!data.players.some((p)=>String(p?.uid||'')===resolvedId)){
         const guestMatch=deps.matchGuestPlayerId(data);
         resolvedId=String(matchedCurrent?.uid||'').trim()||guestMatch||deps.baseRoomPlayerId();
@@ -282,6 +283,7 @@ export function createRoomSubscriptionController(deps){
           }
         }
         liveState.room.lobbyRenderKey=nextLobbyKey;
+        if(startedLocally)return;
         if(prevLobbyKey===nextLobbyKey)return;
       }
       if(roomStatus==='playing'||roomStatus==='finished'){
