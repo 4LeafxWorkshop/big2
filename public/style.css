@@ -7500,6 +7500,9 @@ body[data-screen='game'][data-orientation='portrait'] #game-log-fab {
   z-index: 11940 !important;
   touch-action: auto !important;
 }
+body[data-screen='game'][data-native-android='1'][data-orientation='portrait'] #game-log-fab {
+  bottom: max(6px, env(safe-area-inset-bottom)) !important;
+}
 body[data-screen='game'][data-orientation='portrait'] .log-sheet {
   z-index: 15050 !important;
 }
