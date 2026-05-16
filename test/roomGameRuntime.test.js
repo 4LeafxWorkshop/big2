@@ -13,7 +13,7 @@ function createController(overrides={}){
       return{name:`Bot ${seat+1}`,gender:seat===1?'female':'male'};
     },
     calcPenaltyDetail(hand){
-      return{remain:hand.length,base:hand.length,multiplier:1,deduction:hand.length,anyTwo:false,topTwo:false,chaoMultiplier:1,chaoKey:''};
+      return{remain:hand.length,base:hand.length,multiplier:1,deduction:hand.length,anyTwo:false,twoPenalty:false,chaoMultiplier:1,chaoKey:''};
     },
     canBeat(candidate,target){
       return (candidate.power?.[0]??-1)>(target.power?.[0]??-1);

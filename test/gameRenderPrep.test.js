@@ -42,7 +42,7 @@ test('buildCalloutRenderState keeps opponent emote callouts visible with matchin
   assert.equal(result.seatEmoteHtml(0,'north','#123456',true),'');
 });
 
-test('buildSelfRenderState shows the top-two warning only on the active self turn', ()=>{
+test('buildSelfRenderState shows the play-big warning only on the active self turn', ()=>{
   const result=buildSelfRenderState({
     self:{seat:0,name:'Alice',gender:'female',count:5},
     selfScoreValue:4998,
@@ -63,7 +63,7 @@ test('buildSelfRenderState shows the top-two warning only on the active self tur
   });
 
   assert.match(result.selfCalloutHtml,/seat-top-two-warning/);
-  assert.match(result.selfCalloutHtml,/topTwoWarning/);
+  assert.match(result.selfCalloutHtml,/playBigWarning/);
 
   const offTurn=buildSelfRenderState({
     self:{seat:0,name:'Alice',gender:'female',count:5},
@@ -230,10 +230,10 @@ test('buildResultScreenHtml displays transferred last-card deductions instead of
         deductions:[6,0,0,0],
         winnerGain:6,
         details:[
-          {remain:1,base:1,multiplier:1,deduction:1,anyTwo:false,topTwo:false,chaoMultiplier:1,chaoKey:''},
-          {remain:0,base:0,multiplier:1,deduction:0,anyTwo:false,topTwo:false,chaoMultiplier:1,chaoKey:''},
-          {remain:2,base:2,multiplier:1,deduction:2,anyTwo:false,topTwo:false,chaoMultiplier:1,chaoKey:''},
-          {remain:3,base:3,multiplier:1,deduction:3,anyTwo:false,topTwo:false,chaoMultiplier:1,chaoKey:''}
+          {remain:1,base:1,multiplier:1,deduction:1,anyTwo:false,twoPenalty:false,chaoMultiplier:1,chaoKey:''},
+          {remain:0,base:0,multiplier:1,deduction:0,anyTwo:false,twoPenalty:false,chaoMultiplier:1,chaoKey:''},
+          {remain:2,base:2,multiplier:1,deduction:2,anyTwo:false,twoPenalty:false,chaoMultiplier:1,chaoKey:''},
+          {remain:3,base:3,multiplier:1,deduction:3,anyTwo:false,twoPenalty:false,chaoMultiplier:1,chaoKey:''}
         ],
         lastCardBreach:{seat:0,threatenedSeat:1}
       }
@@ -252,7 +252,7 @@ test('buildResultScreenHtml displays transferred last-card deductions instead of
     roomCountdownText:()=>'-',
     uiStatus:()=> '',
     playerColorByViewClass:()=>'#123456',
-    calcPenaltyDetail:(hand)=>({remain:hand.length,base:hand.length,multiplier:1,deduction:hand.length,anyTwo:false,topTwo:false,chaoMultiplier:1,chaoKey:''}),
+    calcPenaltyDetail:(hand)=>({remain:hand.length,base:hand.length,multiplier:1,deduction:hand.length,anyTwo:false,twoPenalty:false,chaoMultiplier:1,chaoKey:''}),
     renderStaticCard:()=>'<span class="card"></span>',
     authPictureUrl:()=>'',
     authPictureUrlFrom:()=>null,

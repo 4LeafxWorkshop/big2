@@ -4100,7 +4100,7 @@ function handShapeMetrics(hand){
   let triples=0;
   let highSingles=0;
   let twos=0;
-  let topTwo=0;
+  let twoPenalty=0;
   for(const [rank,cnt] of rankCount.entries()){
     if(cnt>=2)pairs+=Math.floor(cnt/2);
     if(cnt>=3)triples+=1;
@@ -4108,13 +4108,13 @@ function handShapeMetrics(hand){
     if(rank===12){
       twos+=cnt;
       const spade=cards.some((c)=>c.rank===12&&c.suit===3);
-      if(spade)topTwo=1;
+      if(spade)twoPenalty=1;
     }
   }
   const valid=allValidPlays(cards);
   const fives=valid.filter((p)=>p.eval.count===5).length;
   const leadOptions=valid.length;
-  return{pairs,triples,fives,highSingles,twos,topTwo,leadOptions};
+  return{pairs,triples,fives,highSingles,twos,twoPenalty,leadOptions};
 }
 function minOpponentCardCount(game,seat){
   const players=Array.isArray(game?.players)?game.players:[];
@@ -4161,7 +4161,7 @@ function recommendPlayScore(play,ctx){
   score+=m.pairs*8+m.triples*10+m.fives*25;
   score-=m.highSingles*7;
   score-=m.twos*12;
-  score-=m.topTwo*10;
+  score-=m.twoPenalty*10;
   score+=Math.min(14,m.leadOptions*0.45);
 
   const maxRank=Math.max(...play.cards.map((c)=>c.rank));
@@ -4282,7 +4282,7 @@ function recommendPassScore(ctx,bestPlayScore){
   const len=(hand??[]).length;
   const m=handShapeMetrics(hand);
   let score=0;
-  score+=m.twos*8+m.topTwo*10;
+  score+=m.twos*8+m.twoPenalty*10;
   score+=m.highSingles*5;
   score+=m.fives*2;
   if(len<=5)score-=45;
@@ -4561,13 +4561,13 @@ function calcPenaltyDetail(cards){
   const remain=(cards??[]).length;
   const base=basePenaltyByCount(remain);
   const anyTwo=hasAnyTwo(cards);
-  const topTwo=hasTopTwo(cards);
+  const twoPenalty=hasTopTwo(cards);
   const chao=chaoByRemain(remain);
   let multiplier=1;
   if(anyTwo)multiplier*=2;
-  if(topTwo)multiplier*=2;
+  if(twoPenalty)multiplier*=2;
   multiplier*=chao.multiplier;
-  return{remain,base,multiplier,deduction:base*multiplier,anyTwo,topTwo,chaoMultiplier:chao.multiplier,chaoKey:chao.key};
+  return{remain,base,multiplier,deduction:base*multiplier,anyTwo,twoPenalty,chaoMultiplier:chao.multiplier,chaoKey:chao.key};
 }
 const seatView=(s,self)=>(s-self+4)%4;
 const botDisplay=(name,isBot)=>{if(!isBot)return name;const raw=String(name??'').trim();const m=raw.match(/(?:bot|ai)\s*([0-9]+)/i);if(!m)return raw||'Bot';const n=m[1]??'';return`Bot ${n}`.trim();};

@@ -43,7 +43,7 @@ export function settleRoundDeductions({
   calcPenaltyDetail
 }){
   const details=game.players.map((p,i)=>i===winnerSeat
-    ?{remain:0,base:0,multiplier:1,deduction:0,anyTwo:false,topTwo:false,chaoMultiplier:1,chaoKey:''}
+    ?{remain:0,base:0,multiplier:1,deduction:0,anyTwo:false,twoPenalty:false,chaoMultiplier:1,chaoKey:''}
     :calcPenaltyDetail(p.hand));
   let deductions=details.map((d)=>d.deduction);
   if(game.lastCardBreach&&winnerSeat===game.lastCardBreach.threatenedSeat){

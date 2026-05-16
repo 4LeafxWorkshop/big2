@@ -21,7 +21,7 @@ export function getScoreGuideText(language){
         ['13','x5','Big Chao']
       ],
       anyTwo:'Holding any 2 card (♦️2/♣️2/♥️2/♠️2) applies x2.',
-      topTwo:'Holding ♠️Spade 2 (top 2) applies an additional x2.',
+      twoPenalty:'Holding ♠️Spade 2 (2-penalty) applies an additional x2.',
       stack:'If multiple conditions apply, multipliers stack (multiply together).'
     };
   }
@@ -47,7 +47,7 @@ export function getScoreGuideText(language){
         ['13','x5','Grand chao']
       ],
       anyTwo:'Avoir un 2 (♦️2/♣️2/♥️2/♠️2) applique x2.',
-      topTwo:'Avoir le ♠️2 (top 2) ajoute un x2.',
+      twoPenalty:'Avoir le ♠️2 (pénalité 2) ajoute un x2.',
       stack:'Si plusieurs conditions s’appliquent, les multiplicateurs se cumulent.'
     };
   }
@@ -73,7 +73,7 @@ export function getScoreGuideText(language){
         ['13','x5','Groß']
       ],
       anyTwo:'Ein 2 (♦️2/♣️2/♥️2/♠️2) ergibt x2.',
-      topTwo:'Ein ♠️2 (Top 2) gibt zusätzlich x2.',
+      twoPenalty:'Ein ♠️2 (2-Strafe) gibt zusätzlich x2.',
       stack:'Mehrere Bedingungen werden multipliziert.'
     };
   }
@@ -99,7 +99,7 @@ export function getScoreGuideText(language){
         ['13','x5','Chao grande']
       ],
       anyTwo:'Tener un 2 (♦️2/♣️2/♥️2/♠️2) aplica x2.',
-      topTwo:'Tener el ♠️2 (top 2) añade x2.',
+      twoPenalty:'Tener el ♠️2 (penalización 2) añade x2.',
       stack:'Si se cumplen varias condiciones, los multiplicadores se acumulan.'
     };
   }
@@ -125,7 +125,7 @@ export function getScoreGuideText(language){
         ['13','x5','ビッグ・チャオ']
       ],
       anyTwo:'2（♦️2/♣️2/♥️2/♠️2）を所持していると x2。',
-      topTwo:'♠️2（トップ2）を所持していると追加で x2。',
+      twoPenalty:'♠️2（2ペナルティ）を所持していると追加で x2。',
       stack:'複数条件が当てはまる場合、倍率は掛け合わせます。'
     };
   }
@@ -150,7 +150,7 @@ export function getScoreGuideText(language){
       ['13張','x5','大炒']
     ],
     anyTwo:'持有任意 2（♦️2/♣️2/♥️2/♠️2）會套用 x2。',
-    topTwo:'持有 ♠️2（頂大）會額外再套用 x2。',
+    twoPenalty:'持有 ♠️2（2罰則）會額外再套用 x2。',
     stack:'同時符合多個條件時，倍率會疊乘（相乘計算）。'
   };
 }

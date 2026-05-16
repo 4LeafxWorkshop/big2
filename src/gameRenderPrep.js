@@ -71,7 +71,7 @@ export function buildSelfRenderState(params){
   const nextSeat=selfSeatNum!==null?(selfSeatNum+1)%4:null;
   const nextPlayer=nextSeat!==null?participants.find((p)=>Number(p?.seat)===nextSeat):null;
   const nextPlayerHasOne=Number(nextPlayer?.count)===1;
-  const selfTopTwoWarningHtml=selfActive&&nextPlayerHasOne?`<span class="seat-top-two-warning">${esc(t('topTwoWarning'))}</span>`:'';
+  const selfTopTwoWarningHtml=selfActive&&nextPlayerHasOne?`<span class="seat-top-two-warning">${esc(t('playBigWarning'))}</span>`:'';
   const selfBadgeHtml=selfDangerLast
     ?`<span class="avatar-status-badge warning ${selfActive?'danger':''}" aria-label="${esc(t('lastCardCall'))}"></span>`
     :(selfActive?`<span class="avatar-status-badge turn" aria-label="${esc(t('wait'))}"></span>`:'');
@@ -558,7 +558,7 @@ export function buildResultScreenHtml(params){
   const showConfetti=selfSeatNum!==null&&winner.seat===selfSeatNum;
   const deductions=v.roundSummary?.deductions??arr.map((p)=>p.seat===winner.seat?0:calcPenaltyDetail(v.revealedHands?.[p.seat]??[]).deduction);
   const winnerGain=Number(v.roundSummary?.winnerGain??deductions.reduce((sum,vv)=>sum+vv,0));
-  const detailBySeat=v.roundSummary?.details??arr.map((p)=>p.seat===winner.seat?{remain:0,base:0,multiplier:1,deduction:0,anyTwo:false,topTwo:false,chaoMultiplier:1,chaoKey:''}:calcPenaltyDetail(v.revealedHands?.[p.seat]??[]));
+  const detailBySeat=v.roundSummary?.details??arr.map((p)=>p.seat===winner.seat?{remain:0,base:0,multiplier:1,deduction:0,anyTwo:false,twoPenalty:false,chaoMultiplier:1,chaoKey:''}:calcPenaltyDetail(v.revealedHands?.[p.seat]??[]));
   const rows=arr.map((p)=>{
     const isWinner=p.seat===winner.seat;
     const isSelf=p.seat===v.selfSeat;
@@ -570,14 +570,14 @@ export function buildResultScreenHtml(params){
     const snapGender=String(snapshot?.gender||p.gender||'male')==='female'?'female':'male';
     const snapPicture=String(snapshot?.picture||'').trim();
     const remain=(v.revealedHands?.[p.seat]??[]);
-    const detail=detailBySeat[p.seat]??{remain:remain.length,base:0,multiplier:1,deduction:Number(deductions[p.seat])||0,anyTwo:false,topTwo:false,chaoMultiplier:1,chaoKey:''};
+    const detail=detailBySeat[p.seat]??{remain:remain.length,base:0,multiplier:1,deduction:Number(deductions[p.seat])||0,anyTwo:false,twoPenalty:false,chaoMultiplier:1,chaoKey:''};
     const actualDeduction=Number(deductions[p.seat])||0;
     const delta=isWinner?winnerGain:-actualDeduction;
     const total=p.score??0;
     const remainCards=remain.length?remain.map((c)=>renderStaticCard(c,true)).join(''):`<span class="hint">-</span>`;
     const mulTags=[
       detail.anyTwo?`<span class="result-score-chip penalty">${t('scoreAnyTwo')} x2</span>`:'',
-      detail.topTwo?`<span class="result-score-chip penalty">${t('scoreTopTwo')} x2</span>`:'',
+      detail.twoPenalty?`<span class="result-score-chip penalty">${t('scoreTwoPenalty')} x2</span>`:'',
       detail.chaoMultiplier>1&&detail.chaoKey?`<span class="result-score-chip penalty">${t(detail.chaoKey)} x${detail.chaoMultiplier}</span>`:''
     ].filter(Boolean).join('');
     const deltaText=delta>0?`+${delta}`:`${delta}`;

@@ -217,7 +217,7 @@ test('renderScoreGuideModal renders tables and special 2-card rows', ()=>{
       chaoTableHeaders:['Rem','Mul','Name'],
       chaoTableRows:[['8-9','x2','Chao']],
       anyTwo:'Any 2',
-      topTwo:'Top 2',
+      twoPenalty:'2-penalty',
       stack:'Stack'
     },
     esc:(value)=>String(value),
