@@ -168,7 +168,7 @@ test('applyPassToGame retakes lead after three passes', ()=>{
   assert.equal(result.game.passStreak,0);
 });
 
-test('applyPlayToGame rejects non-strongest last-card block in room game', ()=>{
+test('applyPlayToGame records a last-card breach when the turn player does not top the strongest play', ()=>{
   const controller=createController({
     shouldForceMaxAgainstLastCard(){
       return true;
@@ -192,8 +192,8 @@ test('applyPlayToGame rejects non-strongest last-card block in room game', ()=>{
     totals:[5000,5000,5000,5000],
     roundWins:[0,0,0,0]
   },0,[card(1,0)],100);
-  assert.equal(first.ok,false);
-  assert.equal(first.reason,'lastCardCall');
+  assert.equal(first.ok,true);
+  assert.deepEqual(first.game.lastCardBreach,{seat:0,threatenedSeat:1});
 });
 
 test('applyPlayToGame accepts strongest last-card block in room game', ()=>{
@@ -223,4 +223,81 @@ test('applyPlayToGame accepts strongest last-card block in room game', ()=>{
   assert.equal(result.ok,true);
   assert.equal(result.game.lastCardBreach,undefined);
   assert.equal(result.game.players[0].hand.length,1);
+});
+
+test('applyPlayToGame transfers all loser deductions to the violator on 頂大', ()=>{
+  const controller=createController({
+    comparePower(a,b){
+      return (a?.[0]??-1)-(b?.[0]??-1);
+    },
+    legalTurnPlays(hand){
+      return hand.map((c)=>({cards:[c],eval:{count:1,kind:'single',power:[c.rank]}}));
+    },
+    shouldForceMaxAgainstLastCard(){
+      return true;
+    }
+  });
+  const startGame={
+    players:[
+      {uid:'uid:1',name:'Alice',hand:[card(3,0),card(9,0)]},
+      {uid:'uid:2',name:'Bob',hand:[card(5,1)]},
+      {uid:'uid:3',name:'Cara',hand:[card(2,2)]},
+      {uid:'uid:4',name:'Dan',hand:[card(4,3)]}
+    ],
+    currentSeat:0,
+    lastPlay:null,
+    passStreak:0,
+    isFirstTrick:false,
+    gameOver:false,
+    history:[],
+    playerActionLog:[null,null,null,null],
+    handCount:[2,1,1,1],
+    totals:[5000,5000,5000,5000],
+    roundWins:[0,0,0,0],
+    lastCardBreach:null
+  };
+  const first=controller.applyPlayToGame(startGame,0,[card(3,0)],100);
+  assert.equal(first.ok,true);
+  assert.deepEqual(first.game.lastCardBreach,{seat:0,threatenedSeat:1});
+  const second=controller.applyPlayToGame(first.game,1,[card(5,1)],200);
+  assert.equal(second.ok,true);
+  assert.equal(second.finished,true);
+  assert.deepEqual(second.game.roundSummary?.deductions,[3,0,0,0]);
+  assert.deepEqual(second.game.totals,[4997,5003,5000,5000]);
+});
+
+test('applyPassToGame records last-card breach when a player passes despite a stronger legal response', ()=>{
+  const controller=createController({
+    shouldForceMaxAgainstLastCard(){
+      return true;
+    }
+  });
+  const afterPlay=controller.applyPlayToGame({
+    players:[
+      {uid:'uid:1',name:'Alice',hand:[card(3,0),card(9,0)]},
+      {uid:'uid:2',name:'Bob',hand:[card(4,1)]},
+      {uid:'uid:3',name:'Cara',hand:[card(5,2)]},
+      {uid:'uid:4',name:'Dan',hand:[card(6,3)]}
+    ],
+    currentSeat:0,
+    lastPlay:null,
+    passStreak:0,
+    isFirstTrick:false,
+    gameOver:false,
+    history:[],
+    playerActionLog:[null,null,null,null],
+    handCount:[2,1,1,1],
+    totals:[5000,5000,5000,5000],
+    roundWins:[0,0,0,0],
+    lastCardBreach:null
+  },0,[card(3,0)],100);
+  assert.equal(afterPlay.ok,true);
+  const afterPass=controller.applyPassToGame(afterPlay.game,1,200);
+  assert.equal(afterPass.ok,true);
+  assert.deepEqual(afterPass.game.lastCardBreach,{seat:1,threatenedSeat:2});
+  const finished=controller.applyPlayToGame(afterPass.game,2,[card(5,2)],300);
+  assert.equal(finished.ok,true);
+  assert.equal(finished.finished,true);
+  assert.deepEqual(finished.game.roundSummary?.deductions,[0,3,0,0]);
+  assert.deepEqual(finished.game.totals,[5000,4997,5003,5000]);
 });

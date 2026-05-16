@@ -58,6 +58,7 @@ import {createRoomSubscriptionController} from './roomSubscription.js';
 import {createRoomTimeoutController} from './roomTimeouts.js';
 import {createMobileAdsController} from './mobileAds.js';
 import {buildActiveRoomRow, buildRoomDirectoryDoc} from './roomDirectory.js';
+import {markLastCardBreachIfNeeded, markLastCardBreachOnPassIfNeeded, settleRoundDeductions} from './gameRuleFlow.js';
 import {getNextSoloRoundWins, getNextSoloTotals, resetSoloSessionCarryoverState} from './soloState.js';
 import {Haptics} from '@capacitor/haptics';
 
@@ -4892,32 +4893,26 @@ function triggerMust3LeadCallout(game,selfSeat=0){
 }
 function startSoloGame(options={}){randomizeNpcColors();const preserveOpponents=options?.preserveOpponents!==false;const resetRoundWins=options?.resetRoundWins===true;const resetTotals=options?.resetTotals===true;const storedBotProfiles=Array.isArray(state.solo.botProfiles)&&state.solo.botProfiles.length===3?state.solo.botProfiles.map((bp)=>({name:String(bp?.name||''),gender:String(bp?.gender||'male')})):null;const botProfiles=preserveOpponents&&storedBotProfiles&&storedBotProfiles.every((bp)=>bp.name)?storedBotProfiles:randomBotProfiles();const p=[{name:state.home.name||t('name'),gender:state.home.gender==='female'?'female':'male',hand:[],isHuman:true},{name:botProfiles[0].name,gender:botProfiles[0].gender,hand:[],isHuman:false},{name:botProfiles[1].name,gender:botProfiles[1].gender,hand:[],isHuman:false},{name:botProfiles[2].name,gender:botProfiles[2].gender,hand:[],isHuman:false}];const deck=shuffle(createDeck());p.forEach((x)=>{x.hand=deck.splice(0,13).sort(cmpCard);});const start=p.findIndex((x)=>x.hand.some((c)=>c.rank===0&&c.suit===0));const totals=resetTotals?soloStartingTotals(p):getNextSoloTotals(state.solo.totals,{resetTotals});const roundWins=getNextSoloRoundWins(state.solo.roundWins,{resetTotals,resetRoundWins});state.solo={players:p,botProfiles:botProfiles.map((bp)=>({name:bp.name,gender:bp.gender})),botNames:botProfiles.map((bp)=>bp.name),totals,roundWins,currentSeat:start,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',statusMeta:null,systemLog:[],history:[],aiDifficulty:state.home.aiDifficulty,lastCardBreach:null,roundSummary:null};setSoloStatus(`${p[start].name} ${t('start')}`,{meta:{seat:start,name:p[start].name,key:'start'}});state.selected.clear();state.recommendation=null;state.logTouched=false;state.showLog=false;state.showLogSheet=false;state.screen='game';state.home.mode='solo';state.home.showIntro=false;state.home.showLeaderboard=false;state.showScoreGuide=false;calloutGateUntilPlay=true;playSound('start');triggerMust3LeadCallout(state.solo,0);render();maybeRunSoloAi();}
 function soloApplyPlay(seat,cards){const g=state.solo;const ev=evaluatePlay(cards);if(!ev.valid){if(seat===0)setSoloStatus(ev.reason);return false;}if(g.isFirstTrick&&!has3d(cards)){if(seat===0)setSoloStatus(t('must3'));return false;}if(g.lastPlay&&!canBeat(ev,g.lastPlay.eval)){if(seat===0)setSoloStatus(t('beat'));return false;}
-  if(shouldForceMaxAgainstLastCard(g,seat)){
-    const legal=legalTurnPlays(g.players[seat].hand,g).sort(cmpStrongPlayDesc);
-    const strongest=legal[0];
-    const chosen=legal.find((x)=>x.eval.count===ev.count&&x.eval.kind===ev.kind&&comparePower(x.eval.power,ev.power)===0);
-    if(chosen&&strongest&&comparePower(chosen.eval.power,strongest.eval.power)!==0){
-      g.lastCardBreach={seat,threatenedSeat:(seat+1)%4};
-    }
-  }
+  markLastCardBreachIfNeeded({
+    game:g,
+    seat,
+    playEval:ev,
+    shouldForceMaxAgainstLastCard,
+    legalTurnPlays,
+    cmpStrongPlayDesc,
+    comparePower
+  });
   const ids=new Set(cards.map(cardId));g.players[seat].hand=g.players[seat].hand.filter((c)=>!ids.has(cardId(c)));g.lastPlay={seat,eval:ev,cards:ev.sorted};g.passStreak=0;g.isFirstTrick=false;g.history.push({action:'play',seat,name:g.players[seat].name,cards:ev.sorted,kind:ev.kind,ts:Date.now()});
   if(g.players[seat].hand.length===0){
     lockTurnProgress(900);
     g.gameOver=true;
-    const details=g.players.map((p,i)=>i===seat?{remain:0,base:0,multiplier:1,deduction:0,anyTwo:false,topTwo:false,chaoMultiplier:1,chaoKey:''}:calcPenaltyDetail(p.hand));
-    let deductions=details.map((d)=>d.deduction);
-    if(g.lastCardBreach&&seat===g.lastCardBreach.threatenedSeat){
-      const violator=g.lastCardBreach.seat;
-      const transferred=deductions.reduce((sum,v)=>sum+v,0);
-      deductions=deductions.map((v,i)=>i===violator?transferred:0);
-    }
-    const winnerGain=deductions.reduce((sum,v)=>sum+v,0);
-    g.roundSummary={winnerSeat:seat,deductions:[...deductions],winnerGain,details,lastCardBreach:g.lastCardBreach?{...g.lastCardBreach}:null};
+    const settlement=settleRoundDeductions({game:g,winnerSeat:seat,calcPenaltyDetail});
+    g.roundSummary={winnerSeat:seat,deductions:[...settlement.deductions],winnerGain:settlement.winnerGain,details:settlement.details,lastCardBreach:settlement.lastCardBreach};
   g.roundWins=(Array.isArray(g.roundWins)&&g.roundWins.length===4?g.roundWins:[0,0,0,0]).map((v,i)=>i===seat?(Number(v)||0)+1:(Number(v)||0));
-  g.totals=(g.totals??[5000,5000,5000,5000]).map((s,i)=>s+(i===seat?winnerGain:-deductions[i]));
-  const remain=g.players.map((p,i)=>({p,i})).filter((x)=>x.i!==seat).map((x)=>`${x.p.name}:${deductions[x.i]}`).join(' / ');
+  g.totals=(g.totals??[5000,5000,5000,5000]).map((s,i)=>s+(i===seat?settlement.winnerGain:-settlement.deductions[i]));
+  const remain=g.players.map((p,i)=>({p,i})).filter((x)=>x.i!==seat).map((x)=>`${x.p.name}:${settlement.deductions[x.i]}`).join(' / ');
   setSoloStatus(`${g.players[seat].name} ${t('wins')} ${t('penalty')}:${remain}`,{meta:{seat,name:g.players[seat].name,key:'custom'}});
-  const deltas=g.players.map((_,i)=>i===seat?winnerGain:-deductions[i]);
+  const deltas=g.players.map((_,i)=>i===seat?settlement.winnerGain:-settlement.deductions[i]);
   g.players.forEach((p,i)=>{
     const identity=p.isHuman?currentLeaderboardIdentity():botLeaderboardIdentity(p.name,p.gender);
     void recordLeaderboardRound(identity,deltas[i],i===seat);
@@ -4932,7 +4927,7 @@ function soloApplyPlay(seat,cards){const g=state.solo;const ev=evaluatePlay(card
   const reaction=pickBotReaction(g,seat,'play',{cards:ev.sorted,eval:ev});
   if(reaction)triggerBotEmoteLocal(reaction.seat,reaction.id);
   return true;}
-function soloPass(seat){const g=state.solo;if(!g.lastPlay){if(seat===0)setSoloStatus(t('cantPass'));return false;}g.passStreak+=1;g.history.push({action:'pass',seat,name:g.players[seat].name,ts:Date.now()});if(g.lastCardBreach&&seat===g.lastCardBreach.threatenedSeat)g.lastCardBreach=null;lockTurnProgress(850);if(g.passStreak>=3){const lead=g.lastPlay.seat;g.currentSeat=lead;g.lastPlay=null;g.passStreak=0;setSoloStatus(`${g.players[lead].name} ${t('retake')}`,{meta:{seat:lead,name:g.players[lead].name,key:'retake'}});playSound('pass');return true;}g.currentSeat=(seat+1)%4;setSoloStatus(`${g.players[seat].name} ${t('pass')}.`,{appendLog:false,meta:{seat,name:g.players[seat].name,key:'pass'}});playSound('pass');const reaction=pickBotReaction(g,seat,'pass',null);if(reaction)triggerBotEmoteLocal(reaction.seat,reaction.id);return true;}
+function soloPass(seat){const g=state.solo;if(!g.lastPlay){if(seat===0)setSoloStatus(t('cantPass'));return false;}markLastCardBreachOnPassIfNeeded({game:g,seat,shouldForceMaxAgainstLastCard,legalTurnPlays,cmpStrongPlayDesc,canBeat});g.passStreak+=1;g.history.push({action:'pass',seat,name:g.players[seat].name,ts:Date.now()});if(g.lastCardBreach&&seat===g.lastCardBreach.threatenedSeat)g.lastCardBreach=null;lockTurnProgress(850);if(g.passStreak>=3){const lead=g.lastPlay.seat;g.currentSeat=lead;g.lastPlay=null;g.passStreak=0;setSoloStatus(`${g.players[lead].name} ${t('retake')}`,{meta:{seat:lead,name:g.players[lead].name,key:'retake'}});playSound('pass');return true;}g.currentSeat=(seat+1)%4;setSoloStatus(`${g.players[seat].name} ${t('pass')}.`,{appendLog:false,meta:{seat,name:g.players[seat].name,key:'pass'}});playSound('pass');const reaction=pickBotReaction(g,seat,'pass',null);if(reaction)triggerBotEmoteLocal(reaction.seat,reaction.id);return true;}
 function maybeRunSoloAi(){
   if(aiTimer){clearTimeout(aiTimer);aiTimer=null;}
   if(state.home.mode!=='solo')return;

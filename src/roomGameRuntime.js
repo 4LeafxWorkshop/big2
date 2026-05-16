@@ -1,3 +1,5 @@
+import {markLastCardBreachIfNeeded, markLastCardBreachOnPassIfNeeded, settleRoundDeductions} from './gameRuleFlow.js';
+
 export function createRoomGameRuntimeController(deps){
   function buildRoomGameState(roomData){
     const roster=Array.isArray(roomData?.players)?roomData.players:[];
@@ -65,14 +67,15 @@ export function createRoomGameRuntimeController(deps){
     if(!ev.valid)return{ok:false,reason:ev.reason||deps.t('illegal')};
     if(g.isFirstTrick&&!deps.has3d(cards))return{ok:false,reason:deps.t('must3')};
     if(g.lastPlay&&!deps.canBeat(ev,g.lastPlay.eval))return{ok:false,reason:deps.t('beat')};
-    if(deps.shouldForceMaxAgainstLastCard(g,seat)){
-      const legal=deps.legalTurnPlays(g.players[seat].hand,g).sort(deps.cmpStrongPlayDesc);
-      const strongest=legal[0];
-      const chosen=legal.find((x)=>x.eval.count===ev.count&&x.eval.kind===ev.kind&&deps.comparePower(x.eval.power,ev.power)===0);
-      if(chosen&&strongest&&deps.comparePower(chosen.eval.power,strongest.eval.power)!==0){
-        return{ok:false,reason:deps.t('lastCardCall')};
-      }
-    }
+    markLastCardBreachIfNeeded({
+      game:g,
+      seat,
+      playEval:ev,
+      shouldForceMaxAgainstLastCard:deps.shouldForceMaxAgainstLastCard,
+      legalTurnPlays:deps.legalTurnPlays,
+      cmpStrongPlayDesc:deps.cmpStrongPlayDesc,
+      comparePower:deps.comparePower
+    });
     const ids=new Set(cards.map(deps.cardId));
     g.players[seat].hand=g.players[seat].hand.filter((c)=>!ids.has(deps.cardId(c)));
     g.lastPlay={seat,eval:ev,cards:ev.sorted};
@@ -85,19 +88,12 @@ export function createRoomGameRuntimeController(deps){
     if(Array.isArray(g.handCount))g.handCount[seat]=g.players[seat].hand.length;
     if(g.players[seat].hand.length===0){
       g.gameOver=true;
-      const details=g.players.map((p,i)=>i===seat?{remain:0,base:0,multiplier:1,deduction:0,anyTwo:false,topTwo:false,chaoMultiplier:1,chaoKey:''}:deps.calcPenaltyDetail(p.hand));
-      let deductions=details.map((d)=>d.deduction);
-      if(g.lastCardBreach&&seat===g.lastCardBreach.threatenedSeat){
-        const violator=g.lastCardBreach.seat;
-        const transferred=deductions.reduce((sum,v)=>sum+v,0);
-        deductions=deductions.map((v,i)=>i===violator?transferred:0);
-      }
-      const winnerGain=deductions.reduce((sum,v)=>sum+v,0);
-      g.roundSummary={winnerSeat:seat,deductions:[...deductions],winnerGain,details,lastCardBreach:g.lastCardBreach?{...g.lastCardBreach}:null};
+      const settlement=settleRoundDeductions({game:g,winnerSeat:seat,calcPenaltyDetail:deps.calcPenaltyDetail});
+      g.roundSummary={winnerSeat:seat,deductions:[...settlement.deductions],winnerGain:settlement.winnerGain,details:settlement.details,lastCardBreach:settlement.lastCardBreach};
       g.roundWins=(Array.isArray(g.roundWins)&&g.roundWins.length===4?g.roundWins:[0,0,0,0]).map((v,i)=>i===seat?(Number(v)||0)+1:(Number(v)||0));
-      g.totals=(g.totals??[5000,5000,5000,5000]).map((s,i)=>s+(i===seat?winnerGain:-deductions[i]));
-      const remain=g.players.map((p,i)=>({p,i})).filter((x)=>x.i!==seat).map((x)=>`${x.p.name}:${deductions[x.i]}`).join(' / ');
-      const penalties=g.players.map((p,i)=>({name:p.name,value:deductions[i]})).filter((_,i)=>i!==seat);
+      g.totals=(g.totals??[5000,5000,5000,5000]).map((s,i)=>s+(i===seat?settlement.winnerGain:-settlement.deductions[i]));
+      const remain=g.players.map((p,i)=>({p,i})).filter((x)=>x.i!==seat).map((x)=>`${x.p.name}:${settlement.deductions[x.i]}`).join(' / ');
+      const penalties=g.players.map((p,i)=>({name:p.name,value:settlement.deductions[i]})).filter((_,i)=>i!==seat);
       deps.setGameStatus(g,`${g.players[seat].name} ${deps.t('wins')} ${deps.t('penalty')}:${remain}`,{now,meta:{key:'wins',name:g.players[seat].name,penalties}});
       g.lastMove={type:'win',seat,uid:String(g.players[seat]?.uid??''),cards:[],ts:now};
       return{ok:true,game:g,finished:true};
@@ -112,6 +108,14 @@ export function createRoomGameRuntimeController(deps){
     const g=deps.cloneRoomGame(game);
     if(!g||!Array.isArray(g.players)||!g.players[seat])return{ok:false,reason:'invalid'};
     if(!g.lastPlay)return{ok:false,reason:deps.t('cantPass')};
+    markLastCardBreachOnPassIfNeeded({
+      game:g,
+      seat,
+      shouldForceMaxAgainstLastCard:deps.shouldForceMaxAgainstLastCard,
+      legalTurnPlays:deps.legalTurnPlays,
+      cmpStrongPlayDesc:deps.cmpStrongPlayDesc,
+      canBeat:deps.canBeat
+    });
     g.passStreak+=1;
     g.history.push({action:'pass',seat,name:g.players[seat].name,ts:now});
     g.lastMove={type:'pass',seat,uid:String(g.players[seat]?.uid??''),cards:[],ts:now};
