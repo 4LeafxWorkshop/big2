@@ -42,6 +42,11 @@ export function runGamePostRender(params){
     }else if(logFab.parentElement!==logFabHost){
       logFabHost.appendChild(logFab);
     }
+    if(logFab instanceof HTMLElement){
+      logFab.setAttribute('aria-label',t('log'));
+      const textNode=logFab.querySelector('.game-log-fab-text');
+      if(textNode)textNode.textContent=t('log');
+    }
     if(logSheetOpen){
       logFab.remove();
       const existingSheet=appEl.querySelector('#log-sheet');
