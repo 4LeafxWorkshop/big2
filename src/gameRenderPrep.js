@@ -67,12 +67,18 @@ export function buildSelfRenderState(params){
   const selfActive=Boolean(!v.gameOver&&self&&selfSeatNum!==null&&currentSeatNum!==null&&currentSeatNum===selfSeatNum);
   const selfIsHost=hostSeat!==null&&selfSeatNum!==null&&Number(hostSeat)===selfSeatNum;
   const selfHostBadgeHtml=selfIsHost?`<span class="lobby-seat-host-badge-text">${t('roomHostTag')}</span>`:'';
+  const participants=Array.isArray(v?.participants)?v.participants:[];
+  const nextSeat=selfSeatNum!==null?(selfSeatNum+1)%4:null;
+  const nextPlayer=nextSeat!==null?participants.find((p)=>Number(p?.seat)===nextSeat):null;
+  const nextPlayerHasOne=Number(nextPlayer?.count)===1;
+  const selfTopTwoWarningHtml=selfActive&&nextPlayerHasOne?`<span class="seat-top-two-warning">${esc(t('topTwoWarning'))}</span>`:'';
   const selfBadgeHtml=selfDangerLast
     ?`<span class="avatar-status-badge warning ${selfActive?'danger':''}" aria-label="${esc(t('lastCardCall'))}"></span>`
     :(selfActive?`<span class="avatar-status-badge turn" aria-label="${esc(t('wait'))}"></span>`:'');
   const selfAvatar=`<span class="player-avatar-wrap player-avatar-wrap-self avatar-rim${selfActive?' is-active':''}" style="--avatar-rim:${selfSeatColor};"><img id="self-avatar-img" class="player-avatar player-avatar-self ${avatarGenderClass(selfGender)} ${useGoogleSelfAvatar?'player-avatar-google':''}" style="--avatar-outline:${selfSeatColor};" src="${selfAvatarSrc}" data-fallback="${selfGender==='female'?AVATAR_BASE_SRC.female:AVATAR_BASE_SRC.male}" alt="${esc(selfName)}"/>${selfHostBadgeHtml}${selfBadgeHtml}${coachMarksButtonHtml}</span>`;
   let selfCalloutHtml=self?seatCalloutHtml(self.seat,'south',selfSeatColor,true):'';
   const selfEmoteHtml=self?seatEmoteHtml(self.seat,'south',selfSeatColor,true):'';
+  if(selfTopTwoWarningHtml)selfCalloutHtml+=selfTopTwoWarningHtml;
   if(selfEmoteHtml)selfCalloutHtml+=selfEmoteHtml;
   return{
     selfScore,

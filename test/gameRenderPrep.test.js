@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import {buildCalloutRenderState, buildOpponentSeatsHtml, buildResultScreenHtml} from '../src/gameRenderPrep.js';
+import {buildCalloutRenderState, buildOpponentSeatsHtml, buildResultScreenHtml, buildSelfRenderState} from '../src/gameRenderPrep.js';
 import {renderOpponentSeat, renderOpponentStationFlow} from '../src/gameView.js';
 
 test('buildCalloutRenderState keeps opponent emote callouts visible with matching seat callouts', ()=>{
@@ -40,6 +40,51 @@ test('buildCalloutRenderState keeps opponent emote callouts visible with matchin
   assert.match(result.seatCalloutHtml(1,'north','#123456',false),/callout-with-emote/);
   assert.equal(result.seatEmoteHtml(1,'north','#123456',false),'');
   assert.equal(result.seatEmoteHtml(0,'north','#123456',true),'');
+});
+
+test('buildSelfRenderState shows the top-two warning only on the active self turn', ()=>{
+  const result=buildSelfRenderState({
+    self:{seat:0,name:'Alice',gender:'female',count:5},
+    selfScoreValue:4998,
+    state:{home:{gender:'female',google:{signedIn:false}}},
+    t:(key)=>key,
+    esc:(value)=>String(value),
+    hostSeat:null,
+    roundWinsBySeat:{0:0},
+    v:{selfSeat:0,currentSeat:0,gameOver:false,participants:[{seat:0,count:5},{seat:1,count:1},{seat:2,count:4},{seat:3,count:3}]},
+    AVATAR_BASE_SRC:{female:'female.png',male:'male.png'},
+    authPictureUrl:()=>null,
+    selfAvatarDataUri:(name)=>`avatar:${name}`,
+    avatarGenderClass:()=>'avatar-female',
+    playerColorByViewClass:()=>'#123456',
+    roundWinsChipHtml:()=>'<span class="seat-round-wins">0</span>',
+    seatCalloutHtml:()=>'<span class="self-callout"></span>',
+    seatEmoteHtml:()=>''
+  });
+
+  assert.match(result.selfCalloutHtml,/seat-top-two-warning/);
+  assert.match(result.selfCalloutHtml,/topTwoWarning/);
+
+  const offTurn=buildSelfRenderState({
+    self:{seat:0,name:'Alice',gender:'female',count:5},
+    selfScoreValue:4998,
+    state:{home:{gender:'female',google:{signedIn:false}}},
+    t:(key)=>key,
+    esc:(value)=>String(value),
+    hostSeat:null,
+    roundWinsBySeat:{0:0},
+    v:{selfSeat:0,currentSeat:1,gameOver:false,participants:[{seat:0,count:5},{seat:1,count:1},{seat:2,count:4},{seat:3,count:3}]},
+    AVATAR_BASE_SRC:{female:'female.png',male:'male.png'},
+    authPictureUrl:()=>null,
+    selfAvatarDataUri:(name)=>`avatar:${name}`,
+    avatarGenderClass:()=>'avatar-female',
+    playerColorByViewClass:()=>'#123456',
+    roundWinsChipHtml:()=>'<span class="seat-round-wins">0</span>',
+    seatCalloutHtml:()=>'<span class="self-callout"></span>',
+    seatEmoteHtml:()=>''
+  });
+
+  assert.equal(offTurn.selfCalloutHtml.includes('seat-top-two-warning'),false);
 });
 
 test('buildCalloutRenderState keeps standalone opponent emotes visible', ()=>{

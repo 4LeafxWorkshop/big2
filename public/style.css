@@ -10490,6 +10490,43 @@ body[data-screen='game'] .avatar-status-badge.warning.danger::before {
   border-color: rgba(255, 95, 102, .92);
   box-shadow: 0 0 16px rgba(255, 95, 102, .58);
 }
+body[data-screen='game'] .seat-top-two-warning {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 18px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: .76rem;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+  color: #fff;
+  text-shadow: 0 1px 2px rgba(0,0,0,.9);
+  background: linear-gradient(135deg, #ffd700 0%, #ff4500 100%);
+  border: 1px solid rgba(255, 225, 153, .58);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, .22) inset,
+    0 0 12px rgba(255, 215, 0, .42),
+    0 2px 8px rgba(0, 0, 0, .28);
+  animation: topTwoWarningPulse 1.5s ease-in-out infinite;
+}
+@keyframes topTwoWarningPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow:
+      0 0 0 1px rgba(0, 0, 0, .22) inset,
+      0 0 12px rgba(255, 215, 0, .42),
+      0 2px 8px rgba(0, 0, 0, .28);
+  }
+  50% {
+    transform: scale(1.08);
+    box-shadow:
+      0 0 0 1px rgba(0, 0, 0, .22) inset,
+      0 0 18px rgba(255, 215, 0, .62),
+      0 2px 12px rgba(0, 0, 0, .34);
+  }
+}
 @keyframes lastCardBadgePulse {
   0% { transform: scale(1); }
   50% { transform: scale(1.1); }
