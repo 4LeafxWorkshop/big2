@@ -5299,6 +5299,10 @@ function formatSystemLogDateTime(ts){
 function gameLogCardText(cards){
   return(cards??[]).map((c)=>`${SUITS[c.suit]?.symbol??''}${RANKS[c.rank]??''}`).join('');
 }
+function gameLogCardHtml(cards){
+  const suitSymbols=['♦','♣','♥','♠'];
+  return(cards??[]).map((c)=>`<span class="game-log-suit">${esc(suitSymbols[c.suit]??'')}</span>${esc(RANKS[c.rank]??'')}`).join('');
+}
 function gameLogDetailText(e){
   const lang=state.language;
   const textByLang={
@@ -5317,6 +5321,16 @@ function gameLogDetailText(e){
   if(lang==='zh-HK')return`${copy.played}${kind}(${cards.length}${copy.card})${cardText?`(${cardText})`:''}`;
   return`${copy.played} ${kind} (${cards.length} ${copy.card})${cardText?` (${cardText})`:''}`;
 }
+function gameLogDetailHtml(e){
+  if(e.action==='pass')return esc(gameLogDetailText(e));
+  const cardText=gameLogCardText(e.cards??[]);
+  const detail=gameLogDetailText(e);
+  if(!cardText)return esc(detail);
+  const cardHtml=gameLogCardHtml(e.cards??[]);
+  const cardTextIndex=detail.lastIndexOf(cardText);
+  if(cardTextIndex<0)return esc(detail);
+  return`${esc(detail.slice(0,cardTextIndex))}${cardHtml}${esc(detail.slice(cardTextIndex+cardText.length))}`;
+}
 function historyHtml(h,self,participants=[],systemLog=[]){
   const items=[];
   const participantList=Array.isArray(participants)?participants:[];
@@ -5328,16 +5342,16 @@ function historyHtml(h,self,participants=[],systemLog=[]){
     const participant=resolveHistoryLogParticipant(e,participantList);
     const avatarSrc=String(participant?.avatarSrc||participant?.picture||'').trim();
     const timeText=formatGameLogDateTime(e.ts);
-    const detail=gameLogDetailText(e);
+    const detail=gameLogDetailHtml(e);
     const tag=avatarSrc
       ?`<span class="history-avatar-badge" style="--player-color:${color};"><img class="game-log-fab-status-avatar history-avatar" src="${esc(avatarSrc)}" alt="" aria-hidden="true"/></span><span class="history-name">${esc(e.name)}</span>`
       :`<span class="player-color-chip" style="--player-color:${color};"></span><span class="history-name">${esc(e.name)}</span>`;
     if(e.action==='pass'){
-      items.push({ts:Number(e.ts)||0,seq:seq++,html:`<div class="history-item"><div class="history-head"><div class="history-title">${tag}</div>${timeText?`<div class="history-time">${esc(timeText)}</div>`:''}</div><div class="history-detail">${esc(detail)}</div></div>`});
+      items.push({ts:Number(e.ts)||0,seq:seq++,html:`<div class="history-item"><div class="history-head"><div class="history-title">${tag}</div>${timeText?`<div class="history-time">${esc(timeText)}</div>`:''}</div><div class="history-detail">${detail}</div></div>`});
       continue;
     }
     const cards=(e.cards??[]).map((c)=>renderStaticCard(c,true)).join('');
-    items.push({ts:Number(e.ts)||0,seq:seq++,html:`<div class="history-item"><div class="history-head"><div class="history-title">${tag}</div>${timeText?`<div class="history-time">${esc(timeText)}</div>`:''}</div><div class="history-detail-row"><div class="history-detail">${esc(detail)}</div><div class="history-cards">${cards}</div></div></div>`});
+    items.push({ts:Number(e.ts)||0,seq:seq++,html:`<div class="history-item"><div class="history-head"><div class="history-title">${tag}</div>${timeText?`<div class="history-time">${esc(timeText)}</div>`:''}</div><div class="history-detail-row"><div class="history-detail">${detail}</div><div class="history-cards">${cards}</div></div></div>`});
   }
   const sysEntries=(systemLog??[]).map((x)=>{
     if(typeof x==='string')return{text:x,ts:0};

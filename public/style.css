@@ -5117,6 +5117,20 @@ ul.gesture-help-list {
 .suit-black {
   color: #111111;
 }
+.history-detail .game-log-suit {
+  display: inline-grid;
+  place-items: center;
+  width: 1em;
+  height: 1em;
+  min-width: 1em;
+  padding: 0;
+  border-radius: .22em;
+  background: rgba(255, 255, 255, .96);
+  color: inherit;
+  box-shadow: 0 0 0 1px rgba(11, 18, 32, .18);
+  line-height: 1;
+  vertical-align: -0.08em;
+}
 .score-guide-stack {
   color: #ffd166 !important;
   font-weight: 700;
