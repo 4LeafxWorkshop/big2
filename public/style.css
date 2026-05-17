@@ -10501,11 +10501,11 @@ body[data-screen='game'] .seat-top-two-warning {
   font-weight: 900;
   line-height: 1;
   white-space: nowrap;
-  color: #111827;
+  color: #f4f9fb;
   text-shadow: none;
-  background: #ffcf5a;
-  border: 1px solid rgba(255, 255, 255, .92);
-  box-shadow: 0 2px 8px rgba(0,0,0,.52);
+  background: rgba(255,255,255,.1);
+  border: 1px solid rgba(255,255,255,.26);
+  box-shadow: 0 2px 6px rgba(0,0,0,.26);
 }
 @keyframes lastCardBadgePulse {
   0% { transform: scale(1); }
