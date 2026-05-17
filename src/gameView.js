@@ -121,7 +121,7 @@ export function renderGameTable(params){
     t
   }=params;
   const coachMarksHtml=coachMarksButtonHtml;
-  return`<section class="table">${roomTopMetaTable}${seatHtml}${coachMarksHtml}<div class="table-center-stack">${mobileNamesHtml}${mobileDiscardHtml}${centerMovesHtml}${centerLastMovesHtml}</div>${turnCompassHtml??''}${inventoryDecorHtml}${showWinCelebrate?`<div class="win-celebrate"><div class="confetti-layer"></div><div class="win-banner">${t('congrats')}</div></div>`:''}</section>`;
+  return`<section class="table">${roomTopMetaTable}${seatHtml}${coachMarksHtml}<div class="table-center-stack">${mobileNamesHtml}${mobileDiscardHtml}${centerMovesHtml}</div><div class="table-south-play-layer">${centerLastMovesHtml}</div>${turnCompassHtml??''}${inventoryDecorHtml}${showWinCelebrate?`<div class="win-celebrate"><div class="confetti-layer"></div><div class="win-banner">${t('congrats')}</div></div>`:''}</section>`;
 }
 
 export function renderSeatLastAction(action,{
