@@ -42,7 +42,7 @@ test('buildCalloutRenderState keeps opponent emote callouts visible with matchin
   assert.equal(result.seatEmoteHtml(0,'north','#123456',true),'');
 });
 
-test('buildSelfRenderState shows the play-big warning only on the active self turn', ()=>{
+test('buildSelfRenderState shows the play-big warning whenever the next player has one card', ()=>{
   const result=buildSelfRenderState({
     self:{seat:0,name:'Alice',gender:'female',count:5},
     selfScoreValue:4998,
@@ -84,7 +84,7 @@ test('buildSelfRenderState shows the play-big warning only on the active self tu
     seatEmoteHtml:()=>''
   });
 
-  assert.equal(offTurn.selfCalloutHtml.includes('seat-top-two-warning'),false);
+  assert.match(offTurn.selfCalloutHtml,/seat-top-two-warning/);
 });
 
 test('buildCalloutRenderState keeps standalone opponent emotes visible', ()=>{

@@ -71,7 +71,7 @@ export function buildSelfRenderState(params){
   const nextSeat=selfSeatNum!==null?(selfSeatNum+1)%4:null;
   const nextPlayer=nextSeat!==null?participants.find((p)=>Number(p?.seat)===nextSeat):null;
   const nextPlayerHasOne=Number(nextPlayer?.count)===1;
-  const selfTopTwoWarningHtml=selfActive&&nextPlayerHasOne?`<span class="seat-top-two-warning">${esc(t('playBigWarning'))}</span>`:'';
+  const selfTopTwoWarningHtml=nextPlayerHasOne?`<span class="seat-top-two-warning"><span aria-hidden="true">⚠️</span><span>${esc(t('playBigWarning'))}</span></span>`:'';
   const selfBadgeHtml=selfDangerLast
     ?`<span class="avatar-status-badge warning ${selfActive?'danger':''}" aria-label="${esc(t('lastCardCall'))}"></span>`
     :(selfActive?`<span class="avatar-status-badge turn" aria-label="${esc(t('wait'))}"></span>`:'');

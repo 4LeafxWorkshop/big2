@@ -109,12 +109,12 @@ function gestureListItemHtml(text,kind,esc,language){
   const label=gestureHelpLabel(kind,language);
   const actionIconHtml=kind==='handUp'
     ?'<span class="title-icon title-icon-log" aria-hidden="true"></span>'
-    :kind==='handRight'
+      :kind==='handRight'
       ?'<span aria-hidden="true">💡</span>'
       :kind==='handDown'
-        ?'<span aria-hidden="true">🛎️</span>'
+        ?'<svg class="ui-icon ui-icon-bell" width="21" height="21" aria-hidden="true" viewBox="0 0 24 24"><g transform="translate(0 .1) scale(1.08)"><rect x="10.3" y="4.8" width="3.4" height="1.4" rx=".5" fill="#c8973b"/><path d="M6 16h12l-.7-1c-.4-.5-.6-1.1-.6-1.7 0-2.8-1.8-5-4.7-5s-4.7 2.2-4.7 5c0 .6-.2 1.2-.6 1.7l-.7 1Z" fill="#f3d28a"/><rect x="6" y="17" width="12" height="1.8" rx=".7" fill="#d7a85a"/></g></svg>'
         :kind==='handLeft'
-          ?'<span aria-hidden="true">😆</span>'
+          ?'<svg class="ui-icon ui-icon-emote" width="20" height="20" aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5" fill="#ffd84d" stroke="#111827" stroke-width="1.6"/><circle cx="9" cy="10" r="1.15" fill="#111827"/><circle cx="15" cy="10" r="1.15" fill="#111827"/><path d="M8.3 14.4c1.1 1.4 2.5 2.1 3.7 2.1s2.6-.7 3.7-2.1" fill="none" stroke="#111827" stroke-width="1.9" stroke-linecap="round"/><circle cx="7.4" cy="13.1" r="0.9" fill="#ff8ba7"/><circle cx="16.6" cy="13.1" r="0.9" fill="#ff8ba7"/></svg>'
           :'<span aria-hidden="true">▶</span>';
   const buttonClass=kind==='handUp'
     ?'secondary gesture-help-action-btn gesture-help-action-btn-handUp'
