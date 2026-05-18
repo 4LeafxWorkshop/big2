@@ -577,10 +577,12 @@ export function buildResultScreenHtml(params){
     const total=p.score??0;
     const remainCards=remain.length?remain.map((c)=>renderStaticCard(c,true)).join(''):`<span class="hint">-</span>`;
     const scoreChipText=(key)=>typeof colorizeSuitText==='function'?colorizeSuitText(t(key)):esc(t(key));
+    const playBigPenalty=Number(v.roundSummary?.lastCardBreach?.seat)===Number(p.seat)&&actualDeduction>0;
     const mulTags=[
       detail.anyTwo?`<span class="result-score-chip penalty">${scoreChipText('scoreAnyTwo')} x2</span>`:'',
       detail.twoPenalty?`<span class="result-score-chip penalty">${scoreChipText('scoreTwoPenalty')} x2</span>`:'',
-      detail.chaoMultiplier>1&&detail.chaoKey?`<span class="result-score-chip penalty">${t(detail.chaoKey)} x${detail.chaoMultiplier}</span>`:''
+      detail.chaoMultiplier>1&&detail.chaoKey?`<span class="result-score-chip penalty">${t(detail.chaoKey)} x${detail.chaoMultiplier}</span>`:'',
+      playBigPenalty?`<span class="result-score-chip penalty">${scoreChipText('playBigPenalty')}</span>`:''
     ].filter(Boolean).join('');
     const deltaText=delta>0?`+${delta}`:`${delta}`;
     const detailLine=isWinner

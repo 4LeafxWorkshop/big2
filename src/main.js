@@ -3933,13 +3933,15 @@ function straightMeta(ranks){
   const uniq=[...new Set(ranks)];
   if(uniq.length!==5)return null;
   const has=new Set(uniq);
-  // Allowed starts: 3..10 (normal), A (A2345), 2 (23456).
-  const starts=[0,1,2,3,4,5,6,7,11,12];
+  // Hong Kong order: 3-4-5-6-7 lowest, then wraps through J-Q-K-A-2,
+  // Q-K-A-2-3, K-A-2-3-4, with A-2-3-4-5 highest.
+  const starts=[0,1,2,3,4,5,6,7,8,9,10,11];
   for(const start of starts){
     const seq=[0,1,2,3,4].map((i)=>(start+i)%13);
     if(seq.every((r)=>has.has(r))){
-      // Straight comparison uses the biggest rank by Big Two order (2 is highest).
-      return{seq,high:Math.max(...seq)};
+      const high=Math.max(...seq);
+      const power=start;
+      return{seq,high,power};
     }
   }
   return null;
@@ -3955,11 +3957,11 @@ function evaluatePlay(cards){
   if(count!==5)return{valid:false,reason:t('count')};
   const ranks=sorted.map((c)=>c.rank).sort((a,b)=>a-b);const suits=sorted.map((c)=>c.suit);const flush=suits.every((s)=>s===suits[0]);const straight=straightMeta(ranks);const g=[...cnt.entries()].sort((a,b)=>b[1]-a[1]||b[0]-a[0]);
   const straightHighSuit=straight?sorted.filter((c)=>c.rank===straight.high).reduce((best,c)=>c.suit>best?c.suit:best,-1):-1;
-  if(straight&&flush)return{valid:true,count,kind:'straightflush',power:[FIVE_KIND_POWER.straightflush,straight.high,straightHighSuit],sorted};
+  if(straight&&flush)return{valid:true,count,kind:'straightflush',power:[FIVE_KIND_POWER.straightflush,straight.power,straightHighSuit],sorted};
   if(g[0][1]===4)return{valid:true,count,kind:'fourofkind',power:[FIVE_KIND_POWER.fourofkind,g[0][0]],sorted};
   if(g[0][1]===3&&g[1][1]===2)return{valid:true,count,kind:'fullhouse',power:[FIVE_KIND_POWER.fullhouse,g[0][0]],sorted};
   if(flush){const d=[...ranks].sort((a,b)=>b-a);const flushSuit=sorted[0].suit;return{valid:true,count,kind:'flush',power:[FIVE_KIND_POWER.flush,...d,flushSuit],sorted};}
-  if(straight)return{valid:true,count,kind:'straight',power:[FIVE_KIND_POWER.straight,straight.high,straightHighSuit],sorted};
+  if(straight)return{valid:true,count,kind:'straight',power:[FIVE_KIND_POWER.straight,straight.power,straightHighSuit],sorted};
   return{valid:false,reason:t('five')};
 }
 

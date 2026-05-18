@@ -2,7 +2,7 @@ export function getScoreGuideText(language){
   if(language==='en'){
     return{
       close:'Close',
-      headingDesc:'At round end, each loser is deducted based on remaining cards, then multiplied by penalty conditions. The winner receives the total deductions from all losers.',
+      headingDesc:'All players start at 5000 points. At round end, each loser is deducted based on remaining cards, then multiplied by penalty conditions. The winner receives the total deductions from all losers.',
       baseTitle:'Base Scoring',
       mulTitle:'Multiplier Penalties',
       summary:'Per-loser deduction formula: Base deduction x total multiplier. The winner gains the combined deductions from all losing players.',
@@ -28,15 +28,19 @@ export function getScoreGuideText(language){
         'Calculate each loser’s base deduction from remaining cards.',
         'Apply 2 / ♠2 multipliers and stack them when multiple conditions apply.',
         'Apply chao multipliers according to the loser’s remaining-card count.',
-        'Apply Play big: when the next player has only 1 card, the previous player must play the strongest card or strongest legal response in hand. If they fail to play big and the next player wins, that player also pays the deductions owed by the other two losers.'
+        'Apply Play big: when the next player has only 1 card, the previous player must defend with the strongest card or strongest legal response in hand. Passing while holding a stronger legal play also counts as failing to defend. If the next player wins, that player also pays the deductions owed by the other two losers.'
       ],
-      playBigRule:'Apply Play big: when the next player has only 1 card, the previous player must play the strongest card or strongest legal response in hand. If they fail to play big and the next player wins, that player also pays the deductions owed by the other two losers.'
+      playBigBadge:'No Play big',
+      playBigTransfer:'Transfer',
+      playBigBadgeNote:'Shown when Play big transfers the other two losers’ deductions to one player.',
+      playBigExample:'Example: if Play big is missed and the next player wins, the player with No Play big pays their own deduction plus the other two losers’ deductions; the other two losers pay 0 for that round.',
+      playBigRule:'Apply Play big: when the next player has only 1 card, the previous player must defend with the strongest card or strongest legal response in hand. Passing while holding a stronger legal play also counts as failing to defend. If the next player wins, that player also pays the deductions owed by the other two losers.'
     };
   }
   if(language==='fr'){
     return{
       close:'Fermer',
-      headingDesc:'En fin de manche, chaque perdant est pénalisé selon ses cartes restantes puis multiplié par les conditions. Le gagnant reçoit la somme totale.',
+      headingDesc:'Chaque joueur commence avec 5000 points. En fin de manche, chaque perdant est pénalisé selon ses cartes restantes puis multiplié par les conditions. Le gagnant reçoit la somme totale.',
       baseTitle:'Score de base',
       mulTitle:'Multiplicateurs',
       summary:'Formule : déduction de base x multiplicateur total. Le gagnant reçoit la somme des déductions.',
@@ -62,15 +66,19 @@ export function getScoreGuideText(language){
         'Calculez la déduction de base de chaque perdant selon ses cartes restantes.',
         'Appliquez les multiplicateurs 2 / ♠2 et cumulez-les si plusieurs conditions s’appliquent.',
         'Appliquez les multiplicateurs chao selon le nombre de cartes restantes du perdant.',
-        'Appliquez Joue grand : quand le joueur suivant n’a plus qu’une carte, le joueur précédent doit jouer sa carte la plus forte ou sa meilleure réponse légale. S’il ne le fait pas et que le joueur suivant gagne, il paie aussi les pertes des deux autres perdants.'
+        'Appliquez Joue grand : quand le joueur suivant n’a plus qu’une carte, le joueur précédent doit défendre avec sa carte la plus forte ou sa meilleure réponse légale. Passer avec une réponse plus forte en main compte aussi comme un échec. Si le joueur suivant gagne, il paie aussi les pertes des deux autres perdants.'
       ],
-      playBigRule:'Appliquez Joue grand : quand le joueur suivant n’a plus qu’une carte, le joueur précédent doit jouer sa carte la plus forte ou sa meilleure réponse légale. S’il ne le fait pas et que le joueur suivant gagne, il paie aussi les pertes des deux autres perdants.'
+      playBigBadge:'Pas joué grand',
+      playBigTransfer:'Transfert',
+      playBigBadgeNote:'Affiché quand Joue grand transfère les pertes des deux autres perdants à un seul joueur.',
+      playBigExample:'Exemple : si Joue grand est manqué et que le joueur suivant gagne, le joueur avec Pas joué grand paie sa propre déduction plus celles des deux autres perdants ; les deux autres perdants paient 0 pour cette manche.',
+      playBigRule:'Appliquez Joue grand : quand le joueur suivant n’a plus qu’une carte, le joueur précédent doit défendre avec sa carte la plus forte ou sa meilleure réponse légale. Passer avec une réponse plus forte en main compte aussi comme un échec. Si le joueur suivant gagne, il paie aussi les pertes des deux autres perdants.'
     };
   }
   if(language==='de'){
     return{
       close:'Schließen',
-      headingDesc:'Am Rundenende wird jeder Verlierer nach Restkarten abgezogen und mit Bedingungen multipliziert. Der Gewinner erhält die Summe.',
+      headingDesc:'Alle Spieler starten mit 5000 Punkten. Am Rundenende wird jeder Verlierer nach Restkarten abgezogen und mit Bedingungen multipliziert. Der Gewinner erhält die Summe.',
       baseTitle:'Grundwertung',
       mulTitle:'Multiplikatoren',
       summary:'Formel: Grundabzug x Gesamt‑Multiplikator. Der Gewinner erhält die Summe der Abzüge.',
@@ -96,15 +104,19 @@ export function getScoreGuideText(language){
         'Berechne den Grundabzug jedes Verlierers aus seinen Restkarten.',
         'Wende 2- / ♠2-Multiplikatoren an und multipliziere sie, wenn mehrere Bedingungen gelten.',
         'Wende Chao-Multiplikatoren nach der Restkartenzahl des Verlierers an.',
-        'Wende Größte Karte an: Hat der nächste Spieler nur noch 1 Karte, muss der vorherige Spieler seine stärkste Karte oder stärkste legale Antwort spielen. Tut er das nicht und der nächste Spieler gewinnt, übernimmt er auch die Abzüge der beiden anderen Verlierer.'
+        'Wende Größte Karte an: Hat der nächste Spieler nur noch 1 Karte, muss der vorherige Spieler mit seiner stärksten Karte oder stärksten legalen Antwort verteidigen. Passen trotz stärkerer legaler Antwort zählt ebenfalls als Versäumnis. Gewinnt der nächste Spieler, übernimmt er auch die Abzüge der beiden anderen Verlierer.'
       ],
-      playBigRule:'Wende Größte Karte an: Hat der nächste Spieler nur noch 1 Karte, muss der vorherige Spieler seine stärkste Karte oder stärkste legale Antwort spielen. Tut er das nicht und der nächste Spieler gewinnt, übernimmt er auch die Abzüge der beiden anderen Verlierer.'
+      playBigBadge:'Nicht verteidigt',
+      playBigTransfer:'Übertrag',
+      playBigBadgeNote:'Wird angezeigt, wenn Größte Karte die Abzüge der beiden anderen Verlierer auf einen Spieler überträgt.',
+      playBigExample:'Beispiel: Wird Größte Karte verpasst und der nächste Spieler gewinnt, zahlt der Spieler mit Nicht verteidigt den eigenen Abzug plus die Abzüge der beiden anderen Verlierer; die beiden anderen Verlierer zahlen in dieser Runde 0.',
+      playBigRule:'Wende Größte Karte an: Hat der nächste Spieler nur noch 1 Karte, muss der vorherige Spieler mit seiner stärksten Karte oder stärksten legalen Antwort verteidigen. Passen trotz stärkerer legaler Antwort zählt ebenfalls als Versäumnis. Gewinnt der nächste Spieler, übernimmt er auch die Abzüge der beiden anderen Verlierer.'
     };
   }
   if(language==='es'){
     return{
       close:'Cerrar',
-      headingDesc:'Al final de la ronda, cada perdedor pierde según cartas restantes y se multiplica por condiciones. El ganador recibe la suma.',
+      headingDesc:'Todos empiezan con 5000 puntos. Al final de la ronda, cada perdedor pierde según cartas restantes y se multiplica por condiciones. El ganador recibe la suma.',
       baseTitle:'Puntuación base',
       mulTitle:'Multiplicadores',
       summary:'Fórmula: deducción base x multiplicador total. El ganador recibe la suma de deducciones.',
@@ -130,15 +142,19 @@ export function getScoreGuideText(language){
         'Calcula la deducción base de cada perdedor según sus cartas restantes.',
         'Aplica los multiplicadores de 2 / ♠2 y acumúlalos si hay varias condiciones.',
         'Aplica los multiplicadores chao según las cartas restantes del perdedor.',
-        'Aplica Carta Alta: cuando el siguiente jugador solo tiene 1 carta, el jugador anterior debe jugar su carta más fuerte o su mejor respuesta legal. Si no lo hace y el siguiente jugador gana, también paga las deducciones de los otros dos perdedores.'
+        'Aplica Carta Alta: cuando el siguiente jugador solo tiene 1 carta, el jugador anterior debe defender con su carta más fuerte o su mejor respuesta legal. Pasar teniendo una respuesta legal más fuerte también cuenta como no defender. Si el siguiente jugador gana, también paga las deducciones de los otros dos perdedores.'
       ],
-      playBigRule:'Aplica Carta Alta: cuando el siguiente jugador solo tiene 1 carta, el jugador anterior debe jugar su carta más fuerte o su mejor respuesta legal. Si no lo hace y el siguiente jugador gana, también paga las deducciones de los otros dos perdedores.'
+      playBigBadge:'Sin Carta Alta',
+      playBigTransfer:'Transferencia',
+      playBigBadgeNote:'Se muestra cuando Carta Alta transfiere las deducciones de los otros dos perdedores a un jugador.',
+      playBigExample:'Ejemplo: si se falla Carta Alta y el siguiente jugador gana, quien tiene Sin Carta Alta paga su propia deducción más las deducciones de los otros dos perdedores; esos dos perdedores pagan 0 en esa ronda.',
+      playBigRule:'Aplica Carta Alta: cuando el siguiente jugador solo tiene 1 carta, el jugador anterior debe defender con su carta más fuerte o su mejor respuesta legal. Pasar teniendo una respuesta legal más fuerte también cuenta como no defender. Si el siguiente jugador gana, también paga las deducciones de los otros dos perdedores.'
     };
   }
   if(language==='ja'){
     return{
       close:'閉じる',
-      headingDesc:'ラウンド終了時、各敗者は残り枚数に応じた基本減点にペナルティ倍率を掛けます。勝者は全敗者の合計減点を得ます。',
+      headingDesc:'全員5000点から開始します。ラウンド終了時、各敗者は残り枚数に応じた基本減点にペナルティ倍率を掛けます。勝者は全敗者の合計減点を得ます。',
       baseTitle:'基本得点',
       mulTitle:'倍率ペナルティ',
       summary:'各敗者の減点：基本減点 x 総倍率。勝者は全敗者の合計減点を獲得します。',
@@ -164,14 +180,18 @@ export function getScoreGuideText(language){
         '各敗者の残り枚数から基本減点を計算します。',
         '2 / ♠2 の倍率を適用し、複数条件があれば掛け合わせます。',
         '敗者の残り枚数に応じてチャオ倍率を適用します。',
-        '大を出せを適用します：次のプレイヤーが残り1枚のとき、前のプレイヤーは手札の最強カードまたは最強の合法手を出す必要があります。出さずに次のプレイヤーが勝った場合、そのプレイヤーは他の2人の敗者分の減点も負担します。'
+        '大を出せを適用します：次のプレイヤーが残り1枚のとき、前のプレイヤーは手札の最強カードまたは最強の合法手で止める必要があります。より強い合法手があるのにパスした場合も失敗扱いです。次のプレイヤーが勝った場合、そのプレイヤーは他の2人の敗者分の減点も負担します。'
       ],
-      playBigRule:'大を出せを適用します：次のプレイヤーが残り1枚のとき、前のプレイヤーは手札の最強カードまたは最強の合法手を出す必要があります。出さずに次のプレイヤーが勝った場合、そのプレイヤーは他の2人の敗者分の減点も負担します。'
+      playBigBadge:'大を出せず',
+      playBigTransfer:'移転',
+      playBigBadgeNote:'大を出せにより、他の2人の敗者分の減点が1人に移ると表示されます。',
+      playBigExample:'例：大を出せずに次のプレイヤーが勝った場合、そのプレイヤーは自分の減点に加えて他の2人の敗者分も支払います。他の2人の敗者の支払いはそのラウンドでは0になります。',
+      playBigRule:'大を出せを適用します：次のプレイヤーが残り1枚のとき、前のプレイヤーは手札の最強カードまたは最強の合法手で止める必要があります。より強い合法手があるのにパスした場合も失敗扱いです。次のプレイヤーが勝った場合、そのプレイヤーは他の2人の敗者分の減点も負担します。'
     };
   }
   return{
     close:'關閉',
-    headingDesc:'每局結算時，先按各輸家剩餘張數計算基本扣分，再套用加乘罰則；最後由贏家獲得所有輸家扣分總和。',
+    headingDesc:'所有玩家起始 5000 分。每局結算時，先按各輸家剩餘張數計算基本扣分，再套用加乘罰則；最後由贏家獲得所有輸家扣分總和。',
     baseTitle:'基本計分',
     mulTitle:'加乘罰則',
     summary:'每位輸家扣分公式：基本扣分 x 總加乘倍數；贏家加分為所有輸家扣分總和。',
@@ -197,8 +217,12 @@ export function getScoreGuideText(language){
       '先按每位輸家剩餘手牌計算基本扣分。',
       '如輸家剩餘手牌包含任何 2，套用 x2；若同時持有 ♠2，額外再套用 2罰則 x2。多個倍率會疊乘。',
       '按輸家剩餘張數套用炒的倍率。',
-      '套用頂大：當下家只剩下一張牌時，上家必須打出手上最大的牌。若玩家沒頂大而讓下家勝出的話，則該玩家必須兼負其餘兩家所輸的分數。'
+      '套用頂大：當下一位玩家只剩一張牌時，你必須盡量用手上最大的牌阻止他出清。若你手上有可頂大的牌卻選擇過牌，亦算沒有頂大。若結果讓他勝出，你要代另外兩位輸家承擔扣分。'
     ],
-    playBigRule:'套用頂大：當下家只剩下一張牌時，上家必須打出手上最大的牌。若玩家沒頂大而讓下家勝出的話，則該玩家必須兼負其餘兩家所輸的分數。'
+    playBigBadge:'冇頂大',
+    playBigTransfer:'轉嫁扣分',
+    playBigBadgeNote:'當頂大觸發並由一位玩家承擔另外兩位輸家的扣分時，結算會顯示此標籤。',
+    playBigExample:'例子：若玩家冇頂大而令下家勝出，該玩家要承擔自己扣分，加上另外兩位輸家的扣分；另外兩位輸家該局扣分為 0。',
+    playBigRule:'套用頂大：當下一位玩家只剩一張牌時，你必須盡量用手上最大的牌阻止他出清。若你手上有可頂大的牌卻選擇過牌，亦算沒有頂大。若結果讓他勝出，你要代另外兩位輸家承擔扣分。'
   };
 }

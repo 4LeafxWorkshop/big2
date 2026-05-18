@@ -21,10 +21,10 @@ export function createIntroGuideHelpers(deps){
         panelTitle:'Guide',
         panelSub:'Official quick reference covering core rules, hand hierarchy, opening flow, and practical table strategy.',
         historyTitle:'Background',
-        historyBody:'Big Two (Cho Dai Di) is a four-player shedding card game using a standard 52-card deck without jokers. Each player receives 13 cards, and the objective is to empty your hand before all opponents. The game is known for high decision density, compact round duration, and strong strategic interaction between tempo control, hand preservation, and timing of power cards.',
+        historyBody:'Big Two (Cho Dai Di) is a four-player shedding card game using a standard 52-card deck without jokers. Its exact origin is not well documented; it is generally described as a Cantonese or Chinese climbing game that likely appeared around 1980 in coastal China, became especially popular in Hong Kong, Macau, Taiwan and Southeast Asian Chinese communities, and is also believed by some writers to have originated from Hong Kong. Each player receives 13 cards, and the objective is to empty your hand before all opponents. The game is known for high decision density, compact round duration, and strong strategic interaction between tempo control, hand preservation, and timing of power cards.',
         playTitle:'Gameplay Highlights',
         playList:[
-          'Opening lead of the first round must contain {{3D}}.',
+          'The first play of each game must contain {{3D}}.',
           'Follow play must match card count: single, pair, triple, or 5-card hand.',
           'Five-card hierarchy: Straight < Flush < Full House < Four of a Kind < Straight Flush.',
           'For equal ranks, suit order is ♦️ < ♣️ < ♥️ < ♠️.',
@@ -46,8 +46,9 @@ export function createIntroGuideHelpers(deps){
         guideHowList:[
           'Sign in to enable room play and leaderboard tracking.',
           'From Home, choose Solo or enter the Lobby to create/join a room.',
-          'In a room, the host can press Start when at least 2 players are inside.',
           'On your turn, select cards and tap Play; tap Pass when allowed.',
+          {text:'Room game only:',sub:['The host can start with at least 2 players.','If your turn timer reaches 0, the game auto-plays with initiative or auto-passes against an active play.','Repeated timeouts may replace that player with a bot.']},
+          'Round results show penalty badges such as Has 2, Has ♠2, chao, and Play big.',
           'Use Suggest for help, and sort/drag to organize your hand.'
         ],
         guideGestureTitle:'Gesture Controls',
@@ -77,8 +78,7 @@ export function createIntroGuideHelpers(deps){
         ],
         guideHomeNotes:'If you do not see the option, make sure you are using Safari/Chrome rather than an in-app browser.',
         howTitle:'Hand Types',
-        howBody:'To follow, card count must match the active play. For 5-card contests, compare the highest rank first, then the next ranks in order, and only use suit as the final tiebreaker.',
-        howList:[]
+        howBody:'To follow, card count must match the active play. For 5-card contests, compare the hand type first; when the hand type matches, use that type’s comparison rule.'
       };
     }
     if(lang==='fr'){
@@ -88,10 +88,10 @@ export function createIntroGuideHelpers(deps){
         panelTitle:'Guide',
         panelSub:'Référence rapide officielle : règles clés, hiérarchie des mains, ouverture et stratégie de table.',
         historyTitle:'Contexte',
-        historyBody:'Big Two (Cho Dai Di) est un jeu de défausse à 4 joueurs, joué avec un jeu standard de 52 cartes sans jokers. Chaque joueur reçoit 13 cartes et l’objectif est de vider sa main avant les autres. Le jeu est connu pour sa densité de décisions, ses manches rapides et l’interaction stratégique entre le contrôle du tempo, la conservation des cartes fortes et le timing.',
+        historyBody:'Big Two (Cho Dai Di) est un jeu de défausse à 4 joueurs, joué avec un jeu standard de 52 cartes sans jokers. Son origine exacte est mal documentée ; il est généralement décrit comme un jeu de montée cantonais ou chinois, probablement apparu vers 1980 dans la Chine côtière, devenu particulièrement populaire à Hong Kong, Macao, Taïwan et dans les communautés chinoises d’Asie du Sud-Est, et certains auteurs le pensent originaire de Hong Kong. Chaque joueur reçoit 13 cartes et l’objectif est de vider sa main avant les autres. Le jeu est connu pour sa densité de décisions, ses manches rapides et l’interaction stratégique entre le contrôle du tempo, la conservation des cartes fortes et le timing.',
         playTitle:'Points clés',
         playList:[
-          'La première sortie du premier tour doit contenir {{3D}}.',
+          'La première sortie de chaque partie doit contenir {{3D}}.',
           'Pour suivre, le nombre de cartes doit correspondre : simple, paire, brelan ou 5 cartes.',
           'Hiérarchie des 5 cartes : Suite < Couleur < Full House < Carré < Quinte flush.',
           'À rang égal, l’ordre des couleurs est ♦️ < ♣️ < ♥️ < ♠️.',
@@ -113,8 +113,9 @@ export function createIntroGuideHelpers(deps){
         guideHowList:[
           'Connectez-vous pour activer les salles et le classement.',
           'Depuis l’accueil, choisissez Solo ou entrez dans le Lobby pour créer/rejoindre.',
-          'Dans une salle, l’hôte lance dès que 2 joueurs sont présents.',
           'À votre tour, sélectionnez des cartes puis Jouer ; Passez si autorisé.',
+          {text:'Salle uniquement :',sub:['L’hôte peut lancer dès que 2 joueurs sont présents.','Si votre minuteur atteint 0, le jeu joue automatiquement avec la main ou passe face à une sortie active.','Des expirations répétées peuvent remplacer ce joueur par un bot.']},
+          'Le résultat affiche des badges de pénalité comme Possède un 2, Possède ♠2, chao et Joue grand.',
           'Utilisez Suggestion et triez/drag pour organiser votre main.'
         ],
         guideGestureTitle:'Gestes',
@@ -144,8 +145,7 @@ export function createIntroGuideHelpers(deps){
         ],
         guideHomeNotes:'Si l’option n’apparaît pas, utilisez Safari/Chrome plutôt qu’un navigateur intégré.',
         howTitle:'Types de mains',
-        howBody:'Pour suivre, le nombre de cartes doit correspondre. En 5 cartes, comparez d’abord la plus haute carte, puis les suivantes dans l’ordre, et ne départagez par la couleur qu’en dernier.',
-        howList:[]
+        howBody:'Pour suivre, le nombre de cartes doit correspondre. En 5 cartes, comparez d’abord le type de main ; si le type est identique, utilisez la règle de comparaison de ce type.'
       };
     }
     if(lang==='de'){
@@ -155,10 +155,10 @@ export function createIntroGuideHelpers(deps){
         panelTitle:'Guide',
         panelSub:'Offizielle Kurzübersicht: Regeln, Hand-Rangfolge, Startablauf und Taktik.',
         historyTitle:'Hintergrund',
-        historyBody:'Big Two (Cho Dai Di) ist ein 4‑Spieler‑Ausstiegsspiel mit einem 52‑Karten‑Deck ohne Joker. Jeder erhält 13 Karten; Ziel ist, die eigene Hand zuerst zu leeren. Das Spiel ist bekannt für hohe Entscheidungsdichte, kurze Runden und starke strategische Wechselwirkung zwischen Tempo, Kartenmanagement und Timing starker Karten.',
+        historyBody:'Big Two (Cho Dai Di) ist ein 4‑Spieler‑Ausstiegsspiel mit einem 52‑Karten‑Deck ohne Joker. Die genaue Herkunft ist kaum dokumentiert; meist wird es als kantonesisches bzw. chinesisches Climbing-Kartenspiel beschrieben, das wahrscheinlich um 1980 an der chinesischen Küste aufkam, besonders in Hongkong, Macau, Taiwan und südostasiatischen chinesischen Gemeinschaften populär wurde und von einigen Autoren als aus Hongkong stammend angesehen wird. Jeder erhält 13 Karten; Ziel ist, die eigene Hand zuerst zu leeren. Das Spiel ist bekannt für hohe Entscheidungsdichte, kurze Runden und starke strategische Wechselwirkung zwischen Tempo, Kartenmanagement und Timing starker Karten.',
         playTitle:'Spiel-Highlights',
         playList:[
-          'Der Eröffnungszug der ersten Runde muss {{3D}} enthalten.',
+          'Der erste Zug jedes Spiels muss {{3D}} enthalten.',
           'Nachspielen muss die Kartenanzahl treffen: Einzel, Paar, Drilling oder 5‑Karten‑Hand.',
           '5‑Karten‑Hierarchie: Straße < Farbe < Full House < Vierling < Straight Flush.',
           'Bei gleichem Rang gilt die Farb-Reihenfolge ♦️ < ♣️ < ♥️ < ♠️.',
@@ -180,8 +180,9 @@ export function createIntroGuideHelpers(deps){
         guideHowList:[
           'Anmelden, um Räume und Rangliste zu aktivieren.',
           'Im Home Solo wählen oder Lobby öffnen, um Raum zu erstellen/beitreten.',
-          'Im Raum kann der Host starten, sobald mindestens 2 Spieler drin sind.',
           'Im Zug Karten wählen und Spielen; Passen, wenn erlaubt.',
+          {text:'Nur im Raumspiel:',sub:['Der Host kann ab 2 Spielern starten.','Erreicht dein Zug-Timer 0, spielt das Spiel mit Initiative automatisch oder passt gegen einen aktiven Zug.','Wiederholte Timeouts können den Spieler durch einen Bot ersetzen.']},
+          'Das Rundenergebnis zeigt Straf-Badges wie Hat eine 2, Hat ♠2, Chao und Größte Karte.',
           'Vorschlag nutzen und per Sortieren/Drag die Hand ordnen.'
         ],
         guideGestureTitle:'Gestensteuerung',
@@ -211,8 +212,7 @@ export function createIntroGuideHelpers(deps){
         ],
         guideHomeNotes:'Falls die Option fehlt, nutze Safari/Chrome statt In‑App‑Browser.',
         howTitle:'Handtypen',
-        howBody:'Beim Nachspielen muss die Kartenanzahl passen. Bei 5 Karten zuerst die höchste Karte, dann die weiteren Karten der Reihe nach vergleichen und die Farbe nur als letzten Tiebreaker nutzen.',
-        howList:[]
+        howBody:'Beim Nachspielen muss die Kartenanzahl passen. Bei 5 Karten zuerst den Handtyp vergleichen; bei gleichem Typ gilt die Vergleichsregel dieses Typs.'
       };
     }
     if(lang==='es'){
@@ -222,10 +222,10 @@ export function createIntroGuideHelpers(deps){
         panelTitle:'Guía',
         panelSub:'Referencia rápida oficial: reglas clave, jerarquía de manos, apertura y estrategia.',
         historyTitle:'Contexto',
-        historyBody:'Big Two (Cho Dai Di) es un juego de descarte para 4 jugadores con una baraja estándar de 52 cartas sin comodines. Cada jugador recibe 13 cartas y el objetivo es vaciar la mano antes que los demás. Es un juego de alta densidad de decisiones, rondas rápidas y gran interacción estratégica entre control del ritmo, conservación de cartas fuertes y timing.',
+        historyBody:'Big Two (Cho Dai Di) es un juego de descarte para 4 jugadores con una baraja estándar de 52 cartas sin comodines. Su origen exacto no está bien documentado; normalmente se describe como un juego cantonés o chino de escalada que probablemente apareció alrededor de 1980 en la costa de China, se hizo especialmente popular en Hong Kong, Macao, Taiwán y comunidades chinas del Sudeste Asiático, y algunos autores creen que pudo originarse en Hong Kong. Cada jugador recibe 13 cartas y el objetivo es vaciar la mano antes que los demás. Es un juego de alta densidad de decisiones, rondas rápidas y gran interacción estratégica entre control del ritmo, conservación de cartas fuertes y timing.',
         playTitle:'Puntos clave',
         playList:[
-          'La primera jugada de la primera ronda debe incluir {{3D}}.',
+          'La primera jugada de cada partida debe incluir {{3D}}.',
           'Para responder, la cantidad de cartas debe coincidir: simple, pareja, trío o 5 cartas.',
           'Jerarquía de 5 cartas: Escalera < Color < Full House < Póker < Escalera de color.',
           'A igual rango, el orden de palos es ♦️ < ♣️ < ♥️ < ♠️.',
@@ -247,8 +247,9 @@ export function createIntroGuideHelpers(deps){
         guideHowList:[
           'Inicia sesión para habilitar salas y ranking.',
           'En Inicio, elige Solo o entra al Lobby para crear/unirte.',
-          'En una sala, el anfitrión inicia cuando hay al menos 2 jugadores dentro.',
           'En tu turno, selecciona cartas y pulsa Jugar; Pasa si está permitido.',
+          {text:'Solo en sala:',sub:['El anfitrión puede iniciar con al menos 2 jugadores.','Si tu contador llega a 0, el juego juega con iniciativa o pasa frente a una jugada activa.','Los turnos agotados repetidamente pueden reemplazar a ese jugador por un bot.']},
+          'El resultado muestra insignias de penalización como Tiene un 2, Tiene ♠2, chao y Carta Alta.',
           'Usa Sugerir y ordena/arrastra para organizar la mano.'
         ],
         guideGestureTitle:'Gestos',
@@ -278,8 +279,7 @@ export function createIntroGuideHelpers(deps){
         ],
         guideHomeNotes:'Si no aparece la opción, usa Safari/Chrome en lugar de un navegador integrado.',
         howTitle:'Tipos de manos',
-        howBody:'Para responder, la cantidad de cartas debe coincidir. En 5 cartas, compara primero la carta más alta, luego las siguientes en orden y usa el palo solo como desempate final.',
-        howList:[]
+        howBody:'Para responder, la cantidad de cartas debe coincidir. En manos de 5 cartas, compara primero el tipo de mano; si coincide, usa la regla de comparación de ese tipo.'
       };
     }
     if(lang==='ja'){
@@ -289,10 +289,10 @@ export function createIntroGuideHelpers(deps){
         panelTitle:'ガイド',
         panelSub:'コアルール、役の序列、開局フロー、実戦のセオリーをまとめた公式クイックリファレンス。',
         historyTitle:'概要',
-        historyBody:'Big Two（Chō Dai Di）は4人用の出し切り型カードゲームで、ジョーカーなしの標準52枚デッキを使います。各プレイヤーに13枚ずつ配られ、最初に手札を無くした人が勝利です。テンポ管理、強い札の温存、パワーカードのタイミングなど、密度の高い判断が求められるゲームとして知られています。',
+        historyBody:'Big Two（Chō Dai Di）は4人用の出し切り型カードゲームで、ジョーカーなしの標準52枚デッキを使います。正確な起源は十分に記録されていませんが、一般には広東語圏または中国系のクライミング系カードゲームとされ、1980年前後に中国沿岸部で広まり、香港・マカオ・台湾・東南アジアの華人コミュニティで特に人気になったと説明されます。一部では香港発祥と考えられています。各プレイヤーに13枚ずつ配られ、最初に手札を無くした人が勝利です。テンポ管理、強い札の温存、パワーカードのタイミングなど、密度の高い判断が求められるゲームとして知られています。',
         playTitle:'ポイント',
         playList:[
-          '最初のラウンドの初手は {{3D}} を含む必要があります。',
+          '各ゲームの最初の手は {{3D}} を含む必要があります。',
           '後出しは同じ枚数で合わせます：単札・ペア・スリー・5枚役。',
           '5枚役の強さ：ストレート < フラッシュ < フルハウス < フォーカード < ストレートフラッシュ。',
           '同ランクの場合、スート順は ♦️ < ♣️ < ♥️ < ♠️。',
@@ -314,8 +314,9 @@ export function createIntroGuideHelpers(deps){
         guideHowList:[
           'サインインしてルーム対戦とランキングを有効にします。',
           'ホームでソロを選ぶか、ロビーからルーム作成/参加します。',
-          'ルームでは2人以上でホストが開始できます。',
           '自分の番にカードを選び、プレイをタップ。必要ならパスします。',
+          {text:'ルーム対戦のみ：',sub:['2人以上でホストが開始できます。','自分のターンのカウントが0になると、主導権がある場合は自動で出し、相手の出し手に応答する場合は自動でパスします。','時間切れが続くと、そのプレイヤーがボットに置き換わることがあります。']},
+          '結果画面では、2を所持、♠2を所持、チャオ、大を出せなどのペナルティバッジが表示されます。',
           'サジェストで補助し、並び替え/ドラッグで手札を整理します。'
         ],
         guideGestureTitle:'ジェスチャー',
@@ -345,8 +346,7 @@ export function createIntroGuideHelpers(deps){
         ],
         guideHomeNotes:'表示されない場合は、アプリ内ブラウザではなくSafari/Chromeを使用してください。',
         howTitle:'役の種類',
-        howBody:'後出しは同じ枚数で合わせる必要があります。5枚勝負では、まず一番高い札、次に続く札を順に比べ、最後の同点判定でだけスートを使います。',
-        howList:[]
+        howBody:'後出しは同じ枚数で合わせる必要があります。5枚勝負では、まず役の種類を比較し、同じ役ならその役ごとの比較ルールに従います。'
       };
     }
     return{
@@ -355,10 +355,10 @@ export function createIntroGuideHelpers(deps){
       panelTitle:'玩法指南',
       panelSub:'提供核心規則、牌型次序、開局流程與實戰節奏的官方速覽。',
       historyTitle:'背景',
-      historyBody:'《鋤大D》（Big Two）為四人出清型撲克牌遊戲，使用標準52張牌（不含鬼牌），每位玩家派發13張。玩家的目標是在其他對手之前出清手牌。此遊戲特色在於回合節奏明確、決策密度高，並重視控場、保留關鍵牌與出牌時機的策略取捨。\n\n在香港，《鋤大D》是非常普及的休閒紙牌遊戲，常見於家庭聚會、朋友聚餐及節日活動（例如農曆新年）。許多香港人自小便接觸此遊戲，並在社交場合中用作娛樂和聯誼。遊戲節奏快速且富競技性，因此深受年輕人及成年人歡迎，也逐漸發展出不同地方版本與玩法變化，成為香港流行文化的一部分。',
+      historyBody:'《鋤大D》（Big Two）為四人出清型撲克牌遊戲，使用標準52張牌（不含鬼牌），每位玩家派發13張。此遊戲的確切起源缺乏完整正式文獻；常見資料多把它歸類為粵語或華人爬升類紙牌遊戲，約於1980年前後在中國沿海一帶流行起來，並迅速傳到香港、澳門、台灣及東南亞華人社群。亦有早期分析文章推測它源自香港。玩家的目標是在其他對手之前出清手牌。此遊戲特色在於回合節奏明確、決策密度高，並重視控場、保留關鍵牌與出牌時機的策略取捨。\n\n在香港，《鋤大D》是非常普及的休閒紙牌遊戲，常見於家庭聚會、朋友聚餐及節日活動（例如農曆新年）。許多香港人自小便接觸此遊戲，並在社交場合中用作娛樂和聯誼。遊戲節奏快速且富競技性，因此深受年輕人及成年人歡迎，也逐漸發展出不同地方版本與玩法變化，成為香港流行文化的一部分。',
       playTitle:'玩法重點',
       playList:[
-        '首圈開局第一手必須包含 {{3D}}。',
+        '每局第一手必須包含 {{3D}}。',
         '跟牌必須跟相同張數：單張／一對／三條／五張牌型。',
         '五張牌型大小：蛇 < 花 < 俘佬 < 四條 < 同花順。',
         '同點數比較花色：♦️< ♣️ < ♥️< ♠️。',
@@ -380,8 +380,9 @@ export function createIntroGuideHelpers(deps){
       guideHowList:[
         '登入後可進行房間對戰與排行榜記錄。',
         '主頁選擇「開局」（單人）或進入大堂建立／加入房間。',
-        '房主可在至少 2 位玩家進入房間後按「開始」。',
         '輪到你時，選牌後按「出牌」，可過牌時按「過牌」。',
+        {text:'只限房間對戰：',sub:['房主可在至少 2 位玩家進入房間後按「開始」。','輪到你時若倒數到 0，無上手時系統會自動出牌；有上手時會自動過牌。','如玩家多次回合逾時，可能會被系統以電腦玩家替代。']},
+        '結算時會以標籤顯示有2、持有 ♠2、炒及頂大等罰則。',
         '需要提示可按「建議」，亦可使用排序或拖曳整理手牌。'
       ],
       guideGestureTitle:'手勢提示',
@@ -411,8 +412,7 @@ export function createIntroGuideHelpers(deps){
       ],
       guideHomeNotes:'如看不到相關選項，請確認不是在其他 App 的內置瀏覽器內開啟。',
       howTitle:'牌型',
-      howBody:'跟牌時必須符合相同張數。若為五張牌對比，先比較最高點數，再依次比較第2、第3、第4、第5大的點數；只有所有點數都相同時，最後才比花色。',
-      howList:[]
+      howBody:'跟牌時必須符合相同張數。五張牌先比較牌型；同牌型時，按該牌型的規則比較大小。'
     };
   }
 
@@ -426,60 +426,72 @@ export function createIntroGuideHelpers(deps){
     if(lang==='en'){
       return[
         {name:'Single',desc:'1 card',cards:[card('A','♠️')]},
-        {name:'Pair',desc:'2 same rank',cards:[card('9','♦️'),card('9','♣️')]},
-        {name:'Triple',desc:'3 same rank',cards:[card('7','♦️'),card('7','♣️'),card('7','♠️')]},
-        {name:'Straight (Snake)',desc:'5 consecutive ranks',cards:[card('6','♦️'),card('7','♣️'),card('8','♥️'),card('9','♠️'),card('10','♣️')]},
-        {name:'Flush (Flower)',desc:'5 same suit',cards:[card('3','♥️'),card('7','♥️'),card('9','♥️'),card('J','♥️'),card('A','♥️')]},
-        {name:'Full House',desc:'Triple + Pair',cards:[card('Q','♣️'),card('Q','♦️'),card('Q','♠️'),card('5','♥️'),card('5','♣️')]},
-        {name:'Four of a Kind',desc:'4 same rank + kicker',cards:[card('8','♦️'),card('8','♣️'),card('8','♥️'),card('8','♠️'),card('2','♣️')]},
-        {name:'Straight Flush',desc:'Same suit + consecutive',cards:[card('5','♠️'),card('6','♠️'),card('7','♠️'),card('8','♠️'),card('9','♠️')]}
+        {name:'Pair',desc:'2 same rank',note:'Compare rank first; if ranks match, compare the higher suit in the pair.',cards:[card('9','♦️'),card('9','♣️')]},
+        {name:'Triple',desc:'3 same rank',note:'Compare the triple rank.',cards:[card('7','♦️'),card('7','♣️'),card('7','♠️')]},
+        {name:'Straight (Snake)',desc:'5 consecutive ranks',note:'3-4-5-6-7 is lowest, then normal straights continue up to 10-J-Q-K-A, J-Q-K-A-2, Q-K-A-2-3, K-A-2-3-4, and A-2-3-4-5 is highest.',cards:[card('6','♦️'),card('7','♣️'),card('8','♥️'),card('9','♠️'),card('10','♣️')]},
+        {name:'Flush (Flower)',desc:'5 same suit',note:'Compare highest card, then 2nd, 3rd, 4th, 5th; compare suit only if all ranks match.',cards:[card('3','♥️'),card('7','♥️'),card('9','♥️'),card('J','♥️'),card('A','♥️')]},
+        {name:'Full House',desc:'Triple + Pair',note:'Compare the triple rank.',cards:[card('Q','♣️'),card('Q','♦️'),card('Q','♠️'),card('5','♥️'),card('5','♣️')]},
+        {name:'Four of a Kind',desc:'4 same rank + kicker',note:'Compare the four-card rank.',cards:[card('8','♦️'),card('8','♣️'),card('8','♥️'),card('8','♠️'),card('2','♣️')]},
+        {name:'Straight Flush',desc:'Same suit + consecutive',note:'Compare as a straight.',cards:[card('5','♠️'),card('6','♠️'),card('7','♠️'),card('8','♠️'),card('9','♠️')]}
       ];
     }
     if(lang==='fr'){
       return[
         {name:'Carte',desc:'1 carte',cards:[card('A','♠️')]},
-        {name:'Paire',desc:'2 même rang',cards:[card('9','♦️'),card('9','♣️')]},
-        {name:'Brelan',desc:'3 même rang',cards:[card('7','♦️'),card('7','♣️'),card('7','♠️')]},
-        {name:'Suite',desc:'5 rangs consécutifs',cards:[card('6','♦️'),card('7','♣️'),card('8','♥️'),card('9','♠️'),card('10','♣️')]},
-        {name:'Couleur',desc:'5 même couleur',cards:[card('3','♥️'),card('7','♥️'),card('9','♥️'),card('J','♥️'),card('A','♥️')]},
-        {name:'Full House',desc:'Brelan + Paire',cards:[card('Q','♣️'),card('Q','♦️'),card('Q','♠️'),card('5','♥️'),card('5','♣️')]},
-        {name:'Carré',desc:'4 même rang + kicker',cards:[card('8','♦️'),card('8','♣️'),card('8','♥️'),card('8','♠️'),card('2','♣️')]},
-        {name:'Quinte flush',desc:'Même couleur + suite',cards:[card('5','♠️'),card('6','♠️'),card('7','♠️'),card('8','♠️'),card('9','♠️')]}
+        {name:'Paire',desc:'2 même rang',note:'Comparer d’abord le rang ; à rang égal, comparer la couleur la plus haute de la paire.',cards:[card('9','♦️'),card('9','♣️')]},
+        {name:'Brelan',desc:'3 même rang',note:'Comparer le rang du brelan.',cards:[card('7','♦️'),card('7','♣️'),card('7','♠️')]},
+        {name:'Suite',desc:'5 rangs consécutifs',note:'3-4-5-6-7 est la plus faible, puis les suites montent jusqu’à 10-J-Q-K-A, J-Q-K-A-2, Q-K-A-2-3, K-A-2-3-4, et A-2-3-4-5 est la plus forte.',cards:[card('6','♦️'),card('7','♣️'),card('8','♥️'),card('9','♠️'),card('10','♣️')]},
+        {name:'Couleur',desc:'5 même couleur',note:'Comparer la carte la plus haute, puis la 2e, 3e, 4e, 5e ; comparer la couleur seulement si tous les rangs sont identiques.',cards:[card('3','♥️'),card('7','♥️'),card('9','♥️'),card('J','♥️'),card('A','♥️')]},
+        {name:'Full House',desc:'Brelan + Paire',note:'Comparer le rang du brelan.',cards:[card('Q','♣️'),card('Q','♦️'),card('Q','♠️'),card('5','♥️'),card('5','♣️')]},
+        {name:'Carré',desc:'4 même rang + kicker',note:'Comparer le rang des quatre cartes.',cards:[card('8','♦️'),card('8','♣️'),card('8','♥️'),card('8','♠️'),card('2','♣️')]},
+        {name:'Quinte flush',desc:'Même couleur + suite',note:'Suit la comparaison des suites.',cards:[card('5','♠️'),card('6','♠️'),card('7','♠️'),card('8','♠️'),card('9','♠️')]}
       ];
     }
     if(lang==='de'){
       return[
         {name:'Einzel',desc:'1 Karte',cards:[card('A','♠️')]},
-        {name:'Paar',desc:'2 gleiche Ränge',cards:[card('9','♦️'),card('9','♣️')]},
-        {name:'Drilling',desc:'3 gleiche Ränge',cards:[card('7','♦️'),card('7','♣️'),card('7','♠️')]},
-        {name:'Straße',desc:'5 aufeinanderfolgende Ränge',cards:[card('6','♦️'),card('7','♣️'),card('8','♥️'),card('9','♠️'),card('10','♣️')]},
-        {name:'Farbe',desc:'5 gleiche Farbe',cards:[card('3','♥️'),card('7','♥️'),card('9','♥️'),card('J','♥️'),card('A','♥️')]},
-        {name:'Full House',desc:'Drilling + Paar',cards:[card('Q','♣️'),card('Q','♦️'),card('Q','♠️'),card('5','♥️'),card('5','♣️')]},
-        {name:'Vierling',desc:'4 gleiche Ränge + Beikarte',cards:[card('8','♦️'),card('8','♣️'),card('8','♥️'),card('8','♠️'),card('2','♣️')]},
-        {name:'Straight Flush',desc:'Gleiche Farbe + Straße',cards:[card('5','♠️'),card('6','♠️'),card('7','♠️'),card('8','♠️'),card('9','♠️')]}
+        {name:'Paar',desc:'2 gleiche Ränge',note:'Zuerst Rang vergleichen; bei gleichem Rang zählt die höhere Farbe im Paar.',cards:[card('9','♦️'),card('9','♣️')]},
+        {name:'Drilling',desc:'3 gleiche Ränge',note:'Rang des Drillings vergleichen.',cards:[card('7','♦️'),card('7','♣️'),card('7','♠️')]},
+        {name:'Straße',desc:'5 aufeinanderfolgende Ränge',note:'3-4-5-6-7 ist am niedrigsten; danach steigen die Straßen bis 10-J-Q-K-A, J-Q-K-A-2, Q-K-A-2-3, K-A-2-3-4, und A-2-3-4-5 ist am höchsten.',cards:[card('6','♦️'),card('7','♣️'),card('8','♥️'),card('9','♠️'),card('10','♣️')]},
+        {name:'Farbe',desc:'5 gleiche Farbe',note:'Höchste Karte, dann 2., 3., 4., 5. Karte vergleichen; Farbe nur vergleichen, wenn alle Ränge gleich sind.',cards:[card('3','♥️'),card('7','♥️'),card('9','♥️'),card('J','♥️'),card('A','♥️')]},
+        {name:'Full House',desc:'Drilling + Paar',note:'Vergleicht den Drilling-Rang.',cards:[card('Q','♣️'),card('Q','♦️'),card('Q','♠️'),card('5','♥️'),card('5','♣️')]},
+        {name:'Vierling',desc:'4 gleiche Ränge + Beikarte',note:'Vergleicht den Rang der vier Karten.',cards:[card('8','♦️'),card('8','♣️'),card('8','♥️'),card('8','♠️'),card('2','♣️')]},
+        {name:'Straight Flush',desc:'Gleiche Farbe + Straße',note:'Folgt dem Straßenvergleich.',cards:[card('5','♠️'),card('6','♠️'),card('7','♠️'),card('8','♠️'),card('9','♠️')]}
       ];
     }
     if(lang==='es'){
       return[
         {name:'Carta',desc:'1 carta',cards:[card('A','♠️')]},
-        {name:'Pareja',desc:'2 del mismo rango',cards:[card('9','♦️'),card('9','♣️')]},
-        {name:'Trío',desc:'3 del mismo rango',cards:[card('7','♦️'),card('7','♣️'),card('7','♠️')]},
-        {name:'Escalera',desc:'5 rangos consecutivos',cards:[card('6','♦️'),card('7','♣️'),card('8','♥️'),card('9','♠️'),card('10','♣️')]},
-        {name:'Color',desc:'5 del mismo palo',cards:[card('3','♥️'),card('7','♥️'),card('9','♥️'),card('J','♥️'),card('A','♥️')]},
-        {name:'Full House',desc:'Trío + Pareja',cards:[card('Q','♣️'),card('Q','♦️'),card('Q','♠️'),card('5','♥️'),card('5','♣️')]},
-        {name:'Póker',desc:'4 del mismo rango + kicker',cards:[card('8','♦️'),card('8','♣️'),card('8','♥️'),card('8','♠️'),card('2','♣️')]},
-        {name:'Escalera de color',desc:'Mismo palo + escalera',cards:[card('5','♠️'),card('6','♠️'),card('7','♠️'),card('8','♠️'),card('9','♠️')]}
+        {name:'Pareja',desc:'2 del mismo rango',note:'Compara primero el rango; si coincide, compara el palo más alto de la pareja.',cards:[card('9','♦️'),card('9','♣️')]},
+        {name:'Trío',desc:'3 del mismo rango',note:'Compara el rango del trío.',cards:[card('7','♦️'),card('7','♣️'),card('7','♠️')]},
+        {name:'Escalera',desc:'5 rangos consecutivos',note:'3-4-5-6-7 es la más baja; luego suben hasta 10-J-Q-K-A, J-Q-K-A-2, Q-K-A-2-3, K-A-2-3-4, y A-2-3-4-5 es la más alta.',cards:[card('6','♦️'),card('7','♣️'),card('8','♥️'),card('9','♠️'),card('10','♣️')]},
+        {name:'Color',desc:'5 del mismo palo',note:'Compara la carta más alta, luego la 2.ª, 3.ª, 4.ª y 5.ª; compara palo solo si todos los rangos coinciden.',cards:[card('3','♥️'),card('7','♥️'),card('9','♥️'),card('J','♥️'),card('A','♥️')]},
+        {name:'Full House',desc:'Trío + Pareja',note:'Compara el rango del trío.',cards:[card('Q','♣️'),card('Q','♦️'),card('Q','♠️'),card('5','♥️'),card('5','♣️')]},
+        {name:'Póker',desc:'4 del mismo rango + kicker',note:'Compara el rango de las cuatro cartas.',cards:[card('8','♦️'),card('8','♣️'),card('8','♥️'),card('8','♠️'),card('2','♣️')]},
+        {name:'Escalera de color',desc:'Mismo palo + escalera',note:'Sigue la comparación de escalera.',cards:[card('5','♠️'),card('6','♠️'),card('7','♠️'),card('8','♠️'),card('9','♠️')]}
+      ];
+    }
+    if(lang==='ja'){
+      return[
+        {name:'単札',desc:'1枚',cards:[card('A','♠️')]},
+        {name:'ペア',desc:'同じランク2枚',note:'まずランクを比較し、同じランクならペア内の高いスートで比較します。',cards:[card('9','♦️'),card('9','♣️')]},
+        {name:'スリー',desc:'同じランク3枚',note:'スリーのランクで比較します。',cards:[card('7','♦️'),card('7','♣️'),card('7','♠️')]},
+        {name:'ストレート',desc:'連続ランク5枚',note:'3-4-5-6-7 が最弱で、10-J-Q-K-A、J-Q-K-A-2、Q-K-A-2-3、K-A-2-3-4 と続き、A-2-3-4-5 が最強です。',cards:[card('6','♦️'),card('7','♣️'),card('8','♥️'),card('9','♠️'),card('10','♣️')]},
+        {name:'フラッシュ',desc:'同じスート5枚',note:'最高ランクから2番目、3番目、4番目、5番目の順に比較し、全ランクが同じ場合だけスートを比較します。',cards:[card('3','♥️'),card('7','♥️'),card('9','♥️'),card('J','♥️'),card('A','♥️')]},
+        {name:'フルハウス',desc:'スリー + ペア',note:'スリーのランクで比較します。',cards:[card('Q','♣️'),card('Q','♦️'),card('Q','♠️'),card('5','♥️'),card('5','♣️')]},
+        {name:'フォーカード',desc:'同じランク4枚 + キッカー',note:'4枚のランクで比較します。',cards:[card('8','♦️'),card('8','♣️'),card('8','♥️'),card('8','♠️'),card('2','♣️')]},
+        {name:'ストレートフラッシュ',desc:'同じスート + 連続ランク',note:'ストレートの比較に従います。',cards:[card('5','♠️'),card('6','♠️'),card('7','♠️'),card('8','♠️'),card('9','♠️')]}
       ];
     }
     return[
       {name:'單張',desc:'1張牌',cards:[card('A','♠️')]},
-      {name:'一對',desc:'2張同點數',cards:[card('9','♦️'),card('9','♣️')]},
-      {name:'三條',desc:'3張同點數',cards:[card('7','♦️'),card('7','♣️'),card('7','♠️')]},
-      {name:'蛇',desc:'5張連續點數',cards:[card('6','♦️'),card('7','♣️'),card('8','♥️'),card('9','♠️'),card('10','♣️')]},
-      {name:'花',desc:'5張同花色',cards:[card('3','♥️'),card('7','♥️'),card('9','♥️'),card('J','♥️'),card('A','♥️')]},
-      {name:'俘佬',desc:'三條 + 一對',cards:[card('Q','♣️'),card('Q','♦️'),card('Q','♠️'),card('5','♥️'),card('5','♣️')]},
-      {name:'四條',desc:'4張同點數 + 腳',cards:[card('8','♦️'),card('8','♣️'),card('8','♥️'),card('8','♠️'),card('2','♣️')]},
-      {name:'同花順',desc:'同花色 + 連續點數',cards:[card('5','♠️'),card('6','♠️'),card('7','♠️'),card('8','♠️'),card('9','♠️')]}
+      {name:'一對',desc:'2張同點數',note:'先比點數；點數相同時，比較該對牌中較大的花色。',cards:[card('9','♦️'),card('9','♣️')]},
+      {name:'三條',desc:'3張同點數',note:'以三張牌的點數比較大小。',cards:[card('7','♦️'),card('7','♣️'),card('7','♠️')]},
+      {name:'蛇',desc:'5張連續點數',note:'3-4-5-6-7 最小，之後順序去到 10-J-Q-K-A、J-Q-K-A-2、Q-K-A-2-3、K-A-2-3-4，A-2-3-4-5 最大。',cards:[card('6','♦️'),card('7','♣️'),card('8','♥️'),card('9','♠️'),card('10','♣️')]},
+      {name:'花',desc:'5張同花色',note:'先比最大點數，再依次比第2、第3、第4、第5大；只有所有點數相同時才比花色。',cards:[card('3','♥️'),card('7','♥️'),card('9','♥️'),card('J','♥️'),card('A','♥️')]},
+      {name:'俘佬',desc:'三條 + 一對',note:'以三條點數比較。',cards:[card('Q','♣️'),card('Q','♦️'),card('Q','♠️'),card('5','♥️'),card('5','♣️')]},
+      {name:'四條',desc:'4張同點數 + 腳',note:'以四張相同牌的點數比較。',cards:[card('8','♦️'),card('8','♣️'),card('8','♥️'),card('8','♠️'),card('2','♣️')]},
+      {name:'同花順',desc:'同花色 + 連續點數',note:'按蛇的比較方式。',cards:[card('5','♠️'),card('6','♠️'),card('7','♠️'),card('8','♠️'),card('9','♠️')]}
     ];
   }
 
