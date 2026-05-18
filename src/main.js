@@ -7221,6 +7221,70 @@ if(import.meta.env.DEV){
     return{left:rect.left,top:rect.top,right:rect.right,bottom:rect.bottom,width:rect.width,height:rect.height};
   };
   window.__BIG2_VISUAL_TEST__={
+    seedRoomResume({email='resume@example.com',roomId='room-1',roomCode='ABCD',score=6200,roomData=null}={}){
+      const now=Date.now();
+      const nextRoomData=roomData??{
+        code:roomCode,
+        status:'lobby',
+        updatedAt:now,
+        hostId:'uid:resume',
+        hostName:'Player',
+        playerIds:['uid:resume','uid:ally'],
+        players:[
+          {uid:'uid:resume',email,name:'Player',gender:'male',seat:0,isHost:true,lastSeen:now},
+          {uid:'uid:ally',email:'ally@example.com',name:'Ally',gender:'female',seat:1,isHost:false,lastSeen:now}
+        ],
+        totals:[score,5000,5000,5000]
+      };
+      state.home.google={
+        ...state.home.google,
+        signedIn:true,
+        provider:'google',
+        name:'Player',
+        email:String(email).trim().toLowerCase(),
+        uid:'resume',
+        sub:'resume',
+        picture:'',
+        pictureLoaded:false,
+        gender:'male',
+        profileMissing:false,
+        hydrating:true
+      };
+      state.score=score;
+      state.solo.totals=[score,5000,5000,5000];
+      state.home.mode='room';
+      state.room={
+        ...state.room,
+        id:roomId,
+        code:roomCode,
+        firebaseInstanceId:'seed-services',
+        data:nextRoomData,
+        joinOpen:false,
+        inviteOpen:false,
+        error:'',
+        started:false,
+        unsub:null,
+        selfSeat:0,
+        recordedGameKey:'',
+        lastMoveKey:'',
+        playerId:'uid:resume',
+        pendingStart:false,
+        lastResultPlayers:null,
+        inviteUrl:'',
+        inviteQrDataUrl:'',
+        inviteCardDataUrl:'',
+        inviteQrLoading:false,
+        inviteQrError:'',
+        pendingInviteCode:'',
+        inviteQrPayload:'',
+        adPromptGameKey:''
+      };
+      render();
+    },
+    finishRoomResume(){
+      state.home.google={...state.home.google,hydrating:false};
+      render();
+    },
     showCallout({seat=1,text='Pass!'}={}){
       setVisualPassCallout(seat,text);
     },
