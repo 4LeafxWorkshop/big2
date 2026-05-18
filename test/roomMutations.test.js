@@ -93,6 +93,28 @@ test('setRoomPrivacy updates privacy for the host while room is not playing', as
   assert.equal(typeof updates[0].payload.updatedAt,'number');
 });
 
+test('setRoomPrivacy ignores non-host updates', async()=>{
+  const state=createState({
+    room:{
+      id:'room-1',
+      data:{
+        status:'lobby',
+        hostId:'uid:999',
+        hostName:'Other',
+        players:[
+          {uid:'uid:123',name:'Player',gender:'male',seat:0,lastSeen:0},
+          {uid:'uid:999',name:'Other',gender:'female',seat:1,lastSeen:0}
+        ],
+        totals:[5000,5000,5000,5000]
+      }
+    }
+  });
+  const updates=[];
+  const {controller}=createController(state,updates);
+  await controller.setRoomPrivacy(true);
+  assert.equal(updates.length,0);
+});
+
 test('syncRoomSelfScoreIfNeeded writes new totals when local score differs from room totals', async()=>{
   const state=createState();
   const updates=[];

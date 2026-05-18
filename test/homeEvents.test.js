@@ -144,6 +144,20 @@ test('home binder blocks lobby open when sign-in is required', async()=>{
   assert.equal(roomError,'roomLoginRequired');
 });
 
+test('home binder ignores room privacy toggles for non-hosts', async()=>{
+  const publicBtn=makeElement({attrs:{'data-private':'0'}});
+  const privateBtn=makeElement({attrs:{'data-private':'1'}});
+  let privacyCalls=0;
+  bindWith({
+    document:makeDocument({bySelector:{'#room-privacy-toggle [data-private]':[publicBtn,privateBtn]}}),
+    roomIsHost:false,
+    setRoomPrivacy:async()=>{privacyCalls+=1;}
+  });
+  await publicBtn.dispatch('click');
+  await privateBtn.dispatch('click');
+  assert.equal(privacyCalls,0);
+});
+
 test('home binder arms room start pending flow', async()=>{
   const roomStart=makeElement();
   let timerValue=null;
