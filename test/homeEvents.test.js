@@ -271,6 +271,57 @@ test('home binder waits for google hydration before room create', async()=>{
   assert.equal(createCalls,1);
 });
 
+test('home binder waits for hydrated login before solo and room start', async()=>{
+  const soloStart=makeElement();
+  const roomStart=makeElement();
+  const state={
+    home:{
+      mode:'home',
+      showLeaderboard:false,
+      google:{
+        signedIn:true,
+        email:'user@example.com',
+        hydrating:true,
+        profileMissing:false
+      },
+      leaderboard:{sort:'totalDelta',period:'all'}
+    },
+    room:{joinOpen:false,error:'',joinOpenCountdown:15,pendingStart:false,code:'ABCD'},
+    showScoreGuide:false,
+    screen:'home',
+    opponentProfileName:''
+  };
+  let waitCalls=0;
+  let soloCalls=0;
+  let roomCalls=0;
+  let resolveWait;
+  const waitPromise=new Promise((resolve)=>{
+    resolveWait=resolve;
+  });
+  bindWith({
+    document:makeDocument({byId:{'solo-start':soloStart,'room-start':roomStart}}),
+    state,
+    signedInWithEmail:()=>true,
+    waitMs:async()=>{
+      waitCalls+=1;
+      await waitPromise;
+      state.home.google.hydrating=false;
+    },
+    startSoloGame:()=>{soloCalls+=1;},
+    startRoom:async()=>{roomCalls+=1;}
+  });
+  const soloFlow=soloStart.dispatch('pointerdown');
+  const roomFlow=roomStart.dispatch('click');
+  await Promise.resolve();
+  assert.equal(waitCalls,2);
+  resolveWait();
+  await Promise.all([soloFlow,roomFlow]);
+  await new Promise((resolve)=>setImmediate(resolve));
+  assert.equal(soloCalls,1);
+  assert.equal(roomCalls,1);
+  assert.equal(state.home.google.hydrating,false);
+});
+
 test('home binder rerenders gender toggle when not signed in', async()=>{
   const genderButton=makeElement({attrs:{'data-value':'female'}});
   let renderCount=0;
