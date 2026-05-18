@@ -197,6 +197,15 @@
   --game-penalty-badge-bg: linear-gradient(180deg, rgba(255, 93, 93, .28), rgba(182, 38, 38, .16));
   --game-penalty-badge-text: #ffd1d1;
   --game-penalty-badge-shadow: 0 0 0 1px rgba(255, 93, 93, .18), 0 0 10px rgba(255, 93, 93, .16);
+  --ui-pill-radius: 999px;
+  --ui-pill-border: 1px solid rgba(255,255,255,.16);
+  --ui-pill-bg: rgba(255,255,255,.08);
+  --ui-pill-text: #f4f9fb;
+  --ui-pill-shadow: 0 2px 8px rgba(0,0,0,.2);
+  --ui-pill-loading-border: rgba(96, 165, 250, .28);
+  --ui-pill-loading-bg:
+    linear-gradient(180deg, rgba(96, 165, 250, .22), rgba(59, 130, 246, .12)),
+    rgba(255,255,255,.06);
   --game-round-wins-min-h: 18px;
   --game-round-wins-pad-x: 7px;
   --game-round-wins-font-size: .68rem;
@@ -5240,16 +5249,38 @@ ul.gesture-help-list {
   width: auto;
   justify-content: flex-end;
 }
-#google-name-inline .auth-status {
+#google-name-inline .auth-status,
+.room-start-subtitle,
+.seat-top-two-warning,
+.result-score-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 18px;
+  padding: 2px 8px;
+  border-radius: var(--ui-pill-radius);
+  border: var(--ui-pill-border);
+  background: var(--ui-pill-bg);
+  box-shadow: var(--ui-pill-shadow);
+  line-height: 1;
+  letter-spacing: 0;
+}
+#google-name-inline .auth-status,
+.room-start-subtitle {
   font-size: .78rem;
   font-weight: 700;
-  color: var(--muted);
+  color: var(--ui-pill-text);
 }
 #google-name-inline .auth-status-warning {
-  color: #f59e0b;
+  color: #ffd79a;
+  border-color: rgba(245, 158, 11, .26);
+  background: linear-gradient(180deg, rgba(245, 158, 11, .24), rgba(180, 83, 9, .12)), rgba(255,255,255,.06);
 }
 #google-name-inline .auth-status-loading {
-  color: #60a5fa;
+  color: #dbeafe;
+  border-color: var(--ui-pill-loading-border);
+  background: var(--ui-pill-loading-bg);
+  box-shadow: 0 2px 8px rgba(0,0,0,.18), 0 0 12px rgba(96, 165, 250, .12);
 }
 #google-name-inline .auth-provider-badge {
   width: 30px;
@@ -7553,7 +7584,7 @@ body[data-screen='game'] .side-zone.log-collapsed {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 999px;
+  border-radius: var(--ui-pill-radius);
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--player-color, #7aaed8) 42%, rgba(255,255,255,.2)) inset;
 }
 .game-log-fab-status-chip,
@@ -7828,7 +7859,7 @@ body[data-screen='game'] .log-side-card .log-status {
   width: 14px;
   height: 14px;
   margin-right: 4px;
-  border-radius: 999px;
+  border-radius: var(--ui-pill-radius);
   box-shadow: 0 0 0 1px color-mix(in srgb, var(--player-color, #7aaed8) 42%, rgba(255,255,255,.2)) inset;
   overflow: hidden;
 }
@@ -9535,8 +9566,8 @@ body[data-screen='game'] .result-card .room-expiry-row.room-expiry-top {
   align-items: center;
   margin-left: 4px;
   padding: 1px 6px;
-  border-radius: var(--game-badge-radius);
-  border: 1px solid var(--game-badge-border);
+  border-radius: var(--ui-pill-radius);
+  border: var(--game-badge-border);
   background: var(--game-badge-bg);
   font-size: .74rem;
   color: var(--game-badge-text);
@@ -10575,15 +10606,7 @@ body[data-screen='game'] .avatar-status-badge.warning.danger::before {
   box-shadow: 0 0 16px rgba(255, 95, 102, .58);
 }
 body[data-screen='game'] .seat-top-two-warning {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  min-height: 18px;
-  padding: 2px 8px;
-  border-radius: var(--game-badge-radius);
-  font-size: .76rem;
   font-weight: 900;
-  line-height: 1;
   white-space: nowrap;
   color: var(--game-badge-text);
   text-shadow: none;
