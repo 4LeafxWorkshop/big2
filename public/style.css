@@ -5248,6 +5248,9 @@ ul.gesture-help-list {
 #google-name-inline .auth-status-warning {
   color: #f59e0b;
 }
+#google-name-inline .auth-status-loading {
+  color: #60a5fa;
+}
 #google-name-inline .auth-provider-badge {
   width: 30px;
   height: 30px;

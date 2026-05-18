@@ -102,8 +102,11 @@ export function createGoogleIdentityController({
       nameRow?.classList.add('signed-in-auth');
       const label='Google';
       const profileMissing=Boolean(state.home.google?.profileMissing);
+      const hydrating=Boolean(state.home.google?.hydrating);
       const t=getT();
-      const status=profileMissing?`<span class="auth-status auth-status-warning">${t('profileMissing')}</span>`:'';
+      const status=profileMissing
+        ?`<span class="auth-status auth-status-warning">${t('profileMissing')}</span>`
+        :(hydrating?`<span class="auth-status auth-status-loading">${t('restoringScore')}</span>`:'');
       const actionLabel=profileMissing?t('signInAgain'):t('signOut');
       const actionClass=profileMissing?'auth-btn-retry':'auth-btn-signout';
       slot.innerHTML=`<span class="auth-provider-badge auth-provider-google" role="img" aria-label="${label}" title="${label}">${authProviderBadgeHtml('google')}</span>${status}<button id="google-signout" class="auth-btn ${actionClass}">${actionLabel}</button>`;

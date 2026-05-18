@@ -6202,7 +6202,9 @@ function renderHome(){
   const aiFieldRight=`<label class="field field-ai field-ai-right"><span>${t('ai')}</span>${difficultySliderHtml('difficulty-slider-right',state.home.aiDifficulty,t)}</label>`;
   const roomErrorHtml=state.room.error?`<div class="hint room-error">${esc(state.room.error)}</div>`:'';
   const loginHint=t('loginToStart');
-  const roomLobbyBtnCore=inRoom?'':`<button id="room-lobby-open" class="secondary royal-room-btn" ${signedIn?'':'disabled'}><span class="home-btn-main">${t('roomEnter')}</span><span class="home-btn-subtitle">${esc(t('roomEnterSubtitle'))}</span></button>`;
+  const profileRestorePending=Boolean(state.home.google?.signedIn&&state.home.google?.hydrating);
+  const roomLobbySubtitle=profileRestorePending?t('restoringScore'):t('roomEnterSubtitle');
+  const roomLobbyBtnCore=inRoom?'':`<button id="room-lobby-open" class="secondary royal-room-btn" ${signedIn&&!profileRestorePending?'':'disabled'}><span class="home-btn-main">${t('roomEnter')}</span><span class="home-btn-subtitle">${esc(roomLobbySubtitle)}</span></button>`;
   const roomButtonsHtml=roomLobbyBtnCore
     ?roomLobbyBtnCore
     :'';
@@ -6224,10 +6226,12 @@ function renderHome(){
     :'';
   const roomStartControl=roomIsHost
     ?(() => {
-        const disabled=roomStarting||!roomCanStart||roomStartPending;
+        const disabled=roomStarting||!roomCanStart||roomStartPending||profileRestorePending;
         const subtitle=roomStarting||roomStartPending
           ?''
-          :roomCanStart
+          :profileRestorePending
+            ?`<span class="room-start-subtitle">${esc(t('restoringScore'))}</span>`
+            :roomCanStart
             ?`<span class="room-start-subtitle">${esc(t('startReadySubtitle'))}</span>`
             :`<span class="room-start-subtitle">${t('roomNeedPlayersShort')}</span>`
         ;
@@ -6235,6 +6239,8 @@ function renderHome(){
           ?`<span class="hint">${t('roomSending')}</span>`
           :roomStarting
             ?`<span class="hint">${t('roomStarting')}</span>`
+            :profileRestorePending
+              ?`<span class="hint">${t('restoringScore')}</span>`
           :'';
         const button=`<button id="room-start" class="primary room-start-btn" ${disabled?'disabled':''}><span class="room-start-main">${t('roomStart')}</span>${subtitle}</button>`;
         return `${button}${hint}`;
@@ -6285,7 +6291,8 @@ function renderHome(){
     authPictureUrlFrom,
     avatarDataUri
   });
-  const soloBtnCore=`<button id="solo-start" class="primary royal-start-btn" ${signedIn?'':'disabled'}><span class="home-btn-main">${t('solo')}</span><span class="home-btn-subtitle">${esc(t('startReadySubtitle'))}</span></button>`;
+  const soloReadySubtitle=profileRestorePending?t('restoringScore'):t('startReadySubtitle');
+  const soloBtnCore=`<button id="solo-start" class="primary royal-start-btn" ${signedIn&&!profileRestorePending?'':'disabled'}><span class="home-btn-main">${t('solo')}</span><span class="home-btn-subtitle">${esc(soloReadySubtitle)}</span></button>`;
   const soloBtnHtml=signedIn
     ?soloBtnCore
     :`<button id="solo-start" class="primary royal-start-btn" disabled><span class="home-btn-main">${t('solo')}</span><span class="home-btn-subtitle">${esc(loginHint)}</span></button>`;

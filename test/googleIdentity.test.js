@@ -128,3 +128,24 @@ test('renderGoogleInline uses native Android button when native auth is enabled'
   assert.equal(signInCalls,1);
   assert.equal(renderCalls,1);
 });
+
+test('renderGoogleInline shows restoring score status while hydrating', ()=>{
+  const state=createState();
+  state.home.google.hydrating=true;
+  const doc=createDoc();
+  const controller=createGoogleIdentityController({
+    getState:()=>state,
+    getWindow:()=>({}),
+    getDocument:()=>doc,
+    getFirebaseAuth:()=>null,
+    getT:()=>((x)=>x),
+    getRender:()=>()=>{},
+    signedInWithEmail:()=>true,
+    clearGoogleSession:()=>{},
+    handleCredentialResponse:()=>{},
+    authProviderBadgeHtml:()=>''
+  });
+  controller.renderGoogleInline();
+  assert.match(doc.googleNameInline.innerHTML,/auth-status-loading/);
+  assert.match(doc.googleNameInline.innerHTML,/restoringScore/);
+});
