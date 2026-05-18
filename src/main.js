@@ -5297,7 +5297,8 @@ function formatSystemLogDateTime(ts){
   }
 }
 function gameLogCardText(cards){
-  return(cards??[]).map((c)=>`${SUITS[c.suit]?.symbol??''}${RANKS[c.rank]??''}`).join('');
+  const suitSymbols=['♦','♣','♥','♠'];
+  return(cards??[]).map((c)=>`${suitSymbols[c.suit]??''}${RANKS[c.rank]??''}`).join('');
 }
 function gameLogCardHtml(cards){
   const suitSymbols=['♦','♣','♥','♠'];

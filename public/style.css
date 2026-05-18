@@ -5118,18 +5118,17 @@ ul.gesture-help-list {
   color: #111111;
 }
 .history-detail .game-log-suit {
-  display: inline-grid;
-  place-items: center;
-  width: 1em;
-  height: 1em;
-  min-width: 1em;
+  display: inline;
+  width: auto;
+  height: auto;
+  min-width: 0;
   padding: 0;
-  border-radius: .22em;
-  background: rgba(255, 255, 255, .96);
+  border-radius: 0;
+  background: transparent;
   color: inherit;
-  box-shadow: 0 0 0 1px rgba(11, 18, 32, .18);
-  line-height: 1;
-  vertical-align: -0.08em;
+  box-shadow: none;
+  line-height: inherit;
+  vertical-align: baseline;
 }
 .score-guide-stack {
   color: #ffd166 !important;
