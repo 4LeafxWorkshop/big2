@@ -91,12 +91,12 @@ test('renderCoachMarksPanel uses the gesture guide icon', ()=>{
   assert.match(html,/gesture-help-action-btn/);
   assert.match(html,/gesture-help-title-row/);
   assert.match(html,/title-icon-log/);
-  assert.match(html,/🛎️/);
-  assert.match(html,/😆/);
+  assert.match(html,/ui-icon-bell/);
+  assert.match(html,/ui-icon-emote/);
   assert.match(html,/gesture-help-action-btn-handDown/);
   assert.match(html,/gesture-help-action-btn-handLeft/);
-  assert.match(html,/gesture-help-action-btn-handDown" type="button"><span class="gesture-help-action-icon" aria-hidden="true"><span aria-hidden="true">🛎️<\/span><\/span><\/button>/);
-  assert.match(html,/gesture-help-action-btn-handLeft" type="button"><span class="gesture-help-action-icon" aria-hidden="true"><span aria-hidden="true">😆<\/span><\/span><\/button>/);
+  assert.match(html,/gesture-help-action-btn-handDown" type="button"><span class="gesture-help-action-icon" aria-hidden="true"><svg class="ui-icon ui-icon-bell"/);
+  assert.match(html,/gesture-help-action-btn-handLeft" type="button"><span class="gesture-help-action-icon" aria-hidden="true"><svg class="ui-icon ui-icon-emote"/);
   assert.match(html,/gesture-help-stage/);
   assert.doesNotMatch(html,/coach-close-icon/);
 });

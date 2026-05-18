@@ -6933,10 +6933,10 @@ function reorderCurrent(v,fromId,toId){
   if(!state.solo.players?.[seat])return;
   state.solo.players[seat].hand=reorderById(state.solo.players[seat].hand,fromId,toId,cardId);
 }
-function autoArrangeCurrent(v,mode='seq'){
+function autoArrangeCurrent(v,mode='number'){
   const seat=Number.isInteger(v?.selfSeat)?v.selfSeat:0;
   if(!state.solo.players?.[seat])return;
-  state.solo.players[seat].hand=mode==='pattern'?patternSortCards(state.solo.players[seat].hand):[...state.solo.players[seat].hand].sort(cmpCard);
+  state.solo.players[seat].hand=mode==='suit'?patternSortCards(state.solo.players[seat].hand):[...state.solo.players[seat].hand].sort(cmpCard);
 }
 
 function isPortraitMode(){

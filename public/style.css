@@ -188,6 +188,15 @@
   --game-seat-badge-gap: 6px;
   --game-seat-count-size: 18px;
   --game-seat-count-font-size: .72rem;
+  --game-badge-radius: 999px;
+  --game-badge-border: rgba(255,255,255,.26);
+  --game-badge-bg: rgba(255,255,255,.1);
+  --game-badge-text: #f4f9fb;
+  --game-badge-shadow: 0 2px 6px rgba(0,0,0,.26);
+  --game-penalty-badge-border: rgba(255, 110, 110, .68);
+  --game-penalty-badge-bg: linear-gradient(180deg, rgba(255, 93, 93, .28), rgba(182, 38, 38, .16));
+  --game-penalty-badge-text: #ffd1d1;
+  --game-penalty-badge-shadow: 0 0 0 1px rgba(255, 93, 93, .18), 0 0 10px rgba(255, 93, 93, .16);
   --game-round-wins-min-h: 18px;
   --game-round-wins-pad-x: 7px;
   --game-round-wins-font-size: .68rem;
@@ -9523,11 +9532,11 @@ body[data-screen='game'] .result-card .room-expiry-row.room-expiry-top {
   align-items: center;
   margin-left: 4px;
   padding: 1px 6px;
-  border-radius: 999px;
-  border: 1px solid rgba(255,255,255,.26);
-  background: rgba(255,255,255,.1);
+  border-radius: var(--game-badge-radius);
+  border: 1px solid var(--game-badge-border);
+  background: var(--game-badge-bg);
   font-size: .74rem;
-  color: #f4f9fb;
+  color: var(--game-badge-text);
 }
 .result-score-chip.boosted {
   border-color: rgba(255, 209, 102, .72);
@@ -9537,10 +9546,10 @@ body[data-screen='game'] .result-card .room-expiry-row.room-expiry-top {
   font-weight: 800;
 }
 .result-score-chip.penalty {
-  border-color: rgba(255, 110, 110, .68);
-  background: linear-gradient(180deg, rgba(255, 93, 93, .28), rgba(182, 38, 38, .16));
-  color: #ffd1d1;
-  box-shadow: 0 0 0 1px rgba(255, 93, 93, .18), 0 0 10px rgba(255, 93, 93, .16);
+  border-color: var(--game-penalty-badge-border);
+  background: var(--game-penalty-badge-bg);
+  color: var(--game-penalty-badge-text);
+  box-shadow: var(--game-penalty-badge-shadow);
   font-weight: 800;
 }
 .result-confidential-stamp {
@@ -10568,16 +10577,16 @@ body[data-screen='game'] .seat-top-two-warning {
   gap: 4px;
   min-height: 18px;
   padding: 2px 8px;
-  border-radius: 999px;
+  border-radius: var(--game-badge-radius);
   font-size: .76rem;
   font-weight: 900;
   line-height: 1;
   white-space: nowrap;
-  color: #f4f9fb;
+  color: var(--game-badge-text);
   text-shadow: none;
-  background: rgba(255,255,255,.1);
-  border: 1px solid rgba(255,255,255,.26);
-  box-shadow: 0 2px 6px rgba(0,0,0,.26);
+  background: var(--game-badge-bg);
+  border: 1px solid var(--game-badge-border);
+  box-shadow: var(--game-badge-shadow);
 }
 @keyframes lastCardBadgePulse {
   0% { transform: scale(1); }

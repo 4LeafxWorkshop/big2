@@ -16,14 +16,33 @@ test('renderGameTopbar includes the game controls', ()=>{
   assert.match(html,/id="restart-btn"/);
 });
 
-test('renderGameSideZone hides in portrait mode', ()=>{
-  assert.equal(renderGameSideZone({
+test('renderGameSideZone renders outside mobile portrait mode', ()=>{
+  const html=renderGameSideZone({
     portraitMode:true,
     logToggleStateText:'Log',
     historyHtml:'<div></div>',
     t:(key)=>key,
     esc:(value)=>String(value)
-  }),'');
+  });
+  assert.match(html,/side-zone/);
+  assert.match(html,/log-side-card/);
+});
+
+test('renderGameSideZone hides in mobile portrait mode', ()=>{
+  const originalWindow=globalThis.window;
+  globalThis.window={innerWidth:390,matchMedia:()=>({matches:true})};
+  try{
+    assert.equal(renderGameSideZone({
+      portraitMode:true,
+      logToggleStateText:'Log',
+      historyHtml:'<div></div>',
+      t:(key)=>key,
+      esc:(value)=>String(value)
+    }),'');
+  }finally{
+    if(originalWindow===undefined)delete globalThis.window;
+    else globalThis.window=originalWindow;
+  }
 });
 
 test('renderGameLogSheet renders history when open', ()=>{
@@ -66,7 +85,7 @@ test('renderGameActionZone renders controls, hand, and drag popup', ()=>{
   assert.match(html,/id="suggest-btn"/);
   assert.match(html,/recommend-glow-play/);
   assert.match(html,/id="bell-toggle"/);
-  assert.match(html,/🛎️/);
+  assert.match(html,/ui-icon-bell/);
   assert.match(html,/aria-label="serviceBellTooltip"/);
   assert.match(html,/action-zone seat-callout-active/);
   assert.match(html,/action-strip active seat-callout-active/);
@@ -110,11 +129,34 @@ test('renderGameControlRowHtml renders the action controls and hand', ()=>{
   assert.match(html,/id="suggest-btn"/);
   assert.match(html,/recommend-glow-play/);
   assert.match(html,/id="bell-toggle"/);
-  assert.match(html,/🛎️/);
+  assert.match(html,/ui-icon-bell/);
   assert.match(html,/aria-label="serviceBellTooltip"/);
   assert.match(html,/id="auto-sort-btn"/);
+  assert.match(html,/aria-label="sortByNumberTooltip"/);
+  assert.match(html,/data-tooltip="sortByNumberTooltip"/);
   assert.match(html,/id="drag-popup"/);
   assert.match(html,/id="emote-panel"/);
+});
+
+test('renderGameControlRowHtml shows suit sort tooltip in suit mode', ()=>{
+  const html=renderGameControlRowHtml({
+    isRecPlay:false,
+    canPlay:true,
+    isRecPass:false,
+    canPass:true,
+    canSuggest:true,
+    showRecommendHint:false,
+    isRecEmpty:false,
+    recommendHint:'Hint',
+    t:(key)=>key,
+    esc:(value)=>String(value),
+    canAutoSort:true,
+    autoSortMode:'suit',
+    emotePanel:'<div id="emote-panel"></div>',
+    handHtml:'<button class="card"></button>'
+  });
+  assert.match(html,/aria-label="sortBySuitTooltip"/);
+  assert.match(html,/data-tooltip="sortBySuitTooltip"/);
 });
 
 test('renderGameControlRowHtml adds pass glow when pass is recommended', ()=>{

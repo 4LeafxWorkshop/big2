@@ -47,7 +47,7 @@ function bindResultActionButton(buttonId,guardKey,handler,guardAction,beforeActi
   });
 }
 
-function bindControlRowLabels({app,t,isPortraitMode}){
+function bindControlRowLabels({app,t,isPortraitMode,autoSortMode='number'}){
   const controlRow=app.querySelector('.action-zone .control-row');
   if(!controlRow)return;
   const suggestAnchor=controlRow.querySelector('.recommend-anchor');
@@ -84,8 +84,9 @@ function bindControlRowLabels({app,t,isPortraitMode}){
     bellBtn.removeAttribute('title');
   }
   if(sortBtn){
-    sortBtn.setAttribute('aria-label',t('sortTooltip'));
-    sortBtn.setAttribute('data-tooltip',t('sortTooltip'));
+    const sortLabel=autoSortMode==='suit'?t('sortBySuitTooltip'):t('sortByNumberTooltip');
+    sortBtn.setAttribute('aria-label',sortLabel);
+    sortBtn.setAttribute('data-tooltip',sortLabel);
     sortBtn.removeAttribute('title');
   }
   if(isPortraitMode()){
@@ -574,7 +575,7 @@ function bindActionControls({
     if(!canAutoSort)return;
     const mode=autoSortState.mode;
     autoArrangeCurrent(v,mode);
-    autoSortState.mode=mode==='seq'?'pattern':'seq';
+    autoSortState.mode=mode==='number'?'suit':'number';
     render();
   });
   document.getElementById('suggest-btn')?.addEventListener('click',()=>{
@@ -690,7 +691,7 @@ export function createGameEventsBinder({
   let logSwipeStartAt=0;
   let lastNamecardTapAt=0;
   let mobileTapAt=0;
-  let autoSortMode='seq';
+  let autoSortMode='number';
 
   return function bindGameEvents(v){
     const canReorder=!isMobilePointer()&&!v.gameOver&&v.hand.length>0;
@@ -834,7 +835,7 @@ export function createGameEventsBinder({
       setSoloStatus,
       guardAction
     });
-    bindControlRowLabels({app,t,isPortraitMode});
+    bindControlRowLabels({app,t,isPortraitMode,autoSortMode});
     bindActionControls({
       app,
       v,
