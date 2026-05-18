@@ -117,6 +117,28 @@ test('syncRoomSelfScoreIfNeeded skips while google hydration is in flight', asyn
   assert.equal(updates.length,0);
 });
 
+test('syncRoomSelfScoreIfNeeded writes the restored score after room resume', async()=>{
+  const state=createState({
+    score:6200,
+    home:{
+      google:{
+        hydrating:true
+      }
+    }
+  });
+  const updates=[];
+  const {controller}=createController(state,updates,{
+    currentHumanScoreValue(){return state.score;}
+  });
+  await controller.syncRoomSelfScoreIfNeeded();
+  assert.equal(updates.length,0);
+  state.home.google.hydrating=false;
+  await controller.syncRoomSelfScoreIfNeeded();
+  assert.equal(updates.length,1);
+  assert.deepEqual(updates[0].payload.totals,[6200,5000,5000,5000]);
+  assert.equal(typeof updates[0].payload.updatedAt,'number');
+});
+
 test('resetRoomExpiryTo60s refreshes finished-room expiry and result expiry together', async()=>{
   const state=createState({
     room:{
