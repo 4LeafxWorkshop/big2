@@ -22,7 +22,15 @@ export function getScoreGuideText(language){
       ],
       anyTwo:'Holding any 2 card (♦️2/♣️2/♥️2/♠️2) applies x2.',
       twoPenalty:'Holding ♠️Spade 2 (2-penalty) applies an additional x2.',
-      stack:'If multiple conditions apply, multipliers stack (multiply together).'
+      stack:'If multiple conditions apply, multipliers stack (multiply together).',
+      scoringOrderTitle:'Scoring Order',
+      scoringOrder:[
+        'Calculate each loser’s base deduction from remaining cards.',
+        'Apply 2 / ♠2 multipliers and stack them when multiple conditions apply.',
+        'Apply chao multipliers according to the loser’s remaining-card count.',
+        'Apply Play big: when the next player has only 1 card, the previous player must play the strongest card or strongest legal response in hand. If they fail to play big and the next player wins, that player also pays the deductions owed by the other two losers.'
+      ],
+      playBigRule:'Apply Play big: when the next player has only 1 card, the previous player must play the strongest card or strongest legal response in hand. If they fail to play big and the next player wins, that player also pays the deductions owed by the other two losers.'
     };
   }
   if(language==='fr'){
@@ -48,7 +56,15 @@ export function getScoreGuideText(language){
       ],
       anyTwo:'Avoir un 2 (♦️2/♣️2/♥️2/♠️2) applique x2.',
       twoPenalty:'Avoir le ♠️2 (pénalité 2) ajoute un x2.',
-      stack:'Si plusieurs conditions s’appliquent, les multiplicateurs se cumulent.'
+      stack:'Si plusieurs conditions s’appliquent, les multiplicateurs se cumulent.',
+      scoringOrderTitle:'Ordre de calcul',
+      scoringOrder:[
+        'Calculez la déduction de base de chaque perdant selon ses cartes restantes.',
+        'Appliquez les multiplicateurs 2 / ♠2 et cumulez-les si plusieurs conditions s’appliquent.',
+        'Appliquez les multiplicateurs chao selon le nombre de cartes restantes du perdant.',
+        'Appliquez Joue grand : quand le joueur suivant n’a plus qu’une carte, le joueur précédent doit jouer sa carte la plus forte ou sa meilleure réponse légale. S’il ne le fait pas et que le joueur suivant gagne, il paie aussi les pertes des deux autres perdants.'
+      ],
+      playBigRule:'Appliquez Joue grand : quand le joueur suivant n’a plus qu’une carte, le joueur précédent doit jouer sa carte la plus forte ou sa meilleure réponse légale. S’il ne le fait pas et que le joueur suivant gagne, il paie aussi les pertes des deux autres perdants.'
     };
   }
   if(language==='de'){
@@ -74,7 +90,15 @@ export function getScoreGuideText(language){
       ],
       anyTwo:'Ein 2 (♦️2/♣️2/♥️2/♠️2) ergibt x2.',
       twoPenalty:'Ein ♠️2 (2-Strafe) gibt zusätzlich x2.',
-      stack:'Mehrere Bedingungen werden multipliziert.'
+      stack:'Mehrere Bedingungen werden multipliziert.',
+      scoringOrderTitle:'Wertungsreihenfolge',
+      scoringOrder:[
+        'Berechne den Grundabzug jedes Verlierers aus seinen Restkarten.',
+        'Wende 2- / ♠2-Multiplikatoren an und multipliziere sie, wenn mehrere Bedingungen gelten.',
+        'Wende Chao-Multiplikatoren nach der Restkartenzahl des Verlierers an.',
+        'Wende Größte Karte an: Hat der nächste Spieler nur noch 1 Karte, muss der vorherige Spieler seine stärkste Karte oder stärkste legale Antwort spielen. Tut er das nicht und der nächste Spieler gewinnt, übernimmt er auch die Abzüge der beiden anderen Verlierer.'
+      ],
+      playBigRule:'Wende Größte Karte an: Hat der nächste Spieler nur noch 1 Karte, muss der vorherige Spieler seine stärkste Karte oder stärkste legale Antwort spielen. Tut er das nicht und der nächste Spieler gewinnt, übernimmt er auch die Abzüge der beiden anderen Verlierer.'
     };
   }
   if(language==='es'){
@@ -100,7 +124,15 @@ export function getScoreGuideText(language){
       ],
       anyTwo:'Tener un 2 (♦️2/♣️2/♥️2/♠️2) aplica x2.',
       twoPenalty:'Tener el ♠️2 (penalización 2) añade x2.',
-      stack:'Si se cumplen varias condiciones, los multiplicadores se acumulan.'
+      stack:'Si se cumplen varias condiciones, los multiplicadores se acumulan.',
+      scoringOrderTitle:'Orden de puntuación',
+      scoringOrder:[
+        'Calcula la deducción base de cada perdedor según sus cartas restantes.',
+        'Aplica los multiplicadores de 2 / ♠2 y acumúlalos si hay varias condiciones.',
+        'Aplica los multiplicadores chao según las cartas restantes del perdedor.',
+        'Aplica Carta Alta: cuando el siguiente jugador solo tiene 1 carta, el jugador anterior debe jugar su carta más fuerte o su mejor respuesta legal. Si no lo hace y el siguiente jugador gana, también paga las deducciones de los otros dos perdedores.'
+      ],
+      playBigRule:'Aplica Carta Alta: cuando el siguiente jugador solo tiene 1 carta, el jugador anterior debe jugar su carta más fuerte o su mejor respuesta legal. Si no lo hace y el siguiente jugador gana, también paga las deducciones de los otros dos perdedores.'
     };
   }
   if(language==='ja'){
@@ -126,7 +158,15 @@ export function getScoreGuideText(language){
       ],
       anyTwo:'2（♦️2/♣️2/♥️2/♠️2）を所持していると x2。',
       twoPenalty:'♠️2（2ペナルティ）を所持していると追加で x2。',
-      stack:'複数条件が当てはまる場合、倍率は掛け合わせます。'
+      stack:'複数条件が当てはまる場合、倍率は掛け合わせます。',
+      scoringOrderTitle:'計算順序',
+      scoringOrder:[
+        '各敗者の残り枚数から基本減点を計算します。',
+        '2 / ♠2 の倍率を適用し、複数条件があれば掛け合わせます。',
+        '敗者の残り枚数に応じてチャオ倍率を適用します。',
+        '大を出せを適用します：次のプレイヤーが残り1枚のとき、前のプレイヤーは手札の最強カードまたは最強の合法手を出す必要があります。出さずに次のプレイヤーが勝った場合、そのプレイヤーは他の2人の敗者分の減点も負担します。'
+      ],
+      playBigRule:'大を出せを適用します：次のプレイヤーが残り1枚のとき、前のプレイヤーは手札の最強カードまたは最強の合法手を出す必要があります。出さずに次のプレイヤーが勝った場合、そのプレイヤーは他の2人の敗者分の減点も負担します。'
     };
   }
   return{
@@ -151,6 +191,14 @@ export function getScoreGuideText(language){
     ],
     anyTwo:'持有任何 2（♦️2/♣️2/♥️2/♠️2）會套用 x2。',
     twoPenalty:'持有 ♠️2（2罰則）會額外再套用 x2。',
-    stack:'同時符合多個條件時，倍率會疊乘（相乘計算）。'
+    stack:'同時符合多個條件時，倍率會疊乘（相乘計算）。',
+    scoringOrderTitle:'計分次序',
+    scoringOrder:[
+      '先按每位輸家剩餘手牌計算基本扣分。',
+      '如輸家剩餘手牌包含任何 2，套用 x2；若同時持有 ♠2，額外再套用 2罰則 x2。多個倍率會疊乘。',
+      '按輸家剩餘張數套用炒的倍率。',
+      '套用頂大：當下家只剩下一張牌時，上家必須打出手上最大的牌。若玩家沒頂大而讓下家勝出的話，則該玩家必須兼負其餘兩家所輸的分數。'
+    ],
+    playBigRule:'套用頂大：當下家只剩下一張牌時，上家必須打出手上最大的牌。若玩家沒頂大而讓下家勝出的話，則該玩家必須兼負其餘兩家所輸的分數。'
   };
 }

@@ -29,6 +29,7 @@ export function createIntroGuideHelpers(deps){
           'Five-card hierarchy: Straight < Flush < Full House < Four of a Kind < Straight Flush.',
           'For equal ranks, suit order is ♦️ < ♣️ < ♥️ < ♠️.',
           'Single-card order: 2 > A > K > ... > 3 (highest: ♠️Spade 2, lowest: ♦️3).',
+          'Play big: when the next player has only 1 card, the previous player must play the strongest card or strongest legal response in hand; failing to do so and letting them win transfers the other two losers’ deductions to that player.',
           'After three consecutive passes, initiative returns to the last successful player.',
           'When you hold initiative, choose a tempo that preserves control and blocks opponent exits.'
         ],
@@ -95,6 +96,7 @@ export function createIntroGuideHelpers(deps){
           'Hiérarchie des 5 cartes : Suite < Couleur < Full House < Carré < Quinte flush.',
           'À rang égal, l’ordre des couleurs est ♦️ < ♣️ < ♥️ < ♠️.',
           'Ordre des cartes simples : 2 > A > K > ... > 3 (max : ♠️2, min : ♦️3).',
+          'Joue grand : quand le joueur suivant n’a plus qu’une carte, le joueur précédent doit jouer sa meilleure carte ou réponse légale ; sinon, s’il laisse ce joueur gagner, il paie aussi les pertes des deux autres perdants.',
           'Après trois passes consécutives, l’initiative revient au dernier joueur ayant joué.',
           'Avec l’initiative, choisissez un tempo qui garde le contrôle et bloque les sorties adverses.'
         ],
@@ -161,6 +163,7 @@ export function createIntroGuideHelpers(deps){
           '5‑Karten‑Hierarchie: Straße < Farbe < Full House < Vierling < Straight Flush.',
           'Bei gleichem Rang gilt die Farb-Reihenfolge ♦️ < ♣️ < ♥️ < ♠️.',
           'Einzelkarten-Rang: 2 > A > K > ... > 3 (höchste: ♠️2, niedrigste: ♦️3).',
+          'Größte Karte: Hat der nächste Spieler nur noch 1 Karte, muss der vorherige Spieler seine stärkste Karte oder stärkste legale Antwort spielen; andernfalls übernimmt er bei dessen Sieg auch die Abzüge der beiden anderen Verlierer.',
           'Nach drei Pässen in Folge geht die Initiative an den letzten Gewinner zurück.',
           'Mit Initiative wähle ein Tempo, das Kontrolle hält und Ausstiege blockiert.'
         ],
@@ -227,6 +230,7 @@ export function createIntroGuideHelpers(deps){
           'Jerarquía de 5 cartas: Escalera < Color < Full House < Póker < Escalera de color.',
           'A igual rango, el orden de palos es ♦️ < ♣️ < ♥️ < ♠️.',
           'Orden de cartas simples: 2 > A > K > ... > 3 (máxima: ♠️2, mínima: ♦️3).',
+          'Carta Alta: si el siguiente jugador solo tiene 1 carta, el jugador anterior debe jugar su carta más fuerte o su mejor respuesta legal; si no lo hace y aquel gana, paga también las deducciones de los otros dos perdedores.',
           'Tras tres pases seguidos, la iniciativa vuelve al último que jugó.',
           'Con la iniciativa, elige un ritmo que mantenga el control y bloquee salidas.'
         ],
@@ -293,6 +297,7 @@ export function createIntroGuideHelpers(deps){
           '5枚役の強さ：ストレート < フラッシュ < フルハウス < フォーカード < ストレートフラッシュ。',
           '同ランクの場合、スート順は ♦️ < ♣️ < ♥️ < ♠️。',
           '単札の強さ：2 > A > K > ... > 3（最強：♠️2、最弱：♦️3）。',
+          '大を出せ：次のプレイヤーが残り1枚のとき、前のプレイヤーは手札の最強カードまたは最強の合法手を出します。出さずにそのプレイヤーが勝った場合、他の2人の敗者分の減点も負担します。',
           '3人連続パス後、最後に出したプレイヤーが主導権を得ます。',
           '主導権がある時は、テンポと手札温存のバランスで相手の上がりを阻止します。'
         ],
@@ -358,6 +363,7 @@ export function createIntroGuideHelpers(deps){
         '五張牌型大小：蛇 < 花 < 俘佬 < 四條 < 同花順。',
         '同點數比較花色：♦️< ♣️ < ♥️< ♠️。',
         '單張大小：2 > A > K > ... > 3（最大單張：♠️2；最小單張：♦️3）。',
+        '頂大：當下一位玩家只剩一張牌時，你必須盡量用手上最大的牌阻止他出清。若你沒有頂大，結果讓他勝出，你要代另外兩位輸家承擔扣分。',
         '連續三家過牌後，由最後有效出牌者重新話事。',
         '當你話事時，應平衡節奏控制與大牌保留，避免被對手一手出清。'
       ],

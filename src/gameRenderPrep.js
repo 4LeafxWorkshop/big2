@@ -514,6 +514,7 @@ export function buildResultScreenHtml(params){
     playerColorByViewClass,
     calcPenaltyDetail,
     renderStaticCard,
+    colorizeSuitText,
     authPictureUrl,
     authPictureUrlFrom,
     avatarDataUri
@@ -575,9 +576,10 @@ export function buildResultScreenHtml(params){
     const delta=isWinner?winnerGain:-actualDeduction;
     const total=p.score??0;
     const remainCards=remain.length?remain.map((c)=>renderStaticCard(c,true)).join(''):`<span class="hint">-</span>`;
+    const scoreChipText=(key)=>typeof colorizeSuitText==='function'?colorizeSuitText(t(key)):esc(t(key));
     const mulTags=[
-      detail.anyTwo?`<span class="result-score-chip penalty">${t('scoreAnyTwo')} x2</span>`:'',
-      detail.twoPenalty?`<span class="result-score-chip penalty">${t('scoreTwoPenalty')} x2</span>`:'',
+      detail.anyTwo?`<span class="result-score-chip penalty">${scoreChipText('scoreAnyTwo')} x2</span>`:'',
+      detail.twoPenalty?`<span class="result-score-chip penalty">${scoreChipText('scoreTwoPenalty')} x2</span>`:'',
       detail.chaoMultiplier>1&&detail.chaoKey?`<span class="result-score-chip penalty">${t(detail.chaoKey)} x${detail.chaoMultiplier}</span>`:''
     ].filter(Boolean).join('');
     const deltaText=delta>0?`+${delta}`:`${delta}`;

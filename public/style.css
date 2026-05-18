@@ -5111,6 +5111,19 @@ ul.gesture-help-list {
 .score-guide-card-art + .score-guide-card-art {
   margin-left: calc(var(--guide-card-w, var(--card-w)) * -0.5);
 }
+.score-guide-chip {
+  width: fit-content;
+  margin-left: 0;
+  padding: 3px 8px;
+  font-size: .84rem;
+  line-height: 1.2;
+  vertical-align: middle;
+}
+.score-guide-rule-with-chip {
+  display: grid;
+  gap: 6px;
+  align-items: start;
+}
 .suit-red {
   color: #d9252a;
 }
@@ -5132,15 +5145,36 @@ ul.gesture-help-list {
 }
 .score-guide-stack {
   color: #ffd166 !important;
+  font-size: .84rem;
   font-weight: 700;
 }
 .score-guide-heading,
 .score-guide-summary {
+  font-size: .84rem;
   text-align: left;
   line-height: 1.5;
   letter-spacing: 0;
   word-break: normal;
   overflow-wrap: break-word;
+}
+.score-guide-flow {
+  gap: 10px;
+}
+.score-guide-flow h4 {
+  font-size: .84rem;
+}
+.score-guide-order {
+  display: grid;
+  gap: 9px;
+  margin: 0;
+  padding-left: 24px;
+  color: var(--muted);
+  font-size: .84rem;
+  line-height: 1.45;
+  letter-spacing: 0;
+}
+.score-guide-order li {
+  padding-left: 2px;
 }
 #google-inline { display: inline-flex; align-items: center; min-height: 36px; }
 .name-with-google {

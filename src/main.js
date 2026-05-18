@@ -3872,11 +3872,7 @@ function resolveHistoryLogParticipant(entry,participants){
   return null;
 }
 const esc=(s)=>String(s??'').replace(/[&<>"']/g,(c)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const colorizeSuitText=(s)=>esc(s)
-  .replaceAll('♦️','<span class="suit-red">♦️</span>')
-  .replaceAll('♥️','<span class="suit-red">♥️</span>')
-  .replaceAll('♣️','<span class="suit-black">♣️</span>')
-  .replaceAll('♠️','<span class="suit-black">♠️</span>');
+const colorizeSuitText=(s)=>esc(s).replace(/[♦♣♥♠]\ufe0f?/g,(suit)=>`<span class="game-log-suit">${suit[0]}</span>`);
 const footerMenuHelpers=createFooterMenuHelpers({
   esc,
   t,
@@ -5423,6 +5419,7 @@ const resultScreenHtml=(v,arr)=>buildResultScreenHtml({
   playerColorByViewClass,
   calcPenaltyDetail,
   renderStaticCard,
+  colorizeSuitText,
   authPictureUrl,
   authPictureUrlFrom,
   avatarDataUri
