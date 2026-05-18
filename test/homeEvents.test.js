@@ -149,11 +149,35 @@ test('home binder arms room start pending flow', async()=>{
   let timerValue=null;
   let renderCount=0;
   let startRoomCalls=0;
+  const state={
+    home:{
+      mode:'home',
+      showLeaderboard:true,
+      google:{
+        signedIn:true,
+        email:'user@example.com',
+        hydrating:true,
+        profileMissing:false
+      },
+      leaderboard:{sort:'totalDelta',period:'all'}
+    },
+    room:{joinOpen:false,error:'',joinOpenCountdown:15,pendingStart:false,code:'ABCD'},
+    showScoreGuide:false,
+    screen:'home',
+    opponentProfileName:''
+  };
+  let waitCalls=0;
   bindWith({
     document:makeDocument({byId:{'room-start':roomStart}}),
+    state,
     pendingStartTimerRef:{
       get:()=>timerValue,
       set:(value)=>{timerValue=value;}
+    },
+    signedInWithEmail:()=>true,
+    waitMs:async()=>{
+      waitCalls+=1;
+      state.home.google.hydrating=false;
     },
     window:{
       setTimeout:()=>{
@@ -168,20 +192,83 @@ test('home binder arms room start pending flow', async()=>{
   assert.equal(renderCount,0);
   assert.equal(startRoomCalls,1);
   assert.equal(timerValue,2);
+  assert.equal(waitCalls,1);
 });
 
 test('home binder arms popunder during solo start gesture', async()=>{
   const soloStart=makeElement();
   let armed=0;
   let started=0;
+  const state={
+    home:{
+      mode:'home',
+      showLeaderboard:false,
+      google:{
+        signedIn:true,
+        email:'user@example.com',
+        hydrating:true,
+        profileMissing:false
+      },
+      leaderboard:{sort:'totalDelta',period:'all'}
+    },
+    room:{joinOpen:false,error:'',joinOpenCountdown:15,pendingStart:false,code:'ABCD'},
+    showScoreGuide:false,
+    screen:'home',
+    opponentProfileName:''
+  };
+  let waitCalls=0;
   bindWith({
     document:makeDocument({byId:{'solo-start':soloStart}}),
+    state,
     armPopunderForGesture:()=>{armed+=1;},
+    signedInWithEmail:()=>true,
+    waitMs:async()=>{
+      waitCalls+=1;
+      state.home.google.hydrating=false;
+    },
     startSoloGame:()=>{started+=1;}
   });
   await soloStart.dispatch('pointerdown');
+  await new Promise((resolve)=>setImmediate(resolve));
   assert.equal(armed,1);
   assert.equal(started,1);
+  assert.equal(waitCalls,1);
+});
+
+test('home binder waits for google hydration before room create', async()=>{
+  const roomCreate=makeElement();
+  const state={
+    home:{
+      mode:'home',
+      showLeaderboard:false,
+      google:{
+        signedIn:true,
+        email:'user@example.com',
+        hydrating:true,
+        profileMissing:false
+      },
+      leaderboard:{sort:'totalDelta',period:'all'}
+    },
+    room:{joinOpen:false,error:'',joinOpenCountdown:15,pendingStart:false,code:'ABCD'},
+    showScoreGuide:false,
+    screen:'home',
+    opponentProfileName:''
+  };
+  let waitCalls=0;
+  let createCalls=0;
+  bindWith({
+    document:makeDocument({byId:{'room-create':roomCreate}}),
+    state,
+    signedInWithEmail:()=>true,
+    waitMs:async()=>{
+      waitCalls+=1;
+      state.home.google.hydrating=false;
+    },
+    createRoom:async()=>{createCalls+=1;}
+  });
+  await roomCreate.dispatch('click');
+  assert.equal(waitCalls,1);
+  assert.equal(createCalls,1);
 });
 
 test('home binder rerenders gender toggle when not signed in', async()=>{

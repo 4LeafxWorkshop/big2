@@ -43,10 +43,6 @@ export function renderHomeSettingsCardHtml(params){
     t,
     aiFieldRight,
     soundEnabled,
-    calloutDisplayEnabled,
-    emoteDisplayEnabled,
-    gestureHelpEnabled,
-    vibrateEnabled,
     cardBackRight,
     moreSettingsOpen
   }=params;

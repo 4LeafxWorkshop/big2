@@ -268,6 +268,7 @@ export function createRoomMutationsController(deps){
     const roomDb=deps.currentRoomDb();
     const roomData=state.room.data;
     if(!state.room.id||!roomDb||!roomData)return;
+    if(state.home.google?.hydrating)return;
     const status=String(roomData.status||'');
     if(status==='playing')return;
     const uid=deps.currentRoomPlayerId();

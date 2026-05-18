@@ -59,6 +59,13 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       state.home.showLeaderboard=false;
       render();
     };
+    const waitForGoogleProfileReady=async()=>{
+      if(!signedInWithEmail())return true;
+      for(let i=0;i<100&&state.home.google?.hydrating;i+=1){
+        await waitMs(50);
+      }
+      return !state.home.google?.hydrating;
+    };
     const closeLegal=()=>{
       const legalModal=doc.getElementById('legal-modal');
       legalModal?.classList.remove('open');
@@ -263,6 +270,7 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       state.home.mode='solo';
       state.home.showLeaderboard=false;
       initFirebaseIfReady();
+      await waitForGoogleProfileReady();
       let synced=false;
       for(let i=0;i<4&&!synced;i++){
         synced=await syncLeaderboardProfile(currentLeaderboardIdentity());
@@ -298,9 +306,11 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       void loadActiveRooms();
     });
     doc.getElementById('room-create')?.addEventListener('click',async()=>{
+      await waitForGoogleProfileReady();
       await createRoom();
     });
     doc.getElementById('room-create-card')?.addEventListener('click',async()=>{
+      await waitForGoogleProfileReady();
       await createRoom();
     });
     doc.getElementById('room-join-cancel')?.addEventListener('click',()=>{
@@ -310,6 +320,7 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
     });
     doc.getElementById('room-join-confirm')?.addEventListener('click',async()=>{
       const code=getRoomCodeFromBoxes();
+      await waitForGoogleProfileReady();
       await joinRoomByCode(code);
     });
     const handleRoomPasteCode=async(e)=>{
@@ -375,6 +386,7 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
           const code=String(joinBtn.getAttribute('data-code')||'');
           if(!code||joinBtn.hasAttribute('disabled'))return;
           applyRoomCodeToInput(code);
+          await waitForGoogleProfileReady();
           await joinRoomByCode(code);
           return;
         }
@@ -600,6 +612,7 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
         state.room.pendingStart=false;
         setRoomError(t('roomSendTimeout'));
       },5000));
+      await waitForGoogleProfileReady();
       let synced=false;
       for(let i=0;i<4&&!synced;i++){
         synced=await syncLeaderboardProfile(currentLeaderboardIdentity());

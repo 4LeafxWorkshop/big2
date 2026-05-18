@@ -120,7 +120,6 @@ export function renderGameTable(params){
     turnCompassHtml,
     inventoryDecorHtml='',
     coachMarksButtonHtml='',
-    coachMarksLabel='',
     showWinCelebrate,
     t
   }=params;

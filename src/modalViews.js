@@ -140,8 +140,7 @@ export function renderIntroPanel(params){
     colorizeSuitText,
     esc,
     renderStaticCard,
-    introHandSamples,
-    showGestureGuide=false
+    introHandSamples
   }=params;
   const formatIntroLine=(text)=>{
     const token='{{3D}}';

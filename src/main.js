@@ -2338,7 +2338,6 @@ const roomSubscriptionController=createRoomSubscriptionController({
   startRoomPresencePing,
   syncRoomGameRoster,
   syncRoomSelfScoreIfNeeded,
-  syncRoomLobbySeatPanel,
   t
 });
 function setRoomError(msg){
@@ -3526,7 +3525,7 @@ async function recordLeaderboardRound(identity,delta,won){
   }
 }
 async function syncLeaderboardProfile(identity){
-  if(!isBotIdentity(identity)&&state.home.google?.profileMissing)return false;
+  if(!isBotIdentity(identity)&&(state.home.google?.profileMissing||state.home.google?.hydrating))return false;
   const store=loadLeaderboardStore();
   const entry=ensureLeaderboardEntry(store,identity);
   if(!entry)return false;
@@ -6790,7 +6789,6 @@ function renderGame(){
     introPanelHtml,
     leaderboardModalHtml,
     coachMarksButtonHtml,
-    coachMarksLabel:esc(intro.guideGestureTitle),
     coachMarksHtml:state.showCoachMarks&&coachMarksEligible?coachMarksHtml():''
   });
   runGamePostRender({

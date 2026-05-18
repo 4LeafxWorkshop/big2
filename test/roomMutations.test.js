@@ -103,6 +103,20 @@ test('syncRoomSelfScoreIfNeeded writes new totals when local score differs from 
   assert.equal(typeof updates[0].payload.updatedAt,'number');
 });
 
+test('syncRoomSelfScoreIfNeeded skips while google hydration is in flight', async()=>{
+  const state=createState({
+    home:{
+      google:{
+        hydrating:true
+      }
+    }
+  });
+  const updates=[];
+  const {controller}=createController(state,updates);
+  await controller.syncRoomSelfScoreIfNeeded();
+  assert.equal(updates.length,0);
+});
+
 test('resetRoomExpiryTo60s refreshes finished-room expiry and result expiry together', async()=>{
   const state=createState({
     room:{
