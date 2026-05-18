@@ -16,6 +16,10 @@ test.describe('room resume hydration flow', ()=>{
     await seedRoomLobby(page);
     await expect(page.locator('.room-start-subtitle')).toContainText('分數還原中');
     await expect(page.locator('#room-start')).toBeDisabled();
+    await expect(page.locator('#room-start')).toHaveScreenshot('room-start-hydrating.png', {
+      animations:'disabled',
+      maxDiffPixelRatio:0.02
+    });
     await expect(page.locator('.auth-status-loading')).toContainText('分數還原中');
     await page.evaluate(()=>{
       window.__BIG2_VISUAL_TEST__.finishRoomResume();
@@ -30,6 +34,10 @@ test.describe('room resume hydration flow', ()=>{
     await seedRoomLobby(page);
     await expect(page.locator('.room-start-subtitle')).toContainText('分數還原中');
     await expect(page.locator('#room-start')).toBeDisabled();
+    await expect(page.locator('#room-start')).toHaveScreenshot('room-start-hydrating.png', {
+      animations:'disabled',
+      maxDiffPixelRatio:0.02
+    });
     await page.evaluate(()=>{
       window.__BIG2_VISUAL_TEST__.finishRoomResume();
     });

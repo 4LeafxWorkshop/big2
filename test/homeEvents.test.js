@@ -81,7 +81,20 @@ function bindWith(overrides={}){
   });
   const state=overrides.state??{
     home:{mode:'home',showLeaderboard:true,leaderboard:{sort:'totalDelta',period:'all'}},
-    room:{joinOpen:false,error:'',joinOpenCountdown:15,pendingStart:false,code:'ABCD'},
+    room:{
+      joinOpen:false,
+      error:'',
+      joinOpenCountdown:15,
+      pendingStart:false,
+      code:'ABCD',
+      data:{
+        status:'lobby',
+        players:[
+          {uid:'uid:a',seat:0},
+          {uid:'guest:b',seat:1}
+        ]
+      }
+    },
     showScoreGuide:false,
     screen:'home',
     opponentProfileName:''
@@ -175,7 +188,20 @@ test('home binder arms room start pending flow', async()=>{
       },
       leaderboard:{sort:'totalDelta',period:'all'}
     },
-    room:{joinOpen:false,error:'',joinOpenCountdown:15,pendingStart:false,code:'ABCD'},
+    room:{
+      joinOpen:false,
+      error:'',
+      joinOpenCountdown:15,
+      pendingStart:false,
+      code:'ABCD',
+      data:{
+        status:'lobby',
+        players:[
+          {uid:'uid:a',seat:0},
+          {uid:'guest:b',seat:1}
+        ]
+      }
+    },
     showScoreGuide:false,
     screen:'home',
     opponentProfileName:''
@@ -225,7 +251,20 @@ test('home binder arms popunder during solo start gesture', async()=>{
       },
       leaderboard:{sort:'totalDelta',period:'all'}
     },
-    room:{joinOpen:false,error:'',joinOpenCountdown:15,pendingStart:false,code:'ABCD'},
+    room:{
+      joinOpen:false,
+      error:'',
+      joinOpenCountdown:15,
+      pendingStart:false,
+      code:'ABCD',
+      data:{
+        status:'lobby',
+        players:[
+          {uid:'uid:a',seat:0},
+          {uid:'guest:b',seat:1}
+        ]
+      }
+    },
     showScoreGuide:false,
     screen:'home',
     opponentProfileName:''
@@ -263,7 +302,20 @@ test('home binder waits for google hydration before room create', async()=>{
       },
       leaderboard:{sort:'totalDelta',period:'all'}
     },
-    room:{joinOpen:false,error:'',joinOpenCountdown:15,pendingStart:false,code:'ABCD'},
+    room:{
+      joinOpen:false,
+      error:'',
+      joinOpenCountdown:15,
+      pendingStart:false,
+      code:'ABCD',
+      data:{
+        status:'lobby',
+        players:[
+          {uid:'uid:a',seat:0},
+          {uid:'guest:b',seat:1}
+        ]
+      }
+    },
     showScoreGuide:false,
     screen:'home',
     opponentProfileName:''
@@ -300,7 +352,20 @@ test('home binder waits for hydrated login before solo and room start', async()=
       },
       leaderboard:{sort:'totalDelta',period:'all'}
     },
-    room:{joinOpen:false,error:'',joinOpenCountdown:15,pendingStart:false,code:'ABCD'},
+    room:{
+      joinOpen:false,
+      error:'',
+      joinOpenCountdown:15,
+      pendingStart:false,
+      code:'ABCD',
+      data:{
+        status:'lobby',
+        players:[
+          {uid:'uid:a',seat:0},
+          {uid:'guest:b',seat:1}
+        ]
+      }
+    },
     showScoreGuide:false,
     screen:'home',
     opponentProfileName:''
@@ -334,6 +399,49 @@ test('home binder waits for hydrated login before solo and room start', async()=
   assert.equal(soloCalls,1);
   assert.equal(roomCalls,1);
   assert.equal(state.home.google.hydrating,false);
+});
+
+test('home binder ignores room start clicks when the room is not ready', async()=>{
+  const roomStart=makeElement();
+  let startRoomCalls=0;
+  const state={
+    home:{
+      mode:'home',
+      showLeaderboard:false,
+      google:{
+        signedIn:true,
+        email:'user@example.com',
+        hydrating:false,
+        profileMissing:false
+      },
+      leaderboard:{sort:'totalDelta',period:'all'}
+    },
+    room:{
+      joinOpen:false,
+      error:'',
+      joinOpenCountdown:15,
+      pendingStart:false,
+      code:'ABCD',
+      data:{
+        status:'lobby',
+        players:[
+          {uid:'uid:a',seat:0}
+        ]
+      }
+    },
+    showScoreGuide:false,
+    screen:'home',
+    opponentProfileName:''
+  };
+  bindWith({
+    document:makeDocument({byId:{'room-start':roomStart}}),
+    state,
+    signedInWithEmail:()=>true,
+    startRoom:async()=>{startRoomCalls+=1;}
+  });
+  await roomStart.dispatch('click');
+  assert.equal(state.room.pendingStart,false);
+  assert.equal(startRoomCalls,0);
 });
 
 test('home binder rerenders gender toggle when not signed in', async()=>{

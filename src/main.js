@@ -60,6 +60,7 @@ import {createMobileAdsController} from './mobileAds.js';
 import {buildActiveRoomRow, buildRoomDirectoryDoc} from './roomDirectory.js';
 import {markLastCardBreachIfNeeded, markLastCardBreachOnPassIfNeeded, settleRoundDeductions} from './gameRuleFlow.js';
 import {getNextSoloRoundWins, getNextSoloTotals, resetSoloSessionCarryoverState} from './soloState.js';
+import {resolveRoomLaunchState} from './roomLaunchState.js';
 import {Haptics} from '@capacitor/haptics';
 
 const RANKS=['3','4','5','6','7','8','9','10','J','Q','K','A','2'];
@@ -655,11 +656,10 @@ function syncRoomLobbySeatPanel(roomData=state.room.data){
   const roomUid=currentRoomPlayerId();
   const derivedHostId=String(roomData?.hostId||roomPlayers[0]?.uid||'');
   const roomIsHost=derivedHostId&&String(derivedHostId)===roomUid;
-  const roomHumanPlayers=roomPlayers.filter((p)=>String(p.uid||'').startsWith('uid:')||String(p.uid||'').startsWith('guest:'));
-  const roomCanStart=roomHumanPlayers.length>=2;
+  const roomLaunchState=resolveRoomLaunchState({state,roomData,roomPlayers});
   const roomPrivate=Boolean(roomData?.isPrivate);
-  const roomStatus=String(roomData?.status??'');
-  const roomStarting=roomStatus==='starting';
+  const roomStatus=roomLaunchState.roomStatus;
+  const roomStarting=roomLaunchState.roomStarting;
   const roomGamePlayers=(roomStatus==='finished'&&Array.isArray(roomData?.game?.players))?roomData.game.players:null;
   const roomSeatMap=new Map(roomPlayers.map((p)=>[Number(p.seat),p]));
   const gameSeatMap=roomGamePlayers?new Map(roomGamePlayers.map((p,i)=>[Number.isFinite(Number(p?.seat))?Number(p.seat):i,p])):null;
@@ -684,12 +684,12 @@ function syncRoomLobbySeatPanel(roomData=state.room.data){
   }
   const roomStartBtn=document.getElementById('room-start');
   if(roomStartBtn){
-    const disabled=roomStarting||!roomCanStart||Boolean(state.room.pendingStart);
-    const subtitle=roomStarting||state.room.pendingStart
+    const disabled=roomLaunchState.startDisabled;
+    const subtitle=roomStarting||roomLaunchState.roomStartPending
       ?''
-      :roomCanStart
-        ?`<span class="room-start-subtitle">${esc(t('startReadySubtitle'))}</span>`
-        :`<span class="room-start-subtitle">${t('roomNeedPlayersShort')}</span>`;
+      :roomLaunchState.startSubtitleKey
+        ?`<span class="room-start-subtitle">${esc(t(roomLaunchState.startSubtitleKey))}</span>`
+        :'';
     roomStartBtn.disabled=disabled;
     roomStartBtn.innerHTML=`<span class="room-start-main">${t('roomStart')}</span>${subtitle}`;
   }
@@ -697,14 +697,8 @@ function syncRoomLobbySeatPanel(roomData=state.room.data){
   if(roomLeaveBtn)roomLeaveBtn.disabled=roomStarting;
   const roomHint=roomActions.querySelector('.hint');
   const nextHint=roomIsHost
-    ?(state.room.pendingStart
-      ?t('roomSending')
-      :roomStarting
-        ?t('roomStarting')
-        :roomCanStart
-          ?''
-          :t('roomNeedPlayersShort'))
-    :(roomStarting?t('roomStarting'):t('roomWaitingHost'));
+    ?(roomLaunchState.startHintKey?t(roomLaunchState.startHintKey):'')
+    :t(roomLaunchState.lobbyHintKey);
   if(roomHint){
     roomHint.textContent=nextHint;
   }else if(nextHint){
@@ -6175,16 +6169,15 @@ function renderHome(){
   const roomUid=currentRoomPlayerId();
   const derivedHostId=String(roomData?.hostId||roomPlayers[0]?.uid||'');
   const roomIsHost=derivedHostId&&String(derivedHostId)===roomUid;
-  const roomHumanPlayers=roomPlayers.filter((p)=>String(p.uid||'').startsWith('uid:')||String(p.uid||'').startsWith('guest:'));
-  const roomCanStart=roomHumanPlayers.length>=2;
+  const roomLaunchState=resolveRoomLaunchState({state,roomData,roomPlayers});
   const roomPrivate=Boolean(roomData?.isPrivate);
-  const roomStatus=String(roomData?.status??'');
-  const roomStarting=roomStatus==='starting';
+  const roomStatus=roomLaunchState.roomStatus;
+  const roomStarting=roomLaunchState.roomStarting;
   const roomGamePlayers=(roomStatus==='finished'&&Array.isArray(roomData?.game?.players))?roomData.game.players:null;
   const roomSeatMap=new Map(roomPlayers.map((p)=>[Number(p.seat),p]));
   const gameSeatMap=roomGamePlayers?new Map(roomGamePlayers.map((p,i)=>[Number.isFinite(Number(p?.seat))?Number(p.seat):i,p])):null;
   const useGameRoster=roomStatus==='finished'&&Boolean(gameSeatMap);
-  const roomStartPending=Boolean(state.room.pendingStart);
+  const roomStartPending=roomLaunchState.roomStartPending;
   if(state.home.avatarChoice==='google'){
     state.home.avatarChoice=state.home.gender==='female'?'female':'male';
   }
@@ -6202,7 +6195,7 @@ function renderHome(){
   const aiFieldRight=`<label class="field field-ai field-ai-right"><span>${t('ai')}</span>${difficultySliderHtml('difficulty-slider-right',state.home.aiDifficulty,t)}</label>`;
   const roomErrorHtml=state.room.error?`<div class="hint room-error">${esc(state.room.error)}</div>`:'';
   const loginHint=t('loginToStart');
-  const profileRestorePending=Boolean(state.home.google?.signedIn&&state.home.google?.hydrating);
+  const profileRestorePending=roomLaunchState.profileRestorePending;
   const roomLobbySubtitle=profileRestorePending?t('restoringScore'):t('roomEnterSubtitle');
   const roomLobbyBtnCore=inRoom?'':`<button id="room-lobby-open" class="secondary royal-room-btn" ${signedIn&&!profileRestorePending?'':'disabled'}><span class="home-btn-main">${t('roomEnter')}</span><span class="home-btn-subtitle">${esc(roomLobbySubtitle)}</span></button>`;
   const roomButtonsHtml=roomLobbyBtnCore
@@ -6226,26 +6219,20 @@ function renderHome(){
     :'';
   const roomStartControl=roomIsHost
     ?(() => {
-        const disabled=roomStarting||!roomCanStart||roomStartPending||profileRestorePending;
+        const disabled=roomLaunchState.startDisabled;
         const subtitle=roomStarting||roomStartPending
           ?''
-          :profileRestorePending
-            ?`<span class="room-start-subtitle">${esc(t('restoringScore'))}</span>`
-            :roomCanStart
-            ?`<span class="room-start-subtitle">${esc(t('startReadySubtitle'))}</span>`
-            :`<span class="room-start-subtitle">${t('roomNeedPlayersShort')}</span>`
+          :roomLaunchState.startSubtitleKey
+            ?`<span class="room-start-subtitle">${esc(t(roomLaunchState.startSubtitleKey))}</span>`
+            :''
         ;
-        const hint=roomStartPending
-          ?`<span class="hint">${t('roomSending')}</span>`
-          :roomStarting
-            ?`<span class="hint">${t('roomStarting')}</span>`
-            :profileRestorePending
-              ?`<span class="hint">${t('restoringScore')}</span>`
+        const hint=roomLaunchState.startHintKey
+          ?`<span class="hint">${esc(t(roomLaunchState.startHintKey))}</span>`
           :'';
         const button=`<button id="room-start" class="primary room-start-btn" ${disabled?'disabled':''}><span class="room-start-main">${t('roomStart')}</span>${subtitle}</button>`;
         return `${button}${hint}`;
       })()
-    :`<span class="hint">${roomStarting?t('roomStarting'):t('roomWaitingHost')}</span>`;
+    :`<span class="hint">${t(roomLaunchState.lobbyHintKey)}</span>`;
   const roomPendingHint='';
   const roomTitle=t('roomTableTitle');
   const roomLobbyCountdown=(inRoom&&roomStatus!=='playing'&&state.room.data)?roomCountdownText(state.room.data):'';

@@ -1,3 +1,5 @@
+import {resolveRoomLaunchState} from './roomLaunchState.js';
+
 export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>window}={}){
   let clipboardModulePromise=null;
   const loadClipboard=async()=>{
@@ -603,7 +605,9 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       await setRoomPrivacy(desired);
     }));
     const handleRoomStart=async()=>{
-      if(state.room.pendingStart)return;
+      const roomLaunchState=resolveRoomLaunchState({state,roomData:state.room.data});
+      if(roomLaunchState.roomStarting||roomLaunchState.roomStartPending)return;
+      if(!roomLaunchState.roomCanStart&&!roomLaunchState.profileRestorePending)return;
       state.room.pendingStart=true;
       const activeTimer=pendingStartTimerRef.get?.();
       if(activeTimer){win.clearTimeout(activeTimer);}
@@ -612,7 +616,18 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
         state.room.pendingStart=false;
         setRoomError(t('roomSendTimeout'));
       },5000));
-      await waitForGoogleProfileReady();
+      const profileReady=await waitForGoogleProfileReady();
+      if(!profileReady){
+        pendingStartTimerRef.set?.(null);
+        state.room.pendingStart=false;
+        return;
+      }
+      const roomReadyAfterWait=resolveRoomLaunchState({state,roomData:state.room.data});
+      if(roomReadyAfterWait.roomStarting||!roomReadyAfterWait.roomCanStart){
+        pendingStartTimerRef.set?.(null);
+        state.room.pendingStart=false;
+        return;
+      }
       let synced=false;
       for(let i=0;i<4&&!synced;i++){
         synced=await syncLeaderboardProfile(currentLeaderboardIdentity());
