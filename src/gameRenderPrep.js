@@ -590,7 +590,7 @@ export function buildResultScreenHtml(params){
     const deltaText=delta>0?`+${delta}`:`${delta}`;
     const detailLine=isWinner
       ?`<div class="result-score-detail">${t('resultDetail')}: ${t('scoreGain')} +${winnerGain}</div>`
-      :`<div class="result-score-detail">${t('resultDetail')}: ${t('scoreBase')} ${detail.base} x ${detail.multiplier} · ${t('scoreDeduct')} ${actualDeduction}${mulTags?` · ${t('scorePenaltyBoost')}: ${mulTags}`:''}</div>`;
+      :`<div class="result-score-detail">${t('resultDetail')}: ${t('scoreBase')} ${detail.base} x ${detail.multiplier} · ${t('scoreDeduct')} ${actualDeduction}${mulTags?`<span class="result-score-boost-line">${t('scorePenaltyBoost')}: ${mulTags}</span>`:''}</div>`;
     const selfPic=isSelf?authPictureUrl():'';
     const fallbackPicture=snapPicture||roomPictureBySeat.get(p.seat)||String(p.picture||'').trim();
     const avatarSrc=resolveAvatarSrc({
