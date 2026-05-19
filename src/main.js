@@ -886,7 +886,7 @@ function guardAction(key,windowMs=800){
 
 const app=document.getElementById('app');
 const isNativeApp=isNativeAndroidApp()||isNativeIosApp();
-const state={language:'zh-HK',screen:'home',screenBeforeConfig:'home',showRules:false,showLog:false,showLogSheet:false,logTouched:false,showScoreGuide:false,showCoachMarks:false,opponentProfileName:'',mottoPeekName:'',selected:new Set(),drag:{id:null,moved:false},playAnimKey:'',autoPassKey:'',score:5000,suggestCost:0,recommendation:null,recommendHint:'',logFab:{x:null,y:null},home:{mode:'solo',name:'玩家',gender:'male',avatarChoice:'male',aiDifficulty:'normal',backColor:'red',theme:'ocean',showIntro:false,showLeaderboard:false,showMoreSettings:false,gestureHelpEnabled:isNativeApp,google:{signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',pictureLoaded:false,gender:'',profileMissing:false,hydrating:false},leaderboard:{rows:[],sort:'totalDelta',period:'all',limit:20},activeRooms:{rows:[],loading:false,loadedAt:0,error:''}},room:{id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:false,inviteOpen:false,error:'',started:false,unsub:null,selfSeat:-1,recordedGameKey:'',lastMoveKey:'',playerId:'',pendingStart:false,lastResultPlayers:null,inviteUrl:'',inviteQrDataUrl:'',inviteCardDataUrl:'',inviteQrLoading:false,inviteQrError:'',pendingInviteCode:'',inviteQrPayload:'',adPromptGameKey:''},sessionId:'',solo:{players:[],botNames:[],totals:[5000,5000,5000,5000],currentSeat:0,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',history:[],aiDifficulty:'normal',lastCardBreach:null},emote:{open:false,active:null},serviceBell:{foodCallout:null}};
+const state={language:'zh-HK',screen:'home',screenBeforeConfig:'home',showRules:false,showLog:false,showLogSheet:false,logTouched:false,showScoreGuide:false,showCoachMarks:false,gameExitConfirm:null,opponentProfileName:'',mottoPeekName:'',selected:new Set(),drag:{id:null,moved:false},playAnimKey:'',autoPassKey:'',score:5000,suggestCost:0,recommendation:null,recommendHint:'',logFab:{x:null,y:null},home:{mode:'solo',name:'玩家',gender:'male',avatarChoice:'male',aiDifficulty:'normal',backColor:'red',theme:'ocean',showIntro:false,showLeaderboard:false,showMoreSettings:false,gestureHelpEnabled:isNativeApp,google:{signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',pictureLoaded:false,gender:'',profileMissing:false,hydrating:false},leaderboard:{rows:[],sort:'totalDelta',period:'all',limit:20},activeRooms:{rows:[],loading:false,loadedAt:0,error:''}},room:{id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:false,inviteOpen:false,error:'',started:false,unsub:null,selfSeat:-1,recordedGameKey:'',lastMoveKey:'',playerId:'',pendingStart:false,lastResultPlayers:null,inviteUrl:'',inviteQrDataUrl:'',inviteCardDataUrl:'',inviteQrLoading:false,inviteQrError:'',pendingInviteCode:'',inviteQrPayload:'',adPromptGameKey:''},sessionId:'',solo:{players:[],botNames:[],totals:[5000,5000,5000,5000],currentSeat:0,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',history:[],aiDifficulty:'normal',lastCardBreach:null},emote:{open:false,active:null},serviceBell:{foodCallout:null}};
 const {
   EMOTE_STICKERS,
   cardImagePath,
@@ -6729,7 +6729,7 @@ function renderGame(){
   const gameTopbarHtml=renderGameTopbar({
     renderLangMenu,
     introButtonLabel:intro.btnShow,
-    roomExitHint:state.home.mode==='room'?t('roomExitHint'):'',
+    roomMode:state.home.mode==='room',
     t,
     esc,
     withBase
@@ -6763,6 +6763,7 @@ function renderGame(){
     youWin,
     state,
     t,
+    esc,
     roomTopMetaTable,
     seatHtml,
     lastActions,

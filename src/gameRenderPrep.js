@@ -2,6 +2,7 @@ import {renderConfidentialStamp} from './modalViews.js';
 import {resolveAvatarSrc} from './avatarProfile.js';
 import {buildOpponentNamecardHtml} from './opponentNamecard.js';
 import {renderOpponentIdentityHtml, renderOpponentLabel} from './opponentLabel.js';
+import {renderGameExitConfirmHtml} from './gameView.js';
 
 const TURN_SEAT_CLS=['south','east','north','west'];
 const TURN_COMPASS_ICON_BY_SEAT={
@@ -440,6 +441,7 @@ export function buildGameShellMarkup(params){
     youWin,
     state,
     t,
+    esc,
     roomTopMetaTable,
     seatHtml,
     lastActions,
@@ -492,7 +494,8 @@ export function buildGameShellMarkup(params){
     scoreGuideModalHtml:state.showScoreGuide?scoreGuideModalHtml():'',
     introPanelHtml:state.home.showIntro?introPanelHtml():'',
     leaderboardModalHtml:state.home.showLeaderboard?leaderboardModalHtml():'',
-    coachMarksHtml:state.showCoachMarks?coachMarksHtml:''
+    coachMarksHtml:state.showCoachMarks?coachMarksHtml:'',
+    gameExitConfirmHtml:state.gameExitConfirm?renderGameExitConfirmHtml({action:state.gameExitConfirm.action,anchor:state.gameExitConfirm.anchor,t,esc}):''
   });
   if(!v.gameOver&&youWin){
     shellHtml=shellHtml.replace('<div class="win-celebrate"><div class="confetti-layer"></div>','<div class="win-celebrate"><canvas class="confetti-canvas" data-confetti="win" aria-hidden="true"></canvas>');
@@ -628,13 +631,12 @@ export function buildResultScreenHtml(params){
       ${isRoom?`<div class="room-expiry-row room-expiry-top"><span class="room-expiry-label"><i class="fa-solid fa-clock room-expiry-icon" aria-hidden="true"></i><span>${t('roomCountdown')}</span></span><button type="button" class="room-expiry-reset-btn" data-room-expiry-reset="1"><strong data-room-countdown-value>${esc(roomCountdown)}</strong></button></div>`:''}
       <div class="result-list">${rows}</div>
       <div class="control-row">
-        <button id="result-home" class="secondary">${isRoom?t('roomLeave'):t('home')}</button>
+        <button id="result-home" class="secondary"${roomExitHint?` data-tooltip="${esc(roomExitHint)}" data-tooltip-pos="up"`:''}>${isRoom?t('roomLeave'):t('home')}</button>
         ${(!isRoom||canRoomAgain)
     ?`<button id="result-again" class="primary" ${canRoomAgain||!isRoom?'':'disabled'}>${t('again')}</button>`
     :(!isRoom?'':footerHint?``:`<span class="hint">${t('roomWaitingHost')}</span>`)}
         ${footerHint?`<span class="hint">${footerHint}</span>`:''}
       </div>
-      ${roomExitHint?`<div class="room-action-note hint">${esc(roomExitHint)}</div>`:''}
     </div>
   </section>`;
 }
@@ -660,5 +662,5 @@ export function buildCongratsOverlayHtml(params){
   const againHtml=(!isRoom||(isHost&&!roomExpired))
     ?`<button id="congrats-again" class="primary">${t('again')}</button>`
     :`<span class="hint">${roomExpired?t('roomHostSneakAway'):t('roomWaitingHost')}</span>`;
-  return`<div class="congrats-screen"><div class="congrats-card"><h3 class="title-with-icon"><span class="title-icon title-icon-congrats" aria-hidden="true"></span><span>${t('congrats')}</span></h3><div class="hint">${esc(uiStatus(v.status,v.statusMeta))}</div>${isRoom?`<div class="room-expiry-row room-expiry-top"><span class="room-expiry-label"><i class="fa-solid fa-clock room-expiry-icon" aria-hidden="true"></i><span>${t('roomCountdown')}</span></span><button type="button" class="room-expiry-reset-btn" data-room-expiry-reset="1"><strong data-room-countdown-value>${esc(roomCountdown)}</strong></button></div>`:''}<div class="control-row"><button id="congrats-home" class="secondary">${t('home')}</button>${againHtml}</div>${roomExitHint?`<div class="room-action-note hint">${esc(roomExitHint)}</div>`:''}</div></div>`;
+  return`<div class="congrats-screen"><div class="congrats-card"><h3 class="title-with-icon"><span class="title-icon title-icon-congrats" aria-hidden="true"></span><span>${t('congrats')}</span></h3><div class="hint">${esc(uiStatus(v.status,v.statusMeta))}</div>${isRoom?`<div class="room-expiry-row room-expiry-top"><span class="room-expiry-label"><i class="fa-solid fa-clock room-expiry-icon" aria-hidden="true"></i><span>${t('roomCountdown')}</span></span><button type="button" class="room-expiry-reset-btn" data-room-expiry-reset="1"><strong data-room-countdown-value>${esc(roomCountdown)}</strong></button></div>`:''}<div class="control-row"><button id="congrats-home" class="secondary"${roomExitHint?` data-tooltip="${esc(roomExitHint)}" data-tooltip-pos="up"`:''}>${t('home')}</button>${againHtml}</div></div></div>`;
 }

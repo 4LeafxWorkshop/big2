@@ -1,12 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import {renderCenterLastMoves, renderGameActionZone, renderGameControlRowHtml, renderGameLogSheet, renderGameSelfTagHtml, renderGameShell, renderGameSideZone, renderGameTable, renderGameTopbar, renderOpponentLabel, renderOpponentSeat, renderOpponentSeats, renderOpponentStationFlow, renderSeatLastAction} from '../src/gameView.js';
+import {renderCenterLastMoves, renderGameActionZone, renderGameControlRowHtml, renderGameExitConfirmHtml, renderGameLogSheet, renderGameSelfTagHtml, renderGameShell, renderGameSideZone, renderGameTable, renderGameTopbar, renderOpponentLabel, renderOpponentSeat, renderOpponentSeats, renderOpponentStationFlow, renderSeatLastAction} from '../src/gameView.js';
 
 test('renderGameTopbar includes the game controls', ()=>{
   const html=renderGameTopbar({
     renderLangMenu:()=>'<div id="lang"></div>',
     introButtonLabel:'Guide',
+    roomMode:true,
     t:(key)=>key,
     esc:(value)=>String(value),
     withBase:(path)=>`/base/${path}`
@@ -14,6 +15,10 @@ test('renderGameTopbar includes the game controls', ()=>{
   assert.match(html,/title-lockup-game\.png/);
   assert.match(html,/id="game-intro-toggle"/);
   assert.match(html,/id="restart-btn"/);
+  assert.match(html,/id="home-btn" class="secondary game-exit-room-btn"/);
+  assert.match(html,/title-icon-exit/);
+  assert.match(html,/roomLeave/);
+  assert.doesNotMatch(html,/data-tooltip="Going home or restarting will leave the room\."/);
 });
 
 test('renderGameSideZone renders outside mobile portrait mode', ()=>{
@@ -291,13 +296,39 @@ test('renderGameShell assembles the main sections and overlays', ()=>{
     opponentProfileModalHtml:'<div id="profile"></div>',
     scoreGuideModalHtml:'<div id="score-guide"></div>',
     introPanelHtml:'<div id="intro"></div>',
-    leaderboardModalHtml:'<div id="lb"></div>'
+    leaderboardModalHtml:'<div id="lb"></div>',
+    gameExitConfirmHtml:'<div id="exit-confirm"></div>'
   });
   assert.match(html,/class="game-shell {2}log-open"/);
   assert.match(html,/id="topbar"/);
   assert.match(html,/id="side"/);
   assert.match(html,/class="game-foreground-layer"/);
   assert.match(html,/id="lb"/);
+  assert.match(html,/id="exit-confirm"/);
+});
+
+test('renderGameExitConfirmHtml renders the in-game confirmation panel', ()=>{
+  const html=renderGameExitConfirmHtml({
+    action:'restart',
+    anchor:{left:123,top:45},
+    t:(key)=>{
+      const map={
+        gameExitConfirmTitle:'Leave the game?',
+        gameExitConfirmPrompt:'The current game records will be cleared. Continue?',
+        close:'Close',
+        restart:'Restart'
+      };
+      return map[key]??key;
+    },
+    esc:(value)=>String(value)
+  });
+  assert.match(html,/game-confirm-screen/);
+  assert.match(html,/game-confirm-popover/);
+  assert.match(html,/style="left:123px;top:45px"/);
+  assert.match(html,/Leave the game\?/);
+  assert.match(html,/The current game records will be cleared/);
+  assert.match(html,/game-exit-confirm-continue/);
+  assert.match(html,/Restart/);
 });
 
 test('renderSeatLastAction renders pass and fanned card layouts', ()=>{

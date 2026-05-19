@@ -3,13 +3,15 @@ export function renderGameTopbar(params){
     renderLangMenu,
     introButtonLabel,
     coachMarksButtonHtml='',
-    roomExitHint='',
+    roomMode=false,
     t,
     esc,
     withBase
   }=params;
-  const roomExitHintHtml=roomExitHint?`<div class="room-action-note hint">${esc(roomExitHint)}</div>`:'';
-  return`<header class="topbar"><div class="game-title-wrap"><span class="game-logo-block"><img class="title-logo title-logo-game" src="${withBase('title-lockup-game.png')}" alt="鋤大D TRADITIONAL BIG TWO"/></span></div><div class="topbar-right"><div class="control-row">${renderLangMenu('game-lang-menu')}<button id="game-intro-toggle" class="secondary">${esc(introButtonLabel)}</button>${coachMarksButtonHtml}<button id="score-guide-toggle" class="secondary">${t('scoreGuide')}</button><button id="game-lb-toggle" class="secondary">${t('lb')}</button><button id="home-btn" class="secondary">${t('home')}</button><button id="restart-btn" class="primary">${t('restart')}</button></div>${roomExitHintHtml}</div></header>`;
+  const homeButtonHtml=roomMode
+    ?`<button id="home-btn" class="secondary game-exit-room-btn" aria-label="${esc(t('roomLeave'))}"><span class="title-icon title-icon-exit game-topbar-exit-icon" aria-hidden="true"></span><span>${esc(t('roomLeave'))}</span></button>`
+    :`<button id="home-btn" class="secondary">${t('home')}</button>`;
+  return`<header class="topbar"><div class="game-title-wrap"><span class="game-logo-block"><img class="title-logo title-logo-game" src="${withBase('title-lockup-game.png')}" alt="鋤大D TRADITIONAL BIG TWO"/></span></div><div class="topbar-right"><div class="control-row">${renderLangMenu('game-lang-menu')}<button id="game-intro-toggle" class="secondary">${esc(introButtonLabel)}</button>${coachMarksButtonHtml}<button id="score-guide-toggle" class="secondary">${t('scoreGuide')}</button><button id="game-lb-toggle" class="secondary">${t('lb')}</button>${homeButtonHtml}<button id="restart-btn" class="primary">${t('restart')}</button></div></div></header>`;
 }
 
 export function renderGameSideZone(params){
@@ -39,6 +41,17 @@ export function renderGameLogSheet(params){
   }=params;
   if(!logSheetOpen)return'';
   return`<div class="log-sheet" id="log-sheet"><button class="log-sheet-backdrop" id="log-sheet-backdrop" aria-label="${t('close')}"></button><section class="log-sheet-panel side-card log-side-card"><header class="log-sheet-head"><h3 class="log-toggle-title title-with-icon"><span class="title-icon title-icon-log" aria-hidden="true"></span><span class="log-toggle-text">${t('log')}</span></h3><button id="log-sheet-close" class="secondary">${closeLabel}</button></header><div class="history-list">${historyHtml}</div></section></div>`;
+}
+
+export function renderGameExitConfirmHtml({action='home',anchor=null,t,esc}){
+  const continueLabel=action==='restart'?t('restart'):t('home');
+  const left=Math.round(Number(anchor?.left)||0);
+  const top=Math.round(Number(anchor?.top)||0);
+  const styleParts=[
+    Number.isFinite(left)?`left:${left}px`:'',
+    Number.isFinite(top)?`top:${top}px`:''
+  ].filter(Boolean).join(';');
+  return `<div class="game-confirm-screen" id="game-exit-confirm-screen"><button class="game-confirm-backdrop" id="game-exit-confirm-backdrop" aria-label="${esc(t('close'))}"></button><section class="game-confirm-card game-confirm-popover"${styleParts?` style="${styleParts}"`:''}><h3 class="title-with-icon"><span class="title-icon title-icon-exit" aria-hidden="true"></span><span>${esc(t('gameExitConfirmTitle'))}</span></h3><p class="game-confirm-copy">${esc(t('gameExitConfirmPrompt'))}</p><div class="control-row game-confirm-actions"><button id="game-exit-confirm-cancel" class="secondary">${t('close')}</button><button id="game-exit-confirm-continue" class="primary">${esc(continueLabel)}</button></div></section></div>`;
 }
 
 export function renderGameSelfTagHtml(params){
@@ -230,7 +243,8 @@ export function renderGameShell(params){
     scoreGuideModalHtml,
     introPanelHtml,
     leaderboardModalHtml,
-    coachMarksHtml
+    coachMarksHtml,
+    gameExitConfirmHtml=''
   }=params;
-  return`<section class="game-shell ${gameOver?'game-over':''} ${showLog?'log-open':''}"><div class="main-zone">${gameTopbarHtml}${gameTableHtml}${gameActionZoneHtml}${selfTableEmoteHtml}${congratsOverlayHtml}${revealHtml}</div>${sideZoneHtml}<div class="game-foreground-layer" aria-hidden="true"></div>${resultScreenHtml}${opponentProfileModalHtml}${scoreGuideModalHtml}${introPanelHtml}${leaderboardModalHtml}${coachMarksHtml}</section>`;
+  return`<section class="game-shell ${gameOver?'game-over':''} ${showLog?'log-open':''}"><div class="main-zone">${gameTopbarHtml}${gameTableHtml}${gameActionZoneHtml}${selfTableEmoteHtml}${congratsOverlayHtml}${revealHtml}</div>${sideZoneHtml}<div class="game-foreground-layer" aria-hidden="true"></div>${resultScreenHtml}${opponentProfileModalHtml}${scoreGuideModalHtml}${introPanelHtml}${leaderboardModalHtml}${coachMarksHtml}${gameExitConfirmHtml}</section>`;
 }

@@ -463,19 +463,57 @@ function bindHomeAndResultActions({
   setSoloStatus,
   guardAction
 }){
-  document.getElementById('home-btn')?.addEventListener('click',()=>{
+  const openGameExitConfirm=(action,buttonEl)=>{
+    const rect=buttonEl?.getBoundingClientRect?.();
+    const popoverWidth=236;
+    const popoverHeight=96;
+    const pad=8;
+    const centerX=rect?Math.round(rect.left+rect.width/2):pad+popoverWidth/2;
+    const underTop=rect?Math.round(rect.bottom+8):pad;
+    const overTop=rect?Math.round(rect.top-popoverHeight-8):pad;
+    const fitsBelow=!rect||underTop+popoverHeight<=window.innerHeight-pad;
+    const top=Math.max(pad,Math.min(fitsBelow?underTop:overTop,window.innerHeight-popoverHeight-pad));
+    const left=Math.max(pad+popoverWidth/2,Math.min(centerX,window.innerWidth-pad-popoverWidth/2));
+    state.gameExitConfirm={action,anchor:{left,top,width:popoverWidth,height:popoverHeight}};
+    render();
+  };
+  const closeGameExitConfirm=()=>{
+    state.gameExitConfirm=null;
+    render();
+  };
+  const confirmGameExit=async()=>{
+    const action=String(state.gameExitConfirm||'home');
+    state.gameExitConfirm=null;
     closeLangMenu();
+    if(action==='restart'){
+      clearAiTimer();
+      triggerClickBanner(document.getElementById('restart-btn'));
+      await waitMs(120);
+      state.opponentProfileName='';
+      state.recommendation=null;
+      setRecommendHint('');
+      if(state.home.mode==='room'&&state.room.id){
+        await leaveRoom();
+      }
+      startSoloGame({preserveOpponents:false,resetTotals:true,resetRoundWins:true});
+      schedulePopunderAfterRender(1200);
+      return;
+    }
     clearAiTimer();
     state.opponentProfileName='';
     if(state.home.mode==='room'&&state.room.id){
-      void leaveRoom();
+      await leaveRoom();
       return;
     }
+    resetSoloSessionCarryover();
     state.screen='home';
     state.selected.clear();
     state.recommendation=null;
     setRecommendHint('');
     render();
+  };
+  document.getElementById('home-btn')?.addEventListener('click',()=>{
+    openGameExitConfirm('home',document.getElementById('home-btn'));
   });
   document.getElementById('result-home')?.addEventListener('click',()=>{clearAiTimer();state.opponentProfileName='';if(state.home.mode==='room'&&state.room.id){void leaveRoom();return;}resetSoloSessionCarryover();state.screen='home';state.selected.clear();state.recommendation=null;setRecommendHint('');render();});
   document.getElementById('congrats-home')?.addEventListener('click',()=>{clearAiTimer();state.opponentProfileName='';if(state.home.mode==='room'&&state.room.id){void leaveRoom();return;}resetSoloSessionCarryover();state.screen='home';state.selected.clear();state.recommendation=null;setRecommendHint('');render();});
@@ -483,20 +521,15 @@ function bindHomeAndResultActions({
     await resetRoomExpiryTo60s();
   }));
 
-  const handleRestart=async()=>{
-    closeLangMenu();
-    triggerClickBanner(document.getElementById('restart-btn'));
-    await waitMs(120);
-    state.opponentProfileName='';
-    state.recommendation=null;
-    setRecommendHint('');
-    if(state.home.mode==='room'&&state.room.id){
-      await leaveRoom();
-    }
-    startSoloGame({preserveOpponents:false,resetTotals:true,resetRoundWins:true});
-    schedulePopunderAfterRender(1200);
-  };
-  bindResultActionButton('restart-btn','restart-btn',handleRestart,guardAction,armPopunderForGesture);
+  document.getElementById('restart-btn')?.addEventListener('click',()=>{
+    openGameExitConfirm('restart',document.getElementById('restart-btn'));
+  });
+
+  document.getElementById('game-exit-confirm-cancel')?.addEventListener('click',closeGameExitConfirm);
+  document.getElementById('game-exit-confirm-backdrop')?.addEventListener('click',closeGameExitConfirm);
+  document.getElementById('game-exit-confirm-continue')?.addEventListener('click',()=>{
+    void confirmGameExit();
+  });
 
   const handleResultAgain=async()=>{
     triggerClickBanner(document.getElementById('result-again'));

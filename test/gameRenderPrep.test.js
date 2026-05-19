@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 
-import {buildCalloutRenderState, buildOpponentSeatsHtml, buildResultScreenHtml, buildSelfRenderState} from '../src/gameRenderPrep.js';
+import {buildCalloutRenderState, buildCongratsOverlayHtml, buildOpponentSeatsHtml, buildResultScreenHtml, buildSelfRenderState} from '../src/gameRenderPrep.js';
 import {renderOpponentSeat, renderOpponentStationFlow} from '../src/gameView.js';
 
 test('buildCalloutRenderState keeps opponent emote callouts visible with matching seat callouts', ()=>{
@@ -262,4 +262,58 @@ test('buildResultScreenHtml displays transferred last-card deductions instead of
   assert.match(html,/Alice[\s\S]*resultDelta: -6[\s\S]*scoreDeduct 6/);
   assert.match(html,/Cara[\s\S]*resultDelta: 0[\s\S]*scoreDeduct 0/);
   assert.match(html,/Dan[\s\S]*resultDelta: 0[\s\S]*scoreDeduct 0/);
+});
+
+test('buildResultScreenHtml shows the room exit hint as a tooltip instead of fixed text', ()=>{
+  const html=buildResultScreenHtml({
+    v:{
+      mode:'solo',
+      gameOver:true,
+      selfSeat:0,
+      status:'',
+      statusMeta:null,
+      history:[],
+      revealedHands:[],
+      roundSummary:{winnerSeat:0,deductions:[0,0,0,0],winnerGain:0,details:[]}
+    },
+    arr:[
+      {seat:0,cls:'south',name:'Alice',gender:'female',count:0,score:5000,isBot:false,picture:''},
+      {seat:1,cls:'east',name:'Bob',gender:'male',count:0,score:5000,isBot:false,picture:''},
+      {seat:2,cls:'north',name:'Cara',gender:'female',count:0,score:5000,isBot:false,picture:''},
+      {seat:3,cls:'west',name:'Dan',gender:'male',count:0,score:5000,isBot:false,picture:''}
+    ],
+    state:{home:{mode:'room'},room:{data:null,lastResultPlayers:null}},
+    t:(key)=>key,
+    esc:(value)=>String(value),
+    roomIsHost:()=>false,
+    roomResultExpired:()=>false,
+    roomCountdownText:()=>'-',
+    uiStatus:()=> '',
+    playerColorByViewClass:()=>'#123456',
+    calcPenaltyDetail:()=>({remain:0,base:0,multiplier:1,deduction:0,anyTwo:false,twoPenalty:false,chaoMultiplier:1,chaoKey:''}),
+    renderStaticCard:()=>'<span class="card"></span>',
+    authPictureUrl:()=>'',
+    authPictureUrlFrom:()=>null,
+    avatarDataUri:()=>'avatar'
+  });
+
+  assert.match(html,/id="result-home" class="secondary" data-tooltip="roomExitHint" data-tooltip-pos="up"/);
+  assert.doesNotMatch(html,/room-action-note/);
+});
+
+test('buildCongratsOverlayHtml shows the room exit hint as a tooltip instead of fixed text', ()=>{
+  const html=buildCongratsOverlayHtml({
+    v:{status:'done',statusMeta:null},
+    youWin:true,
+    state:{home:{mode:'room'},room:{data:null}},
+    t:(key)=>key,
+    esc:(value)=>String(value),
+    roomIsHost:()=>false,
+    roomResultExpired:()=>false,
+    roomCountdownText:()=>'-',
+    uiStatus:()=> 'done'
+  });
+
+  assert.match(html,/id="congrats-home" class="secondary" data-tooltip="roomExitHint" data-tooltip-pos="up"/);
+  assert.doesNotMatch(html,/room-action-note/);
 });
