@@ -45,6 +45,7 @@ export function createRoomActionsController(deps){
         deps.setRoomError(deps.t('roomCreateFail'));
         return;
       }
+      await deps.waitForLeaderboardCloudReady?.();
       const uid=deps.baseRoomPlayerId();
       const email=String(deps.currentUserEmail?.()||'').trim().toLowerCase();
       state.room.playerId=uid;
@@ -178,6 +179,7 @@ export function createRoomActionsController(deps){
         deps.setRoomError(deps.t('roomJoinFail'));
         return;
       }
+      await deps.waitForLeaderboardCloudReady?.();
       const status=String(data.status||'');
       const players=Array.isArray(data.players)?data.players:[];
       const currentEmail=String(deps.currentUserEmail?.()||'').trim().toLowerCase();

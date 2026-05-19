@@ -15,6 +15,7 @@ export function createProfileSettingsHelpers(deps){
     currentLeaderboardIdentity,
     ensureLeaderboardEntry,
     loadLeaderboardStore,
+    loadLeaderboardCloudStore=loadLeaderboardStore,
     botLeaderboardIdentity,
     currentRoomPlayerId
   }=deps;
@@ -29,8 +30,39 @@ export function createProfileSettingsHelpers(deps){
     return clampScoreValue(totalScore);
   }
 
+  function findLeaderboardEntry(store,identity){
+    const players=store&&store.players&&typeof store.players==='object'?store.players:{};
+    const values=Object.values(players);
+    const idRaw=String(identity?.id??'').trim();
+    const idLower=idRaw.toLowerCase();
+    const email=String(identity?.email??'').trim().toLowerCase();
+    const nameRaw=String(identity?.name??'').trim();
+    const nameLower=nameRaw.toLowerCase();
+    const gender=String(identity?.gender??'male')==='female'?'female':'male';
+    const candidates=[
+      idRaw,
+      idLower,
+      email,
+      nameRaw,
+      nameLower,
+      gender==='female'?`bot:${nameLower}:female`:`bot:${nameLower}:male`
+    ].filter(Boolean);
+    for(const key of candidates){
+      if(players[key])return players[key];
+    }
+    if(email){
+      const byEmail=values.find((value)=>String(value?.email??'').trim().toLowerCase()===email);
+      if(byEmail)return byEmail;
+    }
+    if(nameLower){
+      const byName=values.find((value)=>String(value?.name??'').trim().toLowerCase()===nameLower);
+      if(byName)return byName;
+    }
+    return null;
+  }
+
   function currentScoreForIdentity(identity){
-    const entry=ensureLeaderboardEntry(loadLeaderboardStore(),identity);
+    const entry=findLeaderboardEntry(loadLeaderboardCloudStore(),identity);
     if(entry)return scoreFromStoredTotal(entry.totalScore);
     return 5000;
   }

@@ -184,6 +184,9 @@ export function renderLeaderboardPanel(params){
     language
   }=params;
   const rows=leaderboard.rows??[];
+  if(leaderboard.loading){
+    return`<section class="lobby-panel leaderboard-panel"><div class="hint">${t('lbLoading')}</div></section>`;
+  }
   const botUnique=[];
   const botSeen=new Set();
   botProfiles.forEach((b)=>{

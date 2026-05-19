@@ -886,7 +886,7 @@ function guardAction(key,windowMs=800){
 
 const app=document.getElementById('app');
 const isNativeApp=isNativeAndroidApp()||isNativeIosApp();
-const state={language:'zh-HK',screen:'home',screenBeforeConfig:'home',showRules:false,showLog:false,showLogSheet:false,logTouched:false,showScoreGuide:false,showCoachMarks:false,gameExitConfirm:null,opponentProfileName:'',mottoPeekName:'',selected:new Set(),drag:{id:null,moved:false},playAnimKey:'',autoPassKey:'',score:5000,suggestCost:0,recommendation:null,recommendHint:'',logFab:{x:null,y:null},home:{mode:'solo',name:'玩家',gender:'male',avatarChoice:'male',aiDifficulty:'normal',backColor:'red',theme:'ocean',showIntro:false,showLeaderboard:false,showMoreSettings:false,gestureHelpEnabled:isNativeApp,google:{signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',pictureLoaded:false,gender:'',profileMissing:false,hydrating:false},leaderboard:{rows:[],sort:'totalDelta',period:'all',limit:20},activeRooms:{rows:[],loading:false,loadedAt:0,error:''}},room:{id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:false,inviteOpen:false,error:'',started:false,unsub:null,selfSeat:-1,recordedGameKey:'',lastMoveKey:'',playerId:'',pendingStart:false,lastResultPlayers:null,inviteUrl:'',inviteQrDataUrl:'',inviteCardDataUrl:'',inviteQrLoading:false,inviteQrError:'',pendingInviteCode:'',inviteQrPayload:'',adPromptGameKey:''},sessionId:'',solo:{players:[],botNames:[],totals:[5000,5000,5000,5000],currentSeat:0,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',history:[],aiDifficulty:'normal',lastCardBreach:null},emote:{open:false,active:null},serviceBell:{foodCallout:null}};
+const state={language:'zh-HK',screen:'home',screenBeforeConfig:'home',showRules:false,showLog:false,showLogSheet:false,logTouched:false,showScoreGuide:false,showCoachMarks:false,gameExitConfirm:null,opponentProfileName:'',mottoPeekName:'',selected:new Set(),drag:{id:null,moved:false},playAnimKey:'',autoPassKey:'',score:5000,suggestCost:0,recommendation:null,recommendHint:'',logFab:{x:null,y:null},home:{mode:'solo',name:'玩家',gender:'male',avatarChoice:'male',aiDifficulty:'normal',backColor:'red',theme:'ocean',showIntro:false,showLeaderboard:false,showMoreSettings:false,gestureHelpEnabled:isNativeApp,google:{signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',pictureLoaded:false,gender:'',profileMissing:false,hydrating:false},leaderboard:{rows:[],sort:'totalDelta',period:'all',limit:20,loading:false},activeRooms:{rows:[],loading:false,loadedAt:0,error:''}},room:{id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:false,inviteOpen:false,error:'',started:false,unsub:null,selfSeat:-1,recordedGameKey:'',lastMoveKey:'',playerId:'',pendingStart:false,lastResultPlayers:null,inviteUrl:'',inviteQrDataUrl:'',inviteCardDataUrl:'',inviteQrLoading:false,inviteQrError:'',pendingInviteCode:'',inviteQrPayload:'',adPromptGameKey:''},sessionId:'',solo:{players:[],botNames:[],totals:[5000,5000,5000,5000],currentSeat:0,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',history:[],aiDifficulty:'normal',lastCardBreach:null},emote:{open:false,active:null},serviceBell:{foodCallout:null}};
 const {
   EMOTE_STICKERS,
   cardImagePath,
@@ -1164,6 +1164,8 @@ const firebaseRoomDbs=new Map();
 let firebaseInstancesCache=null;
 let leaderboardCloudRefreshInFlight=false;
 let leaderboardCloudLoaded=false;
+let leaderboardCloudStore={players:{}};
+let leaderboardCloudRefreshPromise=null;
 const sound={ctx:null,enabled:true};
 let winSfxAudio=null;
 let winSfxSeq=0;
@@ -1578,6 +1580,41 @@ function saveLeaderboardStore(store){
   if(!store||typeof store!=='object')return;
   runtimeProfileStore.players=store.players&&typeof store.players==='object'?store.players:{};
 }
+function loadLeaderboardCloudStore(){
+  return leaderboardCloudStore&&typeof leaderboardCloudStore==='object'
+    ?leaderboardCloudStore
+    :{players:{}};
+}
+function findLeaderboardEntryInStore(store,identity){
+  const players=store&&store.players&&typeof store.players==='object'?store.players:{};
+  const values=Object.values(players);
+  const idRaw=String(identity?.id??'').trim();
+  const idLower=idRaw.toLowerCase();
+  const email=String(identity?.email??'').trim().toLowerCase();
+  const nameRaw=String(identity?.name??'').trim();
+  const nameLower=nameRaw.toLowerCase();
+  const gender=String(identity?.gender??'male')==='female'?'female':'male';
+  const keys=[
+    idRaw,
+    idLower,
+    email,
+    nameRaw,
+    nameLower,
+    identity?.isBot?`bot:${nameLower}:${gender}`:''
+  ].filter(Boolean);
+  for(const key of keys){
+    if(players[key])return players[key];
+  }
+  if(email){
+    const byEmail=values.find((value)=>String(value?.email??'').trim().toLowerCase()===email);
+    if(byEmail)return byEmail;
+  }
+  if(nameLower){
+    const byName=values.find((value)=>String(value?.name??'').trim().toLowerCase()===nameLower);
+    if(byName)return byName;
+  }
+  return null;
+}
 const LOCAL_ROOM_KEY='big2.currentRoomId';
 const COACH_MARKS_DISMISSED_KEY='big2.mobileCoachMarksDismissed.v1';
 const FIREBASE_INSTANCES_CACHE_KEY='big2.firebaseInstancesCache';
@@ -1623,6 +1660,7 @@ const {
   currentLeaderboardIdentity,
   ensureLeaderboardEntry,
   loadLeaderboardStore,
+  loadLeaderboardCloudStore,
   botLeaderboardIdentity,
   currentRoomPlayerId
 });
@@ -1651,28 +1689,8 @@ const {
 function syncSessionScoreFromStore(store,{force=false}={}){
   if(!store||typeof store!=='object'||!store.players||typeof store.players!=='object')return;
   const identity=currentLeaderboardIdentity();
-  const players=store.players;
-  const idRaw=String(identity.id??'').trim();
-  const idLower=idRaw.toLowerCase();
-  const email=String(identity.email??state.home.google?.email??'').trim().toLowerCase();
-  const uid=String(state.home.google?.uid??'').trim();
-  const sub=String(state.home.google?.sub??'').trim();
-  const directKeys=[idRaw,idLower,uid,uid.toLowerCase(),sub,sub.toLowerCase()].filter(Boolean);
-  let matchedKey=directKeys.find((k)=>players[k]);
-  let entry=matchedKey?players[matchedKey]:null;
-  if(!entry&&email){
-    const byEmail=Object.entries(players).find(([,value])=>String(value?.email??'').trim().toLowerCase()===email);
-    if(byEmail){
-      matchedKey=String(byEmail[0]??'').trim();
-      entry=byEmail[1];
-    }
-  }
+  const entry=findLeaderboardEntryInStore(store,identity);
   if(!entry)return;
-  if(idRaw&&matchedKey&&matchedKey!==idRaw&&!players[idRaw]){
-    players[idRaw]={...entry,id:idRaw};
-    saveLeaderboardStore(store);
-    entry=players[idRaw];
-  }
   const inGame=state.screen==='game'&&Array.isArray(state.solo.players)&&state.solo.players.length>0&&!state.solo.gameOver;
   if(inGame&&!force)return;
   const restored=scoreFromStoredTotal(entry.totalScore);
@@ -1702,24 +1720,8 @@ async function hydrateProfileFromCloudByIdentity(identity){
       }
     }
     if(!data){
-      if(!readFailed&&(identity?.email||identity?.id)){
-        const store=loadLeaderboardStore();
-        const entry=ensureLeaderboardEntry(store,identity);
-        if(entry){
-          const name=String(state.home.google?.name||identity?.name||entry.name||'Player').trim().slice(0,18);
-          const email=String(identity?.email??entry.email??'').trim().toLowerCase().slice(0,120);
-          entry.name=name||entry.name;
-          entry.email=email||entry.email;
-          entry.gender=state.home.gender==='female'?'female':'male';
-          entry.picture=normalizeStoredHumanPicture(state.home.google?.picture??entry.picture??'');
-          entry.settings=collectMainSettings();
-          entry.totalScore=scoreFromStoredTotal(entry.totalScore);
-          entry.updatedAt=Date.now();
-          saveLeaderboardStore(store);
-        }
-        state.home.google.profileMissing=false;
-        return{status:'not_found'};
-      }
+      if(!readFailed&&(identity?.email||identity?.id))state.home.google.profileMissing=false;
+      if(!readFailed&&(identity?.email||identity?.id))return{status:'not_found'};
       return{status:'error'};
     }
     const d=data;
@@ -2292,7 +2294,8 @@ const roomActionsController=createRoomActionsController({
   subscribeRoom,
   syncRoomDirectory,
   t,
-  updateActiveRoomPointer
+  updateActiveRoomPointer,
+  waitForLeaderboardCloudReady:()=>refreshLeaderboardCloud()
 });
 const roomSubscriptionController=createRoomSubscriptionController({
   FIRESTORE_ROOMS_COLLECTION,
@@ -3520,11 +3523,13 @@ async function recordLeaderboardRound(identity,delta,won){
 }
 async function syncLeaderboardProfile(identity){
   if(!isBotIdentity(identity)&&(state.home.google?.profileMissing||state.home.google?.hydrating))return false;
+  await refreshLeaderboardCloud();
   const store=loadLeaderboardStore();
   const entry=ensureLeaderboardEntry(store,identity);
   if(!entry)return false;
+  const cloudEntry=findLeaderboardEntryInStore(leaderboardCloudStore,identity);
   entry.updatedAt=Date.now();
-  entry.totalScore=scoreFromStoredTotal(entry.totalScore);
+  entry.totalScore=scoreFromStoredTotal(cloudEntry?.totalScore??state.score??entry.totalScore);
   entry.settings=collectMainSettings();
   saveLeaderboardStore(store);
   const payload=buildProfilePayload(identity,entry,entry.updatedAt);
@@ -3634,35 +3639,58 @@ async function migrateBotLeaderboardPicturesNow(){
 }
 
 async function refreshLeaderboardCloud(){
-  if(!firebaseDb||leaderboardCloudRefreshInFlight)return;
+  if(!firebaseDb)return false;
+  if(leaderboardCloudRefreshPromise)return leaderboardCloudRefreshPromise;
   leaderboardCloudRefreshInFlight=true;
-  try{
-    const lb=state.home.leaderboard;
-    const snap=await firebaseDb.collection(FIRESTORE_LB_COLLECTION).get();
-    const store={players:{}};
-    snap.forEach((doc)=>{
-      const d=doc.data()??{};
-      const id=String(d.id??doc.id);
-      store.players[id]={id,name:String(d.name??''),email:String(d.email??''),gender:String(d.gender??'male')==='female'?'female':'male',picture:String(d.picture??'').trim(),isBot:Boolean(d.isBot)||Boolean(currentBotLeaderboardPicture(d.name)),settings:d.settings&&typeof d.settings==='object'?d.settings:{},games:Number(d.games)||0,wins:Number(d.wins)||0,totalScore:scoreFromStoredTotal(d.totalScore),updatedAt:Number(d.updatedAt)||0};
-    });
-    const migratedBotEntries=migrateBotLeaderboardPictures(store);
-    saveLeaderboardStore(store);
-    if(migratedBotEntries.length){
-      await writeMigratedBotEntries(migratedBotEntries);
+  leaderboardCloudRefreshPromise=(async()=>{
+    try{
+      while(true){
+        try{
+          const snap=await firebaseDb.collection(FIRESTORE_LB_COLLECTION).get();
+          const store={players:{}};
+          snap.forEach((doc)=>{
+            const d=doc.data()??{};
+            const id=String(d.id??doc.id);
+            store.players[id]={id,name:String(d.name??''),email:String(d.email??''),gender:String(d.gender??'male')==='female'?'female':'male',picture:String(d.picture??'').trim(),isBot:Boolean(d.isBot)||Boolean(currentBotLeaderboardPicture(d.name)),settings:d.settings&&typeof d.settings==='object'?d.settings:{},games:Number(d.games)||0,wins:Number(d.wins)||0,totalScore:scoreFromStoredTotal(d.totalScore),updatedAt:Number(d.updatedAt)||0};
+          });
+          const migratedBotEntries=migrateBotLeaderboardPictures(store);
+          leaderboardCloudStore=store;
+          saveLeaderboardStore(store);
+          if(migratedBotEntries.length){
+            await writeMigratedBotEntries(migratedBotEntries);
+          }
+          syncSessionScoreFromStore(leaderboardCloudStore,{force:true});
+          const lb=state.home.leaderboard;
+          lb.loading=false;
+          lb.rows=computeLeaderboardRowsFromStore(leaderboardCloudStore,lb.period,lb.sort,lb.limit);
+          leaderboardCloudLoaded=true;
+          if(state.home.showLeaderboard&&state.screen==='home')render();
+          return true;
+        }catch(err){
+          console.error('leaderboard fetch failed',err);
+          state.home.leaderboard.loading=true;
+          if(state.home.showLeaderboard&&state.screen==='home')render();
+          await new Promise((resolve)=>setTimeout(resolve,1000));
+        }
+      }
+    }finally{
+      leaderboardCloudRefreshInFlight=false;
+      leaderboardCloudRefreshPromise=null;
     }
-    syncSessionScoreFromStore(store);
-    lb.rows=computeLeaderboardRowsFromStore(store,lb.period,lb.sort,lb.limit);
-    leaderboardCloudLoaded=true;
-    if(state.home.showLeaderboard&&state.screen==='home')render();
-  }catch(err){
-    console.error('leaderboard fetch failed',err);
-  }finally{leaderboardCloudRefreshInFlight=false;}
+  })();
+  return leaderboardCloudRefreshPromise;
 }
 function refreshLeaderboard(forceCloud=false){
   const lb=state.home.leaderboard;
-  const store=loadLeaderboardStore();
-  syncSessionScoreFromStore(store);
-  lb.rows=computeLeaderboardRowsFromStore(store,lb.period,lb.sort,lb.limit);
+  if(!leaderboardCloudLoaded){
+    lb.loading=true;
+    lb.rows=[];
+    if(firebaseDb&&(forceCloud||!leaderboardCloudRefreshInFlight))void refreshLeaderboardCloud();
+    return;
+  }
+  lb.loading=false;
+  syncSessionScoreFromStore(leaderboardCloudStore);
+  lb.rows=computeLeaderboardRowsFromStore(leaderboardCloudStore,lb.period,lb.sort,lb.limit);
   if(firebaseDb&&(forceCloud||(!lb.rows.length&&!leaderboardCloudLoaded)))void refreshLeaderboardCloud();
 }
 function scoreGuideModalHtml(){
@@ -4882,7 +4910,7 @@ function triggerMust3LeadCallout(game,selfSeat=0){
   scheduleCalloutExpiry(must3CallState.until);
   speakCallout(text,pick.player?.gender??'male',{seat:pick.seat,force:true,clipKey:'line-must3'});
 }
-function startSoloGame(options={}){randomizeNpcColors();const preserveOpponents=options?.preserveOpponents!==false;const resetRoundWins=options?.resetRoundWins===true;const resetTotals=options?.resetTotals===true;const storedBotProfiles=Array.isArray(state.solo.botProfiles)&&state.solo.botProfiles.length===3?state.solo.botProfiles.map((bp)=>({name:String(bp?.name||''),gender:String(bp?.gender||'male')})):null;const botProfiles=preserveOpponents&&storedBotProfiles&&storedBotProfiles.every((bp)=>bp.name)?storedBotProfiles:randomBotProfiles();const p=[{name:state.home.name||t('name'),gender:state.home.gender==='female'?'female':'male',hand:[],isHuman:true},{name:botProfiles[0].name,gender:botProfiles[0].gender,hand:[],isHuman:false},{name:botProfiles[1].name,gender:botProfiles[1].gender,hand:[],isHuman:false},{name:botProfiles[2].name,gender:botProfiles[2].gender,hand:[],isHuman:false}];const deck=shuffle(createDeck());p.forEach((x)=>{x.hand=deck.splice(0,13).sort(cmpCard);});const start=p.findIndex((x)=>x.hand.some((c)=>c.rank===0&&c.suit===0));const totals=resetTotals?soloStartingTotals(p):getNextSoloTotals(state.solo.totals,{resetTotals});const roundWins=getNextSoloRoundWins(state.solo.roundWins,{resetTotals,resetRoundWins});state.solo={players:p,botProfiles:botProfiles.map((bp)=>({name:bp.name,gender:bp.gender})),botNames:botProfiles.map((bp)=>bp.name),totals,roundWins,currentSeat:start,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',statusMeta:null,systemLog:[],history:[],aiDifficulty:state.home.aiDifficulty,lastCardBreach:null,roundSummary:null};setSoloStatus(`${p[start].name} ${t('start')}`,{meta:{seat:start,name:p[start].name,key:'start'}});state.selected.clear();state.recommendation=null;state.logTouched=false;state.showLog=false;state.showLogSheet=false;state.screen='game';state.home.mode='solo';state.home.showIntro=false;state.home.showLeaderboard=false;state.showScoreGuide=false;calloutGateUntilPlay=true;playSound('start');triggerMust3LeadCallout(state.solo,0);render();maybeRunSoloAi();}
+async function startSoloGame(options={}){randomizeNpcColors();const preserveOpponents=options?.preserveOpponents!==false;const resetRoundWins=options?.resetRoundWins===true;const resetTotals=options?.resetTotals===true;const storedBotProfiles=Array.isArray(state.solo.botProfiles)&&state.solo.botProfiles.length===3?state.solo.botProfiles.map((bp)=>({name:String(bp?.name||''),gender:String(bp?.gender||'male')})):null;const botProfiles=preserveOpponents&&storedBotProfiles&&storedBotProfiles.every((bp)=>bp.name)?storedBotProfiles:randomBotProfiles();await refreshLeaderboardCloud();const p=[{name:state.home.name||t('name'),gender:state.home.gender==='female'?'female':'male',hand:[],isHuman:true},{name:botProfiles[0].name,gender:botProfiles[0].gender,hand:[],isHuman:false},{name:botProfiles[1].name,gender:botProfiles[1].gender,hand:[],isHuman:false},{name:botProfiles[2].name,gender:botProfiles[2].gender,hand:[],isHuman:false}];const deck=shuffle(createDeck());p.forEach((x)=>{x.hand=deck.splice(0,13).sort(cmpCard);});const start=p.findIndex((x)=>x.hand.some((c)=>c.rank===0&&c.suit===0));const totals=resetTotals?soloStartingTotals(p):getNextSoloTotals(state.solo.totals,{resetTotals});const roundWins=getNextSoloRoundWins(state.solo.roundWins,{resetTotals,resetRoundWins});state.solo={players:p,botProfiles:botProfiles.map((bp)=>({name:bp.name,gender:bp.gender})),botNames:botProfiles.map((bp)=>bp.name),totals,roundWins,currentSeat:start,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',statusMeta:null,systemLog:[],history:[],aiDifficulty:state.home.aiDifficulty,lastCardBreach:null,roundSummary:null};setSoloStatus(`${p[start].name} ${t('start')}`,{meta:{seat:start,name:p[start].name,key:'start'}});state.selected.clear();state.recommendation=null;state.logTouched=false;state.showLog=false;state.showLogSheet=false;state.screen='game';state.home.mode='solo';state.home.showIntro=false;state.home.showLeaderboard=false;state.showScoreGuide=false;calloutGateUntilPlay=true;playSound('start');triggerMust3LeadCallout(state.solo,0);render();maybeRunSoloAi();}
 function soloApplyPlay(seat,cards){const g=state.solo;const ev=evaluatePlay(cards);if(!ev.valid){if(seat===0)setSoloStatus(ev.reason);return false;}if(g.isFirstTrick&&!has3d(cards)){if(seat===0)setSoloStatus(t('must3'));return false;}if(g.lastPlay&&!canBeat(ev,g.lastPlay.eval)){if(seat===0)setSoloStatus(t('beat'));return false;}
   markLastCardBreachIfNeeded({
     game:g,

@@ -495,7 +495,7 @@ function bindHomeAndResultActions({
       if(state.home.mode==='room'&&state.room.id){
         await leaveRoom();
       }
-      startSoloGame({preserveOpponents:false,resetTotals:true,resetRoundWins:true});
+      await startSoloGame({preserveOpponents:false,resetTotals:true,resetRoundWins:true});
       schedulePopunderAfterRender(1200);
       return;
     }
@@ -553,7 +553,7 @@ function bindHomeAndResultActions({
       }
       return;
     }
-    startSoloGame();
+    await startSoloGame();
     schedulePopunderAfterRender(350);
   };
   bindResultActionButton('result-again','result-again',handleResultAgain,guardAction,armPopunderForGesture);
@@ -578,7 +578,7 @@ function bindHomeAndResultActions({
       }
       return;
     }
-    startSoloGame();
+    await startSoloGame();
     schedulePopunderAfterRender(350);
   };
   bindResultActionButton('congrats-again','congrats-again',handleCongratsAgain,guardAction,armPopunderForGesture);

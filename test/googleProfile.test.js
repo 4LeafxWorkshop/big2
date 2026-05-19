@@ -45,7 +45,7 @@ function createHelpers(state=createState(),store={players:{}}){
   return{state,helpers,preloadCalls,appliedSettings};
 }
 
-test('cached browser profile restores profile fields and score', ()=>{
+test('cached browser profile restores profile fields without score', ()=>{
   const {state,helpers,preloadCalls}=createHelpers(undefined,{
     players:{
       'user@example.com':{
@@ -63,8 +63,8 @@ test('cached browser profile restores profile fields and score', ()=>{
   assert.equal(state.home.name,'Alice');
   assert.equal(state.home.gender,'female');
   assert.equal(state.home.google.gender,'female');
-  assert.equal(state.score,6789);
-  assert.equal(state.solo.totals[0],6789);
+  assert.equal(state.score,5000);
+  assert.equal(state.solo.totals[0],5000);
   assert.equal(state.home.google.picture,'https://example.com/avatar.png');
   assert.equal(state.home.google.profileMissing,false);
   assert.equal(preloadCalls.length,1);

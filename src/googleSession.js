@@ -17,29 +17,10 @@ export function createGoogleSessionHelpers({
   afterSuccessfulSignIn=()=>{},
   afterSessionReady=()=>{}
 }){
-  const HYDRATE_TIMEOUT_MS=5000;
-  const HYDRATE_RETRY_MAX=3;
   const HYDRATE_RETRY_DELAY_MS=320;
 
   function wait(ms){
     return new Promise((resolve)=>setTimeout(resolve,ms));
-  }
-
-  function withTimeout(task,ms){
-    return new Promise((resolve,reject)=>{
-      const timer=setTimeout(()=>{
-        reject(new Error('hydrate-timeout'));
-      },ms);
-      Promise.resolve(task)
-        .then((value)=>{
-          clearTimeout(timer);
-          resolve(value);
-        })
-        .catch((err)=>{
-          clearTimeout(timer);
-          reject(err);
-        });
-    });
   }
 
   function normalizeHydrateResult(result){
@@ -61,15 +42,10 @@ export function createGoogleSessionHelpers({
     setHydrationBlocking(true);
     state.home.google.profileMissing=false;
     render();
-    let lastStatus='error';
-    for(let i=0;i<HYDRATE_RETRY_MAX;i+=1){
+    while(true){
       try{
-        const result=await withTimeout(
-          hydrateProfileFromCloudByIdentity(currentLeaderboardIdentity()),
-          HYDRATE_TIMEOUT_MS
-        );
+        const result=await hydrateProfileFromCloudByIdentity(currentLeaderboardIdentity());
         const status=normalizeHydrateResult(result);
-        lastStatus=status;
         if(status==='found'){
           setHydrationBlocking(false);
           state.home.google.profileMissing=false;
@@ -83,13 +59,10 @@ export function createGoogleSessionHelpers({
           return{ok:true,status:'not_found'};
         }
       }catch{
-        lastStatus='error';
+        // Keep waiting until Firebase responds.
       }
-      if(i<HYDRATE_RETRY_MAX-1)await wait(HYDRATE_RETRY_DELAY_MS);
+      await wait(HYDRATE_RETRY_DELAY_MS);
     }
-    setHydrationBlocking(false);
-    state.home.google.profileMissing=true;
-    return{ok:false,status:lastStatus||'error'};
   }
 
   function parseJwtPayload(token){

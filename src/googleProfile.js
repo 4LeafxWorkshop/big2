@@ -62,8 +62,7 @@ export function createGoogleProfileHelpers({
       name:String(match.name??'').trim().slice(0,18),
       gender:String(match.gender??'male')==='female'?'female':'male',
       picture:String(match.picture??'').trim(),
-      totalScore:match.totalScore,
-      updateScore:true
+      updateScore:false
     });
     return true;
   }

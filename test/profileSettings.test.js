@@ -4,6 +4,12 @@ import assert from 'node:assert/strict';
 import {createProfileSettingsHelpers} from '../src/profileSettings.js';
 
 function createHelpers(stateOverrides={}){
+  const cloudStore={
+    players:{
+      self:{id:'self',name:'Self',email:'',gender:'male',totalScore:6200},
+      'bot:test:male':{id:'bot:test:male',name:'Test',email:'',gender:'male',totalScore:5400}
+    }
+  };
   const state={
     language:'zh-HK',
     home:{aiDifficulty:'normal',backColor:'red',gender:'male',avatarChoice:'male'},
@@ -38,8 +44,8 @@ function createHelpers(stateOverrides={}){
     setCalloutStylePack:(value)=>{calloutStylePack=value;},
     setCalloutVoiceMode:(value)=>{calloutVoiceMode=value;},
     currentLeaderboardIdentity:()=>({id:'self'}),
-    ensureLeaderboardEntry:(_store,identity)=>identity.id==='self'?{totalScore:6200}:null,
     loadLeaderboardStore:()=>({players:{}}),
+    loadLeaderboardCloudStore:()=>cloudStore,
     botLeaderboardIdentity:(name,gender)=>({id:`bot:${name}:${gender}`}),
     currentRoomPlayerId:()=>'uid:self'
   });
