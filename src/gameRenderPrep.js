@@ -631,7 +631,7 @@ export function buildResultScreenHtml(params){
       ${isRoom?`<div class="room-expiry-row room-expiry-top"><span class="room-expiry-label"><i class="fa-solid fa-clock room-expiry-icon" aria-hidden="true"></i><span>${t('roomCountdown')}</span></span><button type="button" class="room-expiry-reset-btn" data-room-expiry-reset="1"><strong data-room-countdown-value>${esc(roomCountdown)}</strong></button></div>`:''}
       <div class="result-list">${rows}</div>
       <div class="control-row">
-        <button id="result-home" class="secondary"${roomExitHint?` data-tooltip="${esc(roomExitHint)}" data-tooltip-pos="up"`:''}>${isRoom?t('roomLeave'):t('home')}</button>
+        <button id="result-home" class="secondary">${isRoom?t('roomLeave'):t('home')}</button>
         ${(!isRoom||canRoomAgain)
     ?`<button id="result-again" class="primary" ${canRoomAgain||!isRoom?'':'disabled'}>${t('again')}</button>`
     :(!isRoom?'':footerHint?``:`<span class="hint">${t('roomWaitingHost')}</span>`)}

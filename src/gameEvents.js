@@ -515,7 +515,9 @@ function bindHomeAndResultActions({
   document.getElementById('home-btn')?.addEventListener('click',()=>{
     openGameExitConfirm('home',document.getElementById('home-btn'));
   });
-  document.getElementById('result-home')?.addEventListener('click',()=>{clearAiTimer();state.opponentProfileName='';if(state.home.mode==='room'&&state.room.id){void leaveRoom();return;}resetSoloSessionCarryover();state.screen='home';state.selected.clear();state.recommendation=null;setRecommendHint('');render();});
+  document.getElementById('result-home')?.addEventListener('click',()=>{
+    openGameExitConfirm('home',document.getElementById('result-home'));
+  });
   document.getElementById('congrats-home')?.addEventListener('click',()=>{clearAiTimer();state.opponentProfileName='';if(state.home.mode==='room'&&state.room.id){void leaveRoom();return;}resetSoloSessionCarryover();state.screen='home';state.selected.clear();state.recommendation=null;setRecommendHint('');render();});
   document.querySelectorAll('[data-room-expiry-reset]').forEach((btn)=>btn.addEventListener('click',async()=>{
     await resetRoomExpiryTo60s();

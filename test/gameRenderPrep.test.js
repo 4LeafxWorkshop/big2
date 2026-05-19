@@ -264,7 +264,7 @@ test('buildResultScreenHtml displays transferred last-card deductions instead of
   assert.match(html,/Dan[\s\S]*resultDelta: 0[\s\S]*scoreDeduct 0/);
 });
 
-test('buildResultScreenHtml shows the room exit hint as a tooltip instead of fixed text', ()=>{
+test('buildResultScreenHtml renders the result home button without tooltip text', ()=>{
   const html=buildResultScreenHtml({
     v:{
       mode:'solo',
@@ -297,7 +297,7 @@ test('buildResultScreenHtml shows the room exit hint as a tooltip instead of fix
     avatarDataUri:()=>'avatar'
   });
 
-  assert.match(html,/id="result-home" class="secondary" data-tooltip="roomExitHint" data-tooltip-pos="up"/);
+  assert.match(html,/id="result-home" class="secondary">roomLeave<\/button>/);
   assert.doesNotMatch(html,/room-action-note/);
 });
 

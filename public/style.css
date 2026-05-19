@@ -4292,6 +4292,11 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   margin-bottom: 8px;
 }
 .intro-head h3 { margin: 0; font-size: 1.08rem; }
+.score-guide-title-stack {
+  display: inline-grid;
+  gap: 0;
+  line-height: 1.05;
+}
 .title-with-icon {
   display: inline-flex;
   align-items: center;
@@ -10713,13 +10718,23 @@ body[data-screen='game'] .avatar-status-badge.warning.danger::before {
   box-shadow: 0 0 16px rgba(255, 95, 102, .58);
 }
 body[data-screen='game'] .seat-top-two-warning {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: min(100%, 128px);
+  padding: 2px 7px;
+  border-radius: 999px;
   font-weight: 900;
+  font-size: .7rem;
+  line-height: 1;
   white-space: nowrap;
   color: var(--game-badge-text);
   text-shadow: none;
   background: var(--game-badge-bg);
   border: 1px solid var(--game-badge-border);
   box-shadow: var(--game-badge-shadow);
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 @keyframes lastCardBadgePulse {
   0% { transform: scale(1); }
@@ -11681,6 +11696,15 @@ body[data-screen='game'] .action-strip {
     transform: none !important;
     z-index: 12 !important;
     margin: 0 !important;
+  }
+  body[data-screen='game'] .action-strip .player-tag .seat-top-two-warning {
+    position: absolute !important;
+    left: 0 !important;
+    bottom: calc(100% + 4px) !important;
+    z-index: 21 !important;
+    max-width: min(42vw, 120px) !important;
+    padding: 1px 6px !important;
+    font-size: .62rem !important;
   }
 }
 @media (max-width: 420px) and (orientation: portrait) {
