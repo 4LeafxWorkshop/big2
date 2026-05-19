@@ -22,7 +22,10 @@ export function createLangMenuController(deps){
     const padding=8;
     pop.style.display='grid';
     const popRect=pop.getBoundingClientRect();
-    let left=rect.right-popRect.width;
+    let left=rect.left;
+    if(left+popRect.width>window.innerWidth-padding){
+      left=window.innerWidth-popRect.width-padding;
+    }
     left=Math.max(padding,Math.min(left,window.innerWidth-popRect.width-padding));
     let top=rect.bottom+6;
     if(top+popRect.height>window.innerHeight-padding){

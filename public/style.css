@@ -12025,9 +12025,6 @@ body[data-screen='game'] .topbar-right .lang-menu {
   z-index: 12020 !important;
 }
 body[data-screen='game'] .lang-menu-pop {
-  left: 50% !important;
-  right: auto !important;
-  transform: translateX(-50%) !important;
   width: fit-content !important;
   min-width: 128px !important;
   max-width: min(180px, calc(100vw - 32px)) !important;
