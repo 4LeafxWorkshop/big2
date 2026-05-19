@@ -15,8 +15,7 @@ test('renderGameTopbar includes the game controls', ()=>{
   assert.match(html,/title-lockup-game\.png/);
   assert.match(html,/id="game-intro-toggle"/);
   assert.match(html,/id="restart-btn"/);
-  assert.match(html,/id="home-btn" class="secondary game-exit-room-btn"/);
-  assert.match(html,/title-icon-exit/);
+  assert.match(html,/id="home-btn" class="secondary" aria-label="roomLeave"/);
   assert.match(html,/roomLeave/);
   assert.doesNotMatch(html,/data-tooltip="Going home or restarting will leave the room\."/);
 });
