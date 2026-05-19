@@ -148,6 +148,30 @@ export function createRoomActionsController(deps){
         deps.setRoomError(deps.t('roomNotFound'));
         return;
       }
+      const state=deps.getState();
+      const primeJoinedRoomState=(roomId,roomData,firebaseInstanceId='')=>{
+        const selfSeat=(()=>{
+          if(typeof deps.roomSelfSeat==='function'){
+            try{
+              return deps.roomSelfSeat(roomData);
+            }catch{}
+          }
+          const players=Array.isArray(roomData?.players)?roomData.players:[];
+          const selfUid=String(state.room.playerId||deps.baseRoomPlayerId?.()||'').trim();
+          const self=players.find((p)=>String(p?.uid||'').trim()===selfUid);
+          const seat=Number(self?.seat);
+          return Number.isFinite(seat)?seat:-1;
+        })();
+        state.home.mode='room';
+        state.room.id=roomId;
+        state.room.code=code;
+        state.room.pendingInviteCode='';
+        state.room.inviteOpen=false;
+        state.room.joinOpen=false;
+        state.room.firebaseInstanceId=String(firebaseInstanceId||state.room.firebaseInstanceId||'').trim();
+        state.room.data=roomData;
+        state.room.selfSeat=selfSeat;
+      };
       const data=doc.data()??{};
       const roomDb=(doc.ref?.firestore)||await deps.getFirebaseDbForInstanceId(doc.instanceId);
       if(!roomDb){
@@ -165,10 +189,7 @@ export function createRoomActionsController(deps){
       })||null;
       if(status==='playing'){
         if(selfEntry){
-          const state=deps.getState();
-          state.room.code=code;
-          state.room.pendingInviteCode='';
-          state.room.inviteOpen=false;
+          primeJoinedRoomState(doc.id,data,doc.instanceId);
           deps.subscribeRoom(doc.id,code,doc.instanceId,roomDb);
           void deps.updateActiveRoomPointer(doc.id,doc.instanceId||'');
           state.room.joinOpen=false;
@@ -182,18 +203,15 @@ export function createRoomActionsController(deps){
         deps.setRoomError(deps.t('roomClosed'));
         return;
       }
-      const state=deps.getState();
-        if(state.room.id){
-          const same=String(state.room.id)===String(doc.id);
-          if(same){
-            state.room.code=code;
-            state.room.pendingInviteCode='';
-            state.room.inviteOpen=false;
-            deps.subscribeRoom(doc.id,code,doc.instanceId,roomDb);
+      if(state.room.id){
+        const same=String(state.room.id)===String(doc.id);
+        if(same){
+          primeJoinedRoomState(doc.id,data,doc.instanceId);
+          deps.subscribeRoom(doc.id,code,doc.instanceId,roomDb);
           void deps.updateActiveRoomPointer(doc.id,doc.instanceId||'');
-            state.room.joinOpen=false;
-            deps.render();
-            return;
+          state.room.joinOpen=false;
+          deps.render();
+          return;
         }
         deps.setRoomError(deps.t('roomAlreadyIn'));
         return;
@@ -214,9 +232,7 @@ export function createRoomActionsController(deps){
         return;
       }
       if(gate.already){
-        state.room.code=code;
-        state.room.pendingInviteCode='';
-        state.room.inviteOpen=false;
+        primeJoinedRoomState(doc.id,data,doc.instanceId);
         deps.subscribeRoom(doc.id,code,doc.instanceId,roomDb);
         void deps.refreshRoomInviteQrDataUrl?.(true);
         void deps.updateActiveRoomPointer(doc.id,doc.instanceId||'');
@@ -231,6 +247,7 @@ export function createRoomActionsController(deps){
       state.room.code=code;
       state.room.pendingInviteCode='';
       state.room.inviteOpen=false;
+      let optimisticRoomData=data;
       await roomDb.runTransaction(async(tx)=>{
         const snap=await tx.get(doc.ref);
         if(!snap.exists)throw new Error('room missing');
@@ -320,8 +337,10 @@ export function createRoomActionsController(deps){
             updates.gameVersion=Number(data.gameVersion||0)+1;
           }
         }
+        optimisticRoomData={...data,...updates};
         tx.update(doc.ref,updates);
       });
+      primeJoinedRoomState(doc.id,optimisticRoomData,doc.instanceId);
       deps.subscribeRoom(doc.id,code,doc.instanceId,roomDb);
       void deps.refreshRoomInviteQrDataUrl?.(true);
       void deps.updateActiveRoomPointer(doc.id,doc.instanceId||'');

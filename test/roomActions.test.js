@@ -117,3 +117,66 @@ test('joinRoomByCode clears a claimed pointer if the room write fails', async()=
   assert.deepEqual(pointerUpdates,['']);
   assert.equal(calls.errors.at(-1),'roomFull');
 });
+
+test('joinRoomByCode primes room state before the snapshot arrives', async()=>{
+  const state={
+    home:{mode:'solo',name:'Player',gender:'male'},
+    room:{id:'',joinOpen:true,data:null,selfSeat:null,pendingInviteCode:'',inviteOpen:true,code:'',firebaseInstanceId:''}
+  };
+  let subscribeArgs=null;
+  const roomDb={
+    runTransaction:async(fn)=>{
+      await fn({
+        get:async()=>({
+          exists:true,
+          data:()=>({
+            status:'lobby',
+            code:'ABCDE1',
+            hostId:'uid:host',
+            hostName:'Host',
+            maxPlayers:4,
+            players:[{uid:'uid:host',email:'host@example.com',name:'Host',gender:'male',seat:0,isHost:true,lastSeen:1}],
+            playerIds:['uid:host'],
+            totals:[5000,5000,5000,5000]
+          }),
+          ref:{}
+        }),
+        update(){}
+      });
+    }
+  };
+  const {calls,controller}=createController({
+    signedInForPlay:()=>true,
+    initFirebaseIfReady:()=>true,
+    getState:()=>state,
+    findRoomByCode:async()=>({
+      id:'room-1',
+      instanceId:'instance-1',
+      data:()=>({
+        status:'lobby',
+        code:'ABCDE1',
+        hostId:'uid:host',
+        hostName:'Host',
+        maxPlayers:4,
+        players:[{uid:'uid:host',email:'host@example.com',name:'Host',gender:'male',seat:0,isHost:true,lastSeen:1}],
+        playerIds:['uid:host'],
+        totals:[5000,5000,5000,5000]
+      }),
+      ref:{firestore:roomDb}
+    }),
+    getFirebaseDbForInstanceId:async()=>roomDb,
+    gateUserRoomAccess:async()=>({ok:true,claimed:false}),
+    gateGuestRoomAccess:async()=>({ok:true}),
+    subscribeRoom:(...args)=>{subscribeArgs=args;},
+    updateActiveRoomPointer(){},
+    refreshRoomInviteQrDataUrl(){},
+  });
+  await controller.joinRoomByCode('ABCDE1');
+  assert.equal(state.home.mode,'room');
+  assert.equal(state.room.id,'room-1');
+  assert.equal(state.room.joinOpen,false);
+  assert.equal(state.room.selfSeat,1);
+  assert.equal(state.room.data?.players?.length,2);
+  assert.deepEqual(subscribeArgs,['room-1','ABCDE1','instance-1',roomDb]);
+  assert.equal(calls.renderCount,1);
+});
