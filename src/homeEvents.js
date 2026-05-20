@@ -55,6 +55,7 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
     const win=windowRef();
     const closeOpponentProfile=()=>{
       state.opponentProfileName='';
+      state.opponentProfileMode='profile';
       render();
     };
     const closeLeaderboard=()=>{

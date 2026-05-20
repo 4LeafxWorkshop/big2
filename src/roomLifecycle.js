@@ -31,6 +31,7 @@ export function createRoomLifecycleController(deps){
     state.recommendation=null;
     deps.setRecommendHint('');
     state.opponentProfileName='';
+    state.opponentProfileMode='profile';
     state.home.mode='solo';
     state.room={id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:Boolean(openLobby),inviteOpen:false,error:String(msg||''),started:false,unsub:null,selfSeat:-1,recordedGameKey:'',lastMoveKey:'',playerId:'',pendingStart:false,lastResultPlayers:null,inviteUrl:'',inviteQrDataUrl:'',inviteCardDataUrl:'',inviteQrLoading:false,inviteQrError:'',pendingInviteCode:'',inviteQrPayload:'',adPromptGameKey:''};
     state.room.playerId='';
@@ -51,6 +52,7 @@ export function createRoomLifecycleController(deps){
       state.recommendation=null;
       deps.setRecommendHint('');
       state.opponentProfileName='';
+      state.opponentProfileMode='profile';
       if(toLobby){
         state.room.joinOpen=true;
         state.room.error='';

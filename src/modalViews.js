@@ -338,3 +338,78 @@ export function renderOpponentProfileModal(params){
     </section>
   </div>`;
 }
+
+function radarPoints(values,cx,cy,radius){
+  return values.map((value,index)=>{
+    const angle=(-Math.PI/2)+(index*(Math.PI*2/values.length));
+    const scale=Math.max(0,Math.min(100,Number(value)||0))/100;
+    const x=cx+Math.cos(angle)*(radius*scale);
+    const y=cy+Math.sin(angle)*(radius*scale);
+    return `${x.toFixed(1)},${y.toFixed(1)}`;
+  }).join(' ');
+}
+
+export function renderOpponentStarChartModal(params){
+  const {
+    name,
+    closeLabel,
+    chartTitle,
+    avatarSrc,
+    avatarStampHtml,
+    metrics=[],
+    rankSummary=[],
+    dataSummary=[],
+    statCards=[],
+    genderClass='gender-male',
+    genderLabel='',
+    esc
+  }=params;
+  const values=metrics.map((m)=>Number(m.value)||0);
+  const chartCx=120;
+  const chartCy=120;
+  const chartRadius=78;
+  const rings=[22,44,58,74];
+  const ringPolys=rings.map((r)=>`<polygon points="${radarPoints(new Array(5).fill(100),chartCx,chartCy,r)}"/>`).join('');
+  const axisLines=metrics.map((_,index)=>{
+    const angle=(-Math.PI/2)+(index*(Math.PI*2/metrics.length));
+    const x=chartCx+Math.cos(angle)*chartRadius;
+    const y=chartCy+Math.sin(angle)*chartRadius;
+    return `<line x1="${chartCx}" y1="${chartCy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"/>`;
+  }).join('');
+  const axisLabels=metrics.map((m,index)=>{
+    const angle=(-Math.PI/2)+(index*(Math.PI*2/metrics.length));
+    const labelRadius=chartRadius+14;
+    const x=chartCx+Math.cos(angle)*labelRadius;
+    const y=chartCy+Math.sin(angle)*labelRadius;
+    const anchor=x<chartCx-16?'end':x>chartCx+16?'start':'middle';
+    return `<text class="human-star-axis-label" x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="${anchor}">${esc(m.label)}</text>`;
+  }).join('');
+  const fallbackCards=[
+    {id:'totalDelta',label:rankSummary[0]?.label??'Total Delta',value:dataSummary[0]?.displayText??dataSummary[0]?.value??'--',rank:rankSummary[0]?.displayText??'-'},
+    {id:'wins',label:rankSummary[1]?.label??'Wins',value:dataSummary[1]?.displayText??dataSummary[1]?.value??'--',rank:rankSummary[1]?.displayText??'-'},
+    {id:'games',label:rankSummary[2]?.label??'Games',value:dataSummary[2]?.displayText??dataSummary[2]?.value??'--',rank:rankSummary[2]?.displayText??'-'},
+    {id:'winRate',label:rankSummary[3]?.label??'Win Rate',value:dataSummary[3]?.displayText??dataSummary[3]?.value??'--',rank:rankSummary[3]?.displayText??'-'},
+    {id:'form',label:dataSummary[4]?.label??'Form',value:dataSummary[4]?.displayText??dataSummary[4]?.value??'--',rank:'-'},
+    {id:'avgDelta',label:rankSummary[4]?.label??'Avg Delta',value:'--',rank:rankSummary[4]?.displayText??'-'}
+  ];
+  const statList=(statCards.length?statCards:fallbackCards).map((m)=>{
+    const value=String(m.value??'-');
+    const rankValue=String(m.rank??'-');
+    const iconId=String(m.id??'');
+    const iconClass=`human-star-stat-icon human-star-stat-icon-${esc(iconId)}`;
+    const iconSvg=({
+      totalDelta:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 17l5-5 3 3 6-8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M13 7h6v6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+      wins:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4h10v4a5 5 0 0 1-4 4.9V15h2v2H9v-2h2v-2.1A5 5 0 0 1 7 8V4Z" fill="currentColor"/></svg>',
+      games:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M7 18V9M12 18V6M17 18v-4" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>',
+      winRate:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a9 9 0 1 0 9 9h-9V3Z" fill="currentColor"/><path d="M12 3v9h9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+      form:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4l1.6 4.1L18 10l-4.4 1.9L12 16l-1.6-4.1L6 10l4.4-1.9L12 4Zm6.5 8.5.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8Z" fill="currentColor"/></svg>',
+      avgDelta:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7h12M6 12h12M6 17h12" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"/><path d="M8 5l-2 2 2 2M16 15l2 2-2 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+    }[iconId]??'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12h12" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>');
+    return `<div class="human-star-stat-card"><div class="human-star-stat-head"><span class="${iconClass}" aria-hidden="true">${iconSvg}</span><span class="human-star-stat-label">${esc(m.label)}</span></div><div class="human-star-stat-value">${esc(value)}</div><div class="human-star-stat-rank">${rankValue==='-'?'---':`🏆 ${esc(rankValue)}`}</div></div>`;
+  }).join('');
+  const chartPoly=radarPoints(values,chartCx,chartCy,chartRadius);
+  const heroMeta=genderLabel
+    ?`<div class="human-star-hero-meta"><span class="opponent-gender-icon ${genderClass} human-star-hero-gender" aria-label="${esc(genderLabel)}" title="${esc(genderLabel)}">${renderGenderIconSvg(genderClass)}</span></div>`
+    :'';
+  return`<div class="intro-modal opponent-profile-modal human-star-modal" id="opponent-profile-modal"><button class="intro-backdrop" id="opponent-profile-backdrop" aria-label="${esc(closeLabel)}"></button><section class="intro-sheet opponent-profile-sheet human-star-sheet"><header class="intro-head"><div><h3 class="title-with-icon"><span class="title-icon title-icon-stats" aria-hidden="true"></span><span>${esc(chartTitle)}</span></h3></div><button id="opponent-profile-close" class="secondary">${closeLabel}</button></header>${avatarStampHtml??''}<div class="human-star-body"><div class="human-star-dashboard"><div class="human-star-left-column"><section class="human-star-profile-card"><div class="opponent-profile-avatar-wrap human-star-avatar-wrap"><img class="opponent-profile-avatar" src="${avatarSrc}" alt="${esc(name)}"/></div><div class="human-star-hero-copy"><div class="human-star-name">${esc(name)}</div>${heroMeta}</div></section><section class="human-star-chart-card"><div class="human-star-chart-wrap"><svg class="human-star-chart" viewBox="0 0 240 240" role="img" aria-label="${esc(chartTitle)}"><g class="human-star-grid">${ringPolys}${axisLines}</g><g class="human-star-axis-labels">${axisLabels}</g><polygon class="human-star-fill" points="${chartPoly}"/><polygon class="human-star-outline" points="${chartPoly}"/></svg></div></section></div><section class="human-star-stat-grid">${statList}</section></div></div></section></div>`;
+}

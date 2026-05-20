@@ -54,6 +54,12 @@ export function buildSelfRenderState(params){
     seatEmoteHtml,
     coachMarksButtonHtml=''
   }=params;
+  const selfStarcardHtml=buildOpponentNamecardHtml({
+    isHuman:true,
+    opponentName:self?self.name:t('name'),
+    t,
+    esc
+  });
   const selfScore=self?selfScoreValue:0;
   const selfName=self?self.name:t('name');
   const selfGender=self?.gender??state.home.gender??'male';
@@ -84,6 +90,7 @@ export function buildSelfRenderState(params){
   return{
     selfScore,
     selfName,
+    selfStarcardHtml,
     selfRoundWinsHtml,
     selfGender,
     selfAvatar,
@@ -220,6 +227,7 @@ export function buildOpponentSeatsHtml(params){
     const roundWinsHtml=roundWinsChipHtml(roundWinsBySeat[player.seat]??0);
     const namecardBtn=buildOpponentNamecardHtml({
       isBot:player.isBot,
+      isHuman:!player.isBot,
       opponentName,
       t,
       esc

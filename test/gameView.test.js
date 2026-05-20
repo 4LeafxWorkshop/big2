@@ -103,12 +103,14 @@ test('renderGameSelfTagHtml renders the self tag block', ()=>{
     selfName:'Player',
     selfScore:'5000',
     selfRoundWinsHtml:'<span id="wins"></span>',
+    selfStarcardHtml:'<button class="seat-starcard" type="button">*<\/button>',
     selfCalloutHtml:'<span id="callout"></span>',
     esc:(value)=>String(value)
   });
   assert.match(html,/player-tag/);
   assert.match(html,/id="avatar"/);
   assert.match(html,/id="wins"/);
+  assert.match(html,/seat-starcard/);
   assert.match(html,/id="callout"/);
 });
 

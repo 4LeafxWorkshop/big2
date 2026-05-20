@@ -384,8 +384,13 @@ function bindOpponentProfileInteractions({
   render,
   tapState
 }){
-  document.getElementById('opponent-profile-close')?.addEventListener('click',()=>{state.opponentProfileName='';render();});
-  document.getElementById('opponent-profile-backdrop')?.addEventListener('click',()=>{state.opponentProfileName='';render();});
+  const closeOpponentProfile=()=>{
+    state.opponentProfileName='';
+    state.opponentProfileMode='profile';
+    render();
+  };
+  document.getElementById('opponent-profile-close')?.addEventListener('click',closeOpponentProfile);
+  document.getElementById('opponent-profile-backdrop')?.addEventListener('click',closeOpponentProfile);
 
   const openNamecardProfile=(btn,ev)=>{
     if(ev){
@@ -399,9 +404,10 @@ function bindOpponentProfileInteractions({
     if(!name)return;
     state.mottoPeekName='';
     state.opponentProfileName=name;
+    state.opponentProfileMode=String(btn.getAttribute('data-opponent-profile-kind')||'profile')==='chart'?'chart':'profile';
     render();
   };
-  app.querySelectorAll('.seat-namecard').forEach((btn)=>{
+  app.querySelectorAll('.seat-namecard,.seat-starcard').forEach((btn)=>{
     btn.addEventListener('click',(ev)=>openNamecardProfile(btn,ev));
     btn.addEventListener('touchstart',(ev)=>openNamecardProfile(btn,ev),{passive:false});
   });
@@ -413,8 +419,9 @@ function bindOpponentProfileInteractions({
       ev.preventDefault();
       ev.stopPropagation();
       const directProfile=Boolean(ev.target?.closest?.('.seat-namecard'));
+      const directChart=Boolean(ev.target?.closest?.('.seat-starcard'));
       const canPeekMotto=Boolean(el.querySelector('.seat-motto-callout'));
-      if(!directProfile&&canPeekMotto){
+      if(!directProfile&&!directChart&&canPeekMotto){
         if(state.mottoPeekName!==name){
           state.mottoPeekName=name;
           render();
@@ -425,6 +432,7 @@ function bindOpponentProfileInteractions({
         return;
       }
       state.opponentProfileName=name;
+      state.opponentProfileMode=directChart?'chart':'profile';
       render();
     });
   });
@@ -437,6 +445,7 @@ function bindOpponentProfileInteractions({
       ev.stopPropagation();
       state.mottoPeekName='';
       state.opponentProfileName=name;
+      state.opponentProfileMode='profile';
       render();
     });
   });
@@ -482,7 +491,7 @@ function bindHomeAndResultActions({
     render();
   };
   const confirmGameExit=async()=>{
-    const action=String(state.gameExitConfirm||'home');
+    const action=String(state.gameExitConfirm?.action||'home');
     state.gameExitConfirm=null;
     closeLangMenu();
     if(action==='restart'){
@@ -490,6 +499,7 @@ function bindHomeAndResultActions({
       triggerClickBanner(document.getElementById('restart-btn'));
       await waitMs(120);
       state.opponentProfileName='';
+      state.opponentProfileMode='profile';
       state.recommendation=null;
       setRecommendHint('');
       if(state.home.mode==='room'&&state.room.id){
@@ -501,6 +511,7 @@ function bindHomeAndResultActions({
     }
     clearAiTimer();
     state.opponentProfileName='';
+    state.opponentProfileMode='profile';
     if(state.home.mode==='room'&&state.room.id){
       await leaveRoom();
       return;
@@ -518,7 +529,7 @@ function bindHomeAndResultActions({
   document.getElementById('result-home')?.addEventListener('click',()=>{
     openGameExitConfirm('home',document.getElementById('result-home'));
   });
-  document.getElementById('congrats-home')?.addEventListener('click',()=>{clearAiTimer();state.opponentProfileName='';if(state.home.mode==='room'&&state.room.id){void leaveRoom();return;}resetSoloSessionCarryover();state.screen='home';state.selected.clear();state.recommendation=null;setRecommendHint('');render();});
+  document.getElementById('congrats-home')?.addEventListener('click',()=>{clearAiTimer();state.opponentProfileName='';state.opponentProfileMode='profile';if(state.home.mode==='room'&&state.room.id){void leaveRoom();return;}resetSoloSessionCarryover();state.screen='home';state.selected.clear();state.recommendation=null;setRecommendHint('');render();});
   document.querySelectorAll('[data-room-expiry-reset]').forEach((btn)=>btn.addEventListener('click',async()=>{
     await resetRoomExpiryTo60s();
   }));
@@ -537,6 +548,7 @@ function bindHomeAndResultActions({
     triggerClickBanner(document.getElementById('result-again'));
     await waitMs(120);
     state.opponentProfileName='';
+    state.opponentProfileMode='profile';
     state.recommendation=null;
     setRecommendHint('');
     if(state.home.mode==='room'){
@@ -562,6 +574,7 @@ function bindHomeAndResultActions({
     triggerClickBanner(document.getElementById('congrats-again'));
     await waitMs(120);
     state.opponentProfileName='';
+    state.opponentProfileMode='profile';
     state.recommendation=null;
     setRecommendHint('');
     if(state.home.mode==='room'){
@@ -812,6 +825,7 @@ export function createGameEventsBinder({
         if(!btn)return;
         e.preventDefault();
         state.opponentProfileName='';
+        state.opponentProfileMode='profile';
         render();
       });
       opponentProfileDelegateBound=true;

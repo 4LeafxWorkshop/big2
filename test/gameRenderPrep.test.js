@@ -64,6 +64,7 @@ test('buildSelfRenderState shows the play-big warning whenever the next player h
 
   assert.match(result.selfCalloutHtml,/seat-top-two-warning/);
   assert.match(result.selfCalloutHtml,/playBigWarning/);
+  assert.match(result.selfStarcardHtml,/seat-starcard/);
 
   const offTurn=buildSelfRenderState({
     self:{seat:0,name:'Alice',gender:'female',count:5},
@@ -85,6 +86,7 @@ test('buildSelfRenderState shows the play-big warning whenever the next player h
   });
 
   assert.match(offTurn.selfCalloutHtml,/seat-top-two-warning/);
+  assert.match(offTurn.selfStarcardHtml,/seat-starcard/);
 });
 
 test('buildCalloutRenderState keeps standalone opponent emotes visible', ()=>{

@@ -8,6 +8,7 @@ import {
   renderLeaderboardModal,
   renderLeaderboardPanel,
   renderOpponentProfileModal,
+  renderOpponentStarChartModal,
   renderScoreGuideModal
 } from '../src/modalViews.js';
 import {formatLeaderboardDateTime, formatLeaderboardPct} from '../src/localeFormatters.js';
@@ -258,4 +259,51 @@ test('renderOpponentProfileModal renders avatar, chips, and translated close lab
   assert.match(html,/opponent-profile-motto/);
   assert.match(html,/aria-label="Close"/);
   assert.match(html,/<p>Bio<\/p>/);
+});
+
+test('renderOpponentStarChartModal renders chart and stats strip', ()=>{
+  const html=renderOpponentStarChartModal({
+    name:'Luna',
+    closeLabel:'Close',
+    chartTitle:'Stats',
+    genderClass:'gender-female',
+    genderLabel:'Female',
+    avatarSrc:'/avatar.png',
+    avatarStampHtml:'',
+    metrics:[],
+    rankSummary:[
+      {label:'Total Delta',value:12,displayText:'#12'},
+      {label:'Wins',value:4,displayText:'#4'},
+      {label:'Games',value:7,displayText:'#7'},
+      {label:'Win Rate',value:9,displayText:'#9'},
+      {label:'Avg Delta',value:5,displayText:'#5'}
+    ],
+    dataSummary:[
+      {label:'Score',value:5360,displayText:'5360'},
+      {label:'Wins',value:18,displayText:'18'},
+      {label:'Games',value:24,displayText:'24'},
+      {label:'WR',value:75,displayText:'75%'},
+      {label:'Form',value:59,displayText:'59'}
+    ],
+    rankSectionLabel:'Rank Table',
+    dataSectionLabel:'Player Stats',
+    esc:(value)=>String(value)
+  });
+  assert.match(html,/id="opponent-profile-modal"/);
+  assert.match(html,/title-icon-stats/);
+  assert.match(html,/human-star-dashboard/);
+  assert.match(html,/human-star-profile-card/);
+  assert.match(html,/human-star-chart-card/);
+  assert.match(html,/human-star-stat-grid/);
+  assert.match(html,/human-star-axis-labels/);
+  assert.match(html,/human-star-chart/);
+  assert.match(html,/human-star-stat-card/);
+  assert.match(html,/human-star-stat-value">5360</);
+  assert.match(html,/human-star-stat-value">18</);
+  assert.match(html,/human-star-stat-value">24</);
+  assert.match(html,/human-star-stat-value">75%/);
+  assert.match(html,/human-star-stat-value">59</);
+  assert.match(html,/human-star-stat-rank">/);
+  assert.match(html,/opponent-gender-icon gender-female human-star-hero-gender/);
+  assert.doesNotMatch(html,/Real data/);
 });

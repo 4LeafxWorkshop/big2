@@ -21,7 +21,7 @@ import {renderConfigMarkup, renderHomeMarkup, renderOpponentCard, renderOpponent
 import {createLangMenuController} from './langMenu.js';
 import {renderCenterLastMoves, renderGameActionZone, renderGameLogSheet, renderGameShell, renderGameSideZone, renderGameTable, renderGameTopbar, renderOpponentLabel, renderOpponentSeat, renderOpponentSeats, renderOpponentStationFlow, renderSeatLastAction} from './gameView.js';
 import {buildCalloutRenderState, buildCongratsOverlayHtml, buildGameAuxRenderState, buildGameShellMarkup, buildOpponentSeatsHtml, buildResultScreenHtml, buildRoomMetaTableHtml, buildSelfRenderState} from './gameRenderPrep.js';
-import {gestureGuideIconSvg, renderCoachMarksPanel, renderConfidentialStamp, renderIntroPanel, renderLeaderboardModal, renderLeaderboardPanel, renderOpponentProfileModal, renderScoreGuideModal} from './modalViews.js';
+import {gestureGuideIconSvg, renderCoachMarksPanel, renderConfidentialStamp, renderIntroPanel, renderLeaderboardModal, renderLeaderboardPanel, renderOpponentProfileModal, renderOpponentStarChartModal, renderScoreGuideModal} from './modalViews.js';
 import {GoogleAuth} from '@codetrix-studio/capacitor-google-auth';
 import {botAvatarUrl, resolveAvatarSrc} from './avatarProfile.js';
 import {BACK_OPTIONS, CALLOUT_RESPONSE_TEXT, KIND, LANGUAGE_NATIVE_LABEL, LANGUAGE_OPTIONS} from './localeData.js';
@@ -886,7 +886,7 @@ function guardAction(key,windowMs=800){
 
 const app=document.getElementById('app');
 const isNativeApp=isNativeAndroidApp()||isNativeIosApp();
-const state={language:'zh-HK',screen:'home',screenBeforeConfig:'home',showRules:false,showLog:false,showLogSheet:false,logTouched:false,showScoreGuide:false,showCoachMarks:false,gameExitConfirm:null,opponentProfileName:'',mottoPeekName:'',selected:new Set(),drag:{id:null,moved:false},playAnimKey:'',autoPassKey:'',score:5000,suggestCost:0,recommendation:null,recommendHint:'',logFab:{x:null,y:null},home:{mode:'solo',name:'玩家',gender:'male',avatarChoice:'male',aiDifficulty:'normal',backColor:'red',theme:'ocean',showIntro:false,showLeaderboard:false,showMoreSettings:false,gestureHelpEnabled:isNativeApp,google:{signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',pictureLoaded:false,gender:'',profileMissing:false,hydrating:false},leaderboard:{rows:[],sort:'totalDelta',period:'all',limit:20,loading:false},activeRooms:{rows:[],loading:false,loadedAt:0,error:''}},room:{id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:false,inviteOpen:false,error:'',started:false,unsub:null,selfSeat:-1,recordedGameKey:'',lastMoveKey:'',playerId:'',pendingStart:false,lastResultPlayers:null,inviteUrl:'',inviteQrDataUrl:'',inviteCardDataUrl:'',inviteQrLoading:false,inviteQrError:'',pendingInviteCode:'',inviteQrPayload:'',adPromptGameKey:''},sessionId:'',solo:{players:[],botNames:[],totals:[5000,5000,5000,5000],currentSeat:0,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',history:[],aiDifficulty:'normal',lastCardBreach:null},emote:{open:false,active:null},serviceBell:{foodCallout:null}};
+const state={language:'zh-HK',screen:'home',screenBeforeConfig:'home',showRules:false,showLog:false,showLogSheet:false,logTouched:false,showScoreGuide:false,showCoachMarks:false,gameExitConfirm:null,opponentProfileName:'',opponentProfileMode:'profile',mottoPeekName:'',selected:new Set(),drag:{id:null,moved:false},playAnimKey:'',autoPassKey:'',score:5000,suggestCost:0,recommendation:null,recommendHint:'',logFab:{x:null,y:null},home:{mode:'solo',name:'玩家',gender:'male',avatarChoice:'male',aiDifficulty:'normal',backColor:'red',theme:'ocean',showIntro:false,showLeaderboard:false,showMoreSettings:false,gestureHelpEnabled:isNativeApp,google:{signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',pictureLoaded:false,gender:'',profileMissing:false,hydrating:false},leaderboard:{rows:[],sort:'totalDelta',period:'all',limit:20,loading:false},activeRooms:{rows:[],loading:false,loadedAt:0,error:''}},room:{id:'',code:'',firebaseInstanceId:'',data:null,joinOpen:false,inviteOpen:false,error:'',started:false,unsub:null,selfSeat:-1,recordedGameKey:'',lastMoveKey:'',playerId:'',pendingStart:false,lastResultPlayers:null,inviteUrl:'',inviteQrDataUrl:'',inviteCardDataUrl:'',inviteQrLoading:false,inviteQrError:'',pendingInviteCode:'',inviteQrPayload:'',adPromptGameKey:''},sessionId:'',solo:{players:[],botNames:[],totals:[5000,5000,5000,5000],currentSeat:0,lastPlay:null,passStreak:0,isFirstTrick:true,gameOver:false,status:'',history:[],aiDifficulty:'normal',lastCardBreach:null},emote:{open:false,active:null},serviceBell:{foodCallout:null}};
 const {
   EMOTE_STICKERS,
   cardImagePath,
@@ -3006,6 +3006,7 @@ function applyRoomGameSnapshot(roomData){
   state.home.showLeaderboard=false;
   state.showScoreGuide=false;
   state.opponentProfileName='';
+  state.opponentProfileMode='profile';
   state.recommendation=null;
   setRecommendHint('');
   const selfSeat=Number.isInteger(state.room.selfSeat)?state.room.selfSeat:0;
@@ -6515,6 +6516,9 @@ function renderOpponents(){
   bindLangMenu(document.querySelector('.topbar-right'),{reloadGoogle:!state.home.google?.signedIn});
 }
 function opponentProfileModalHtml(name){
+  if(state.opponentProfileMode==='chart'){
+    return humanStarChartModalHtml(name);
+  }
   const {
     profile,
     roomSeatProfile,
@@ -6561,6 +6565,159 @@ function opponentProfileModalHtml(name){
     mottoText,
     profileLabel:t('profile'),
     profileHtml,
+    esc
+  });
+}
+function clampChartValue(value){
+  const n=Number(value);
+  if(!Number.isFinite(n))return 0;
+  return Math.max(0,Math.min(100,n));
+}
+function leaderboardRankForIdentity(identity,cloudEntry,sort='totalDelta'){
+  const rows=computeLeaderboardRowsFromStore(leaderboardCloudStore,'all',sort,20);
+  const targetId=String(cloudEntry?.id??identity?.id??'').trim().toLowerCase();
+  const targetEmail=String(identity?.email??'').trim().toLowerCase();
+  const targetName=String(identity?.name??'').trim().toLowerCase();
+  const row=rows.find((r)=>{
+    const rowId=String(r?.id??'').trim().toLowerCase();
+    const rowEmail=String(r?.email??'').trim().toLowerCase();
+    const rowName=String(r?.name??'').trim().toLowerCase();
+    return (targetId&&rowId===targetId)||(targetEmail&&rowEmail===targetEmail)||(targetName&&rowName===targetName);
+  });
+  return Number(row?.rank)||0;
+}
+function computeHumanStarChartState(name){
+  const currentIdentity=currentLeaderboardIdentity();
+  const selfName=String(state.home.name??currentIdentity.name??'').trim();
+  const requestedName=String(name??'').trim();
+  const isSelfHuman=requestedName&&requestedName===selfName;
+  const roomSeatProfile=resolveRoomSeatProfile({name,state});
+  const identity=isSelfHuman
+    ?{
+        id:String(currentIdentity.id??currentIdentity.email??selfName??requestedName??'').trim(),
+        name:String(currentIdentity.name??selfName??requestedName??'').trim(),
+        email:String(currentIdentity.email??'').trim().toLowerCase(),
+        gender:String(state.home.gender??currentIdentity.gender??'male')==='female'?'female':'male',
+        picture:String(state.home.google?.picture??'').trim()
+      }
+    :{
+        id:String(roomSeatProfile?.uid??roomSeatProfile?.email??requestedName??'').trim(),
+        name:String(roomSeatProfile?.name??requestedName??'').trim(),
+        email:String(roomSeatProfile?.email??'').trim().toLowerCase(),
+        gender:String(roomSeatProfile?.gender??'male')==='female'?'female':'male',
+        picture:String(roomSeatProfile?.picture??'').trim()
+      };
+  const cloudEntry=findLeaderboardEntryInStore(leaderboardCloudStore,identity);
+  const hasRealData=Boolean(cloudEntry);
+  const games=hasRealData?(Number(cloudEntry?.games)||0):0;
+  const wins=hasRealData?(Number(cloudEntry?.wins)||0):0;
+  const totalScore=hasRealData?scoreFromStoredTotal(cloudEntry?.totalScore):0;
+  const ranks=hasRealData?{
+    totalDelta:leaderboardRankForIdentity(identity,cloudEntry,'totalDelta'),
+    wins:leaderboardRankForIdentity(identity,cloudEntry,'wins'),
+    games:leaderboardRankForIdentity(identity,cloudEntry,'games'),
+    winRate:leaderboardRankForIdentity(identity,cloudEntry,'winRate'),
+    avgDelta:leaderboardRankForIdentity(identity,cloudEntry,'avgDelta')
+  }:{totalDelta:0,wins:0,games:0,winRate:0,avgDelta:0};
+  const winRate=games?wins/games:0;
+  const scoreDelta=hasRealData?(totalScore-5000):0;
+  const formValue=Math.round(clampChartValue(50+(scoreDelta/30)+(winRate*50)));
+  const metrics=[
+    {
+      id:'overall',
+      label:t('overall'),
+      value:clampChartValue(50+scoreDelta/20),
+      displayValue:Math.round(clampChartValue(50+scoreDelta/20)),
+      displayText:String(Math.round(clampChartValue(50+scoreDelta/20)))
+    },
+    {
+      id:'wins',
+      label:t('lbWins'),
+      value:clampChartValue(wins*10),
+      displayValue:wins,
+      displayText:String(wins)
+    },
+    {
+      id:'games',
+      label:t('lbGames'),
+      value:clampChartValue(games*4),
+      displayValue:games,
+      displayText:String(games)
+    },
+    {
+      id:'winRate',
+      label:t('lbWR'),
+      value:clampChartValue(winRate*100),
+      displayValue:Math.round(winRate*100),
+      displayText:`${Math.round(winRate*100)}%`
+    },
+    {
+      id:'form',
+      label:t('starForm'),
+      value:clampChartValue(formValue),
+      displayValue:formValue,
+      displayText:String(formValue)
+    }
+  ];
+  const rankSummary=[
+    {id:'totalDelta',label:t('lbTotalDelta'),value:ranks.totalDelta},
+    {id:'wins',label:t('lbWins'),value:ranks.wins},
+    {id:'games',label:t('lbGames'),value:ranks.games},
+    {id:'winRate',label:t('lbWinRate'),value:ranks.winRate},
+    {id:'avgDelta',label:t('lbAvgDelta'),value:ranks.avgDelta}
+  ].map((item)=>({
+    ...item,
+    displayText:item.value?`#${item.value}`:'-'
+  }));
+  const dataSummary=[
+    {id:'score',label:t('score'),value:totalScore,displayText:String(totalScore)},
+    {id:'wins',label:t('lbWins'),value:wins,displayText:String(wins)},
+    {id:'games',label:t('lbGames'),value:games,displayText:String(games)},
+    {id:'winRate',label:t('lbWR'),value:Math.round(winRate*100),displayText:`${Math.round(winRate*100)}%`},
+    {id:'form',label:t('starForm'),value:formValue,displayText:String(formValue)}
+  ];
+  return{roomSeatProfile,cloudEntry,identity,metrics,rankSummary,dataSummary,winRate,totalScore,games,wins,hasRealData,isSelfHuman,formValue,scoreDelta};
+}
+function humanStarChartModalHtml(name){
+  const chartState=computeHumanStarChartState(name);
+  const isSelfHuman=chartState.isSelfHuman;
+  const roomSeatProfile=chartState.roomSeatProfile;
+  const avatarSrc=isSelfHuman
+    ?selfAvatarDataUri(String(state.home.name??chartState.identity.name??name??'').trim(),playerColorByViewClass('south'),state.home.gender==='female'?'female':'male')
+    :resolveAvatarSrc({
+      picture:roomSeatProfile?.picture,
+      name:String(name??'').trim(),
+      color:'#7aaed8',
+      gender:String(roomSeatProfile?.gender??'male')==='female'?'female':'male',
+      isBot:false,
+      authPictureUrlFrom,
+      avatarDataUri
+    });
+  const avatarStampHtml=Boolean(roomSeatProfile)
+    ?renderConfidentialStamp({text:t('confidential'),esc,classes:'opponent-profile-confidential-stamp'})
+    :'';
+  const statCards=[
+    {id:'totalDelta',label:t('lbTotalDelta'),value:chartState.totalScore,rank:chartState.rankSummary.find((x)=>x.id==='totalDelta')?.displayText??'-'},
+    {id:'wins',label:t('lbWins'),value:chartState.wins,rank:chartState.rankSummary.find((x)=>x.id==='wins')?.displayText??'-'},
+    {id:'games',label:t('lbGames'),value:chartState.games,rank:chartState.rankSummary.find((x)=>x.id==='games')?.displayText??'-'},
+    {id:'winRate',label:t('lbWinRate'),value:`${Math.round(chartState.winRate*100)}%`,rank:chartState.rankSummary.find((x)=>x.id==='winRate')?.displayText??'-'},
+    {id:'form',label:t('starForm'),value:Math.round(chartState.formValue),rank:'-'},
+    {id:'avgDelta',label:t('lbAvgDelta'),value:'--',rank:chartState.rankSummary.find((x)=>x.id==='avgDelta')?.displayText??'-'}
+  ];
+  return renderOpponentStarChartModal({
+    name,
+    closeLabel:t('close'),
+    chartTitle:t('stats'),
+    avatarSrc,
+    avatarStampHtml,
+    genderClass:chartState.isSelfHuman
+      ?(state.home.gender==='female'?'gender-female':'gender-male')
+      :(String(roomSeatProfile?.gender??'male')==='female'?'gender-female':'gender-male'),
+    genderLabel:chartState.isSelfHuman?(state.home.gender==='female'?t('female'):t('male')):'',
+    metrics:chartState.metrics,
+    rankSummary:chartState.rankSummary,
+    dataSummary:chartState.dataSummary,
+    statCards,
     esc
   });
 }
@@ -6692,6 +6849,7 @@ function renderGame(){
     selfName,
     selfRoundWinsHtml,
     selfAvatar,
+    selfStarcardHtml,
     selfCalloutHtml
   }=buildSelfRenderState({
     self,
@@ -6770,6 +6928,7 @@ function renderGame(){
     selfName,
     selfScore,
     selfRoundWinsHtml,
+    selfStarcardHtml,
     selfCalloutHtml,
     isRecPlay,
     canPlay,
