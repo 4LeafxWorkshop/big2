@@ -4449,7 +4449,11 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
 .human-star-body {
   display: grid;
   gap: 4px;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
+  min-height: 0;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 .human-star-sheet {
   width: min(700px, 100%);
@@ -4494,14 +4498,8 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
     linear-gradient(180deg, rgba(34, 58, 81, .58), rgba(20, 34, 49, .66)),
     linear-gradient(140deg, rgba(255,255,255,.08), rgba(255,255,255,.02));
 }
-.human-star-hero-gender {
-  width: 1.02rem;
-  height: 1.02rem;
-}
-.human-star-hero-gender svg {
-  width: 100%;
-  height: 100%;
-  display: block;
+.human-star-hero-meta .opponent-gender-icon {
+  margin-left: 0;
 }
 .human-star-stat-grid {
   display: grid;
@@ -4602,7 +4600,7 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
 .human-star-chart {
   width: 100%;
   height: auto;
-  max-width: 266px;
+  max-width: 292px;
   justify-self: center;
 }
 .human-star-axis-labels {
@@ -10649,9 +10647,9 @@ body[data-screen='game'] .seat-namecard:focus-visible {
 }
 body[data-screen='game'] .seat-starcard {
   margin-top: 4px;
-  padding: 2px 4px;
-  min-width: 28px;
-  min-height: 22px;
+  padding: 1px 2px;
+  min-width: 22px;
+  min-height: 16px;
   width: auto;
   height: auto;
   border-radius: 6px;
@@ -10690,8 +10688,9 @@ body[data-screen='game'] .seat-starcard-slot {
   align-items: center;
   justify-content: flex-start;
   width: max-content;
-  min-height: 24px;
-  margin-top: 3px;
+  min-height: 22px;
+  margin-top: 0;
+  line-height: 0;
   position: relative;
   z-index: 22080;
   pointer-events: auto;
@@ -10699,15 +10698,15 @@ body[data-screen='game'] .seat-starcard-slot {
 }
 body[data-screen='game'] .seat-starcard-slot > .seat-starcard {
   margin-top: 0;
-  min-width: 34px;
-  min-height: 24px;
-  padding: 3px 6px;
+  min-width: 24px;
+  min-height: 18px;
+  padding: 1px 2px;
   pointer-events: auto;
 }
 body[data-screen='game'][data-orientation='portrait'] :is(.action-strip .player-tag, .table > .player-tag) .seat-starcard {
-  min-width: 32px !important;
-  min-height: 24px !important;
-  padding: 3px 6px !important;
+  min-width: 24px !important;
+  min-height: 18px !important;
+  padding: 1px 2px !important;
   margin-top: 0 !important;
   margin-left: 2px !important;
   position: relative !important;
@@ -10715,17 +10714,13 @@ body[data-screen='game'][data-orientation='portrait'] :is(.action-strip .player-
   pointer-events: auto !important;
 }
 body[data-screen='game'][data-orientation='portrait'] :is(.action-strip .player-tag, .table > .player-tag) .seat-starcard-slot {
-  min-height: 28px !important;
-  margin-top: 4px !important;
+  min-height: 18px !important;
+  margin-top: 0 !important;
   z-index: 22090 !important;
 }
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] :is(.name, .seat-identity, .seat-name-text, .seat-subline, .seat-round-wins, .seat-namecard, .seat-starcard) {
   position: relative !important;
   z-index: 13000 !important;
-}
-body[data-screen='game'] .opponent-gender-icon svg {
-  fill: currentColor;
-  stroke: none;
 }
 body[data-screen='game'] .human-star-score {
   display: flex;
@@ -10917,50 +10912,64 @@ body[data-screen='game'] .human-star-data-value {
   line-height: 1.1;
 }
 @media (max-width: 520px) {
+  .human-star-sheet {
+    max-height: min(86dvh, 100svh);
+  }
   .human-star-dashboard {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, .92fr) minmax(0, 1.08fr);
+    gap: 4px;
   }
   .human-star-stat-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 5px;
+    gap: 4px;
+  }
+  .human-star-left-column {
+    gap: 4px;
   }
   .human-star-profile-card {
     grid-template-columns: auto minmax(0, 1fr);
-    min-height: 66px;
-    padding: 9px 10px;
-    gap: 7px;
+    min-height: 52px;
+    padding: 6px 7px;
+    gap: 5px;
   }
   .human-star-chart-card {
-    padding: 7px;
+    padding: 3px;
   }
   .human-star-chart {
-    max-width: 222px;
+    max-width: 164px;
   }
   .human-star-stat-card {
-    min-height: 68px;
-    padding: 8px 8px 6px;
-    gap: 4px;
-    border-radius: 12px;
+    min-height: 50px;
+    padding: 5px 5px 4px;
+    gap: 2px;
+    border-radius: 10px;
   }
   .human-star-stat-icon {
-    width: 1.55rem;
-    height: 1.55rem;
+    width: 1.18rem;
+    height: 1.18rem;
   }
   .human-star-stat-icon svg {
-    width: .74rem;
-    height: .74rem;
+    width: .56rem;
+    height: .56rem;
   }
   .human-star-stat-label {
-    font-size: .61rem;
+    font-size: .5rem;
   }
   .human-star-stat-value {
-    font-size: clamp(1.18rem, 4.5vw, 1.55rem);
+    font-size: clamp(.92rem, 3.35vw, 1.12rem);
   }
   .human-star-stat-rank {
-    font-size: .6rem;
+    font-size: .48rem;
   }
   .human-star-axis-labels {
-    font-size: 8px;
+    font-size: 7px;
+  }
+  .human-star-avatar-wrap {
+    width: 48px;
+    height: 48px;
+  }
+  .human-star-name {
+    font-size: .8rem;
   }
 }
 body[data-screen='game'] .human-star-notes {
@@ -11352,7 +11361,7 @@ body[data-screen='game'][data-orientation='portrait'][data-is-mobile='1'] {
   --south-tag-top: auto;
   --south-tag-bottom: 16px;
   --south-tag-transform: none;
-  --south-tag-z: 14000;
+  --south-tag-z: 2147483605;
 }
 body[data-screen='game'][data-orientation='portrait'] .action-strip .player-tag .player-avatar-self {
   pointer-events: none;

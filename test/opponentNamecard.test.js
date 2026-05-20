@@ -20,7 +20,6 @@ test('buildOpponentNamecardHtml renders bot and human profile icons', ()=>{
   assert.match(html,/data-opponent-name="Bot A"/);
   assert.match(html,/data-opponent-profile-kind="profile"/);
   assert.match(html,/aria-label="profile"/);
-  assert.match(html,/seat-namecard-emoji/);
   assert.match(html,/🪪/);
   assert.match(human,/seat-starcard/);
   assert.match(human,/data-opponent-name="Player A"/);

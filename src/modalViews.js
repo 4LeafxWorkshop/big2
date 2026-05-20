@@ -367,8 +367,8 @@ export function renderOpponentStarChartModal(params){
   const values=metrics.map((m)=>Number(m.value)||0);
   const chartCx=120;
   const chartCy=120;
-  const chartRadius=78;
-  const rings=[22,44,58,74];
+  const chartRadius=88;
+  const rings=[24,48,66,84];
   const ringPolys=rings.map((r)=>`<polygon points="${radarPoints(new Array(5).fill(100),chartCx,chartCy,r)}"/>`).join('');
   const axisLines=metrics.map((_,index)=>{
     const angle=(-Math.PI/2)+(index*(Math.PI*2/metrics.length));
@@ -378,7 +378,7 @@ export function renderOpponentStarChartModal(params){
   }).join('');
   const axisLabels=metrics.map((m,index)=>{
     const angle=(-Math.PI/2)+(index*(Math.PI*2/metrics.length));
-    const labelRadius=chartRadius+14;
+    const labelRadius=chartRadius+12;
     const x=chartCx+Math.cos(angle)*labelRadius;
     const y=chartCy+Math.sin(angle)*labelRadius;
     const anchor=x<chartCx-16?'end':x>chartCx+16?'start':'middle';
@@ -409,7 +409,7 @@ export function renderOpponentStarChartModal(params){
   }).join('');
   const chartPoly=radarPoints(values,chartCx,chartCy,chartRadius);
   const heroMeta=genderLabel
-    ?`<div class="human-star-hero-meta"><span class="opponent-gender-icon ${genderClass} human-star-hero-gender" aria-label="${esc(genderLabel)}" title="${esc(genderLabel)}">${renderGenderIconSvg(genderClass)}</span></div>`
+    ?`<div class="human-star-hero-meta"><span class="opponent-gender-icon ${genderClass}" aria-label="${esc(genderLabel)}" title="${esc(genderLabel)}">${renderGenderIconSvg(genderClass)}</span></div>`
     :'';
   return`<div class="intro-modal opponent-profile-modal human-star-modal" id="opponent-profile-modal"><button class="intro-backdrop" id="opponent-profile-backdrop" aria-label="${esc(closeLabel)}"></button><section class="intro-sheet opponent-profile-sheet human-star-sheet"><header class="intro-head"><div><h3 class="title-with-icon"><span class="title-icon title-icon-stats" aria-hidden="true"></span><span>${esc(chartTitle)}</span></h3></div><button id="opponent-profile-close" class="secondary">${closeLabel}</button></header>${avatarStampHtml??''}<div class="human-star-body"><div class="human-star-dashboard"><div class="human-star-left-column"><section class="human-star-profile-card"><div class="opponent-profile-avatar-wrap human-star-avatar-wrap"><img class="opponent-profile-avatar" src="${avatarSrc}" alt="${esc(name)}"/></div><div class="human-star-hero-copy"><div class="human-star-name">${esc(name)}</div>${heroMeta}</div></section><section class="human-star-chart-card"><div class="human-star-chart-wrap"><svg class="human-star-chart" viewBox="0 0 240 240" role="img" aria-label="${esc(chartTitle)}"><g class="human-star-grid">${ringPolys}${axisLines}</g><g class="human-star-axis-labels">${axisLabels}</g><polygon class="human-star-fill" points="${chartPoly}"/><polygon class="human-star-outline" points="${chartPoly}"/></svg></div></section></div><section class="human-star-stat-grid">${statList}</section></div></div></section></div>`;
 }

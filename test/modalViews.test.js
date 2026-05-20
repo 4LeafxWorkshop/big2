@@ -304,6 +304,6 @@ test('renderOpponentStarChartModal renders chart and stats strip', ()=>{
   assert.match(html,/human-star-stat-value">75%/);
   assert.match(html,/human-star-stat-value">59</);
   assert.match(html,/human-star-stat-rank">/);
-  assert.match(html,/opponent-gender-icon gender-female human-star-hero-gender/);
+  assert.match(html,/opponent-gender-icon gender-female/);
   assert.doesNotMatch(html,/Real data/);
 });
