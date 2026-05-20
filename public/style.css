@@ -10573,6 +10573,7 @@ body[data-screen='game'] .seat-identity {
   line-height: 1.02;
   overflow: visible;
   justify-items: start;
+  pointer-events: auto;
 }
 body[data-screen='game'] .seat-name-text {
   font-size: var(--game-seat-name-text-size) !important;
@@ -10685,21 +10686,22 @@ body[data-screen='game'] .seat-starcard:focus-visible {
   box-shadow: none;
 }
 body[data-screen='game'] .seat-starcard-slot {
-  display: flex;
+  display: block;
   align-items: center;
   justify-content: flex-start;
-  width: fit-content;
-  min-height: 22px;
-  margin-top: 2px;
+  width: max-content;
+  min-height: 24px;
+  margin-top: 3px;
   position: relative;
-  z-index: 22049;
+  z-index: 22080;
   pointer-events: auto;
+  justify-self: start;
 }
 body[data-screen='game'] .seat-starcard-slot > .seat-starcard {
   margin-top: 0;
-  min-width: 28px;
-  min-height: 22px;
-  padding: 2px 4px;
+  min-width: 34px;
+  min-height: 24px;
+  padding: 3px 6px;
   pointer-events: auto;
 }
 body[data-screen='game'][data-orientation='portrait'] :is(.action-strip .player-tag, .table > .player-tag) .seat-starcard {
@@ -10713,8 +10715,9 @@ body[data-screen='game'][data-orientation='portrait'] :is(.action-strip .player-
   pointer-events: auto !important;
 }
 body[data-screen='game'][data-orientation='portrait'] :is(.action-strip .player-tag, .table > .player-tag) .seat-starcard-slot {
-  min-height: 24px !important;
-  margin-top: 2px !important;
+  min-height: 28px !important;
+  margin-top: 4px !important;
+  z-index: 22090 !important;
 }
 body[data-screen='game'] .seat-name-fixed[data-opponent-name] :is(.name, .seat-identity, .seat-name-text, .seat-subline, .seat-round-wins, .seat-namecard, .seat-starcard) {
   position: relative !important;
