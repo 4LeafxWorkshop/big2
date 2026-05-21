@@ -61,6 +61,7 @@ Related engineering docs:
   - Rank order encoded for Big Two behavior
 - Rule evaluation:
   - `evaluatePlay(cards)` validates play type and power
+  - Straights use the fixed ranking order `3-4-5-6-7`, `4-5-6-7-8`, `5-6-7-8-9`, `6-7-8-9-10`, `7-8-9-10-J`, `8-9-10-J-Q`, `9-10-J-Q-K`, `J-Q-K-A-2`, `Q-K-A-2-3`, `K-A-2-3-4`, `10-J-Q-K-A`, `2-3-4-5-6`, `A-2-3-4-5`
   - `canBeat(candidate, target)` compares legal responses
   - First trick enforcement (`♦️3`)
   - Pass validity checks by lead state

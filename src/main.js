@@ -61,6 +61,7 @@ import {buildActiveRoomRow, buildRoomDirectoryDoc} from './roomDirectory.js';
 import {markLastCardBreachIfNeeded, markLastCardBreachOnPassIfNeeded, settleRoundDeductions} from './gameRuleFlow.js';
 import {getNextSoloRoundWins, resetSoloSessionCarryoverState} from './soloState.js';
 import {resolveRoomLaunchState} from './roomLaunchState.js';
+import {straightMeta} from './straightRules.js';
 import {Haptics} from '@capacitor/haptics';
 
 const RANKS=['3','4','5','6','7','8','9','10','J','Q','K','A','2'];
@@ -3947,24 +3948,6 @@ const isLowestSingle=(c)=>compareSingleCardPower(c,LOWEST_SINGLE)===0;
 
 function createDeck(){const d=[];for(let r=0;r<RANKS.length;r++)for(let s=0;s<SUITS.length;s++)d.push({rank:r,suit:s});return d;}
 function shuffle(d){for(let i=d.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[d[i],d[j]]=[d[j],d[i]];}return d;}
-function straightMeta(ranks){
-  if(ranks.length!==5)return null;
-  const uniq=[...new Set(ranks)];
-  if(uniq.length!==5)return null;
-  const has=new Set(uniq);
-  // Hong Kong order: 3-4-5-6-7 lowest, then wraps through J-Q-K-A-2,
-  // Q-K-A-2-3, K-A-2-3-4, with A-2-3-4-5 highest.
-  const starts=[0,1,2,3,4,5,6,7,8,9,10,11];
-  for(const start of starts){
-    const seq=[0,1,2,3,4].map((i)=>(start+i)%13);
-    if(seq.every((r)=>has.has(r))){
-      const high=Math.max(...seq);
-      const power=start;
-      return{seq,high,power};
-    }
-  }
-  return null;
-}
 function comparePower(a,b){for(let i=0;i<Math.max(a.length,b.length);i++){const av=a[i]??-1,bv=b[i]??-1;if(av!==bv)return av-bv;}return 0;}
 function canBeat(c,tv){if(c.count!==tv.count)return false;if(c.count<5&&c.kind!==tv.kind)return false;if(c.count===5){const d=FIVE_KIND_POWER[c.kind]-FIVE_KIND_POWER[tv.kind];if(d!==0)return d>0;}return comparePower(c.power,tv.power)>0;}
 const has3d=(cards)=>cards.some((c)=>c.rank===0&&c.suit===0);

@@ -29,10 +29,9 @@ This document describes how the Big Two bots and the in-game recommendation syst
 - Highest single: `2` (with `♠️2` as the top single).
 - Opening lead must include `♦️3`.
 - Straight rules:
-  - Valid: `3-4-5-6-7` up to `A-2-3-4-5`.
+  - Valid, lowest to highest: `3-4-5-6-7`, `4-5-6-7-8`, `5-6-7-8-9`, `6-7-8-9-10`, `7-8-9-10-J`, `8-9-10-J-Q`, `9-10-J-Q-K`, `J-Q-K-A-2`, `Q-K-A-2-3`, `K-A-2-3-4`, `10-J-Q-K-A`, `2-3-4-5-6`, `A-2-3-4-5`.
   - Highest straight is `A-2-3-4-5`, lowest is `3-4-5-6-7`.
   - If straights tie by ranks, compare the highest card’s suit.
-  - Invalid wraps like `J-Q-K-A-2`, `Q-K-A-2-3`, `K-A-2-3-4`.
 - Flush rules:
   - Compare the highest rank first, then the second, third, fourth, and fifth; only if all ranks match, compare suit last.
 
