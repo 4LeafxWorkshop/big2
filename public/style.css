@@ -4439,6 +4439,14 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   align-self: center;
   vertical-align: middle;
 }
+.opponent-profile-top-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+.opponent-profile-stat-btn {
+  margin-top: 0 !important;
+}
 .opponent-profile-body {
   display: grid;
   grid-template-columns: 1fr;
@@ -10970,6 +10978,62 @@ body[data-screen='game'] .human-star-data-value {
   }
   .human-star-name {
     font-size: .8rem;
+  }
+}
+@media (max-width: 520px) and (orientation: portrait) {
+  .human-star-sheet {
+    width: min(100%, 100vw);
+    max-height: min(94dvh, 100svh);
+    padding: 12px 10px 10px;
+  }
+  .human-star-body {
+    gap: 8px;
+  }
+  .human-star-dashboard {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+  .human-star-left-column {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+  .human-star-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .human-star-profile-card {
+    min-height: 56px;
+    padding: 7px 8px;
+  }
+  .human-star-chart-card {
+    padding: 6px;
+  }
+  .human-star-chart {
+    max-width: min(100%, 240px);
+  }
+  .human-star-stat-card {
+    min-height: 58px;
+    padding: 7px 8px 6px;
+    gap: 3px;
+  }
+  .human-star-stat-label {
+    font-size: .56rem;
+  }
+  .human-star-stat-value {
+    font-size: clamp(.98rem, 4vw, 1.28rem);
+  }
+  .human-star-stat-rank {
+    font-size: .5rem;
+  }
+  .human-star-axis-labels {
+    font-size: 9px;
+  }
+  .human-star-avatar-wrap {
+    width: 52px;
+    height: 52px;
+  }
+  .human-star-name {
+    font-size: .86rem;
   }
 }
 body[data-screen='game'] .human-star-notes {

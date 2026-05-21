@@ -278,6 +278,7 @@ export function renderOpponentProfileModal(params){
   const {
     name,
     closeLabel,
+    statsButtonHtml='',
     genderClass,
     genderLabel,
     avatarSrc,
@@ -311,6 +312,7 @@ export function renderOpponentProfileModal(params){
             <img class="opponent-profile-avatar" src="${avatarSrc}" alt="${esc(name)}"/>
           </div>
           <div class="opponent-profile-header-text">
+            ${statsButtonHtml?`<div class="opponent-profile-top-actions">${statsButtonHtml}</div>`:''}
             <div class="opponent-profile-chips">
               <span class="opponent-chip"><span class="opponent-chip-icon zodiac" aria-hidden="true"></span><span>${zodiacLabel} ${zodiacMark?`${zodiacMark} `:''}${esc(zodiacText)}</span></span>
               <span class="opponent-chip"><span class="opponent-chip-icon dob" aria-hidden="true"></span><span>${dobLabel} ${esc(dob)}</span></span>

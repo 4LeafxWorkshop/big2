@@ -6533,6 +6533,11 @@ function opponentProfileModalHtml(name){
     authPictureUrlFrom,
     avatarDataUri
   });
+  const isBotProfile=Boolean(roomSeatProfile?.isBot)||(
+    state.home.mode==='solo'&&
+    Array.isArray(state.solo.botNames)&&
+    state.solo.botNames.includes(name)
+  );
   const hobbies=profileFieldValue(profile,'hobbies',[]);
   const hobbyText=formatHobbyList(hobbies);
   const profileText=profileFieldValue(profile,'profile','-');
@@ -6543,6 +6548,9 @@ function opponentProfileModalHtml(name){
   const mottoText=profileFieldValue(profile,'motto','-');
   const genderLabel=gender==='female'?t('female'):t('male');
   const genderClass=gender==='female'?'gender-female':'gender-male';
+  const statsButtonHtml=isBotProfile
+    ?`<button type="button" class="seat-starcard opponent-profile-stat-btn" data-opponent-name="${esc(name)}" data-opponent-profile-kind="chart" aria-label="${esc(t('starChart'))}"><svg viewBox="0 0 28 20" focusable="false" aria-hidden="true"><rect x="2.4" y="2.2" width="23.2" height="15.6" rx="2.4" fill="#f6f0ef"/><rect x="5.1" y="10.2" width="4.2" height="5.2" rx="1" fill="#ef6c5b"/><rect x="10.7" y="5.2" width="4.6" height="10.2" rx="1" fill="#fa7b32"/><rect x="16.7" y="7.3" width="4.6" height="8.1" rx="1" fill="#f8b340"/><rect x="21.2" y="4.2" width="1.8" height="1.8" rx=".5" fill="#f8b340"/><rect x="22.8" y="3.4" width="1.2" height="1.2" rx=".4" fill="#f8b340"/><rect x="5.1" y="16.1" width="17.9" height=".9" rx=".45" fill="#ffcf8a"/></svg></button>`
+    :'';
   const avatarStampHtml=!hasProfileCard&&Boolean(roomSeatProfile)
     ?renderConfidentialStamp({text:t('confidential'),esc,classes:'opponent-profile-confidential-stamp'})
     :'';
@@ -6550,6 +6558,7 @@ function opponentProfileModalHtml(name){
   return renderOpponentProfileModal({
     name,
     closeLabel,
+    statsButtonHtml,
     genderClass,
     genderLabel,
     avatarSrc,
@@ -6682,6 +6691,7 @@ function humanStarChartModalHtml(name){
   const chartState=computeHumanStarChartState(name);
   const isSelfHuman=chartState.isSelfHuman;
   const roomSeatProfile=chartState.roomSeatProfile;
+  const isBotProfile=Boolean(roomSeatProfile?.isBot)||(state.home.mode==='solo'&&Array.isArray(state.solo.botNames)&&state.solo.botNames.includes(String(name??'').trim()));
   const avatarSrc=isSelfHuman
     ?selfAvatarDataUri(String(state.home.name??chartState.identity.name??name??'').trim(),playerColorByViewClass('south'),state.home.gender==='female'?'female':'male')
     :resolveAvatarSrc({
@@ -6689,7 +6699,7 @@ function humanStarChartModalHtml(name){
       name:String(name??'').trim(),
       color:'#7aaed8',
       gender:String(roomSeatProfile?.gender??'male')==='female'?'female':'male',
-      isBot:false,
+      isBot:isBotProfile,
       authPictureUrlFrom,
       avatarDataUri
     });

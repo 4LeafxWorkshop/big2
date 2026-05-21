@@ -236,6 +236,7 @@ test('renderOpponentProfileModal renders avatar, chips, and translated close lab
   const html=renderOpponentProfileModal({
     name:'Luna',
     closeLabel:'Close',
+    statsButtonHtml:'<button id="stats"></button>',
     genderClass:'gender-female',
     genderLabel:'Female',
     avatarSrc:'/avatar.png',
@@ -259,6 +260,8 @@ test('renderOpponentProfileModal renders avatar, chips, and translated close lab
   assert.match(html,/opponent-profile-motto/);
   assert.match(html,/aria-label="Close"/);
   assert.match(html,/<p>Bio<\/p>/);
+  assert.match(html,/opponent-profile-actions/);
+  assert.match(html,/id="stats"/);
 });
 
 test('renderOpponentStarChartModal renders chart and stats strip', ()=>{
