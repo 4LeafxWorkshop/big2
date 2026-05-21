@@ -260,8 +260,8 @@ test('renderOpponentProfileModal renders avatar, chips, and translated close lab
   assert.match(html,/opponent-profile-motto/);
   assert.match(html,/aria-label="Close"/);
   assert.match(html,/<p>Bio<\/p>/);
-  assert.match(html,/opponent-profile-actions/);
   assert.match(html,/id="stats"/);
+  assert.match(html,/opponent-profile-top-actions">[\s\S]*opponent-profile-confidential-stamp[\s\S]*id="stats"/);
 });
 
 test('renderOpponentStarChartModal renders chart and stats strip', ()=>{

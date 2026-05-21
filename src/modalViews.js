@@ -305,14 +305,13 @@ export function renderOpponentProfileModal(params){
         </div>
         <button id="opponent-profile-close" class="secondary">${closeLabel}</button>
       </header>
-      ${avatarStampHtml??''}
       <div class="opponent-profile-body">
         <div class="opponent-profile-header">
           <div class="opponent-profile-avatar-wrap">
             <img class="opponent-profile-avatar" src="${avatarSrc}" alt="${esc(name)}"/>
           </div>
           <div class="opponent-profile-header-text">
-            ${statsButtonHtml?`<div class="opponent-profile-top-actions">${statsButtonHtml}</div>`:''}
+            ${(avatarStampHtml||statsButtonHtml)?`<div class="opponent-profile-top-actions">${avatarStampHtml??''}${statsButtonHtml??''}</div>`:''}
             <div class="opponent-profile-chips">
               <span class="opponent-chip"><span class="opponent-chip-icon zodiac" aria-hidden="true"></span><span>${zodiacLabel} ${zodiacMark?`${zodiacMark} `:''}${esc(zodiacText)}</span></span>
               <span class="opponent-chip"><span class="opponent-chip-icon dob" aria-hidden="true"></span><span>${dobLabel} ${esc(dob)}</span></span>

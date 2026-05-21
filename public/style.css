@@ -4441,8 +4441,25 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
 }
 .opponent-profile-top-actions {
   display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
   justify-content: flex-end;
   margin-bottom: 8px;
+}
+.opponent-profile-top-actions .opponent-profile-confidential-stamp {
+  position: static;
+  inset: auto;
+  transform: none;
+  z-index: auto;
+  width: auto;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: 4px 9px;
+  border-width: 3px;
+  border-radius: 6px;
+  font-size: .7rem;
+  white-space: nowrap;
 }
 .opponent-profile-stat-btn {
   margin-top: 0 !important;
