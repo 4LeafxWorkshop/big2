@@ -15148,6 +15148,9 @@ body[data-screen='game'] :is(.seat.north .opponent-fan-wrap > .closed-count-pill
 body[data-screen='game'] :is(.seat.north .seat-pack, .seat.west .side-station-stack, .seat.east .side-station-stack) {
   gap: 4px !important;
 }
+body[data-screen='game'] .seat.north .seat-label {
+  margin-bottom: 0 !important;
+}
 body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-pack {
   align-content: center !important;
   justify-content: center !important;
