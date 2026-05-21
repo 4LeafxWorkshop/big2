@@ -45,7 +45,7 @@ test.describe('room resume hydration flow', ()=>{
     await expect(page.locator('.auth-status-loading')).toHaveCount(0);
   });
 
-  test('room lobby snapshot stays stable while restoring score', async({page},testInfo)=>{
+  test('room lobby snapshot stays stable while restoring score', async({page},_testInfo)=>{
     await seedRoomLobby(page);
     await expect(page.locator('.room-overlay')).toHaveScreenshot('room-lobby.png', {
       animations:'disabled',

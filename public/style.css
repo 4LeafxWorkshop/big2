@@ -11270,15 +11270,17 @@ body[data-screen='game'] .player-avatar-wrap-self.is-active::before,
 body[data-screen='game'] .table > .player-tag .player-avatar-wrap-self.is-active::before {
   content: '';
   position: absolute;
-  inset: -6px;
+  inset: -8px;
   border-radius: 50%;
-  background: conic-gradient(from 0deg, color-mix(in srgb, var(--player-color, #ffd166) 85%, white 15%), transparent 35%);
-  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
-  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 calc(100% - 2px));
-  animation: turnRing 1.8s linear infinite;
-  opacity: .9;
+  background: conic-gradient(from 0deg, color-mix(in srgb, var(--player-color, #ffd166) 92%, white 8%), transparent 28%);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 4px), #000 calc(100% - 3px));
+  animation: turnRing 1.6s linear infinite, turnRingGlow 1.45s ease-in-out infinite;
+  opacity: 1;
   pointer-events: none;
-  box-shadow: 0 0 8px color-mix(in srgb, var(--player-color, #ffd166) 55%, transparent);
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--player-color, #ffd166) 28%, transparent),
+    0 0 12px color-mix(in srgb, var(--player-color, #ffd166) 68%, transparent);
 }
 body[data-screen='game'] .player-avatar-wrap > .player-avatar {
   width: 100% !important;
@@ -11300,6 +11302,20 @@ body[data-screen='game'] .player-avatar-wrap.avatar-rim::after {
 }
 @keyframes turnRing {
   to { transform: rotate(360deg); }
+}
+@keyframes turnRingGlow {
+  0%, 100% {
+    opacity: .92;
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--player-color, #ffd166) 26%, transparent),
+      0 0 10px color-mix(in srgb, var(--player-color, #ffd166) 58%, transparent);
+  }
+  50% {
+    opacity: 1;
+    box-shadow:
+      0 0 0 1px color-mix(in srgb, var(--player-color, #ffd166) 34%, transparent),
+      0 0 16px color-mix(in srgb, var(--player-color, #ffd166) 78%, transparent);
+  }
 }
 body[data-screen='game'] .avatar-status-badge {
   position: absolute;

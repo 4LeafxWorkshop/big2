@@ -59,7 +59,7 @@ import {createRoomTimeoutController} from './roomTimeouts.js';
 import {createMobileAdsController} from './mobileAds.js';
 import {buildActiveRoomRow, buildRoomDirectoryDoc} from './roomDirectory.js';
 import {markLastCardBreachIfNeeded, markLastCardBreachOnPassIfNeeded, settleRoundDeductions} from './gameRuleFlow.js';
-import {getNextSoloRoundWins, getNextSoloTotals, resetSoloSessionCarryoverState} from './soloState.js';
+import {getNextSoloRoundWins, resetSoloSessionCarryoverState} from './soloState.js';
 import {resolveRoomLaunchState} from './roomLaunchState.js';
 import {Haptics} from '@capacitor/haptics';
 
@@ -125,7 +125,7 @@ function roomShouldAutoDelete(roomData,now=Date.now()){
 async function deleteRoomIfDead(roomDb,roomId,{directoryId=roomId}={}){
   if(!roomDb||!roomId)return false;
   const ref=roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(roomId);
-  let deleted=false;
+  let deleted;
   try{
     await roomDb.runTransaction(async(tx)=>{
       const snap=await tx.get(ref);
@@ -2489,7 +2489,7 @@ async function dropSelfFromRoom(roomDoc,playerId){
   const roomDb=(roomDoc.ref?.firestore)||await getFirebaseDbForInstanceId(instanceId);
   if(!roomDb)return;
   const ref=roomDoc.ref??roomDb.collection(FIRESTORE_ROOMS_COLLECTION).doc(roomDoc.id);
-  let shouldDeleteDirectory=false;
+  let shouldDeleteDirectory;
   await roomDb.runTransaction(async(tx)=>{
     const snap=await tx.get(ref);
     if(!snap.exists)return;
@@ -2571,7 +2571,7 @@ async function gateUserRoomAccess(targetRoomId=''){
     const snap=await ref.get();
     if(!snap.exists){
       if(!desiredRoomId)return{ok:true};
-      let result={ok:true};
+      let result;
       await firebaseDb.runTransaction(async(tx)=>{
         const claimSnap=await tx.get(ref);
         const claimData=claimSnap.data()??{};
@@ -3732,16 +3732,13 @@ function isWebView(){
   return /\bwv\b/.test(ua)||/WebView/i.test(ua)||/(Android.*Version\/\d+\.\d+.*Chrome\/\d+\.\d+ Mobile)/i.test(ua);
 }
 function nativePlatform(){
-  const cap=window.Capacitor;
-  return String(cap?.getPlatform?.()??'').trim().toLowerCase();
+  return String(window.Capacitor?.getPlatform?.()??'').trim().toLowerCase();
 }
 function isNativeAndroidApp(){
-  const cap=window.Capacitor;
-  return Boolean(cap?.isNativePlatform?.()&&nativePlatform()==='android');
+  return Boolean(window.Capacitor?.isNativePlatform?.()&&nativePlatform()==='android');
 }
 function isNativeIosApp(){
-  const cap=window.Capacitor;
-  return Boolean(cap?.isNativePlatform?.()&&nativePlatform()==='ios');
+  return Boolean(window.Capacitor?.isNativePlatform?.()&&nativePlatform()==='ios');
 }
 const mobileAdsController=createMobileAdsController({
   isNativeAndroidApp,
@@ -5153,9 +5150,8 @@ globalThis.serviceBellTrigger=()=>{
 function triggerVibration(pattern){
   try{
     if(!vibrateEnabled)return;
-    const cap=window.Capacitor;
-    const platform=String(cap?.getPlatform?.()||'').toLowerCase();
-    const isNativePlatform=Boolean(cap?.isNativePlatform?.()||platform==='ios'||platform==='android');
+    const platform=String(window.Capacitor?.getPlatform?.()||'').toLowerCase();
+    const isNativePlatform=Boolean(window.Capacitor?.isNativePlatform?.()||platform==='ios'||platform==='android');
     const useNativeHaptics=isNativePlatform&&(platform==='ios'||platform==='android');
     if(useNativeHaptics){
       void triggerNativeHaptics(pattern);
@@ -5210,7 +5206,7 @@ async function triggerNativeHaptics(pattern){
 }
 function playWinSfxThen(fn,delayFallback=2000){
   const seq=++winSfxSeq;
-  let done=false;
+  let done;
   const fire=()=>{
     if(done||seq!==winSfxSeq)return;
     done=true;
@@ -5297,9 +5293,7 @@ function formatGameLogDateTime(ts){
   if(!n)return'';
   try{
     const locale=gameLogLocale();
-    const d=new Date(n);
-    const time=d.toLocaleTimeString(locale,{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
-    return time;
+    return new Date(n).toLocaleTimeString(locale,{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
   }catch{
     return'';
   }
@@ -6752,8 +6746,9 @@ function renderGame(){
   }
   if(fullHeightLogLayout)state.showLog=true;
   if(!v.canControl||v.gameOver){state.recommendation=null;}
-  if(state.recommendation?.action==='play'){
-    const inHand=state.recommendation.cardIds.every((id)=>v.hand.some((c)=>cardId(c)===id));
+  const recommendation=state.recommendation;
+  if(recommendation?.action==='play'){
+    const inHand=recommendation.cardIds.every((id)=>v.hand.some((c)=>cardId(c)===id));
     if(!inHand)state.recommendation=null;
   }
   const arr=v.participants.map((p)=>{

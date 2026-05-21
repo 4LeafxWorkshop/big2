@@ -13,7 +13,6 @@ export function createProfileSettingsHelpers(deps){
     normalizeCalloutStylePack,
     getCalloutStylePack,
     currentLeaderboardIdentity,
-    ensureLeaderboardEntry,
     loadLeaderboardStore,
     loadLeaderboardCloudStore=loadLeaderboardStore,
     botLeaderboardIdentity,

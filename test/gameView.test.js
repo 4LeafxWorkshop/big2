@@ -103,7 +103,7 @@ test('renderGameSelfTagHtml renders the self tag block', ()=>{
     selfName:'Player',
     selfScore:'5000',
     selfRoundWinsHtml:'<span id="wins"></span>',
-    selfStarcardHtml:'<button class="seat-starcard" type="button">*<\/button>',
+    selfStarcardHtml:'<button class="seat-starcard" type="button">*</button>',
     selfCalloutHtml:'<span id="callout"></span>',
     esc:(value)=>String(value)
   });
