@@ -65,7 +65,10 @@ export function renderGameSelfTagHtml(params){
     selfCalloutHtml,
     esc
   }=params;
-  return`<div class="seat-name-fixed player-tag"><div class="name">${selfAvatar}<span class="seat-identity"><span class="seat-name-text">${esc(selfName)}</span><span class="seat-subline"><span>${selfScore}</span>${selfRoundWinsHtml}</span><span class="seat-starcard-slot">${selfStarcardHtml}${selfTopTwoWarningHtml}</span></span></div>${selfCalloutHtml}</div>`;
+  const selfBadgeLineHtml=(selfStarcardHtml||selfTopTwoWarningHtml)
+    ?`<span class="seat-badge-line">${selfStarcardHtml?`<span class="seat-starcard-slot">${selfStarcardHtml}</span>`:''}${selfTopTwoWarningHtml}</span>`
+    :'';
+  return`<div class="seat-name-fixed player-tag"><div class="name">${selfAvatar}<span class="seat-identity"><span class="seat-name-text">${esc(selfName)}</span><span class="seat-subline"><span>${selfScore}</span>${selfRoundWinsHtml}</span>${selfBadgeLineHtml}</span></div>${selfCalloutHtml}</div>`;
 }
 
 export function renderGameControlRowHtml(params){

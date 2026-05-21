@@ -69,6 +69,7 @@ test('renderGameActionZone renders controls, hand, and drag popup', ()=>{
     selfName:'Player',
     selfScore:'5000',
     selfRoundWinsHtml:'<span id="wins"></span>',
+    selfTopTwoWarningHtml:'<span class="seat-top-two-warning" id="warning"></span>',
     selfCalloutHtml:'<span id="callout"></span>',
     isRecPlay:true,
     canPlay:true,
@@ -93,6 +94,7 @@ test('renderGameActionZone renders controls, hand, and drag popup', ()=>{
   assert.match(html,/aria-label="serviceBellTooltip"/);
   assert.match(html,/action-zone seat-callout-active/);
   assert.match(html,/action-strip active seat-callout-active/);
+  assert.match(html,/id="warning"/);
   assert.match(html,/id="auto-sort-btn"/);
   assert.match(html,/id="drag-popup"/);
 });
@@ -114,7 +116,7 @@ test('renderGameSelfTagHtml renders the self tag block', ()=>{
   assert.match(html,/seat-starcard/);
   assert.match(html,/id="warning"/);
   assert.match(html,/id="callout"/);
-  assert.match(html,/seat-starcard-slot">[\s\S]*seat-starcard[\s\S]*seat-top-two-warning/);
+  assert.match(html,/seat-badge-line">[\s\S]*seat-starcard-slot">[\s\S]*seat-starcard[\s\S]*id="warning"/);
 });
 
 test('renderGameControlRowHtml renders the action controls and hand', ()=>{

@@ -10721,6 +10721,15 @@ body[data-screen='game'] .seat-starcard-slot {
   pointer-events: auto;
   justify-self: start;
 }
+body[data-screen='game'] .seat-badge-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: max-content;
+  min-height: 22px;
+  line-height: 0;
+  justify-self: start;
+}
 body[data-screen='game'] .seat-starcard-slot > .seat-starcard {
   margin-top: 0;
   min-width: 24px;
@@ -10728,8 +10737,8 @@ body[data-screen='game'] .seat-starcard-slot > .seat-starcard {
   padding: 1px 2px;
   pointer-events: auto;
 }
-body[data-screen='game'] .seat-starcard-slot .seat-top-two-warning {
-  margin-left: 4px;
+body[data-screen='game'] .seat-badge-line .seat-top-two-warning {
+  margin-left: 0;
 }
 body[data-screen='game'][data-orientation='portrait'] :is(.action-strip .player-tag, .table > .player-tag) .seat-starcard {
   min-width: 24px !important;
@@ -12378,7 +12387,7 @@ body[data-screen='game'] .action-strip {
     z-index: 12 !important;
     margin: 0 !important;
   }
-  body[data-screen='game'] .action-strip .player-tag .seat-starcard-slot .seat-top-two-warning {
+  body[data-screen='game'] .action-strip .player-tag .seat-badge-line .seat-top-two-warning {
     max-width: min(42vw, 120px) !important;
     padding: 1px 6px !important;
     font-size: .62rem !important;

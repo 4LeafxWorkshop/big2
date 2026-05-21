@@ -6855,6 +6855,7 @@ function renderGame(){
     selfRoundWinsHtml,
     selfAvatar,
     selfStarcardHtml,
+    selfTopTwoWarningHtml,
     selfCalloutHtml
   }=buildSelfRenderState({
     self,
@@ -6934,6 +6935,7 @@ function renderGame(){
     selfScore,
     selfRoundWinsHtml,
     selfStarcardHtml,
+    selfTopTwoWarningHtml,
     selfCalloutHtml,
     isRecPlay,
     canPlay,
