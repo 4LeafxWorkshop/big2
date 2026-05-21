@@ -85,7 +85,6 @@ export function buildSelfRenderState(params){
   const selfAvatar=`<span class="player-avatar-wrap player-avatar-wrap-self avatar-rim${selfActive?' is-active':''}" style="--avatar-rim:${selfSeatColor};"><img id="self-avatar-img" class="player-avatar player-avatar-self ${avatarGenderClass(selfGender)} ${useGoogleSelfAvatar?'player-avatar-google':''}" style="--avatar-outline:${selfSeatColor};" src="${selfAvatarSrc}" data-fallback="${selfGender==='female'?AVATAR_BASE_SRC.female:AVATAR_BASE_SRC.male}" alt="${esc(selfName)}"/>${selfHostBadgeHtml}${selfBadgeHtml}${coachMarksButtonHtml}</span>`;
   let selfCalloutHtml=self?seatCalloutHtml(self.seat,'south',selfSeatColor,true):'';
   const selfEmoteHtml=self?seatEmoteHtml(self.seat,'south',selfSeatColor,true):'';
-  if(selfTopTwoWarningHtml)selfCalloutHtml+=selfTopTwoWarningHtml;
   if(selfEmoteHtml)selfCalloutHtml+=selfEmoteHtml;
   return{
     selfScore,
@@ -94,7 +93,8 @@ export function buildSelfRenderState(params){
     selfRoundWinsHtml,
     selfGender,
     selfAvatar,
-    selfCalloutHtml
+    selfCalloutHtml,
+    selfTopTwoWarningHtml
   };
 }
 

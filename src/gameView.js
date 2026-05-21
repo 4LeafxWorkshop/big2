@@ -61,10 +61,11 @@ export function renderGameSelfTagHtml(params){
     selfScore,
     selfRoundWinsHtml,
     selfStarcardHtml='',
+    selfTopTwoWarningHtml='',
     selfCalloutHtml,
     esc
   }=params;
-  return`<div class="seat-name-fixed player-tag"><div class="name">${selfAvatar}<span class="seat-identity"><span class="seat-name-text">${esc(selfName)}</span><span class="seat-subline"><span>${selfScore}</span>${selfRoundWinsHtml}</span><span class="seat-starcard-slot">${selfStarcardHtml}</span></span></div>${selfCalloutHtml}</div>`;
+  return`<div class="seat-name-fixed player-tag"><div class="name">${selfAvatar}<span class="seat-identity"><span class="seat-name-text">${esc(selfName)}</span><span class="seat-subline"><span>${selfScore}</span>${selfRoundWinsHtml}</span><span class="seat-starcard-slot">${selfStarcardHtml}${selfTopTwoWarningHtml}</span></span></div>${selfCalloutHtml}</div>`;
 }
 
 export function renderGameControlRowHtml(params){
@@ -103,6 +104,7 @@ export function renderGameActionZone(params){
     selfScore,
     selfRoundWinsHtml,
     selfStarcardHtml,
+    selfTopTwoWarningHtml,
     selfCalloutHtml,
     isRecPlay,
     canPlay,
@@ -121,7 +123,7 @@ export function renderGameActionZone(params){
     discardSwipeHintHtml=''
   }=params;
   const selfCalloutActive=Boolean(selfCalloutHtml);
-  return`<section class="action-zone${selfCalloutActive?' seat-callout-active':''}"><div class="action-strip ${canControl&&!gameOver?'active':''}${selfCalloutActive?' seat-callout-active':''}" style="--player-color:${playerColor};">${renderGameSelfTagHtml({selfAvatar,selfName,selfScore,selfRoundWinsHtml,selfStarcardHtml,selfCalloutHtml,esc})}${renderGameControlRowHtml({isRecPlay,canPlay,isRecPass,canPass,canSuggest,showRecommendHint,isRecEmpty,recommendHint,t,esc,canAutoSort,autoSortMode,emotePanel,handHtml,discardSwipeHintHtml})}</div></section>`;
+  return`<section class="action-zone${selfCalloutActive?' seat-callout-active':''}"><div class="action-strip ${canControl&&!gameOver?'active':''}${selfCalloutActive?' seat-callout-active':''}" style="--player-color:${playerColor};">${renderGameSelfTagHtml({selfAvatar,selfName,selfScore,selfRoundWinsHtml,selfStarcardHtml,selfTopTwoWarningHtml,selfCalloutHtml,esc})}${renderGameControlRowHtml({isRecPlay,canPlay,isRecPass,canPass,canSuggest,showRecommendHint,isRecEmpty,recommendHint,t,esc,canAutoSort,autoSortMode,emotePanel,handHtml,discardSwipeHintHtml})}</div></section>`;
 }
 
 export function renderGameTable(params){

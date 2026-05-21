@@ -10728,6 +10728,9 @@ body[data-screen='game'] .seat-starcard-slot > .seat-starcard {
   padding: 1px 2px;
   pointer-events: auto;
 }
+body[data-screen='game'] .seat-starcard-slot .seat-top-two-warning {
+  margin-left: 4px;
+}
 body[data-screen='game'][data-orientation='portrait'] :is(.action-strip .player-tag, .table > .player-tag) .seat-starcard {
   min-width: 24px !important;
   min-height: 18px !important;
@@ -12375,11 +12378,7 @@ body[data-screen='game'] .action-strip {
     z-index: 12 !important;
     margin: 0 !important;
   }
-  body[data-screen='game'] .action-strip .player-tag .seat-top-two-warning {
-    position: absolute !important;
-    left: 0 !important;
-    bottom: calc(100% + 4px) !important;
-    z-index: 21 !important;
+  body[data-screen='game'] .action-strip .player-tag .seat-starcard-slot .seat-top-two-warning {
     max-width: min(42vw, 120px) !important;
     padding: 1px 6px !important;
     font-size: .62rem !important;

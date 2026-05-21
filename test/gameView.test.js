@@ -104,6 +104,7 @@ test('renderGameSelfTagHtml renders the self tag block', ()=>{
     selfScore:'5000',
     selfRoundWinsHtml:'<span id="wins"></span>',
     selfStarcardHtml:'<button class="seat-starcard" type="button">*</button>',
+    selfTopTwoWarningHtml:'<span class="seat-top-two-warning" id="warning"></span>',
     selfCalloutHtml:'<span id="callout"></span>',
     esc:(value)=>String(value)
   });
@@ -111,7 +112,9 @@ test('renderGameSelfTagHtml renders the self tag block', ()=>{
   assert.match(html,/id="avatar"/);
   assert.match(html,/id="wins"/);
   assert.match(html,/seat-starcard/);
+  assert.match(html,/id="warning"/);
   assert.match(html,/id="callout"/);
+  assert.match(html,/seat-starcard-slot">[\s\S]*seat-starcard[\s\S]*seat-top-two-warning/);
 });
 
 test('renderGameControlRowHtml renders the action controls and hand', ()=>{

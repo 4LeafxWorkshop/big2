@@ -62,8 +62,9 @@ test('buildSelfRenderState shows the play-big warning whenever the next player h
     seatEmoteHtml:()=>''
   });
 
-  assert.match(result.selfCalloutHtml,/seat-top-two-warning/);
-  assert.match(result.selfCalloutHtml,/playBigWarning/);
+  assert.match(result.selfTopTwoWarningHtml,/seat-top-two-warning/);
+  assert.match(result.selfTopTwoWarningHtml,/playBigWarning/);
+  assert.doesNotMatch(result.selfCalloutHtml,/seat-top-two-warning/);
   assert.match(result.selfStarcardHtml,/seat-starcard/);
 
   const offTurn=buildSelfRenderState({
@@ -85,7 +86,7 @@ test('buildSelfRenderState shows the play-big warning whenever the next player h
     seatEmoteHtml:()=>''
   });
 
-  assert.match(offTurn.selfCalloutHtml,/seat-top-two-warning/);
+  assert.match(offTurn.selfTopTwoWarningHtml,/seat-top-two-warning/);
   assert.match(offTurn.selfStarcardHtml,/seat-starcard/);
 });
 
