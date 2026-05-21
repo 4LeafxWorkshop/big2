@@ -66,7 +66,7 @@ export function renderHomeActionRowHtml(params){
     soloBtnHtml,
     roomButtonsHtml
   }=params;
-  return`<div class="action-row home-start-row">${soloBtnHtml}${roomButtonsHtml}</div>`;
+  return`<div class="action-row home-start-row">${roomButtonsHtml}${soloBtnHtml}</div>`;
 }
 
 export function renderHomeMarkup(params){

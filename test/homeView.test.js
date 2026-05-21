@@ -154,6 +154,7 @@ test('renderHomeActionRowHtml renders the start buttons row', ()=>{
   assert.match(html,/home-start-row/);
   assert.match(html,/id="solo-start"/);
   assert.match(html,/id="room-create"/);
+  assert.match(html,/id="room-create">room<\/button><button id="solo-start">solo<\/button>/);
 });
 
 test('renderConfigMarkup includes config controls and back carousel', ()=>{
