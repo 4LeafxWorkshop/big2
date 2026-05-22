@@ -102,7 +102,7 @@ export function createGoogleIdentityController({
   }
 
   function appleButtonIconHtml(){
-    return `<span class="auth-btn-icon auth-btn-icon-apple" aria-hidden="true"></span>`;
+    return `<span class="auth-btn-icon auth-btn-icon-apple" aria-hidden="true">${authProviderBadgeHtml('apple')}</span>`;
   }
 
   function googleButtonIconHtml(){

@@ -5737,12 +5737,13 @@ ul.gesture-help-list {
   overflow: hidden;
 }
 #google-name-inline .auth-btn-icon-apple {
-  font-family: 'SF Pro Display', 'SF Pro Text', -apple-system, BlinkMacSystemFont, sans-serif;
-  font-size: 17px;
-  line-height: 1;
-  transform: translateY(-1px);
   width: 18px;
   height: 18px;
+}
+#google-name-inline .auth-btn-icon-apple svg {
+  width: 18px;
+  height: 18px;
+  display: block;
 }
 #google-name-inline .auth-btn-signout {
   width: auto;

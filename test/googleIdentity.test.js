@@ -138,12 +138,13 @@ test('renderGoogleInline uses native Android button when native auth is enabled'
     appleSignIn:async()=>{appleSignInCalls+=1;},
     useNativeGoogleAuth:()=>true,
     handleCredentialResponse:()=>{},
-    authProviderBadgeHtml:()=>''
+    authProviderBadgeHtml:(provider)=>provider==='apple'?'<svg data-provider="apple"></svg>':''
   });
   controller.renderGoogleInline();
   assert.match(doc.googleNameInline.innerHTML,/google-native-signin/);
   assert.match(doc.googleNameInline.innerHTML,/apple-signin/);
   assert.match(doc.googleNameInline.innerHTML,/auth-btn-icon-apple/);
+  assert.match(doc.googleNameInline.innerHTML,/data-provider="apple"/);
   assert.match(doc.googleNameInline.innerHTML,/Sign in with Google/);
   assert.match(doc.googleNameInline.innerHTML,/Sign in with Apple/);
   await doc.getElementById('google-native-signin').click();
