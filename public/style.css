@@ -9081,14 +9081,14 @@ body[data-screen='game'][data-orientation='portrait'] .action-strip .hand-hint {
   }
   .name-with-google-signed-in #name-input {
     min-width: 0;
-    width: auto;
+    width: 0;
     flex: 1 1 0;
   }
   .name-with-google-signed-in .name-auth-row {
     width: auto;
     flex: 0 0 auto;
     min-width: 0;
-    margin-left: auto;
+    margin-left: 0;
   }
   .name-with-google-signed-in .name-auth-row #google-name-inline {
     width: auto;
@@ -9101,6 +9101,7 @@ body[data-screen='game'][data-orientation='portrait'] .action-strip .hand-hint {
   #google-name-inline.signed-in .auth-inline-row {
     width: auto;
     min-width: 0;
+    gap: 4px;
   }
   .name-with-google-signed-in #google-name-inline .auth-btn-signout {
     width: auto;
@@ -9109,7 +9110,7 @@ body[data-screen='game'][data-orientation='portrait'] .action-strip .hand-hint {
     white-space: nowrap;
     height: 30px;
     min-height: 30px;
-    padding: 0 8px;
+    padding: 0 6px;
     font-size: 12px;
   }
   .name-with-google-signed-in #google-name-inline .auth-provider-badge {
