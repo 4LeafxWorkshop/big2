@@ -13865,7 +13865,7 @@ body[data-screen='game'] .seat.east {
     padding-top: var(--opp-side-pack-pad-top, 50%) !important;
   }
   body[data-screen='game'] .seat.north .seat-pack {
-    padding-top: 0 !important;
+    padding-top: max(var(--opp-side-pack-pad-top, 58%), 58%) !important;
   }
   body[data-screen='game'] .seat.west .seat-pack,
   body[data-screen='game'] .seat.east .seat-pack {
@@ -15151,10 +15151,10 @@ body[data-screen='game'] :is(.seat.north .seat-pack, .seat.west .side-station-st
 body[data-screen='game'] .seat.north .seat-label {
   margin-bottom: 0 !important;
 }
-body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-pack {
-  align-content: center !important;
-  justify-content: center !important;
-}
+  body[data-screen='game'][data-orientation='portrait'] .seat.north .seat-pack {
+    align-content: start !important;
+    justify-content: center !important;
+  }
 body[data-screen='game'] :is(.seat.west .side-station-core, .seat.east .side-station-core) {
   gap: 4px !important;
 }
