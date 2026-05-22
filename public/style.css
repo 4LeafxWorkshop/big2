@@ -238,6 +238,7 @@
 html {
   scrollbar-gutter: auto;
   background-color: #0d2b2d;
+  touch-action: manipulation;
 }
 * { box-sizing: border-box; }
 html, body { height: 100%; }
@@ -253,6 +254,10 @@ body {
   background-position: center;
   overflow-x: hidden;
   overflow-y: auto;
+  touch-action: manipulation;
+}
+#app {
+  touch-action: manipulation;
 }
 body[data-screen='home'] {
   background:
