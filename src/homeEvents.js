@@ -199,7 +199,9 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       render();
     });
     doc.getElementById('name-input')?.addEventListener('input',(e)=>{
-      state.home.name=e.target.value;
+      const value=e.target.value;
+      state.home.name=value;
+      state.home.nameDraft=value;
       if(signedInWithEmail()&&!state.home.google?.profileMissing){
         void syncLeaderboardProfile(currentLeaderboardIdentity());
       }

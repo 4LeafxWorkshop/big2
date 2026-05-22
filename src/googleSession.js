@@ -84,12 +84,13 @@ export function createGoogleSessionHelpers({
       const raw=storage.getItem(sessionKey);
       const parsed=raw?JSON.parse(raw):null;
       const email=String(parsed?.email??'').trim().toLowerCase().slice(0,120);
+      const provider=String(parsed?.provider??'google').trim().toLowerCase()==='apple'?'apple':'google';
       if(!email){
         console.debug('[google-picture] session-empty',{sessionKey});
         return false;
       }
       const state=getState();
-      state.home.google={...state.home.google,signedIn:true,provider:'google',email,hydrating:true,profileMissing:false};
+      state.home.google={...state.home.google,signedIn:true,provider,email,hydrating:true,profileMissing:false};
       const cached=applyCachedGoogleProfileFromStore(email);
       console.debug('[google-picture] session-restore',{email,cached});
       const firebaseAuth=getFirebaseAuth();
@@ -126,11 +127,12 @@ export function createGoogleSessionHelpers({
       if(!storage)return;
       const state=getState();
       const email=String(state.home.google.email??'').trim().toLowerCase().slice(0,120);
+      const provider=String(state.home.google.provider??'google').trim().toLowerCase()==='apple'?'apple':'google';
       if(!email){
         storage.removeItem(sessionKey);
         return;
       }
-      storage.setItem(sessionKey,JSON.stringify({email}));
+      storage.setItem(sessionKey,JSON.stringify({email,provider}));
     }catch{}
   }
 
@@ -167,31 +169,40 @@ export function createGoogleSessionHelpers({
     return normalizePictureString(value);
   }
 
-  async function completeGoogleSignIn({
+  async function completeProviderSignIn({
+    provider='google',
     token='',
     email='',
     name='',
     picture='',
     sub='',
-    gender=''
+    gender='',
+    user=null
   }={}){
     const state=getState();
+    provider=String(provider??'google').trim().toLowerCase()==='apple'?'apple':'google';
     token=String(token??'').trim();
-    if(!token)return;
     const tokenPayload=parseJwtPayload?.(token)??{};
     let firebaseUid=String(state.home.google?.uid??'').trim();
     initFirebaseIfReady();
     try{
       const fb=getWindow().firebase;
       const firebaseAuth=getFirebaseAuth();
+      if(user?.uid){
+        firebaseUid=String(user.uid).trim().slice(0,128);
+        state.home.google.uid=firebaseUid;
+        if(!sub)sub=String(user.uid).slice(0,64);
+      }
       if(fb?.auth&&firebaseAuth){
-        const cred=fb.auth.GoogleAuthProvider.credential(token);
-        const res=await firebaseAuth.signInWithCredential(cred);
-        const user=res?.user;
-        if(user?.uid){
-          firebaseUid=String(user.uid).trim().slice(0,128);
-          state.home.google.uid=firebaseUid;
-          if(!sub)state.home.google.sub=String(user.uid).slice(0,64);
+        if(provider==='google'&&token){
+          const cred=fb.auth.GoogleAuthProvider.credential(token);
+          const res=await firebaseAuth.signInWithCredential(cred);
+          user=res?.user??user;
+          if(user?.uid){
+            firebaseUid=String(user.uid).trim().slice(0,128);
+            state.home.google.uid=firebaseUid;
+            if(!sub)sub=String(user.uid).slice(0,64);
+          }
         }
         if(!picture){
           picture=normalizePictureValue(user?.photoURL??firebaseAuth?.currentUser?.photoURL);
@@ -199,13 +210,18 @@ export function createGoogleSessionHelpers({
       }
     }catch{
     }
-    email=String(email??tokenPayload.email??'').trim().toLowerCase().slice(0,120);
+    const providedEmail=String(email??'').trim().toLowerCase();
+    email=(providedEmail||String(tokenPayload.email??user?.email??'').trim().toLowerCase()).slice(0,120);
     picture=normalizePictureValue(picture)||normalizePictureValue(tokenPayload.picture);
-    sub=String(sub??tokenPayload.sub??'').trim();
+    const providedSub=String(sub??'').trim();
+    sub=(providedSub||String(tokenPayload.sub??user?.uid??'').trim()).slice(0,64);
+    const providedName=String(name??'').trim();
+    name=(providedName||String(user?.displayName??tokenPayload.name??'').trim()).slice(0,18);
     gender=String(gender??'').trim().toLowerCase();
     const googleGender=(gender==='female'||gender==='male')?gender:'';
-    const signedIn=Boolean(email||sub);
+    const signedIn=Boolean(email||sub||firebaseUid);
     console.debug('[google-picture] sign-in-resolved',{
+      provider,
       signedIn,
       email,
       hasTokenPicture:Boolean(normalizePictureValue(tokenPayload.picture)),
@@ -215,8 +231,8 @@ export function createGoogleSessionHelpers({
     });
     mergeBrowserGoogleProfile({
       signedIn,
-      provider:'google',
-      name:String(name??'').slice(0,18),
+      provider,
+      name,
       email,
       uid:String(firebaseUid||sub).slice(0,128),
       sub:String(sub).slice(0,64),
@@ -237,7 +253,7 @@ export function createGoogleSessionHelpers({
       const storage=getStorage();
       if(storage){
         const emailKey=String(email).trim().toLowerCase().slice(0,120);
-        if(emailKey)storage.setItem(sessionKey,JSON.stringify({email:emailKey}));
+        if(emailKey)storage.setItem(sessionKey,JSON.stringify({email:emailKey,provider}));
       }
       if(hydrated?.ok){
         await syncLeaderboardProfile(currentLeaderboardIdentity());
@@ -254,7 +270,8 @@ export function createGoogleSessionHelpers({
     if(!token)return;
     const p=parseJwtPayload?.(token)??{};
     const gRaw=String(p.gender??p.sex??'').trim().toLowerCase();
-    await completeGoogleSignIn({
+    await completeProviderSignIn({
+      provider:'google',
       token,
       email:String(p.email??''),
       name:String(p.name??''),
@@ -266,18 +283,32 @@ export function createGoogleSessionHelpers({
 
   async function handleNativeGoogleUser(user){
     const token=String(user?.authentication?.idToken??user?.idToken??'').trim();
-    if(!token)return;
-    await completeGoogleSignIn({
+    await completeProviderSignIn({
+      provider:'google',
       token,
       email:String(user?.email??''),
       name:String(user?.name??''),
       picture:normalizePictureValue(user?.imageUrl),
-      sub:String(user?.id??'')
+      sub:String(user?.id??''),
+      user
+    });
+  }
+
+  async function handleFirebaseOAuthUser({provider='google',user=null,email='',name='',picture='',sub='',gender=''}={}){
+    await completeProviderSignIn({
+      provider,
+      email,
+      name,
+      picture,
+      sub,
+      gender,
+      user
     });
   }
 
   return{
     clearGoogleSession,
+    handleFirebaseOAuthUser,
     handleNativeGoogleUser,
     hydrateProfileBlocking,
     handleCredentialResponse,

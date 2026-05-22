@@ -12,7 +12,7 @@ function render(overrides={}){
     homeAvatarSrc:'/avatar.png',
     esc:(value)=>String(value),
     state:{
-      home:{name:'Player',avatarChoice:'male',showIntro:true,showLeaderboard:false},
+      home:{name:'Player',nameDraft:'',avatarChoice:'male',showIntro:true,showLeaderboard:false},
       showScoreGuide:true
     },
     t:(key)=>key,
@@ -97,15 +97,32 @@ test('renderHomeProfileCardHtml renders the avatar and player fields', ()=>{
   const html=renderHomeProfileCardHtml({
     homeAvatarSrc:'/avatar.png',
     esc:(value)=>String(value),
-    state:{home:{name:'Player',avatarChoice:'female'}},
+    state:{home:{name:'Player',nameDraft:'',avatarChoice:'female',google:{signedIn:false,email:''}}},
     t:(key)=>key,
     aiFieldLeft:'<div id="ai-left"></div>',
     cardBackLeft:'<div id="back-left"></div>'
   });
   assert.match(html,/home-profile-card/);
   assert.match(html,/id="home-avatar-img"/);
-  assert.match(html,/id="name-input"/);
+  assert.doesNotMatch(html,/id="name-input"/);
+  assert.match(html,/loginToStart/);
+  assert.match(html,/name-auth-row/);
   assert.match(html,/id="gender-combo"/);
+});
+
+test('renderHomeProfileCardHtml shows editable name input after sign-in', ()=>{
+  const html=renderHomeProfileCardHtml({
+    homeAvatarSrc:'/avatar.png',
+    esc:(value)=>String(value),
+    state:{home:{name:'Player',avatarChoice:'female',google:{signedIn:true,email:'player@example.com'}}},
+    t:(key)=>key,
+    aiFieldLeft:'<div id="ai-left"></div>',
+    cardBackLeft:'<div id="back-left"></div>'
+  });
+  assert.match(html,/id="name-input"/);
+  assert.match(html,/value="Player"/);
+  assert.match(html,/name-with-google-signed-in/);
+  assert.match(html,/name-auth-row-inline/);
 });
 
 test('renderHomeSettingsCardHtml renders settings and toggles', ()=>{

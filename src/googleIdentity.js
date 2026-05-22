@@ -9,6 +9,7 @@ export function createGoogleIdentityController({
   clearGoogleSession,
   nativeGoogleSignIn=async()=>false,
   nativeGoogleSignOut=async()=>false,
+  appleSignIn=async()=>false,
   useNativeGoogleAuth=()=>false,
   useWebGoogleFallbackButton=()=>false,
   handleCredentialResponse,
@@ -18,6 +19,7 @@ export function createGoogleIdentityController({
   let googleIdentityInitialized=false;
   let googleIdentityPrompted=false;
   let googleScriptReloading=false;
+  let googlePromptAfterLoad=false;
 
   function updateGoogleLocale(){
     const state=getState();
@@ -40,7 +42,10 @@ export function createGoogleIdentityController({
     const script=getDocument().createElement('script');
     script.src=`https://accounts.google.com/gsi/client?hl=${lang}`;
     script.async=true;
-    script.onload=()=>{googleScriptReloading=false;renderGoogleInline();};
+    script.onload=()=>{
+      googleScriptReloading=false;
+      renderGoogleInline();
+    };
     script.onerror=()=>{googleScriptReloading=false;};
     getDocument().head.appendChild(script);
   }
@@ -74,12 +79,34 @@ export function createGoogleIdentityController({
 
   function signOutCurrentProvider(){
     const state=getState();
+    const currentProvider=String(state.home.google?.provider??'').trim().toLowerCase();
     state.home.google={signedIn:false,provider:'',name:'',email:'',uid:'',sub:'',token:'',picture:'',pictureLoaded:false,gender:'',profileMissing:false,hydrating:false};
     clearGoogleSession();
     googleIdentityPrompted=false;
-    try{void nativeGoogleSignOut();}catch{}
+    if(currentProvider==='google'){
+      try{void nativeGoogleSignOut();}catch{}
+    }
     try{getWindow().google?.accounts?.id?.disableAutoSelect?.();}catch{}
     try{getFirebaseAuth()?.signOut?.();}catch{}
+  }
+
+  function renderAppleSignInButton(doc,afterClick){
+    const appleButton=doc.getElementById('apple-signin');
+    appleButton?.addEventListener('click',()=>{
+      void appleSignIn().then(()=>{
+        afterClick?.();
+      }).catch(()=>{
+      });
+    });
+    return appleButton;
+  }
+
+  function appleButtonIconHtml(){
+    return `<span class="auth-btn-icon auth-btn-icon-apple" aria-hidden="true"></span>`;
+  }
+
+  function googleButtonIconHtml(){
+    return `<span class="auth-btn-icon auth-btn-icon-google" aria-hidden="true"><span class="auth-btn-icon-google-tile">${authProviderBadgeHtml('google')}</span></span>`;
   }
 
   function queueGoogleInlineRender(renderGoogleInline){
@@ -100,7 +127,8 @@ export function createGoogleIdentityController({
     if(signedInWithEmail()){
       slot.classList.add('signed-in');
       nameRow?.classList.add('signed-in-auth');
-      const label='Google';
+      const provider=String(state.home.google?.provider??'google').trim().toLowerCase()==='apple'?'apple':'google';
+      const label=provider==='apple'?'Apple':'Google';
       const profileMissing=Boolean(state.home.google?.profileMissing);
       const hydrating=Boolean(state.home.google?.hydrating);
       const t=getT();
@@ -109,49 +137,66 @@ export function createGoogleIdentityController({
         :(hydrating?`<span class="auth-status auth-status-loading">${t('restoringScore')}</span>`:'');
       const actionLabel=profileMissing?t('signInAgain'):t('signOut');
       const actionClass=profileMissing?'auth-btn-retry':'auth-btn-signout';
-      slot.innerHTML=`<span class="auth-provider-badge auth-provider-google" role="img" aria-label="${label}" title="${label}">${authProviderBadgeHtml('google')}</span>${status}<button id="google-signout" class="auth-btn ${actionClass}">${actionLabel}</button>`;
+      const providerMarkup=`<span class="auth-provider-badge auth-provider-${provider}" role="img" aria-label="${label}" title="${label}">${authProviderBadgeHtml(provider)}</span>`;
+      slot.innerHTML=`<div class="auth-inline-row">${providerMarkup}${status}<button id="google-signout" class="auth-btn ${actionClass}">${actionLabel}</button></div>`;
       doc.getElementById('google-signout')?.addEventListener('click',()=>{signOutCurrentProvider();getRender()();});
+      googlePromptAfterLoad=false;
       return;
     }
     slot.classList.remove('signed-in');
     nameRow?.classList.remove('signed-in-auth');
+    const t=getT();
+    const googleLabel=t('signInWithGoogle');
+    const appleLabel=t('signInWithApple');
     if(useWebGoogleFallbackButton()){
-      slot.innerHTML=`<button id="google-web-signin" class="auth-btn auth-btn-google">Google</button><div id="google-login-slot"></div>`;
+      slot.innerHTML=`<div class="login-row"><button id="google-web-signin" class="auth-btn login-btn auth-btn-google">${googleButtonIconHtml()}<span>${googleLabel}</span></button><button id="apple-signin" class="auth-btn login-btn auth-btn-apple">${appleButtonIconHtml()}<span>${appleLabel}</span></button></div><div id="google-login-slot"></div>`;
       doc.getElementById('google-web-signin')?.addEventListener('click',()=>{
         const hasGsi=Boolean(getWindow().google?.accounts?.id&&ensureGoogleIdentityInitialized());
         if(hasGsi){
           promptGoogleIdentityIfNeeded();
           return;
         }
+        googlePromptAfterLoad=true;
         reloadGoogleScriptForLocale();
       });
+      renderAppleSignInButton(doc,()=>getRender()());
       return;
     }
     if(useNativeGoogleAuth()){
-      slot.innerHTML=`<button id="google-native-signin" class="auth-btn auth-btn-google">Google</button>`;
+      slot.innerHTML=`<div class="login-row"><button id="google-native-signin" class="auth-btn login-btn auth-btn-google">${googleButtonIconHtml()}<span>${googleLabel}</span></button><button id="apple-signin" class="auth-btn login-btn auth-btn-apple">${appleButtonIconHtml()}<span>${appleLabel}</span></button></div>`;
       doc.getElementById('google-native-signin')?.addEventListener('click',()=>{
         void nativeGoogleSignIn().then(()=>{
           getRender()();
         }).catch(()=>{
         });
       });
+      renderAppleSignInButton(doc,()=>getRender()());
       return;
     }
     const hasGsi=Boolean(getWindow().google?.accounts?.id&&ensureGoogleIdentityInitialized());
-    slot.innerHTML=`<div id="google-login-slot"></div>`;
+    slot.innerHTML=`<div class="login-row"><div id="google-login-slot" class="google-login-slot"></div><button id="apple-signin" class="auth-btn login-btn auth-btn-apple">${appleButtonIconHtml()}<span>${appleLabel}</span></button></div>`;
     const gSlot=doc.getElementById('google-login-slot');
-    if(hasGsi){
-      if(gSlot){
-        try{
-          getWindow().google.accounts.id.renderButton(gSlot,{theme:'filled_blue',size:'medium',text:'signin_with',shape:'square',logo_alignment:'left',width:140});
-        }catch{
-          gSlot.innerHTML='';
-        }
+    const fallbackGoogleButton=()=>{
+      if(!gSlot)return;
+      gSlot.innerHTML=`<button id="google-web-signin" class="auth-btn login-btn auth-btn-google">${googleButtonIconHtml()}<span>${googleLabel}</span></button>`;
+      doc.getElementById('google-web-signin')?.addEventListener('click',()=>{
+        googlePromptAfterLoad=true;
+        reloadGoogleScriptForLocale();
+      });
+    };
+    if(hasGsi&&gSlot){
+      try{
+        const width=Math.max(140,Math.floor((gSlot.parentElement?.getBoundingClientRect?.()?.width??gSlot.getBoundingClientRect?.()?.width??0)));
+        getWindow().google.accounts.id.renderButton(gSlot,{theme:'filled_blue',size:'large',text:'signin_with',shape:'square',logo_alignment:'left',width});
+        googlePromptAfterLoad=false;
+        promptGoogleIdentityIfNeeded();
+      }catch{
+        fallbackGoogleButton();
       }
-      promptGoogleIdentityIfNeeded();
     }else{
-      if(gSlot)gSlot.innerHTML='';
+      fallbackGoogleButton();
     }
+    renderAppleSignInButton(doc,()=>getRender()());
   }
 
   function onGoogleScriptLoaded(renderGoogleInline){

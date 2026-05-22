@@ -45,7 +45,7 @@ function encodeJwtPayload(payload){
 
 test('loadGoogleSession restores cached browser email and profile', ()=>{
   const state=createState();
-  const storage=createStorage(JSON.stringify({email:'user@example.com'}));
+  const storage=createStorage(JSON.stringify({email:'user@example.com',provider:'apple'}));
   let restoredEmail='';
   const helpers=createGoogleSessionHelpers({
     getState:()=>state,
@@ -62,6 +62,7 @@ test('loadGoogleSession restores cached browser email and profile', ()=>{
   assert.equal(restoredEmail,'user@example.com');
   assert.equal(state.home.google.signedIn,true);
   assert.equal(state.home.google.email,'user@example.com');
+  assert.equal(state.home.google.provider,'apple');
 });
 
 test('loadGoogleSession restores auth photo url when cached profile has no picture', ()=>{
@@ -104,7 +105,7 @@ test('saveGoogleSession and clearGoogleSession update storage', ()=>{
   });
   state.home.google.email='user@example.com';
   helpers.saveGoogleSession();
-  assert.equal(storage.getItem('google-session'),JSON.stringify({email:'user@example.com'}));
+  assert.equal(storage.getItem('google-session'),JSON.stringify({email:'user@example.com',provider:'google'}));
   helpers.clearGoogleSession();
   assert.equal(storage.getItem('google-session'),null);
 });
@@ -154,7 +155,7 @@ test('handleNativeGoogleUser signs into firebase and stores native profile', asy
   assert.equal(state.home.google.uid,'firebase-uid-1');
   assert.equal(state.home.google.sub,'google-sub-1');
   assert.equal(state.home.google.picture,'https://example.com/pic.png');
-  assert.equal(storage.getItem('google-session'),JSON.stringify({email:'native@example.com'}));
+  assert.equal(storage.getItem('google-session'),JSON.stringify({email:'native@example.com',provider:'google'}));
   assert.deepEqual(syncIdentity,{id:'native@example.com'});
 });
 
@@ -201,7 +202,7 @@ test('handleNativeGoogleUser accepts top-level native idToken fallback', async()
   assert.equal(state.home.google.email,'native2@example.com');
   assert.equal(state.home.google.uid,'firebase-uid-2');
   assert.equal(state.home.google.sub,'google-sub-2');
-  assert.equal(storage.getItem('google-session'),JSON.stringify({email:'native2@example.com'}));
+  assert.equal(storage.getItem('google-session'),JSON.stringify({email:'native2@example.com',provider:'google'}));
 });
 
 test('handleNativeGoogleUser accepts object-shaped imageUrl payloads', async()=>{
@@ -297,4 +298,41 @@ test('handleNativeGoogleUser falls back to token picture and syncs profile on no
   assert.equal(state.home.google.sub,'google-sub-4');
   assert.equal(state.home.google.picture,'https://example.com/pic4.png');
   assert.equal(syncCalls,1);
+});
+
+test('handleFirebaseOAuthUser stores apple provider and session state', async()=>{
+  const state=createState();
+  const storage=createStorage();
+  let syncIdentity=null;
+  const helpers=createGoogleSessionHelpers({
+    getState:()=>state,
+    getWindow:()=>({}),
+    getStorage:()=>storage,
+    sessionKey:'google-session',
+    getFirebaseAuth:()=>({
+      signInWithCredential:async()=>({
+        user:{uid:'firebase-uid-apple'}
+      })
+    }),
+    mergeBrowserGoogleProfile:(overrides)=>{state.home.google={...state.home.google,...overrides};},
+    applyCachedGoogleProfileFromStore:()=>false,
+    preloadGooglePicture:()=>{},
+    initFirebaseIfReady:()=>true,
+    hydrateProfileFromCloudByIdentity:async()=>({status:'not_found'}),
+    currentLeaderboardIdentity:()=>({id:state.home.google.email}),
+    syncLeaderboardProfile:async(identity)=>{syncIdentity=identity;},
+    loadActiveRoomPointer:()=>{},
+    refreshLeaderboard:()=>{},
+    render:()=>{}
+  });
+  await helpers.handleFirebaseOAuthUser({
+    provider:'apple',
+    user:{uid:'apple-sub-1',email:'apple@example.com',displayName:'Apple User',photoURL:''}
+  });
+  assert.equal(state.home.google.signedIn,true);
+  assert.equal(state.home.google.provider,'apple');
+  assert.equal(state.home.google.email,'apple@example.com');
+  assert.equal(state.home.google.uid,'apple-sub-1');
+  assert.equal(storage.getItem('google-session'),JSON.stringify({email:'apple@example.com',provider:'apple'}));
+  assert.deepEqual(syncIdentity,{id:'apple@example.com'});
 });
