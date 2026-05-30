@@ -20,10 +20,11 @@ function createHelpers(stateOverrides={}){
   let soundEnabled=true;
   let calloutDisplayEnabled=false;
   let emoteDisplayEnabled=true;
-  let gestureHelpEnabled=false;
-  let vibrateEnabled=true;
+  let gestureHelpEnabled=stateOverrides.gestureHelpEnabled??false;
+  let vibrateEnabled=stateOverrides.vibrateEnabled??true;
   let calloutStylePack='classic';
   let calloutVoiceMode='auto';
+  const mobilePointer=Boolean(stateOverrides.mobilePointer);
   const helpers=createProfileSettingsHelpers({
     getState:()=>state,
     languageOptions:[{value:'zh-HK'},{value:'en'}],
@@ -39,6 +40,7 @@ function createHelpers(stateOverrides={}){
     getVibrateEnabled:()=>vibrateEnabled,
     setVibrateEnabled:(value)=>{vibrateEnabled=value;},
     isNativeApp:()=>true,
+    isMobilePointer:()=>mobilePointer,
     normalizeCalloutStylePack:(value)=>value||'classic',
     getCalloutStylePack:()=>calloutStylePack,
     setCalloutStylePack:(value)=>{calloutStylePack=value;},
@@ -95,6 +97,20 @@ test('applyMainSettings updates state and mutable flags', ()=>{
     vibrateEnabled:false,
     calloutStylePack:'minimal',
     calloutVoiceMode:'off'
+  });
+});
+
+test('applyMainSettings keeps mobile web gesture and vibrate defaults enabled when absent from settings', ()=>{
+  const {helpers,getFlags}=createHelpers({mobilePointer:true,gestureHelpEnabled:true,vibrateEnabled:true});
+  helpers.applyMainSettings({});
+  assert.deepEqual(getFlags(),{
+    soundEnabled:true,
+    calloutDisplayEnabled:false,
+    emoteDisplayEnabled:true,
+    gestureHelpEnabled:true,
+    vibrateEnabled:true,
+    calloutStylePack:'classic',
+    calloutVoiceMode:'auto'
   });
 });
 

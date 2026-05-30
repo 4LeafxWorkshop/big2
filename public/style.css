@@ -6355,7 +6355,7 @@ body[data-screen='game'] .topbar-right .control-row button {
   background: var(--avatar-bg);
 }
 .player-avatar.player-avatar-google {
-  background: transparent !important;
+  background: var(--avatar-bg) !important;
 }
 .player-avatar.avatar-female { object-position: center center; }
 .player-avatar.avatar-male { object-position: center center; }
@@ -11674,7 +11674,7 @@ body[data-screen='game'] .action-strip .player-tag .player-avatar.player-avatar-
   object-fit: cover;
   object-position: center center;
   filter: none;
-  background: transparent !important;
+  background: var(--avatar-bg) !important;
 }
 body[data-screen='game'] .seat-name-fixed .player-avatar-wrap.player-avatar-wrap-opponent {
   width: 38px;

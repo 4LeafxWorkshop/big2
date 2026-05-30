@@ -10,6 +10,7 @@ export function createProfileSettingsHelpers(deps){
     getVibrateEnabled=()=>false,
     setVibrateEnabled=()=>{},
     isNativeApp=()=>false,
+    isMobilePointer=()=>false,
     normalizeCalloutStylePack,
     getCalloutStylePack,
     currentLeaderboardIdentity,
@@ -124,7 +125,7 @@ export function createProfileSettingsHelpers(deps){
     if(typeof settings.emoteDisplayEnabled==='boolean')deps.setEmoteDisplayEnabled(Boolean(settings.emoteDisplayEnabled));
     if(typeof settings.gestureHelpEnabled==='boolean')deps.setGestureHelpEnabled(Boolean(settings.gestureHelpEnabled));
     if(typeof settings.vibrateEnabled==='boolean')setVibrateEnabled(Boolean(settings.vibrateEnabled));
-    if(!isNativeApp()){
+    if(!isNativeApp()&&!isMobilePointer()){
       deps.setGestureHelpEnabled(false);
       setVibrateEnabled(false);
     }
