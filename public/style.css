@@ -804,7 +804,7 @@ body[data-screen='home'] .home-wrap {
   max-width: 760px;
   position: relative;
   margin-top: 0;
-  margin-bottom: 22px;
+  margin-bottom: 0;
 }
 .royal-home-wrap.home-more-settings-open {
   max-width: 980px;
@@ -3896,9 +3896,11 @@ input, select { border: 1px solid rgba(255,255,255,.28); border-radius: 11px; pa
   color: #ffd166;
 }
 .royal-home-wrap .legal-mini {
-  background: transparent;
-  border: 0;
-  box-shadow: none;
+  background: linear-gradient(180deg, rgba(9, 30, 44, .78), rgba(8, 21, 33, .9));
+  border: 1px solid rgba(224, 186, 107, .18);
+  border-radius: 12px;
+  box-shadow: 0 0 0 1px rgba(233, 197, 120, .12);
+  padding: 8px 10px;
 }
 .royal-home-wrap .home-build-version {
   position: fixed;
