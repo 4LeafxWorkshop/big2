@@ -57,7 +57,27 @@ test('resolveRoomLaunchState exposes ready and starting states consistently', ()
   });
   assert.equal(starting.roomStarting,true);
   assert.equal(starting.startDisabled,true);
-  assert.equal(starting.startSubtitleKey,'');
+  assert.equal(starting.startSubtitleKey,'startingGame');
   assert.equal(starting.startHintKey,'roomStarting');
   assert.equal(starting.lobbyHintKey,'roomStarting');
+});
+
+test('resolveRoomLaunchState shows a pending prompt while room start is syncing', ()=>{
+  const pending=resolveRoomLaunchState({
+    state:{
+      home:{google:{signedIn:true,hydrating:false}},
+      room:{pendingStart:true}
+    },
+    roomData:{
+      status:'lobby',
+      players:[
+        {uid:'uid:a'},
+        {uid:'guest:b'}
+      ]
+    }
+  });
+  assert.equal(pending.roomStartPending,true);
+  assert.equal(pending.startDisabled,true);
+  assert.equal(pending.startSubtitleKey,'startingGame');
+  assert.equal(pending.startHintKey,'');
 });

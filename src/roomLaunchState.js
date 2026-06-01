@@ -8,14 +8,14 @@ export function resolveRoomLaunchState({state,roomData,roomPlayers}={}){
   const roomStartPending=Boolean(state?.room?.pendingStart);
   const startDisabled=roomStarting||!roomCanStart||roomStartPending||profileRestorePending;
   const startSubtitleKey=roomStarting||roomStartPending
-    ?''
+    ?'startingGame'
     :profileRestorePending
       ?'restoringScore'
       :roomCanStart
         ?'startReadySubtitle'
         :'roomNeedPlayersShort';
   const startHintKey=roomStartPending
-    ?'roomSending'
+    ?''
     :roomStarting
       ?'roomStarting'
       :profileRestorePending
