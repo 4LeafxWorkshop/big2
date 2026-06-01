@@ -272,18 +272,25 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
     const handleSoloStart=async()=>{
       if(!signedInForPlay())return;
       unlockAudio();
+      state.home.startingSolo=true;
+      render();
       state.home.mode='solo';
       state.home.showLeaderboard=false;
-      initFirebaseIfReady();
-      await waitForGoogleProfileReady();
-      let synced=false;
-      for(let i=0;i<4&&!synced;i++){
-        synced=await syncLeaderboardProfile(currentLeaderboardIdentity());
-        if(!synced)await waitMs(250);
+      try{
+        initFirebaseIfReady();
+        await waitForGoogleProfileReady();
+        let synced=false;
+        for(let i=0;i<4&&!synced;i++){
+          synced=await syncLeaderboardProfile(currentLeaderboardIdentity());
+          if(!synced)await waitMs(250);
+        }
+        if(!synced)console.warn('profile sync failed on start; continuing to game');
+        await startSoloGame({preserveOpponents:false});
+        schedulePopunderAfterRender(350);
+      }finally{
+        state.home.startingSolo=false;
+        if(state.screen==='home')render();
       }
-      if(!synced)console.warn('profile sync failed on start; continuing to game');
-      await startSoloGame({preserveOpponents:false});
-      schedulePopunderAfterRender(350);
     };
 
     const soloStartBtn=doc.getElementById('solo-start');

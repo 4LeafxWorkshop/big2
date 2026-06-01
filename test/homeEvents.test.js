@@ -288,6 +288,70 @@ test('home binder arms popunder during solo start gesture', async()=>{
   assert.equal(waitCalls,1);
 });
 
+test('home binder shows a loading prompt immediately while solo start is pending', async()=>{
+  const soloStart=makeElement();
+  let renderCount=0;
+  let started=0;
+  let waitCalls=0;
+  let resolveWait;
+  const waitPromise=new Promise((resolve)=>{
+    resolveWait=resolve;
+  });
+  const state={
+    home:{
+      mode:'home',
+      showLeaderboard:false,
+      startingSolo:false,
+      google:{
+        signedIn:true,
+        email:'user@example.com',
+        hydrating:true,
+        profileMissing:false
+      },
+      leaderboard:{sort:'totalDelta',period:'all'}
+    },
+    room:{
+      joinOpen:false,
+      error:'',
+      joinOpenCountdown:15,
+      pendingStart:false,
+      code:'ABCD',
+      data:{
+        status:'lobby',
+        players:[
+          {uid:'uid:a',seat:0},
+          {uid:'guest:b',seat:1}
+        ]
+      }
+    },
+    showScoreGuide:false,
+    screen:'home',
+    opponentProfileName:''
+  };
+  bindWith({
+    document:makeDocument({byId:{'solo-start':soloStart}}),
+    state,
+    render:()=>{renderCount+=1;},
+    signedInWithEmail:()=>true,
+    waitMs:async()=>{
+      waitCalls+=1;
+      await waitPromise;
+      state.home.google.hydrating=false;
+    },
+    startSoloGame:async()=>{started+=1;}
+  });
+  const flow=soloStart.dispatch('pointerdown');
+  await Promise.resolve();
+  assert.equal(state.home.startingSolo,true);
+  assert.equal(renderCount,1);
+  resolveWait();
+  await flow;
+  await new Promise((resolve)=>setImmediate(resolve));
+  assert.equal(started,1);
+  assert.equal(waitCalls,1);
+  assert.equal(state.home.startingSolo,false);
+});
+
 test('home binder waits for google hydration before room create', async()=>{
   const roomCreate=makeElement();
   const state={
