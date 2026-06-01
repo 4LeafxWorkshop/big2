@@ -1179,6 +1179,7 @@ let emoteDisplayEnabled=true;
 let gestureHelpEnabled=defaultMobileHomeToggleEnabled;
 let vibrateEnabled=defaultMobileHomeToggleEnabled;
 let hapticFallbackTimer=null;
+let hapticShakeTimer=null;
 let calloutVoiceMode='auto'; // auto | recorded | off
 let calloutStylePack='energetic'; // forced energetic
 let orientationBlockActive=false;
@@ -5180,6 +5181,26 @@ function triggerVibration(pattern){
     if(!ok)triggerHapticFallbackPulse();
   }catch{}
 }
+function triggerAttentionEffect(kind=''){
+  try{
+    const platform=String(window.Capacitor?.getPlatform?.()||'').toLowerCase();
+    const isNativePlatform=Boolean(window.Capacitor?.isNativePlatform?.()||platform==='ios'||platform==='android');
+    if(isNativePlatform)return;
+    const body=document.body;
+    if(!(body instanceof HTMLElement))return;
+    body.setAttribute('data-haptic-shake-kind',String(kind||''));
+    body.setAttribute('data-haptic-shake','0');
+    void body.offsetWidth;
+    body.setAttribute('data-haptic-shake','1');
+    triggerHapticFallbackPulse();
+    if(hapticShakeTimer)window.clearTimeout(hapticShakeTimer);
+    hapticShakeTimer=window.setTimeout(()=>{
+      hapticShakeTimer=null;
+      body.setAttribute('data-haptic-shake','0');
+      body.setAttribute('data-haptic-shake-kind','');
+    },260);
+  }catch{}
+}
 function triggerHapticFallbackPulse(){
   const body=document.body;
   if(!(body instanceof HTMLElement))return;
@@ -5419,23 +5440,36 @@ function centerMovesHtml(v){
 }
 function lastActionBySeat(h){
   const out=new Map();
+  let latestPlay=null;
   for(const e of h??[]){
-    if(e.action==='play'&&Array.isArray(e.cards)&&e.cards.length){out.set(e.seat,{type:'play',cards:[...e.cards]});continue;}
+    if(e.action==='play'&&Array.isArray(e.cards)&&e.cards.length){
+      const action={
+        type:'play',
+        kind:String(e.kind||''),
+        ts:Number(e.ts)||0,
+        cards:[...e.cards]
+      };
+      out.set(e.seat,action);
+      if(!latestPlay||action.ts>=latestPlay.ts)latestPlay={seat:e.seat,...action};
+      continue;
+    }
     if(e.action==='pass')out.set(e.seat,{type:'pass'});
   }
+  out.latestPlay=latestPlay;
   return out;
 }
 const TABLE_PLAY_SCALE=1;
-const seatLastActionHtml=(action,sizeMultiplier=1)=>renderSeatLastAction(action,{
+const seatLastActionHtml=(action,sizeMultiplier=1,highlightKind='')=>renderSeatLastAction(action,{
   t,
   renderStaticCard,
   fanNoise,
   cardId,
-  sizeMultiplier
+  sizeMultiplier,
+  highlightKind
 });
 const centerLastMovesHtml=(lastActions,selfSeat)=>renderCenterLastMoves(lastActions,selfSeat,{
   seatCls,
-  renderSeatLastAction:(action,sizeMultiplier)=>seatLastActionHtml(action,sizeMultiplier),
+  renderSeatLastAction:(action,sizeMultiplier,highlightKind)=>seatLastActionHtml(action,sizeMultiplier,highlightKind),
   tablePlayScale:TABLE_PLAY_SCALE
 });
 const revealHtml=()=>'';
@@ -5518,6 +5552,7 @@ const {
   clearCalloutStates,
   playSound,
   triggerVibration,
+  triggerAttentionEffect,
   speakCallout,
   t
 });
@@ -6258,12 +6293,9 @@ function renderHome(){
   const roomStartControl=roomIsHost
     ?(() => {
         const disabled=roomLaunchState.startDisabled;
-        const subtitle=roomStarting||roomStartPending
-          ?''
-          :roomLaunchState.startSubtitleKey
-            ?`<span class="room-start-subtitle">${esc(t(roomLaunchState.startSubtitleKey))}</span>`
-            :''
-        ;
+        const subtitle=roomLaunchState.startSubtitleKey
+          ?`<span class="room-start-subtitle">${esc(t(roomLaunchState.startSubtitleKey))}</span>`
+          :'';
         const hint=roomLaunchState.startHintKey
           ?`<span class="hint">${esc(t(roomLaunchState.startHintKey))}</span>`
           :'';

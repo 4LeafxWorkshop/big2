@@ -152,7 +152,8 @@ export function renderSeatLastAction(action,{
   renderStaticCard,
   fanNoise,
   cardId,
-  sizeMultiplier=1
+  sizeMultiplier=1,
+  highlightKind=''
 }){
   if(!action)return'';
   if(action.type==='pass')return`<div class="seat-played seat-played-pass"><span class="seat-pass-label"><span class="seat-pass-icon" aria-hidden="true"></span><span class="seat-pass-text">${t('pass')}</span></span></div>`;
@@ -161,6 +162,7 @@ export function renderSeatLastAction(action,{
   const isPair=list.length===2;
   const isFan=list.length===3||list.length===5;
   const isFive=list.length===5;
+  const highlightClass=highlightKind==='bomb'?' seat-played-bomb':'';
   const scale=Math.max(0.1,Number(sizeMultiplier)||1);
   const sizeStyle=`width:calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * ${scale}) !important;height:calc(var(--discard-card-h, calc(var(--card-h) * var(--hand-card-scale) * var(--card-scale))) * ${scale}) !important;`;
   const cards=list.map((card,index)=>{
@@ -174,7 +176,7 @@ export function renderSeatLastAction(action,{
     const rot=((fanNoise(`${action.seat}|${ts}|${cardId(card)}`,index,'played')*2)-1)*8.84;
     return renderStaticCard(card,true,'discard-card',`${sizeStyle}transform:rotate(${rot.toFixed(2)}deg);`);
   }).join('');
-  return`<div class="seat-played${isPair?' seat-played-pair':''}${isFan?' seat-played-fan':''}${isFive?' seat-played-five':''}">${cards}</div>`;
+  return`<div class="seat-played${isPair?' seat-played-pair':''}${isFan?' seat-played-fan':''}${isFive?' seat-played-five':''}${highlightClass}">${cards}</div>`;
 }
 
 export function renderCenterLastMoves(lastActions,selfSeat,{
@@ -183,12 +185,20 @@ export function renderCenterLastMoves(lastActions,selfSeat,{
   tablePlayScale=1
 }){
   const slots=['north','west','east','south'];
+  const latestPlay=lastActions?.latestPlay??null;
   return slots.map((cls)=>{
     if(cls!=='south')return'';
     const seat=(selfSeat+seatCls.indexOf(cls))%4;
     const action=lastActions.get(seat);
     if(!action)return'';
-    return`<div class="center-last center-last-${cls}">${renderSeatLastAction(action,tablePlayScale)}</div>`;
+    const isLatestBomb=Boolean(
+      latestPlay
+      && action.type==='play'
+      && Number(action.ts||0)===Number(latestPlay.ts||0)
+      && Number(latestPlay.seat)===Number(seat)
+      && /^(fourofkind|straightflush)$/i.test(String(action.kind||''))
+    );
+    return`<div class="center-last center-last-${cls}">${renderSeatLastAction(action,tablePlayScale,isLatestBomb?'bomb':'')}</div>`;
   }).join('');
 }
 

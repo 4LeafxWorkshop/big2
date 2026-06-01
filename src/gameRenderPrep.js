@@ -199,9 +199,17 @@ export function buildOpponentSeatsHtml(params){
       ?'justify-self:center !important;align-self:start !important;margin-left:0 !important;margin-right:0 !important;'
       :'';
     const opponentLastAction=lastActions.get(player.seat);
+    const latestPlay=lastActions?.latestPlay??null;
+    const highlightKind=Boolean(
+      latestPlay
+      && opponentLastAction?.type==='play'
+      && Number(opponentLastAction.ts||0)===Number(latestPlay.ts||0)
+      && Number(latestPlay.seat)===Number(player.seat)
+      && /^(fourofkind|straightflush)$/i.test(String(opponentLastAction.kind||''))
+    )?'bomb':'';
     const openAnchorStyle='position:relative !important;z-index:11000 !important;justify-self:center !important;';
     const openPlayContent=opponentLastAction
-      ?seatLastActionHtml(opponentLastAction,TABLE_PLAY_SCALE)
+      ?seatLastActionHtml(opponentLastAction,TABLE_PLAY_SCALE,highlightKind)
       :'';
     const opponentOpenPlayHtml=`<div class="seat-open-play" style="${openAnchorStyle}"><div class="opponent-open-scale">${openPlayContent}</div></div>`;
     const closedCountHtml=!v.gameOver&&player.count>0?`<span class="closed-count-pill">x${player.count}</span>`:'';

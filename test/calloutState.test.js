@@ -9,6 +9,7 @@ function makeController(overrides={}){
   const cleared=[];
   const sounds=[];
   const vibrations=[];
+  const attention=[];
   const locked=[];
   const stateRefs={
     playTypeCallState:{key:'',seat:0,text:'',until:0,startedAt:0,nonce:'',historyLen:0},
@@ -35,10 +36,11 @@ function makeController(overrides={}){
     clearCalloutStates:(kind)=>{cleared.push(kind);},
     playSound:(id)=>{sounds.push(id);},
     triggerVibration:(pattern)=>{vibrations.push(pattern);},
+    triggerAttentionEffect:(kind)=>{attention.push(kind);},
     speakCallout:(text,gender,meta)=>{spoken.push({text,gender,meta});},
     t:(key)=>key
   });
-  return{controller,stateRefs,spoken,scheduled,cleared,sounds,locked,vibrations};
+  return{controller,stateRefs,spoken,scheduled,cleared,sounds,locked,vibrations,attention};
 }
 
 test('callout state controller creates pass callout and reuses it until expiry', ()=>{
@@ -57,10 +59,11 @@ test('callout state controller creates pass callout and reuses it until expiry',
 });
 
 test('callout state controller creates play callout with derived variant', ()=>{
-  const {controller,spoken,cleared,locked}=makeController({
+  const {controller,spoken,cleared,locked,attention}=makeController({
     evaluatePlay:(cards)=>{
       if(cards.length===5&&cards[0].id.startsWith('a'))return{valid:true,count:5,kind:'flush',power:[1,2,3,4,5]};
       if(cards.length===5&&cards[0].id.startsWith('b'))return{valid:true,count:5,kind:'flush',power:[1,2,3,4,9]};
+      if(cards.length===5&&cards[0].id.startsWith('f'))return{valid:true,count:5,kind:'fourofkind',power:[3,7]};
       return{valid:false};
     }
   });
@@ -78,10 +81,30 @@ test('callout state controller creates play callout with derived variant', ()=>{
   assert.equal(spoken.length,1);
   assert.deepEqual(cleared,['play']);
   assert.deepEqual(locked,[900]);
+  assert.deepEqual(attention,[]);
+});
+
+test('callout state controller triggers attention effect for big plays', ()=>{
+  const {controller,attention}=makeController({
+    evaluatePlay:(cards)=>{
+      if(cards.length===5&&cards[0].id.startsWith('f'))return{valid:true,count:5,kind:'fourofkind',power:[3,7]};
+      return{valid:false};
+    }
+  });
+  const view={
+    gameOver:false,
+    history:[
+      {action:'play',seat:0,cards:[{id:'f1'},{id:'f2'},{id:'f3'},{id:'f4'},{id:'f5'}],kind:'fourofkind'}
+    ],
+    participants:[{seat:0,count:4,gender:'male'}]
+  };
+  const result=controller.currentPlayTypeCall(view);
+  assert.deepEqual(result,{seat:0,text:'play:fourofkind:0-fourofkind-f1,f2,f3,f4,f5:0'});
+  assert.deepEqual(attention,['fourofkind']);
 });
 
 test('callout state controller detects and resets last-card announcements', ()=>{
-  const {controller,stateRefs,sounds}=makeController({
+  const {controller,stateRefs,sounds,attention}=makeController({
     buildResponseCalloutText:(kind)=>kind==='last'?'last-card':''
   });
   const firstView={
@@ -92,6 +115,7 @@ test('callout state controller detects and resets last-card announcements', ()=>
   };
   assert.equal(controller.currentLastCardSeat(firstView),1);
   assert.equal(sounds[0],'last');
+  assert.deepEqual(attention,['last']);
   assert.equal(stateRefs.lastCardAnnouncedSeats.has(1),true);
   const resetView={gameOver:false,isFirstTrick:true,history:[],participants:[]};
   assert.equal(controller.currentLastCardSeat(resetView),null);

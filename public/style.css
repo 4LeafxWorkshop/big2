@@ -14922,6 +14922,49 @@ body[data-screen='game'][data-haptic-fallback='1'] .action-strip {
   box-shadow: 0 0 14px rgba(255, 220, 128, .28);
   transition: box-shadow .12s ease;
 }
+@keyframes hapticShake {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  12% { transform: translate3d(-2px, 0, 0) rotate(-0.12deg); }
+  24% { transform: translate3d(2px, -1px, 0) rotate(0.12deg); }
+  36% { transform: translate3d(-3px, 1px, 0) rotate(-0.16deg); }
+  48% { transform: translate3d(3px, 0, 0) rotate(0.16deg); }
+  60% { transform: translate3d(-2px, 1px, 0) rotate(-0.1deg); }
+  72% { transform: translate3d(2px, 0, 0) rotate(0.1deg); }
+  84% { transform: translate3d(-1px, 0, 0) rotate(-0.06deg); }
+}
+body[data-screen='game'][data-haptic-shake='1'] .game-shell {
+  animation: hapticShake 240ms linear;
+  transform-origin: center center;
+}
+@keyframes bombCardPulse {
+  0% {
+    filter: saturate(1) brightness(1);
+    box-shadow: none;
+  }
+  35% {
+    filter: saturate(1.18) brightness(1.14);
+    box-shadow:
+      0 0 0 2px rgba(255, 225, 115, .48),
+      0 0 18px rgba(255, 196, 64, .38);
+  }
+  70% {
+    filter: saturate(1.12) brightness(1.08);
+    box-shadow:
+      0 0 0 1px rgba(255, 225, 115, .32),
+      0 0 10px rgba(255, 196, 64, .22);
+  }
+  100% {
+    filter: none;
+    box-shadow: none;
+  }
+}
+body[data-screen='game'] .seat-played-bomb {
+  z-index: 2 !important;
+}
+body[data-screen='game'] .seat-played-bomb .card.discard-card {
+  animation: bombCardPulse 520ms ease-out;
+  will-change: filter, box-shadow;
+}
 body[data-screen='game'] {
   --table-felt-inset: clamp(12px, 1.7vw, 20px);
   --room-top-meta-offset-top: var(--table-felt-inset);

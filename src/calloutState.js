@@ -11,6 +11,7 @@ export function createCalloutStateController({
   clearCalloutStates,
   playSound,
   triggerVibration,
+  triggerAttentionEffect=()=>{},
   speakCallout,
   t
 }){
@@ -114,6 +115,7 @@ export function createCalloutStateController({
     lockTurnProgress(900);
     clearCalloutStates('last');
     triggerVibration([90,45,90]);
+    triggerAttentionEffect('last');
     playSound('last');
     speakCallout(lastCardCallState.text||t('lastCardCall'),seatGenderBySeat(v,latest.seat),{clipKey:'last',seat:latest.seat});
     return latest.seat;
@@ -162,6 +164,7 @@ export function createCalloutStateController({
       const playKind=String(lastPlay.kind||'').toLowerCase();
       if(playKind==='fourofkind'||playKind==='straightflush'){
         triggerVibration([70,35,70,35,100]);
+        triggerAttentionEffect(playKind);
       }
       speakCallout(playTypeCallState.text,seatGenderBySeat(v,lastPlay.seat),{clipKey:`kind-${String(lastPlay.kind||'').toLowerCase()}`,seat:lastPlay.seat});
     }

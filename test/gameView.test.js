@@ -207,6 +207,24 @@ test('renderGameTable renders center stack and win celebration', ()=>{
   assert.match(html,/win-celebrate/);
 });
 
+test('renderSeatLastAction marks bomb plays', ()=>{
+  const html=renderSeatLastAction({
+    type:'play',
+    kind:'fourofkind',
+    ts:123,
+    cards:[{rank:0,suit:0},{rank:0,suit:1},{rank:0,suit:2},{rank:0,suit:3},{rank:5,suit:0}]
+  },{
+    t:(key)=>key,
+    renderStaticCard:()=>'<div class="card face mini discard-card"></div>',
+    fanNoise:()=>0.5,
+    cardId:(card)=>`${card.rank}-${card.suit}`,
+    sizeMultiplier:1,
+    highlightKind:'bomb'
+  });
+  assert.match(html,/seat-played-bomb/);
+  assert.match(html,/discard-card/);
+});
+
 test('renderOpponentSeat and renderOpponentSeats wrap seat markup', ()=>{
   const seat=renderOpponentSeat({
     cls:'west',
