@@ -14938,32 +14938,50 @@ body[data-screen='game'][data-haptic-shake='1'] .game-shell {
 }
 @keyframes bombCardPulse {
   0% {
+    transform: translate3d(0, 0, 0) scale(1);
     filter: saturate(1) brightness(1);
     box-shadow: none;
   }
-  35% {
-    filter: saturate(1.18) brightness(1.14);
-    box-shadow:
-      0 0 0 2px rgba(255, 225, 115, .48),
-      0 0 18px rgba(255, 196, 64, .38);
+  18% {
+    transform: translate3d(0, -2px, 0) scale(1.14) rotate(-1deg);
   }
-  70% {
+  32% {
+    transform: translate3d(0, 0, 0) scale(1.06) rotate(0.5deg);
+    filter: saturate(1.28) brightness(1.24);
+    box-shadow:
+      0 0 0 3px rgba(255, 238, 150, .72),
+      0 0 24px rgba(255, 196, 64, .62),
+      0 0 42px rgba(255, 145, 0, .28);
+  }
+  48% {
+    transform: translate3d(0, -1px, 0) scale(1.1) rotate(-0.4deg);
+    filter: saturate(1.22) brightness(1.16);
+    box-shadow:
+      0 0 0 2px rgba(255, 235, 145, .58),
+      0 0 18px rgba(255, 196, 64, .42);
+  }
+  66% {
+    transform: translate3d(0, 0, 0) scale(1.02) rotate(0.2deg);
     filter: saturate(1.12) brightness(1.08);
     box-shadow:
       0 0 0 1px rgba(255, 225, 115, .32),
       0 0 10px rgba(255, 196, 64, .22);
   }
   100% {
+    transform: none;
     filter: none;
     box-shadow: none;
   }
 }
 body[data-screen='game'] .seat-played-bomb {
   z-index: 2 !important;
+  animation: bombCardPulse 620ms cubic-bezier(.2,.85,.2,1) both;
+  transform-origin: center center;
+  will-change: transform, filter, box-shadow;
 }
 body[data-screen='game'] .seat-played-bomb .card.discard-card {
-  animation: bombCardPulse 520ms ease-out;
-  will-change: filter, box-shadow;
+  animation: bombCardPulse 620ms cubic-bezier(.2,.85,.2,1) both;
+  will-change: transform, filter, box-shadow;
 }
 body[data-screen='game'] {
   --table-felt-inset: clamp(12px, 1.7vw, 20px);
