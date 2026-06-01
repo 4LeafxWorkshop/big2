@@ -5183,9 +5183,6 @@ function triggerVibration(pattern){
 }
 function triggerAttentionEffect(kind=''){
   try{
-    const platform=String(window.Capacitor?.getPlatform?.()||'').toLowerCase();
-    const isNativePlatform=Boolean(window.Capacitor?.isNativePlatform?.()||platform==='ios'||platform==='android');
-    if(isNativePlatform)return;
     const body=document.body;
     if(!(body instanceof HTMLElement))return;
     body.setAttribute('data-haptic-shake-kind',String(kind||''));
@@ -6786,11 +6783,9 @@ function renderGame(){
   const coachMarksButtonHtml=coachMarksControlVisible
     ?`<button id="coach-marks-toggle" onclick="return window.__big2OpenCoachMarks?.()" class="secondary coach-marks-badge" type="button" aria-label="${esc(intro.guideGestureTitle)}" data-tooltip="${esc(intro.guideGestureTitle)}">${gestureGuideIconSvg()}</button>`
     :'';
-  const rightSidebarDesktop=window.matchMedia('(min-width: 1081px)').matches;
   const rightSidebarMobileLandscape=window.matchMedia('(max-width: 860px) and (orientation: landscape)').matches;
-  const rightSidebarTabletLandscape=window.matchMedia('(min-width: 861px) and (max-width: 1080px) and (orientation: landscape)').matches;
-  const fullHeightLogLayout=rightSidebarDesktop||rightSidebarMobileLandscape||rightSidebarTabletLandscape;
-  const logUnderSouthPanel=window.matchMedia('(max-width: 1080px)').matches&&!rightSidebarMobileLandscape&&!rightSidebarTabletLandscape;
+  const fullHeightLogLayout=window.matchMedia('(min-width: 861px)').matches||rightSidebarMobileLandscape;
+  const logUnderSouthPanel=window.matchMedia('(max-width: 860px) and (orientation: portrait)').matches;
   if(!state.logTouched){
     state.showLog=logUnderSouthPanel?false:fullHeightLogLayout;
   }
