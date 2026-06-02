@@ -162,7 +162,10 @@ export function renderSeatLastAction(action,{
   const isPair=list.length===2;
   const isFan=list.length===3||list.length===5;
   const isFive=list.length===5;
-  const highlightClass=highlightKind==='bomb'?' seat-played-bomb':'';
+  const bombKind=String(highlightKind||'').toLowerCase();
+  const highlightClass=/^(bomb|fourofkind|straightflush)$/.test(bombKind)
+    ?` seat-played-bomb${bombKind&&bombKind!=='bomb'?` seat-played-bomb-${bombKind}`:''}`
+    :'';
   const scale=Math.max(0.1,Number(sizeMultiplier)||1);
   const sizeStyle=`width:calc(var(--discard-card-w, calc(var(--card-w) * var(--hand-card-scale) * var(--card-scale))) * ${scale}) !important;height:calc(var(--discard-card-h, calc(var(--card-h) * var(--hand-card-scale) * var(--card-scale))) * ${scale}) !important;`;
   const cards=list.map((card,index)=>{
@@ -198,7 +201,7 @@ export function renderCenterLastMoves(lastActions,selfSeat,{
       && Number(latestPlay.seat)===Number(seat)
       && /^(fourofkind|straightflush)$/i.test(String(action.kind||''))
     );
-    return`<div class="center-last center-last-${cls}">${renderSeatLastAction(action,tablePlayScale,isLatestBomb?'bomb':'')}</div>`;
+    return`<div class="center-last center-last-${cls}">${renderSeatLastAction(action,tablePlayScale,isLatestBomb?String(action.kind||'bomb').toLowerCase():'')}</div>`;
   }).join('');
 }
 

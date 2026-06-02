@@ -206,7 +206,7 @@ export function buildOpponentSeatsHtml(params){
       && Number(opponentLastAction.ts||0)===Number(latestPlay.ts||0)
       && Number(latestPlay.seat)===Number(player.seat)
       && /^(fourofkind|straightflush)$/i.test(String(opponentLastAction.kind||''))
-    )?'bomb':'';
+    )?String(opponentLastAction.kind||'').toLowerCase():'';
     const openAnchorStyle='position:relative !important;z-index:11000 !important;justify-self:center !important;';
     const openPlayContent=opponentLastAction
       ?seatLastActionHtml(opponentLastAction,TABLE_PLAY_SCALE,highlightKind)
