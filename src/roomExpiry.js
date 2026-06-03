@@ -28,8 +28,9 @@ export function createRoomExpiryHelpers({
   }
 
   function getRoomWaitingExpiresAt(roomData){
-    const status=String(roomData?.status??'');
-    if(status!=='lobby'&&status!=='starting')return 0;
+    const status=String(roomData?.status??'').trim();
+    const inferredStatus=status||((Array.isArray(roomData?.players)&&roomData.players.length&&(!roomData?.game||roomData.game.gameOver))?'lobby':'');
+    if(inferredStatus!=='lobby'&&inferredStatus!=='starting')return 0;
     const direct=Number(roomData?.expiresAt||0);
     if(Number.isFinite(direct)&&direct>0)return direct;
     const fallback=Number(roomData?.updatedAt||roomData?.createdAt||0);
@@ -70,9 +71,9 @@ export function createRoomExpiryHelpers({
       return formatCountdownMs(expiresAt>0?Math.max(0,expiresAt-now):0);
     }
     const game=roomData?.game;
-    if(!game||game.gameOver)return'-';
+    if(!game||game.gameOver)return formatCountdownMs(0);
     const startedAt=Number(game.turnStartedAt)||0;
-    if(!startedAt)return'-';
+    if(!startedAt)return formatCountdownMs(0);
     const timeout=getRoomTurnTimeout(roomData);
     const remain=Math.max(0,timeout-(now-startedAt));
     return formatCountdownMs(remain);
