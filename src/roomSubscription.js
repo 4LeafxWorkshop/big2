@@ -227,6 +227,7 @@ export function createRoomSubscriptionController(deps){
       if(roomStatus==='lobby'||roomStatus==='starting'){
         const prevLobbyKey=String(liveState.room.lobbyRenderKey||'');
         const nextLobbyKey=buildLobbyRenderKey(data);
+        const hadLobbySnapshot=Boolean(prevRoomData);
         const active=rosterAll.filter((p)=>deps.isRoomPlayerActive(p,roomStatus,now));
         const expectedIds=deps.roomPlayerIds(rosterAll);
         const existingIds=Array.isArray(data.playerIds)?data.playerIds.map((v)=>String(v)):null;
@@ -289,6 +290,11 @@ export function createRoomSubscriptionController(deps){
           return;
         }
         if(prevLobbyKey===nextLobbyKey)return;
+        if(!hadLobbySnapshot){
+          liveState.room.lobbyRenderKey=nextLobbyKey;
+          deps.render();
+          return;
+        }
         if(deps.syncRoomLobbySeatPanel?.(data))return;
       }
       if(roomStatus==='playing'||roomStatus==='finished'){

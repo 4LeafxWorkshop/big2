@@ -257,7 +257,7 @@ test('resolveRoomDocByDirectory returns null when a stale room code no longer re
   assert.equal(resolved,null);
 });
 
-test('subscribeRoom clears reconnect error on a fresh snapshot and updates the lobby seat panel', ()=>{
+test('subscribeRoom clears reconnect error on a fresh snapshot and renders the first lobby state', ()=>{
   const {state,calls,controller,triggerSnapshot}=createSnapshotHarness();
   state.room.error='roomReconnecting';
   controller.subscribeRoom('room-1','ABCD','seed-services');
@@ -276,8 +276,8 @@ test('subscribeRoom clears reconnect error on a fresh snapshot and updates the l
   assert.equal(state.room.id,'room-1');
   assert.equal(calls.startPing,1);
   assert.equal(calls.syncSelf,1);
-  assert.equal(calls.syncLobby,1);
-  assert.equal(calls.renders,0);
+  assert.equal(calls.syncLobby,0);
+  assert.equal(calls.renders,1);
   assert.deepEqual(calls.errors,['']);
   assert.ok(calls.updates.length>=1);
   assert.deepEqual(calls.updates[0].playerIds,['guest:1']);
@@ -335,9 +335,18 @@ test('subscribeRoom skips the starting repaint when the local host already marke
 });
 
 test('subscribeRoom updates the lobby seat panel in place when another player joins', ()=>{
-  const {calls,controller,triggerSnapshot}=createSnapshotHarness();
-  controller.subscribeRoom('room-1','ABCD','seed-services');
+  const {state,calls,controller,triggerSnapshot}=createSnapshotHarness();
   const now=Date.now();
+  state.room.data={
+    code:'ABCD',
+    status:'lobby',
+    updatedAt:now-1000,
+    playerIds:['guest:1'],
+    players:[
+      {uid:'guest:1',name:'Player',gender:'male',picture:'',seat:0,isHost:true,lastSeen:now-1000}
+    ]
+  };
+  controller.subscribeRoom('room-1','ABCD','seed-services');
   triggerSnapshot({
     exists:true,
     data(){
