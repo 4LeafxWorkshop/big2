@@ -515,6 +515,8 @@ function preloadGooglePicture(){
   traceGooglePicture('preload-start',{picture:normalizedPic});
   try{
     const img=new Image();
+    img.referrerPolicy='no-referrer';
+    img.crossOrigin='anonymous';
     img.onload=()=>{
       if(token!==googlePicturePreloadToken)return;
       state.home.google.pictureLoaded=true;
@@ -530,8 +532,20 @@ function preloadGooglePicture(){
     img.src=normalizedPic;
   }catch{}
 }
-function syncGooglePictureFromAuth(){
-  const authPic=String(firebaseAuth?.currentUser?.photoURL??'').trim();
+function resolveFirebaseAuthPicture(user=firebaseAuth?.currentUser){
+  if(!user)return'';
+  const providerPicture=Array.isArray(user?.providerData)
+    ?user.providerData.map((provider)=>String(provider?.photoURL??'').trim()).find(Boolean)
+    :'';
+  return String(
+    user?.photoURL
+    ??providerPicture
+    ??user?.reloadUserInfo?.photoUrl
+    ??''
+  ).trim();
+}
+function syncGooglePictureFromAuth(authUser=firebaseAuth?.currentUser){
+  const authPic=resolveFirebaseAuthPicture(authUser);
   if(!authPic){
     traceGooglePicture('auth-sync-empty',{signedIn:Boolean(state.home.google?.signedIn),email:String(state.home.google?.email??'')});
     return false;
@@ -556,8 +570,8 @@ function attachFirebaseAuthPictureSync(){
   if(firebaseAuthPictureSyncAttached)return;
   if(!firebaseAuth?.onAuthStateChanged)return;
   firebaseAuthPictureSyncAttached=true;
-  firebaseAuth.onAuthStateChanged(()=>{
-    if(syncGooglePictureFromAuth()&&state.screen==='home'){
+  firebaseAuth.onAuthStateChanged((user)=>{
+    if(syncGooglePictureFromAuth(user)&&state.screen==='home'){
       render();
     }
   });
@@ -623,7 +637,7 @@ function syncRoomLobbyQrDom(){
   }
   return true;
 }
-function renderRoomLobbySeatHtml({seat,roomSeatMap,gameSeatMap,roomStatus,useGameRoster,derivedHostId}){
+function renderRoomLobbySeatHtml({seat,roomSeatMap,gameSeatMap,roomStatus,useGameRoster,derivedHostId,currentRoomPlayerId='',currentUserEmail='',currentAuthPicture=''}){
   const seatLabel=t('seatLabel').replace('{{n}}',String(seat+1));
   const seatData=resolveLobbySeatDisplayData({
     seat,
@@ -635,7 +649,11 @@ function renderRoomLobbySeatHtml({seat,roomSeatMap,gameSeatMap,roomStatus,useGam
     state,
     playerColorByViewClass,
     authPictureUrlFrom,
-    avatarDataUri
+    avatarDataUri,
+    avatarBaseSrc:AVATAR_BASE_SRC,
+    currentRoomPlayerId,
+    currentUserEmail,
+    currentAuthPicture
   });
   if(!seatData){
     return`<button type="button" class="lobby-seat lobby-seat-button empty" data-room-seat="${seat}" data-room-share-send="1" aria-label="${t('roomSeatInvite')}"><div class="lobby-seat-avatar empty" aria-hidden="true">+</div><div class="lobby-seat-name">${t('roomSeatInvite')}</div><div class="lobby-seat-label">${seatLabel}</div></button>`;
@@ -643,8 +661,9 @@ function renderRoomLobbySeatHtml({seat,roomSeatMap,gameSeatMap,roomStatus,useGam
   const {entryName,avatarSrc,isHost,offline,displayName}=seatData;
   const hostBadge=isHost?`<span class="lobby-seat-host-badge-text">${t('roomHostTag')}</span>`:'';
   const nameHtml=`<div class="lobby-seat-name">${displayName?esc(displayName):'&nbsp;'}</div>`;
+  const avatarFallbackSrc=String(seatData.avatarFallbackSrc||'').trim();
   return`<div class="lobby-seat ${isHost?'host':''} ${offline?'offline':''}" data-room-seat="${seat}">
-      <span class="lobby-seat-avatar-wrap"><span class="lobby-seat-avatar-anchor"><img class="lobby-seat-avatar" src="${avatarSrc}" alt="${esc(entryName)}"/>${hostBadge}</span></span>
+      <span class="lobby-seat-avatar-wrap"><span class="lobby-seat-avatar-anchor"><img class="lobby-seat-avatar" src="${avatarSrc}" alt="${esc(entryName)}" referrerpolicy="no-referrer" crossorigin="anonymous" data-fallback-src="${esc(avatarFallbackSrc)}" onerror="this.onerror=null;this.src=this.dataset.fallbackSrc"/>${hostBadge}</span></span>
       ${nameHtml}
       <div class="lobby-seat-label">${seatLabel}</div>
     </div>`;
@@ -673,7 +692,10 @@ function syncRoomLobbySeatPanel(roomData=state.room.data){
       gameSeatMap,
       roomStatus,
       useGameRoster,
-      derivedHostId
+      derivedHostId,
+      currentRoomPlayerId:roomUid,
+      currentUserEmail:currentUserEmail(),
+      currentAuthPicture:authPictureUrl()
     });
     if(!seatNode){
       lobbyTable.insertAdjacentHTML('beforeend',nextHtml);
@@ -6259,10 +6281,7 @@ function renderHome(){
   if(state.home.showLeaderboard)refreshLeaderboard();
   const homeGenderKey=state.home.gender==='female'?'female':'male';
   const homeAvatarFallbackSrc=AVATAR_BASE_SRC[homeGenderKey];
-  const homePicture=String(state.home.google?.picture??'').trim();
-  const homeAvatarSrc=homePicture
-    ?authPictureUrlFrom(homePicture)||homeAvatarFallbackSrc
-    :homeAvatarFallbackSrc;
+  const homeAvatarSrc=authPictureUrl()||homeAvatarFallbackSrc;
   const cardBackLeft=`<label class="field field-cardback field-cardback-left"><span>${t('cardBack')}</span>${renderBackCarousel('back-combo-left')}</label>`;
   const cardBackRight=`<label class="field field-cardback field-cardback-right"><span>${t('cardBack')}</span>${renderBackCarousel('back-combo-right')}</label>`;
   const aiFieldLeft=`<label class="field field-ai field-ai-left"><span>${t('ai')}</span>${difficultySliderHtml('difficulty-slider-left',state.home.aiDifficulty,t)}</label>`;
@@ -6281,7 +6300,10 @@ function renderHome(){
     gameSeatMap,
     roomStatus,
     useGameRoster,
-    derivedHostId
+    derivedHostId,
+    currentRoomPlayerId:roomUid,
+    currentUserEmail:currentUserEmail(),
+    currentAuthPicture:authPictureUrl()
   })).join('');
   const roomPrivacyRow=roomIsHost
     ?`<div class="room-privacy-row"><span>${t('roomPrivacy')}</span>
@@ -6351,7 +6373,8 @@ function renderHome(){
     esc,
     isRoomPlayerHuman,
     authPictureUrlFrom,
-    avatarDataUri
+    avatarDataUri,
+    avatarBaseSrc:AVATAR_BASE_SRC
   });
   const soloStartPending=Boolean(state.home.startingSolo);
   const soloReadySubtitle=soloStartPending
@@ -6475,7 +6498,7 @@ function renderConfig(){
     bindEmoteDisplayToggle
   });
 }
-function resolveLobbySeatDisplayData({seat,roomSeatMap,gameSeatMap,roomStatus,useGameRoster,derivedHostId,state,playerColorByViewClass,authPictureUrlFrom,avatarDataUri}){
+function resolveLobbySeatDisplayData({seat,roomSeatMap,gameSeatMap,roomStatus,useGameRoster,derivedHostId,state,playerColorByViewClass,authPictureUrlFrom,avatarDataUri,avatarBaseSrc,currentRoomPlayerId='',currentUserEmail='',currentAuthPicture=''}){
   const roomEntry=roomSeatMap.get(seat)||null;
   const gameEntry=gameSeatMap?gameSeatMap.get(seat)||null:null;
   const entry=useGameRoster?(gameEntry||roomEntry):roomEntry;
@@ -6483,24 +6506,27 @@ function resolveLobbySeatDisplayData({seat,roomSeatMap,gameSeatMap,roomStatus,us
   const resolvedSeat=useGameRoster?entry:resolveRoomSeatProfile({name:entry.name,state});
   const entryName=String(entry.name||'');
   const entryGender=String(entry.gender||(useGameRoster?null:roomEntry?.gender)||resolvedSeat?.gender||'male')==='female'?'female':'male';
-  const entryPicture=String(useGameRoster?entry.picture:(entry.picture||resolvedSeat?.picture)||'').trim();
   const isBot=useGameRoster?(!entry.isHuman):(!roomEntry?false:!isRoomPlayerHuman(roomEntry));
   const avatarColor=isBot?playerColorByViewClass(seatCls[seat]||'south'):'#7aaed8';
-  const avatarSrc=resolveAvatarSrc({
-    picture:entryPicture,
-    name:entryName,
-    color:avatarColor,
-    gender:entryGender,
-    isBot,
-    authPictureUrlFrom,
-    avatarDataUri
-  });
+  const defaultAvatarSrc=String(avatarBaseSrc?.[entryGender]??'').trim()||avatarDataUri(entryName,avatarColor,entryGender,isBot);
+  const entryEmail=String(entry.email||roomEntry?.email||'').trim().toLowerCase();
+  const isSelfEntry=String(entry.uid||'').trim()===String(currentRoomPlayerId||'').trim()
+    ||(String(currentUserEmail||'').trim()&&entryEmail===String(currentUserEmail||'').trim().toLowerCase());
+  const rawPicture=String(useGameRoster?entry.picture:(entry.picture||resolvedSeat?.picture)||'').trim();
+  const picture=String(currentAuthPicture||'').trim()&&isSelfEntry
+    ?String(currentAuthPicture||'').trim()
+    :rawPicture;
+  const pictureUrl=picture?authPictureUrlFrom(picture):'';
+  const avatarSrc=isBot
+    ?avatarDataUri(entryName,avatarColor,entryGender,true)
+    :pictureUrl||defaultAvatarSrc;
   const isHost=String(entry.uid)===String(derivedHostId);
   const lastSeen=Number(roomEntry?.lastSeen)||0;
   const offline=roomStatus==='playing'&&lastSeen>0&&(Date.now()-lastSeen>ROOM_OFFLINE_MS);
   return{
     entryName,
     avatarSrc,
+    avatarFallbackSrc:defaultAvatarSrc,
     isHost,
     offline,
     displayName:roomStatus==='finished'?'':entryName

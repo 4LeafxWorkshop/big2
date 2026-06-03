@@ -136,7 +136,7 @@ export function createAvatarProfileHelpers(deps){
 
   function selfAvatarDataUri(_name,_color,gender='male'){
     const authPic=authPictureUrl();
-    if(isGoogleSignedIn()&&authPic&&isGooglePictureLoaded())return authPic;
+    if(isGoogleSignedIn()&&authPic)return authPic;
     const g=String(gender??'male')==='female'?'female':'male';
     return AVATAR_BASE_SRC[g];
   }

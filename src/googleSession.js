@@ -94,8 +94,8 @@ export function createGoogleSessionHelpers({
       const cached=applyCachedGoogleProfileFromStore(email);
       console.debug('[google-picture] session-restore',{email,cached});
       const firebaseAuth=getFirebaseAuth();
-      const authPicture=String(firebaseAuth?.currentUser?.photoURL??'').trim();
-      if(authPicture&&!String(state.home.google.picture??'').trim()){
+      const authPicture=resolveAuthUserPicture(firebaseAuth?.currentUser);
+      if(authPicture){
         mergeBrowserGoogleProfile({
           picture:authPicture,
           pictureLoaded:false
@@ -169,6 +169,14 @@ export function createGoogleSessionHelpers({
     return normalizePictureString(value);
   }
 
+  function resolveAuthUserPicture(user){
+    if(!user)return'';
+    const providerPicture=Array.isArray(user?.providerData)
+      ?user.providerData.map((provider)=>normalizePictureValue(provider?.photoURL)).find(Boolean)
+      :'';
+    return normalizePictureValue(user?.photoURL??providerPicture??user?.reloadUserInfo?.photoUrl);
+  }
+
   async function completeProviderSignIn({
     provider='google',
     token='',
@@ -205,7 +213,7 @@ export function createGoogleSessionHelpers({
           }
         }
         if(!picture){
-          picture=normalizePictureValue(user?.photoURL??firebaseAuth?.currentUser?.photoURL);
+          picture=resolveAuthUserPicture(user??firebaseAuth?.currentUser);
         }
       }
     }catch{
@@ -246,6 +254,15 @@ export function createGoogleSessionHelpers({
     if(signedIn){
       const cached=applyCachedGoogleProfileFromStore(email);
       console.debug('[google-picture] sign-in-cached-profile',{email,cached});
+      const livePicture=resolveAuthUserPicture(user??getFirebaseAuth()?.currentUser)
+        ||normalizePictureValue(tokenPayload.picture)
+        ||normalizePictureValue(picture);
+      if(livePicture){
+        mergeBrowserGoogleProfile({
+          picture:livePicture,
+          pictureLoaded:false
+        });
+      }
       preloadGooglePicture();
       const hydrated=await hydrateProfileBlocking();
       if(state.home.google.name)state.home.name=state.home.google.name;

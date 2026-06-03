@@ -53,7 +53,8 @@ export function renderRoomJoinOverlay(params){
     esc,
     isRoomPlayerHuman,
     authPictureUrlFrom,
-    avatarDataUri
+    avatarDataUri,
+    avatarBaseSrc
   }=params;
   if(!visible)return'';
 
@@ -65,6 +66,7 @@ export function renderRoomJoinOverlay(params){
         isRoomPlayerHuman,
         authPictureUrlFrom,
         avatarDataUri,
+        avatarBaseSrc,
         currentRoomPlayerId:params.currentRoomPlayerId,
         currentUserEmail:params.currentUserEmail,
         currentAuthPicture:params.currentAuthPicture

@@ -1,5 +1,3 @@
-import {resolveAvatarSrc} from './avatarProfile.js';
-
 function maskRoomCode(code){
   const raw=String(code||'');
   if(!raw)return'';
@@ -28,6 +26,7 @@ export function renderRoomSeatMiniHtml(params){
     isRoomPlayerHuman,
     authPictureUrlFrom,
     avatarDataUri,
+    avatarBaseSrc,
     currentRoomPlayerId='',
     currentUserEmail='',
     currentAuthPicture=''
@@ -40,19 +39,14 @@ export function renderRoomSeatMiniHtml(params){
   const isSelfEntry=String(entry.uid||'').trim()===String(currentRoomPlayerId||'').trim()
     ||(String(currentUserEmail||'').trim()&&entryEmail===String(currentUserEmail||'').trim().toLowerCase());
   const pictureRaw=String(entry.picture||'').trim();
-  const picture=pictureRaw|| (isSelfEntry?String(currentAuthPicture||'').trim():'');
   const isBot=!isRoomPlayerHuman(entry);
-  const fallbackSrc=avatarDataUri(name,'#7aaed8',gender,isBot);
-  const src=resolveAvatarSrc({
-    picture,
-    name,
-    color:'#7aaed8',
-    gender,
-    isBot,
-    authPictureUrlFrom,
-    avatarDataUri
-  });
-  return`<span class="room-seat-mini filled" title="${esc(name)}"><img src="${src}" alt="${esc(name)}" data-fallback-src="${esc(fallbackSrc)}" onerror="this.onerror=null;this.src=this.dataset.fallbackSrc"/></span>`;
+  const defaultSrc=String(avatarBaseSrc?.[gender]??'').trim()||avatarDataUri(name,'#7aaed8',gender,isBot);
+  const picture=pictureRaw|| (isSelfEntry?String(currentAuthPicture||'').trim():'');
+  const pictureUrl=picture?authPictureUrlFrom(picture):'';
+  const src=isBot
+    ?avatarDataUri(name,'#7aaed8',gender,true)
+    :pictureUrl||defaultSrc;
+  return`<span class="room-seat-mini filled" title="${esc(name)}"><img src="${src}" alt="${esc(name)}" referrerpolicy="no-referrer" crossorigin="anonymous" data-fallback-src="${esc(defaultSrc)}" onerror="this.onerror=null;this.src=this.dataset.fallbackSrc"/></span>`;
 }
 
 export function renderRoomActiveCardHtml(params){
@@ -63,6 +57,7 @@ export function renderRoomActiveCardHtml(params){
     isRoomPlayerHuman,
     authPictureUrlFrom,
     avatarDataUri,
+    avatarBaseSrc,
     currentRoomPlayerId='',
     currentUserEmail='',
     currentAuthPicture=''
@@ -97,6 +92,7 @@ export function renderRoomActiveCardHtml(params){
     isRoomPlayerHuman,
     authPictureUrlFrom,
     avatarDataUri,
+    avatarBaseSrc,
     currentRoomPlayerId,
     currentUserEmail,
     currentAuthPicture
