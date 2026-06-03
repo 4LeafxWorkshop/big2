@@ -32,7 +32,7 @@ export function renderOpponentAvatarImgHtml(params){
     botNameAttr,
     esc
   }=params;
-  return`<img class="player-avatar player-avatar-opponent ${playerAvatarClass}" style="--avatar-outline:${pColor};" src="${avatarSrc}" alt="${esc(playerName)}"${botNameAttr}/>`;
+  return`<img class="player-avatar player-avatar-opponent ${playerAvatarClass}" style="--avatar-outline:${pColor};" src="${avatarSrc}" alt="${esc(playerName)}" referrerpolicy="no-referrer" crossorigin="anonymous"${botNameAttr}/>`;
 }
 
 export function renderOpponentStatusBadgesHtml(params){
