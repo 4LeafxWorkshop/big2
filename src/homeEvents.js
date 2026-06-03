@@ -531,45 +531,23 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       await writeClipboardText(code);
     };
     const roomCopyQrBtn=doc.getElementById('room-copy-qr');
-    roomCopyQrBtn?.addEventListener('click',async(e)=>{
-      if(roomInviteQrTouchPending)return;
+    roomCopyQrBtn?.addEventListener('click',(e)=>{
+      e.preventDefault();
       if(roomCopyQrBtn.getAttribute('data-ignore-click')==='1'){
         roomCopyQrBtn.setAttribute('data-ignore-click','0');
         return;
       }
-      if((e.detail||0)>=2){
-        e.preventDefault();
-        openRoomInviteQrZoom();
-        return;
-      }
-      await copyRoomInviteQr();
-    });
-    roomCopyQrBtn?.addEventListener('dblclick',(e)=>{
-      e.preventDefault();
       openRoomInviteQrZoom();
     });
     roomCopyQrBtn?.addEventListener('touchend',(e)=>{
       if(!(roomCopyQrBtn instanceof HTMLElement))return;
       e.preventDefault();
       roomCopyQrBtn.setAttribute('data-ignore-click','1');
-      const now=Date.now();
-      if(roomInviteQrLastTapAt&&now-roomInviteQrLastTapAt<320){
-        roomInviteQrLastTapAt=0;
-        roomInviteQrTouchPending=false;
-        clearRoomInviteQrTouchTimer();
-        openRoomInviteQrZoom();
-        roomCopyQrBtn.setAttribute('data-ignore-click','0');
-        return;
-      }
-      roomInviteQrLastTapAt=now;
-      roomInviteQrTouchPending=true;
+      roomInviteQrLastTapAt=0;
+      roomInviteQrTouchPending=false;
       clearRoomInviteQrTouchTimer();
-      roomInviteQrTouchTimer=win.setTimeout(async()=>{
-        roomInviteQrTouchTimer=0;
-        roomInviteQrTouchPending=false;
-        roomCopyQrBtn.setAttribute('data-ignore-click','0');
-        await copyRoomInviteQr();
-      },280);
+      openRoomInviteQrZoom();
+      roomCopyQrBtn.setAttribute('data-ignore-click','0');
     },{passive:false});
     doc.getElementById('room-share-code-copy')?.addEventListener('click',copyRoomInviteCode);
     doc.getElementById('room-share-code-copy')?.addEventListener('keydown',async(e)=>{
