@@ -18,6 +18,9 @@ export function renderRoomLobbyOverlay(params){
     roomStartControl,
     roomPendingHint,
     roomStarting,
+    currentRoomPlayerId,
+    currentUserEmail,
+    currentAuthPicture,
     t,
     esc
   }=params;
@@ -61,7 +64,10 @@ export function renderRoomJoinOverlay(params){
         esc,
         isRoomPlayerHuman,
         authPictureUrlFrom,
-        avatarDataUri
+        avatarDataUri,
+        currentRoomPlayerId:params.currentRoomPlayerId,
+        currentUserEmail:params.currentUserEmail,
+        currentAuthPicture:params.currentAuthPicture
       })).join('')
     :'';
   const empty=activeRooms.length

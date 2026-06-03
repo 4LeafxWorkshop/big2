@@ -202,6 +202,7 @@ export function createRoomSubscriptionController(deps){
         return;
       }
       deps.startRoomPresencePing();
+      deps.syncRoomSelfProfile?.();
       deps.syncRoomSelfScoreIfNeeded();
       const prevStatus=String(prevRoomData?.status||'');
       const roomStatus=String(data.status);

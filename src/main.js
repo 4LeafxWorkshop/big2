@@ -2366,6 +2366,7 @@ const roomSubscriptionController=createRoomSubscriptionController({
   setRoomResultExpiryReached:(value)=>{roomResultExpiryReached=Boolean(value);},
   startRoomPresencePing,
   syncRoomGameRoster,
+  syncRoomSelfProfile,
   syncRoomSelfScoreIfNeeded,
   t
 });
@@ -2945,6 +2946,9 @@ async function loadActiveRoomPointer(){
 }
 async function syncRoomSelfScoreIfNeeded(){
   await roomMutationsController.syncRoomSelfScoreIfNeeded();
+}
+async function syncRoomSelfProfile(){
+  await roomMutationsController.syncRoomSelfProfile();
 }
 const roomRosterSyncController=createRoomRosterSyncController({
   ROOM_PRUNE_PLAYING_MS,
@@ -6340,6 +6344,9 @@ function renderHome(){
     roomCreating:Boolean(state.room.creating),
     roomErrorHtml,
     roomCodeValue:state.room.pendingInviteCode,
+    currentRoomPlayerId:currentRoomPlayerId(),
+    currentUserEmail:currentUserEmail(),
+    currentAuthPicture:authPictureUrl(),
     t,
     esc,
     isRoomPlayerHuman,

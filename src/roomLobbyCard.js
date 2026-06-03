@@ -27,13 +27,20 @@ export function renderRoomSeatMiniHtml(params){
     esc,
     isRoomPlayerHuman,
     authPictureUrlFrom,
-    avatarDataUri
+    avatarDataUri,
+    currentRoomPlayerId='',
+    currentUserEmail='',
+    currentAuthPicture=''
   }=params;
   if(!entry)return`<span class="room-seat-mini vacant" title="${t('roomSeatOpen')}">+</span>`;
   const fallbackSeatName=t('seatLabel').replace('{{n}}',String(idx+1));
   const name=String(entry.name||entry.displayName||fallbackSeatName);
   const gender=String(entry.gender||'male')==='female'?'female':'male';
-  const picture=String(entry.picture||'').trim();
+  const entryEmail=String(entry.email||'').trim().toLowerCase();
+  const isSelfEntry=String(entry.uid||'').trim()===String(currentRoomPlayerId||'').trim()
+    ||(String(currentUserEmail||'').trim()&&entryEmail===String(currentUserEmail||'').trim().toLowerCase());
+  const pictureRaw=String(entry.picture||'').trim();
+  const picture=pictureRaw|| (isSelfEntry?String(currentAuthPicture||'').trim():'');
   const isBot=!isRoomPlayerHuman(entry);
   const fallbackSrc=avatarDataUri(name,'#7aaed8',gender,isBot);
   const src=resolveAvatarSrc({
@@ -55,7 +62,10 @@ export function renderRoomActiveCardHtml(params){
     esc,
     isRoomPlayerHuman,
     authPictureUrlFrom,
-    avatarDataUri
+    avatarDataUri,
+    currentRoomPlayerId='',
+    currentUserEmail='',
+    currentAuthPicture=''
   }=params;
   const roster=Array.isArray(room.roster)?room.roster:[];
   const isPrivate=Boolean(room.isPrivate);
@@ -86,7 +96,10 @@ export function renderRoomActiveCardHtml(params){
     esc,
     isRoomPlayerHuman,
     authPictureUrlFrom,
-    avatarDataUri
+    avatarDataUri,
+    currentRoomPlayerId,
+    currentUserEmail,
+    currentAuthPicture
   })).join('');
   const statusLine=statusText?`<div class="room-active-status-line">${esc(statusText)}</div>`:'';
   const topStatusTag=statusLabel;
