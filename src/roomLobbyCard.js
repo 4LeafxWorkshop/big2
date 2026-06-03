@@ -1,3 +1,5 @@
+import {resolveAvatarSrc} from './avatarProfile.js';
+
 function maskRoomCode(code){
   const raw=String(code||'');
   if(!raw)return'';
@@ -12,8 +14,9 @@ function maskRoomCode(code){
   return chars.join('');
 }
 
-export function renderRoomCreateCardHtml({t}){
-  return`<button class="secondary room-card-join-btn room-icon-btn" id="room-create-card" type="button" aria-label="${t('roomCreate')}"><svg class="room-inline-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4.5 4.5A1.5 1.5 0 0 1 6 3h10a1 1 0 1 1 0 2H6v14h10a1 1 0 1 1 0 2H6A1.5 1.5 0 0 1 4.5 19.5z"/><path d="M15 8a1 1 0 0 1 1-1h2V5a1 1 0 1 1 2 0v2h2a1 1 0 1 1 0 2h-2v2a1 1 0 1 1-2 0V9h-2a1 1 0 0 1-1-1Z"/><path d="M12 12.5a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0Z"/></svg><span>${t('roomCreate')}</span></button>`;
+export function renderRoomCreateCardHtml({t,isCreating=false}){
+  const label=isCreating?t('roomCreating'):t('roomCreate');
+  return`<button class="secondary room-card-join-btn room-icon-btn" id="room-create-card" type="button" aria-label="${label}" ${isCreating?'disabled':''}><svg class="room-inline-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M4.5 4.5A1.5 1.5 0 0 1 6 3h10a1 1 0 1 1 0 2H6v14h10a1 1 0 1 1 0 2H6A1.5 1.5 0 0 1 4.5 19.5z"/><path d="M15 8a1 1 0 0 1 1-1h2V5a1 1 0 1 1 2 0v2h2a1 1 0 1 1 0 2h-2v2h-2v2h-2V9h-2a1 1 0 0 1-1-1Z"/><path d="M12 12.5a1.25 1.25 0 1 1-2.5 0 1.25 1.25 0 0 1 2.5 0Z"/></svg><span>${label}</span></button>`;
 }
 
 export function renderRoomSeatMiniHtml(params){
@@ -32,10 +35,17 @@ export function renderRoomSeatMiniHtml(params){
   const gender=String(entry.gender||'male')==='female'?'female':'male';
   const picture=String(entry.picture||'').trim();
   const isBot=!isRoomPlayerHuman(entry);
-  const src=isBot
-    ?avatarDataUri(name,'#7aaed8',gender,true)
-    :picture?authPictureUrlFrom(picture):avatarDataUri(name,'#7aaed8',gender,false);
-  return`<span class="room-seat-mini filled" title="${esc(name)}"><img src="${src}" alt="${esc(name)}"/></span>`;
+  const fallbackSrc=avatarDataUri(name,'#7aaed8',gender,isBot);
+  const src=resolveAvatarSrc({
+    picture,
+    name,
+    color:'#7aaed8',
+    gender,
+    isBot,
+    authPictureUrlFrom,
+    avatarDataUri
+  });
+  return`<span class="room-seat-mini filled" title="${esc(name)}"><img src="${src}" alt="${esc(name)}" data-fallback-src="${esc(fallbackSrc)}" onerror="this.onerror=null;this.src=this.dataset.fallbackSrc"/></span>`;
 }
 
 export function renderRoomActiveCardHtml(params){

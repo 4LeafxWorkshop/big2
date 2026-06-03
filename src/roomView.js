@@ -43,6 +43,7 @@ export function renderRoomJoinOverlay(params){
     visible,
     activeRooms,
     hiddenCount,
+    roomCreating,
     roomErrorHtml,
     roomCodeValue,
     t,
@@ -67,7 +68,7 @@ export function renderRoomJoinOverlay(params){
     ?''
     :`<div class="room-active-card room-active-empty" aria-disabled="true"><div class="room-active-code">${t('roomActiveEmpty')}</div></div>`;
   const hiddenNote=hiddenCount?`<span class="room-active-hidden">${t('roomActiveHidden')}: ${hiddenCount}</span>`:'';
-  const createRoomSection=`<div class="room-create-section">${renderRoomCreateCardHtml({t})}</div>`;
+  const createRoomSection=`<div class="room-create-section">${renderRoomCreateCardHtml({t,isCreating:roomCreating})}</div>`;
   const activeRoomsBlock=`<div class="room-active-block"><div class="room-active-head"><span>${t('roomActiveList')}</span>${hiddenNote}<button id="room-active-refresh" class="secondary room-icon-btn"><span class="room-inline-icon room-active-refresh-icon" aria-hidden="true"></span><span class="room-active-refresh-label">${t('roomActiveRefresh')}</span></button></div><div class="room-active-grid">${cards}${empty}</div></div>`;
   const roomCodeValueSafe=String(roomCodeValue||'').toUpperCase().slice(0,6);
   const roomCodeBoxes=Array.from({length:6},(_,i)=>{

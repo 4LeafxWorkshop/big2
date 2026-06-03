@@ -1975,7 +1975,7 @@ body[data-screen='home'] .home-wrap {
 .room-invite-qr-zoom-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 12040;
+  z-index: 2147483648;
   border: 0;
   padding: 0;
   margin: 0;
@@ -1991,7 +1991,7 @@ body[data-screen='home'] .home-wrap {
 }
 .room-invite-qr-zoom-ghost {
   position: fixed;
-  z-index: 12041;
+  z-index: 2147483649;
   left: 50%;
   top: 50%;
   width: min(88vw, 420px);

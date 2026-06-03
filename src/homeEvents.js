@@ -307,6 +307,18 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       void handleSoloStart();
     });
 
+    const handleCreateRoom=async()=>{
+      if(state.room.creating)return;
+      state.room.creating=true;
+      render();
+      try{
+        await waitForGoogleProfileReady();
+        await createRoom();
+      }finally{
+        state.room.creating=false;
+        if(state.screen==='home')render();
+      }
+    };
     doc.getElementById('room-lobby-open')?.addEventListener('click',()=>{
       if(!signedInForPlay()){
         setRoomError(t('roomLoginRequired'));
@@ -317,14 +329,8 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       render();
       void loadActiveRooms();
     });
-    doc.getElementById('room-create')?.addEventListener('click',async()=>{
-      await waitForGoogleProfileReady();
-      await createRoom();
-    });
-    doc.getElementById('room-create-card')?.addEventListener('click',async()=>{
-      await waitForGoogleProfileReady();
-      await createRoom();
-    });
+    doc.getElementById('room-create')?.addEventListener('click',handleCreateRoom);
+    doc.getElementById('room-create-card')?.addEventListener('click',handleCreateRoom);
     doc.getElementById('room-join-cancel')?.addEventListener('click',()=>{
       state.room.joinOpen=false;
       state.room.error='';

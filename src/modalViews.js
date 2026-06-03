@@ -11,6 +11,10 @@ export function gestureGuideIconSvg(){
   return gestureIconMarkup('tap');
 }
 
+function recommendIconMarkup(){
+  return '<svg class="ui-icon ui-icon-recommend" width="20" height="20" viewBox="0 0 24 24"><g transform="translate(0 1.2)"><path d="M12 2.7c-4 0-7.2 3.2-7.2 7.1 0 2.2.9 3.8 2.6 5.4 1 1 1.6 2.1 1.8 3.3h5.6c.2-1.2.8-2.3 1.8-3.3 1.7-1.6 2.6-3.2 2.6-5.4 0-3.9-3.2-7.1-7.2-7.1Z" fill="#ffd421" stroke="#2a0d2d" stroke-width="1.85" stroke-linejoin="round"/><path d="M12 5.1c3 .1 5.3 2.5 5.4 5.7" fill="none" stroke="#2a0d2d" stroke-width="1.35" stroke-linecap="round"/><rect x="8.3" y="18" width="7.4" height="2.5" rx=".85" fill="#f5f1e8" stroke="#2a0d2d" stroke-width="1.55"/><path d="M9.8 22h4.4" fill="none" stroke="#2a0d2d" stroke-width="1.8" stroke-linecap="round"/></g></svg>';
+}
+
 function gestureIconBaseSrc(name){
   const base=String(import.meta.env?.BASE_URL??'/').trim()||'/';
   const normalized=base.endsWith('/')?base:`${base}/`;
@@ -110,7 +114,7 @@ function gestureListItemHtml(text,kind,esc,language){
   const actionIconHtml=kind==='handUp'
     ?'<span class="title-icon title-icon-log" aria-hidden="true"></span>'
       :kind==='handRight'
-      ?'<span aria-hidden="true">💡</span>'
+      ?recommendIconMarkup()
       :kind==='handDown'
         ?'<svg class="ui-icon ui-icon-bell" width="21" height="21" aria-hidden="true" viewBox="0 0 24 24"><g transform="translate(0 .1) scale(1.08)"><rect x="10.3" y="4.8" width="3.4" height="1.4" rx=".5" fill="#c8973b"/><path d="M6 16h12l-.7-1c-.4-.5-.6-1.1-.6-1.7 0-2.8-1.8-5-4.7-5s-4.7 2.2-4.7 5c0 .6-.2 1.2-.6 1.7l-.7 1Z" fill="#f3d28a"/><rect x="6" y="17" width="12" height="1.8" rx=".7" fill="#d7a85a"/></g></svg>'
         :kind==='handLeft'
@@ -221,7 +225,7 @@ export function renderLeaderboardPanel(params){
     const avatarClass=`lb-avatar ${rank===1?'gold':rank===2?'silver':rank===3?'bronze':''}`.trim();
     const isBotRow=Boolean(r.isBot)||String(r.id??'').startsWith('bot:')||botNameSet.has(String(r.name??'').trim());
     const avatarPicture=isBotRow?'':r.picture;
-    const avatarFallbackSrc=isBotRow?avatarDataUri(r.name,'#7aaed8',r.gender??'male',false):'';
+    const avatarFallbackSrc=avatarDataUri(r.name,'#7aaed8',r.gender??'male',isBotRow);
     const avatarSrc=resolveAvatarSrc({
       picture:avatarPicture,
       name:r.name,
@@ -232,7 +236,7 @@ export function renderLeaderboardPanel(params){
       avatarDataUri
     });
     const botNameAttr=isBotRow?` data-bot-name="${esc(r.name)}"`:'';
-    const avatarFallbackAttr=isBotRow?` data-fallback-src="${esc(avatarFallbackSrc)}" onerror="this.onerror=null;this.src=this.dataset.fallbackSrc"`:'';
+    const avatarFallbackAttr=` data-fallback-src="${esc(avatarFallbackSrc)}" onerror="this.onerror=null;this.src=this.dataset.fallbackSrc"`;
     return`<div class="lb-row"><div class="lb-rank">${medal?`<span class="lb-badge ${medalClass}" aria-hidden="true">${medal}</span>`:`#${r.rank??'-'}`}</div><div class="lb-main"><div class="lb-name-line"><div class="lb-name-pack"><span class="${avatarClass}"><img src="${avatarSrc}" alt="${esc(r.name)}"${botNameAttr}${avatarFallbackAttr}/></span><div class="lb-name">${esc(r.name)}</div></div><div class="lb-stat">${r.totalScore}</div></div><div class="lb-subline"><span>${t('score')}: ${r.totalScore} · ${t('lbWins')}: ${r.wins} · ${r.games} ${t('games')} · ${t('lbWR')} ${formatLeaderboardPct(r.winRate)}</span><span>${t('lbUpdated')}: ${formatLeaderboardDateTime(r.updatedAt,language)}</span></div></div></div>`;
   }).join(''):`<div class="hint">${t('lbNoData')}</div>`;
   return`<section class="lobby-panel leaderboard-panel"><div class="control-row lb-head"><label class="field"><span>${t('lbSort')}</span><select id="lb-sort"><option value="totalDelta" ${leaderboard.sort==='totalDelta'?'selected':''}>${t('lbTotalDelta')}</option><option value="wins" ${leaderboard.sort==='wins'?'selected':''}>${t('lbWins')}</option><option value="games" ${leaderboard.sort==='games'?'selected':''}>${t('lbGames')}</option><option value="winRate" ${leaderboard.sort==='winRate'?'selected':''}>${t('lbWinRate')}</option><option value="avgDelta" ${leaderboard.sort==='avgDelta'?'selected':''}>${t('lbAvgDelta')}</option></select></label><label class="field"><span>${t('lbPeriod')}</span><select id="lb-period"><option value="all" ${leaderboard.period==='all'?'selected':''}>${t('lbAll')}</option><option value="7d" ${leaderboard.period==='7d'?'selected':''}>${t('lb7d')}</option><option value="30d" ${leaderboard.period==='30d'?'selected':''}>${t('lb30d')}</option></select></label></div><div class="lb-list">${rowHtml}</div></section>`;
