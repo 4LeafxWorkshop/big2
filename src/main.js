@@ -6328,7 +6328,9 @@ function renderHome(){
     :`<span class="hint">${t(roomLaunchState.lobbyHintKey)}</span>`;
   const roomPendingHint='';
   const roomTitle=t('roomTableTitle');
-  const roomLobbyCountdown=(inRoom&&roomStatus!=='playing'&&state.room.data)?roomCountdownText(state.room.data):'';
+  const roomLobbyCountdown=(inRoom&&roomStatus!=='playing')
+    ?roomCountdownText(state.room.data||{})
+    :'-';
   const roomInviteCode=normalizeRoomInviteCode(state.room.code||state.room.pendingInviteCode||'');
   if(roomInviteCode){
     try{

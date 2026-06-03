@@ -86,7 +86,7 @@ export function createRoomMutationsController(deps){
               const game=deps.buildRoomGameState(data);
               const bumped=deps.bumpRoomPlayerLastSeen(Array.isArray(data.players)?data.players:[],String(data.hostId||''),now);
               const nextPlayers=bumped.changed?bumped.players:data.players;
-              game.turnStartedAt=0;
+              game.turnStartedAt=Date.now();
               tx.update(ref,{status:'playing',game,gameVersion:Number(data.gameVersion||0)+1,updatedAt:now,expiresAt:now+(24*60*60*1000),players:nextPlayers});
             });
           }catch(err){
@@ -153,7 +153,7 @@ export function createRoomMutationsController(deps){
         }
         const roomDataForRestart=players===data.players?data:{...data,players,hostId,hostName};
         const game=deps.buildRoomGameState(roomDataForRestart);
-        game.turnStartedAt=0;
+        game.turnStartedAt=Date.now();
         const bumped=deps.bumpRoomPlayerLastSeen(players,uid,now);
         const nextPlayers=bumped.changed?bumped.players:players;
         tx.update(ref,{

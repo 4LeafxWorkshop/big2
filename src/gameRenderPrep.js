@@ -541,7 +541,9 @@ export function buildResultScreenHtml(params){
   const isRoom=state.home.mode==='room';
   const isHost=isRoom&&roomIsHost();
   const roomExpired=isRoom&&roomResultExpired(state.room.data);
-  const roomCountdown=isRoom&&state.room.data?roomCountdownText(state.room.data):'';
+  const roomCountdown=isRoom
+    ?roomCountdownText(state.room.data||{})
+    :'';
   const roomHumanCount=isRoom&&state.room.data
     ?(Array.isArray(state.room.data.players)?state.room.data.players.filter((p)=>String(p.uid||'').startsWith('uid:')||String(p.uid||'').startsWith('guest:')).length:0)
     :0;
@@ -673,7 +675,9 @@ export function buildCongratsOverlayHtml(params){
   const isRoom=state.home.mode==='room';
   const isHost=isRoom&&roomIsHost();
   const roomExpired=isRoom&&roomResultExpired(state.room.data);
-  const roomCountdown=isRoom&&state.room.data?roomCountdownText(state.room.data):'';
+  const roomCountdown=isRoom
+    ?roomCountdownText(state.room.data||{})
+    :'';
   const roomExitHint=isRoom?t('roomExitHint'):'';
   const againHtml=(!isRoom||(isHost&&!roomExpired))
     ?`<button id="congrats-again" class="primary">${t('again')}</button>`

@@ -37,9 +37,10 @@ export function createRoomExpiryHelpers({
   }
 
   function getRoomLifecycleExpiresAt(roomData){
-    const status=String(roomData?.status??'');
-    if(status==='finished')return getRoomResultExpiresAt(roomData);
-    if(status==='lobby'||status==='starting')return getRoomWaitingExpiresAt(roomData);
+    const status=String(roomData?.status??'').trim();
+    const inferredStatus=status||((Array.isArray(roomData?.players)&&roomData.players.length&&(!roomData?.game||roomData.game.gameOver))?'lobby':'');
+    if(inferredStatus==='finished')return getRoomResultExpiresAt(roomData);
+    if(inferredStatus==='lobby'||inferredStatus==='starting')return getRoomWaitingExpiresAt(roomData);
     return 0;
   }
 
@@ -61,9 +62,10 @@ export function createRoomExpiryHelpers({
   }
 
   function roomCountdownText(roomData){
-    const status=String(roomData?.status||'');
+    const status=String(roomData?.status||'').trim();
+    const inferredStatus=status||((Array.isArray(roomData?.players)&&roomData.players.length&&(!roomData?.game||roomData.game.gameOver))?'lobby':'');
     const now=Date.now();
-    if(status==='finished'||status==='lobby'||status==='starting'){
+    if(inferredStatus==='finished'||inferredStatus==='lobby'||inferredStatus==='starting'){
       const expiresAt=getRoomLifecycleExpiresAt(roomData);
       return formatCountdownMs(expiresAt>0?Math.max(0,expiresAt-now):0);
     }
