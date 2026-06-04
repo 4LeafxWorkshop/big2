@@ -312,7 +312,6 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
       state.room.creating=true;
       render();
       try{
-        await waitForGoogleProfileReady();
         await createRoom();
       }finally{
         state.room.creating=false;
@@ -338,7 +337,6 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
     });
     doc.getElementById('room-join-confirm')?.addEventListener('click',async()=>{
       const code=getRoomCodeFromBoxes();
-      await waitForGoogleProfileReady();
       await joinRoomByCode(code);
     });
     const handleRoomPasteCode=async(e)=>{
@@ -404,7 +402,6 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
           const code=String(joinBtn.getAttribute('data-code')||'');
           if(!code||joinBtn.hasAttribute('disabled'))return;
           applyRoomCodeToInput(code);
-          await waitForGoogleProfileReady();
           await joinRoomByCode(code);
           return;
         }
@@ -610,23 +607,7 @@ export function createHomeEventsBinder({documentRef=()=>document,windowRef=()=>w
         state.room.pendingStart=false;
         setRoomError(t('roomSendTimeout'));
       },5000));
-      const profileReady=await waitForGoogleProfileReady();
-      if(!profileReady){
-        pendingStartTimerRef.set?.(null);
-        state.room.pendingStart=false;
-        return;
-      }
-      const roomReadyAfterWait=resolveRoomLaunchState({state,roomData:state.room.data});
-      if(roomReadyAfterWait.roomStarting||!roomReadyAfterWait.roomCanStart){
-        pendingStartTimerRef.set?.(null);
-        state.room.pendingStart=false;
-        return;
-      }
-      let synced=false;
-      for(let i=0;i<4&&!synced;i++){
-        synced=await syncLeaderboardProfile(currentLeaderboardIdentity());
-        if(!synced)await waitMs(250);
-      }
+      void waitForGoogleProfileReady();
       const started=await startRoom();
       if(started)schedulePopunderAfterRender(350);
     };
