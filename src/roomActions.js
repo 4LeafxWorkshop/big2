@@ -45,7 +45,7 @@ export function createRoomActionsController(deps){
         deps.setRoomError(deps.t('roomCreateFail'));
         return;
       }
-      await deps.waitForLeaderboardCloudReady?.();
+      void deps.waitForLeaderboardCloudReady?.();
       const uid=deps.baseRoomPlayerId();
       const email=String(deps.currentUserEmail?.()||'').trim().toLowerCase();
       state.room.playerId=uid;
